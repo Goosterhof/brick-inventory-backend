@@ -10,14 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Set extends Model
 {
-    protected $fillable = [
-        'set_num',
-        'name',
-        'year',
-        'theme',
-        'num_parts',
-        'image_url',
-    ];
+    protected $guarded = [];
 
     public function parts(): BelongsToMany
     {

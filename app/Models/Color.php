@@ -9,12 +9,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Color extends Model
 {
-    protected $fillable = [
-        'rebrickable_id',
-        'name',
-        'rgb',
-        'is_transparent',
-    ];
+    protected $guarded = [];
 
     public function setParts(): HasMany
     {

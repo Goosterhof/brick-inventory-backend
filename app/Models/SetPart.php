@@ -9,14 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class SetPart extends Model
 {
-    protected $fillable = [
-        'set_id',
-        'part_id',
-        'color_id',
-        'quantity',
-        'is_spare',
-        'element_id',
-    ];
+    protected $guarded = [];
 
     public function set(): BelongsTo
     {
