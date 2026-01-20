@@ -35,6 +35,7 @@ Uses Pest PHP with the following conventions:
 - **Unit tests**: For Action and Service classes
 - **Structure**: Use `describe` blocks with `it('should ...')` syntax
 - **Assertions**: Use `expect()` style
+- **Architecture tests**: Located in `tests/Architecture/` to enforce code standards
 
 Example:
 ```php
@@ -47,12 +48,25 @@ describe('CreateSetAction', function () {
 });
 ```
 
+### Architecture Rules
+
+The following rules are enforced via Pest architecture tests:
+
+- Controllers must end with `Controller`
+- Models must extend `Illuminate\Database\Eloquent\Model`
+- DTOs must end with `Data`, be `final`, and `readonly`
+- Requests must end with `Request`
+- Services must end with `Service`
+- All files must declare strict types
+- No debugging statements (`dd`, `dump`, `var_dump`, `ray`)
+
 ## Commands
 
 | Command | Description |
 |---------|-------------|
 | `composer dev` | Start development server |
 | `composer test` | Run tests |
+| `composer test:arch` | Run architecture tests only |
 | `composer lint` | Run Rector + Pint (fix mode) |
 | `composer lint:test` | Run Rector + Pint (dry-run) |
 | `composer phpstan` | Run static analysis |
