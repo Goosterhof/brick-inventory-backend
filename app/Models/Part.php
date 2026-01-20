@@ -12,6 +12,9 @@ class Part extends Model
 {
     protected $guarded = [];
 
+    /**
+     * @return BelongsToMany<Set, $this>
+     */
     public function sets(): BelongsToMany
     {
         return $this->belongsToMany(Set::class, 'set_parts')
@@ -19,6 +22,9 @@ class Part extends Model
             ->withTimestamps();
     }
 
+    /**
+     * @return HasMany<SetPart, $this>
+     */
     public function setParts(): HasMany
     {
         return $this->hasMany(SetPart::class);
