@@ -1,0 +1,31 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
+
+class Part extends Model
+{
+    protected $fillable = [
+        'part_num',
+        'name',
+        'category',
+        'image_url',
+    ];
+
+    public function sets(): BelongsToMany
+    {
+        return $this->belongsToMany(Set::class, 'set_parts')
+            ->withPivot(['color_id', 'quantity', 'is_spare', 'element_id'])
+            ->withTimestamps();
+    }
+
+    public function setParts(): HasMany
+    {
+        return $this->hasMany(SetPart::class);
+    }
+}
