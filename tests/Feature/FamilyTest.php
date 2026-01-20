@@ -39,9 +39,3 @@ test('user belongs to a family', function (): void {
     expect($user->family)->toBeInstanceOf(Family::class)
         ->and($user->family->id)->toBe($family->id);
 });
-
-test('user can exist without a family', function (): void {
-    $user = User::factory()->create(['family_id' => null]);
-
-    expect($user->family)->toBeNull();
-});

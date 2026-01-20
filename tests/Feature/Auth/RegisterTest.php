@@ -55,11 +55,7 @@ test('registration requires valid email', function (): void {
 });
 
 test('registration requires unique email', function (): void {
-    $existingUser = new User;
-    $existingUser->name = 'Existing User';
-    $existingUser->email = 'john@example.com';
-    $existingUser->password = 'password';
-    $existingUser->save();
+    User::factory()->create(['email' => 'john@example.com']);
 
     $response = $this->postJson('/api/register', [
         'family_name' => 'Smith Family',
