@@ -23,7 +23,7 @@ class RegisterController extends Controller
             $family->name = $validated['family_name'];
             $family->save();
 
-            /** @var int<0, max> $familyId */
+            /** @var positive-int $familyId */
             $familyId = $family->id;
 
             $user = new User;
