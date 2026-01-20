@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers\Auth;
 
 use App\Actions\Auth\RegisterUserWithFamilyAction;
+use App\DataTransferObjects\RegisterUserData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\RegisterRequest;
 use Illuminate\Http\JsonResponse;
@@ -20,7 +21,14 @@ class RegisterController extends Controller
         /** @var array{family_name: string, name: string, email: string, password: string} $validated */
         $validated = $request->validated();
 
-        $user = $this->registerUserWithFamilyAction->execute($validated);
+        $data = new RegisterUserData(
+            familyName: $validated['family_name'],
+            name: $validated['name'],
+            email: $validated['email'],
+            password: $validated['password'],
+        );
+
+        $user = $this->registerUserWithFamilyAction->execute($data);
 
         $token = $user->createToken('auth_token')->plainTextToken;
 

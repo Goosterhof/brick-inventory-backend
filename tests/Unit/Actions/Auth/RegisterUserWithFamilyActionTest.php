@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Auth\RegisterUserWithFamilyAction;
+use App\DataTransferObjects\RegisterUserData;
 use App\Models\Family;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -13,12 +14,12 @@ describe('RegisterUserWithFamilyAction', function (): void {
     it('should create a user with a new family', function (): void {
         // arrange
         $action = new RegisterUserWithFamilyAction;
-        $data = [
-            'family_name' => 'Test Family',
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-            'password' => 'password123',
-        ];
+        $data = new RegisterUserData(
+            familyName: 'Test Family',
+            name: 'Test User',
+            email: 'test@example.com',
+            password: 'password123',
+        );
 
         // act
         $user = $action->execute($data);
@@ -34,12 +35,12 @@ describe('RegisterUserWithFamilyAction', function (): void {
     it('should hash the password', function (): void {
         // arrange
         $action = new RegisterUserWithFamilyAction;
-        $data = [
-            'family_name' => 'Test Family',
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-            'password' => 'password123',
-        ];
+        $data = new RegisterUserData(
+            familyName: 'Test Family',
+            name: 'Test User',
+            email: 'test@example.com',
+            password: 'password123',
+        );
 
         // act
         $user = $action->execute($data);
@@ -51,12 +52,12 @@ describe('RegisterUserWithFamilyAction', function (): void {
     it('should persist both family and user to database', function (): void {
         // arrange
         $action = new RegisterUserWithFamilyAction;
-        $data = [
-            'family_name' => 'Persisted Family',
-            'name' => 'Persisted User',
-            'email' => 'persisted@example.com',
-            'password' => 'password123',
-        ];
+        $data = new RegisterUserData(
+            familyName: 'Persisted Family',
+            name: 'Persisted User',
+            email: 'persisted@example.com',
+            password: 'password123',
+        );
 
         // act
         $action->execute($data);
@@ -69,12 +70,12 @@ describe('RegisterUserWithFamilyAction', function (): void {
     it('should associate the user with the created family', function (): void {
         // arrange
         $action = new RegisterUserWithFamilyAction;
-        $data = [
-            'family_name' => 'Associated Family',
-            'name' => 'Associated User',
-            'email' => 'associated@example.com',
-            'password' => 'password123',
-        ];
+        $data = new RegisterUserData(
+            familyName: 'Associated Family',
+            name: 'Associated User',
+            email: 'associated@example.com',
+            password: 'password123',
+        );
 
         // act
         $user = $action->execute($data);
