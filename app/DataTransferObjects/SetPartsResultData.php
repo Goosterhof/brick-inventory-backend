@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\DataTransferObjects;
 
-readonly class SetPartsResultData
+final readonly class SetPartsResultData
 {
     /**
      * @param  array<SetPartData>  $parts
