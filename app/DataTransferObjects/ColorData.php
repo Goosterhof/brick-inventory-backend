@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\DataTransferObjects;
 
-readonly class ColorData
+final readonly class ColorData
 {
     public function __construct(
         public int $id,

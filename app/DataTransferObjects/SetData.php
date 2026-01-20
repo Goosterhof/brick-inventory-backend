@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\DataTransferObjects;
 
-readonly class SetData
+final readonly class SetData
 {
     public function __construct(
         public string $setNum,

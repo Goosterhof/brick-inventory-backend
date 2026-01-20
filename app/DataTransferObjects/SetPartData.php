@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\DataTransferObjects;
 
-readonly class SetPartData
+final readonly class SetPartData
 {
     public function __construct(
         public string $partNum,

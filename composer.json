@@ -50,6 +50,7 @@
             "@php artisan config:clear --ansi",
             "@php artisan test"
         ],
+        "test:arch": "./vendor/bin/pest tests/Architecture",
         "lint": [
             "@rector",
             "@pint"
