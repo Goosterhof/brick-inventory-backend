@@ -67,7 +67,7 @@ it('should use describe blocks in test files', function (): void {
         $relativePath = str_replace(dirname(__DIR__) . '/', '', $file);
 
         expect(str_contains($content, 'describe('))
-            ->toBeTrue("Test file {$relativePath} should use describe() blocks");
+            ->toBeTrue(sprintf('Test file %s should use describe() blocks', $relativePath));
     }
 });
 
@@ -79,7 +79,7 @@ it('should use it should syntax in test files', function (): void {
         // Check that test cases use it('should syntax
         if (preg_match_all('/\bit\s*\(\s*[\'"]/', $content)) {
             expect(preg_match('/\bit\s*\(\s*[\'"]should\s/', $content))
-                ->toBe(1, "Test file {$relativePath} should use it('should ...') syntax");
+                ->toBe(1, sprintf("Test file %s should use it('should ...') syntax", $relativePath));
         }
     }
 });
