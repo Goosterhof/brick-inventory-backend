@@ -5,7 +5,8 @@
       "Bash(php:*)",
       "Bash(./vendor/bin/pint:*)",
       "Bash(git add:*)",
-      "Bash(git commit:*)"
+      "Bash(git commit:*)",
+      "Bash(./vendor/bin/rector process:*)"
     ]
   }
 }
