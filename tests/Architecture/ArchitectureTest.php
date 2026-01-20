@@ -43,3 +43,47 @@ arch('data transfer objects should be readonly')
 arch('data transfer objects should be final')
     ->expect('App\DataTransferObjects')
     ->toBeFinal();
+
+function getTestFiles(): array
+{
+    $testsDir = dirname(__DIR__);
+    $testFiles = [];
+
+    $directories = ['Feature', 'Unit'];
+    foreach ($directories as $dir) {
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($testsDir . '/' . $dir, RecursiveDirectoryIterator::SKIP_DOTS),
+        );
+
+        foreach ($iterator as $file) {
+            if ($file->isFile() && $file->getExtension() === 'php') {
+                $testFiles[] = $file->getPathname();
+            }
+        }
+    }
+
+    return $testFiles;
+}
+
+it('should use describe blocks in test files', function (): void {
+    foreach (getTestFiles() as $file) {
+        $content = file_get_contents($file);
+        $relativePath = str_replace(dirname(__DIR__) . '/', '', $file);
+
+        expect(str_contains($content, 'describe('))
+            ->toBeTrue(sprintf('Test file %s should use describe() blocks', $relativePath));
+    }
+});
+
+it('should use it should syntax in test files', function (): void {
+    foreach (getTestFiles() as $file) {
+        $content = file_get_contents($file);
+        $relativePath = str_replace(dirname(__DIR__) . '/', '', $file);
+
+        // Check that test cases use it('should syntax
+        if (preg_match_all('/\bit\s*\(\s*[\'"]/', $content)) {
+            expect(preg_match('/\bit\s*\(\s*[\'"]should\s/', $content))
+                ->toBe(1, sprintf("Test file %s should use it('should ...') syntax", $relativePath));
+        }
+    }
+});
