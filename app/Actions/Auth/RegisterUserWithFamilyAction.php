@@ -22,8 +22,8 @@ class RegisterUserWithFamilyAction
             $user->name = $data->name;
             $user->email = $data->email;
             $user->password = $data->password;
-            $user->family_id = $family->id;
-            $user->save();
+
+            $family->users()->save($user);
 
             return $user;
         });
