@@ -15,6 +15,7 @@ class RegisterController extends Controller
 {
     public function __invoke(RegisterRequest $request): JsonResponse
     {
+        /** @var array{family_name: string, name: string, email: string, password: string} $validated */
         $validated = $request->validated();
 
         $user = DB::transaction(function () use ($validated): User {
@@ -22,11 +23,14 @@ class RegisterController extends Controller
             $family->name = $validated['family_name'];
             $family->save();
 
+            /** @var positive-int $familyId */
+            $familyId = $family->id;
+
             $user = new User;
             $user->name = $validated['name'];
             $user->email = $validated['email'];
             $user->password = $validated['password'];
-            $user->family_id = $family->id;
+            $user->family_id = $familyId;
             $user->save();
 
             return $user;
