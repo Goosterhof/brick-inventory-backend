@@ -15,9 +15,10 @@ This runs Rector (refactoring) followed by Pint (formatting) to ensure code qual
 Before creating any commit, always:
 
 1. Run `composer lint` to fix code style
-2. Run `composer test` to ensure all tests pass
+2. Run `composer phpstan` to check for type errors
+3. Run `composer test` to ensure all tests pass
 
-Both must pass before committing. If tests fail, fix them before proceeding.
+All must pass before committing. If any fail, fix them before proceeding.
 
 ## Tech Stack
 
@@ -33,3 +34,4 @@ Both must pass before committing. If tests fail, fix them before proceeding.
 | `composer test` | Run tests |
 | `composer lint` | Run Rector + Pint (fix mode) |
 | `composer lint:test` | Run Rector + Pint (dry-run) |
+| `composer phpstan` | Run static analysis |
