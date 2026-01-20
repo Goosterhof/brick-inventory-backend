@@ -4,6 +4,10 @@ declare(strict_types=1);
 
 namespace App\Services;
 
+use App\DataTransferObjects\ColorData;
+use App\DataTransferObjects\SetData;
+use App\DataTransferObjects\SetPartData;
+use App\DataTransferObjects\SetPartsResultData;
 use App\Models\Color;
 use App\Models\Part;
 use App\Models\Set;
@@ -22,21 +26,51 @@ class RebrickableService
         $this->apiKey = config('services.rebrickable.key', '');
     }
 
-    public function getSetParts(string $setNum): Set
+    public function getSetParts(string $setNum): SetPartsResultData
     {
         $set = Set::where('set_num', $setNum)->first();
 
-        if ($set && $set->setParts()->exists()) {
-            return $set->load(['setParts.part', 'setParts.color']);
+        if (!$set || !$set->setParts()->exists()) {
+            $setData = $this->fetchSet($setNum);
+            $set = $this->createOrUpdateSet($setData);
+
+            $parts = $this->fetchAllSetParts($setNum);
+            $this->storeSetParts($set, $parts);
         }
 
-        $setData = $this->fetchSet($setNum);
-        $set = $this->createOrUpdateSet($setData);
+        $set->load(['setParts.part', 'setParts.color']);
 
-        $parts = $this->fetchAllSetParts($setNum);
-        $this->storeSetParts($set, $parts);
+        return $this->toDto($set);
+    }
 
-        return $set->load(['setParts.part', 'setParts.color']);
+    private function toDto(Set $set): SetPartsResultData
+    {
+        $setData = new SetData(
+            setNum: $set->set_num,
+            name: $set->name,
+            year: $set->year,
+            theme: $set->theme,
+            numParts: $set->num_parts,
+            imageUrl: $set->image_url,
+        );
+
+        $parts = $set->setParts->map(fn (SetPart $setPart): SetPartData => new SetPartData(
+            partNum: $setPart->part->part_num,
+            name: $setPart->part->name,
+            category: $setPart->part->category,
+            imageUrl: $setPart->part->image_url,
+            color: new ColorData(
+                id: $setPart->color->rebrickable_id,
+                name: $setPart->color->name,
+                rgb: $setPart->color->rgb,
+                isTransparent: $setPart->color->is_transparent,
+            ),
+            quantity: $setPart->quantity,
+            isSpare: $setPart->is_spare,
+            elementId: $setPart->element_id,
+        ))->all();
+
+        return new SetPartsResultData(set: $setData, parts: $parts);
     }
 
     private function fetchSet(string $setNum): array
