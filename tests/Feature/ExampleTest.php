@@ -2,22 +2,8 @@
 
 declare(strict_types=1);
 
-namespace Tests\Feature;
+test('the application returns a successful response', function (): void {
+    $response = $this->get('/api');
 
-// use Illuminate\Foundation\Testing\RefreshDatabase;
-use Tests\TestCase;
-
-class ExampleTest extends TestCase
-{
-    /**
-     * A basic test example.
-     *
-     * @test
-     */
-    public function the_application_returns_a_successful_response(): void
-    {
-        $response = $this->get('/api');
-
-        $response->assertStatus(200);
-    }
-}
+    $response->assertStatus(200);
+});
