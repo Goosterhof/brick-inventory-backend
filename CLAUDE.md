@@ -10,6 +10,15 @@ composer lint
 
 This runs Rector (refactoring) followed by Pint (formatting) to ensure code quality.
 
+## Before Committing
+
+Before creating any commit, always:
+
+1. Run `composer lint` to fix code style
+2. Run `composer test` to ensure all tests pass
+
+Both must pass before committing. If tests fail, fix them before proceeding.
+
 ## Tech Stack
 
 - Laravel 12 (API-only, no frontend)
