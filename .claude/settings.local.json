@@ -11,7 +11,8 @@
       "Bash(gh run list:*)",
       "WebFetch(domain:api.github.com)",
       "Bash(gh run view:*)",
-      "Bash(./vendor/bin/pest:*)"
+      "Bash(./vendor/bin/pest:*)",
+      "Bash(git checkout:*)"
     ]
   }
 }

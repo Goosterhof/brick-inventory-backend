@@ -43,6 +43,9 @@ jobs:
       - name: Run Pint
         run: composer pint:test
 
+      - name: Run PHPStan
+        run: composer phpstan
+
   test:
     runs-on: ubuntu-latest
 
