@@ -24,6 +24,10 @@ arch('services should end with Service')
     ->expect('App\Services')
     ->toHaveSuffix('Service');
 
+arch('actions should end with Action')
+    ->expect('App\Actions')
+    ->toHaveSuffix('Action');
+
 arch('no debugging statements')
     ->expect('App')
     ->not->toUse(['dd', 'dump', 'var_dump', 'ray']);

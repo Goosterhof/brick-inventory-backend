@@ -4,37 +4,23 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Auth;
 
+use App\Actions\Auth\RegisterUserWithFamilyAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\RegisterRequest;
-use App\Models\Family;
-use App\Models\User;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\DB;
 
 class RegisterController extends Controller
 {
+    public function __construct(
+        private readonly RegisterUserWithFamilyAction $registerUserWithFamilyAction,
+    ) {}
+
     public function __invoke(RegisterRequest $request): JsonResponse
     {
         /** @var array{family_name: string, name: string, email: string, password: string} $validated */
         $validated = $request->validated();
 
-        $user = DB::transaction(function () use ($validated): User {
-            $family = new Family;
-            $family->name = $validated['family_name'];
-            $family->save();
-
-            /** @var positive-int $familyId */
-            $familyId = $family->id;
-
-            $user = new User;
-            $user->name = $validated['name'];
-            $user->email = $validated['email'];
-            $user->password = $validated['password'];
-            $user->family_id = $familyId;
-            $user->save();
-
-            return $user;
-        });
+        $user = $this->registerUserWithFamilyAction->execute($validated);
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
