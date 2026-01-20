@@ -19,7 +19,7 @@ class SetController extends Controller
         try {
             $result = $this->getSetPartsAction->execute($setNum);
 
-            return response()->json($this->getSetPartsAction->toArray($result));
+            return response()->json($result->toArray());
         } catch (RequestException $requestException) {
             $status = $requestException->response->status();
             $message = match ($status) {
