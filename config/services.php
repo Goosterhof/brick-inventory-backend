@@ -37,4 +37,8 @@ return [
         ],
     ],
 
+    'rebrickable' => [
+        'key' => env('REBRICKABLE_API_KEY'),
+    ],
+
 ];
