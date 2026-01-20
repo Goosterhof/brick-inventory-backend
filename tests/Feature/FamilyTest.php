@@ -9,7 +9,9 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 uses(RefreshDatabase::class);
 
 test('can create a family', function (): void {
-    $family = Family::create(['name' => 'Smith Family']);
+    $family = new Family;
+    $family->name = 'Smith Family';
+    $family->save();
 
     expect($family)->toBeInstanceOf(Family::class)
         ->and($family->name)->toBe('Smith Family');
