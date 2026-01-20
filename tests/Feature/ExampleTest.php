@@ -2,8 +2,10 @@
 
 declare(strict_types=1);
 
-test('the application returns a successful response', function (): void {
-    $response = $this->get('/api');
+describe('Application', function (): void {
+    it('should return a successful response', function (): void {
+        $response = $this->get('/api');
 
-    $response->assertStatus(200);
+        $response->assertStatus(200);
+    });
 });
