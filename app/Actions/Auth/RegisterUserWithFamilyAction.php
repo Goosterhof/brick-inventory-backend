@@ -18,14 +18,11 @@ class RegisterUserWithFamilyAction
             $family->name = $data->familyName;
             $family->save();
 
-            /** @var positive-int $familyId */
-            $familyId = $family->id;
-
             $user = new User;
             $user->name = $data->name;
             $user->email = $data->email;
             $user->password = $data->password;
-            $user->family_id = $familyId;
+            $user->family_id = $family->id;
             $user->save();
 
             return $user;
