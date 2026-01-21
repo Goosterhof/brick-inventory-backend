@@ -25,7 +25,7 @@ describe('RegisterUserWithFamilyAction', function (): void {
 
         $user = Mockery::mock(User::class);
         $user->shouldReceive('newInstance')
-            ->with(Mockery::on(fn ($args) => $args['name'] === 'Test User'
+            ->with(Mockery::on(fn ($args): bool => $args['name'] === 'Test User'
                 && $args['email'] === 'test@example.com'
                 && $args['password'] === 'password123'))
             ->once()
