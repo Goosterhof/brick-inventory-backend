@@ -12,8 +12,8 @@ return new class extends Migration
     {
         Schema::create('family_sets', function (Blueprint $table): void {
             $table->id();
-            $table->foreignId('family_id')->constrained()->cascadeOnDelete();
-            $table->foreignId('set_id')->constrained()->cascadeOnDelete();
+            $table->foreignId('family_id')->constrained();
+            $table->foreignId('set_id')->constrained();
             $table->unsignedInteger('quantity')->default(1);
             $table->string('status')->default('sealed');
             $table->date('purchase_date')->nullable();
