@@ -24,6 +24,10 @@ arch('services should end with Service')
     ->expect('App\Services')
     ->toHaveSuffix('Service');
 
+arch('resources should end with Resource')
+    ->expect('App\Http\Resources')
+    ->toHaveSuffix('Resource');
+
 arch('actions should end with Action')
     ->expect('App\Actions')
     ->toHaveSuffix('Action');
@@ -47,6 +51,43 @@ arch('data transfer objects should be readonly')
 arch('data transfer objects should be final')
     ->expect('App\DataTransferObjects')
     ->toBeFinal();
+
+function getDtoClasses(): array
+{
+    $dtosDir = dirname(__DIR__, 2) . '/app/DataTransferObjects';
+    $classes = [];
+
+    $iterator = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($dtosDir, RecursiveDirectoryIterator::SKIP_DOTS),
+    );
+
+    foreach ($iterator as $file) {
+        if ($file->isFile() && $file->getExtension() === 'php') {
+            $relativePath = str_replace([$dtosDir . '/', '.php'], ['', ''], $file->getPathname());
+            $className = 'App\\DataTransferObjects\\' . str_replace('/', '\\', $relativePath);
+            $classes[] = $className;
+        }
+    }
+
+    return $classes;
+}
+
+it('should not have methods in DTOs', function (): void {
+    foreach (getDtoClasses() as $className) {
+        $reflection = new ReflectionClass($className);
+        $methods = array_filter(
+            $reflection->getMethods(),
+            fn (ReflectionMethod $method): bool => $method->getDeclaringClass()->getName() === $className,
+        );
+
+        $methodNames = array_map(fn (ReflectionMethod $method): string => $method->getName(), $methods);
+        $nonConstructorMethods = array_diff($methodNames, ['__construct']);
+
+        expect($nonConstructorMethods)->toBeEmpty(
+            sprintf('DTO %s should only have __construct, found: %s', $className, implode(', ', $methodNames)),
+        );
+    }
+});
 
 function getActionClasses(): array
 {

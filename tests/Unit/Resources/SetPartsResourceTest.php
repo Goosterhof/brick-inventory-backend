@@ -6,11 +6,13 @@ use App\DataTransferObjects\ColorData;
 use App\DataTransferObjects\SetData;
 use App\DataTransferObjects\SetPartData;
 use App\DataTransferObjects\SetPartsResultData;
+use App\Http\Resources\SetPartsResource;
+use Illuminate\Http\Request;
 
-describe('SetPartsResultData', function (): void {
+describe('SetPartsResource', function (): void {
     it('should convert to array format', function (): void {
         // arrange
-        $result = new SetPartsResultData(
+        $data = new SetPartsResultData(
             set: new SetData(
                 setNum: '75192-1',
                 name: 'Millennium Falcon',
@@ -38,8 +40,11 @@ describe('SetPartsResultData', function (): void {
             ],
         );
 
+        $resource = new SetPartsResource($data);
+        $request = Request::create('/api/sets/75192-1/parts');
+
         // act
-        $array = $result->toArray();
+        $array = $resource->toArray($request);
 
         // assert
         expect($array)->toBeArray()
@@ -71,7 +76,7 @@ describe('SetPartsResultData', function (): void {
 
     it('should handle multiple parts', function (): void {
         // arrange
-        $result = new SetPartsResultData(
+        $data = new SetPartsResultData(
             set: new SetData(
                 setNum: '10179-1',
                 name: 'Ultimate Collector Millennium Falcon',
@@ -104,8 +109,11 @@ describe('SetPartsResultData', function (): void {
             ],
         );
 
+        $resource = new SetPartsResource($data);
+        $request = Request::create('/api/sets/10179-1/parts');
+
         // act
-        $array = $result->toArray();
+        $array = $resource->toArray($request);
 
         // assert
         expect($array['parts'])->toHaveCount(2)
