@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\FamilySet\AddSetToFamilyAction;
+use App\Actions\FamilySet\UpdateFamilySetAction;
 use App\DataTransferObjects\CreateFamilySetData;
 use App\Enums\FamilySetStatus;
 use App\Models\Family;
@@ -25,7 +26,8 @@ describe('AddSetToFamilyAction', function (): void {
             ->with('75192-1')
             ->andReturn($set);
 
-        $action = new AddSetToFamilyAction($rebrickableService);
+        $updateAction = new UpdateFamilySetAction;
+        $action = new AddSetToFamilyAction($rebrickableService, $updateAction);
         $data = new CreateFamilySetData(
             setNum: '75192-1',
             quantity: 2,
@@ -57,7 +59,8 @@ describe('AddSetToFamilyAction', function (): void {
             ->with('75192-1')
             ->andReturn($set);
 
-        $action = new AddSetToFamilyAction($rebrickableService);
+        $updateAction = new UpdateFamilySetAction;
+        $action = new AddSetToFamilyAction($rebrickableService, $updateAction);
         $data = new CreateFamilySetData(setNum: '75192-1');
 
         // act
@@ -80,7 +83,8 @@ describe('AddSetToFamilyAction', function (): void {
             ->with('75192-1')
             ->andReturn($set);
 
-        $action = new AddSetToFamilyAction($rebrickableService);
+        $updateAction = new UpdateFamilySetAction;
+        $action = new AddSetToFamilyAction($rebrickableService, $updateAction);
         $data = new CreateFamilySetData(setNum: '75192-1');
 
         // act
@@ -101,7 +105,8 @@ describe('AddSetToFamilyAction', function (): void {
             ->with('75192-1')
             ->andReturn($set);
 
-        $action = new AddSetToFamilyAction($rebrickableService);
+        $updateAction = new UpdateFamilySetAction;
+        $action = new AddSetToFamilyAction($rebrickableService, $updateAction);
         $data = new CreateFamilySetData(setNum: '75192-1', quantity: 3);
 
         // act
