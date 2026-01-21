@@ -28,6 +28,18 @@ class RebrickableService
         $this->apiKey = is_string($apiKey) ? $apiKey : '';
     }
 
+    public function getSet(string $setNum): Set
+    {
+        $set = Set::where('set_num', $setNum)->first();
+
+        if (!$set) {
+            $setData = $this->fetchSet($setNum);
+            $set = $this->createOrUpdateSet($setData);
+        }
+
+        return $set;
+    }
+
     public function getSetParts(string $setNum): SetPartsResultData
     {
         $set = Set::where('set_num', $setNum)->first();

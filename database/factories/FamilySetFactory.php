@@ -1,0 +1,34 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Database\Factories;
+
+use App\Enums\FamilySetStatus;
+use App\Models\Family;
+use App\Models\FamilySet;
+use App\Models\Set;
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+/**
+ * @extends Factory<FamilySet>
+ */
+class FamilySetFactory extends Factory
+{
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition(): array
+    {
+        return [
+            'family_id' => Family::factory(),
+            'set_id' => Set::factory(),
+            'quantity' => fake()->numberBetween(1, 3),
+            'status' => fake()->randomElement(FamilySetStatus::cases()),
+            'purchase_date' => fake()->optional()->date(),
+            'notes' => fake()->optional()->sentence(),
+        ];
+    }
+}
