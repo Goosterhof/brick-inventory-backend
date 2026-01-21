@@ -1,0 +1,31 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Actions\Auth;
+
+use App\DataTransferObjects\RegisterUserData;
+use App\Models\Family;
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
+
+class RegisterUserWithFamilyAction
+{
+    public function execute(RegisterUserData $data): User
+    {
+        return DB::transaction(function () use ($data): User {
+            $family = new Family;
+            $family->name = $data->familyName;
+            $family->save();
+
+            $user = new User;
+            $user->name = $data->name;
+            $user->email = $data->email;
+            $user->password = $data->password;
+
+            $family->users()->save($user);
+
+            return $user;
+        });
+    }
+}
