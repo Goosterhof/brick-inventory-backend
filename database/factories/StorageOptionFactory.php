@@ -1,0 +1,48 @@
+<?php
+
+declare(strict_types=1);
+
+namespace Database\Factories;
+
+use App\Models\Family;
+use App\Models\StorageOption;
+use Illuminate\Database\Eloquent\Factories\Factory;
+
+/**
+ * @extends Factory<StorageOption>
+ */
+class StorageOptionFactory extends Factory
+{
+    /**
+     * Define the model's default state.
+     *
+     * @return array<string, mixed>
+     */
+    public function definition(): array
+    {
+        return [
+            'family_id' => Family::factory(),
+            'parent_id' => null,
+            'name' => fake()->words(2, true),
+            'description' => fake()->optional()->sentence(),
+            'row' => null,
+            'column' => null,
+        ];
+    }
+
+    public function withParent(StorageOption $parent): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'family_id' => $parent->family_id,
+            'parent_id' => $parent->id,
+        ]);
+    }
+
+    public function atPosition(int $row, int $column): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'row' => $row,
+            'column' => $column,
+        ]);
+    }
+}

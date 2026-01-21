@@ -26,4 +26,14 @@ class Family extends Model
     {
         return $this->hasMany(User::class);
     }
+
+    /**
+     * Get the storage options belonging to this family.
+     *
+     * @return HasMany<StorageOption, $this>
+     */
+    public function storageOptions(): HasMany
+    {
+        return $this->hasMany(StorageOption::class);
+    }
 }
