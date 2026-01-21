@@ -11,17 +11,22 @@ use Illuminate\Support\Facades\DB;
 
 class RegisterUserWithFamilyAction
 {
+    public function __construct(
+        private readonly User $user,
+        private readonly Family $family,
+    ) {}
+
     public function execute(RegisterUserData $data): User
     {
         return DB::transaction(function () use ($data): User {
-            $family = new Family;
-            $family->name = $data->familyName;
+            $family = $this->family->newInstance(['name' => $data->familyName]);
             $family->save();
 
-            $user = new User;
-            $user->name = $data->name;
-            $user->email = $data->email;
-            $user->password = $data->password;
+            $user = $this->user->newInstance([
+                'name' => $data->name,
+                'email' => $data->email,
+                'password' => $data->password,
+            ]);
 
             $family->users()->save($user);
 
