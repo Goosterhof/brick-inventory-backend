@@ -4,22 +4,22 @@ declare(strict_types=1);
 
 namespace App\Actions\FamilySet;
 
+use App\Actions\GetSetAction;
 use App\DataTransferObjects\CreateFamilySetData;
 use App\DataTransferObjects\UpdateFamilySetData;
 use App\Models\Family;
 use App\Models\FamilySet;
-use App\Services\RebrickableService;
 
 class AddSetToFamilyAction
 {
     public function __construct(
-        private readonly RebrickableService $rebrickableService,
+        private readonly GetSetAction $getSetAction,
         private readonly UpdateFamilySetAction $updateFamilySetAction,
     ) {}
 
     public function execute(Family $family, CreateFamilySetData $data): FamilySet
     {
-        $set = $this->rebrickableService->getSet($data->setNum);
+        $set = $this->getSetAction->execute($data->setNum);
 
         /** @var FamilySet $familySet */
         $familySet = $family->familySets()->create([

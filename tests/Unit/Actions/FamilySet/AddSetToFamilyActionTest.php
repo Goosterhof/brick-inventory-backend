@@ -4,24 +4,24 @@ declare(strict_types=1);
 
 use App\Actions\FamilySet\AddSetToFamilyAction;
 use App\Actions\FamilySet\UpdateFamilySetAction;
+use App\Actions\GetSetAction;
 use App\DataTransferObjects\CreateFamilySetData;
 use App\DataTransferObjects\UpdateFamilySetData;
 use App\Enums\FamilySetStatus;
 use App\Models\Family;
 use App\Models\FamilySet;
 use App\Models\Set;
-use App\Services\RebrickableService;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 describe('AddSetToFamilyAction', function (): void {
-    it('should fetch set from rebrickable service', function (): void {
+    it('should fetch set using GetSetAction', function (): void {
         // arrange
         $set = Mockery::mock(Set::class)->makePartial();
         $set->id = 1;
 
-        $rebrickableService = Mockery::mock(RebrickableService::class);
-        $rebrickableService->shouldReceive('getSet')
+        $getSetAction = Mockery::mock(GetSetAction::class);
+        $getSetAction->shouldReceive('execute')
             ->with('75192-1')
             ->once()
             ->andReturn($set);
@@ -43,7 +43,7 @@ describe('AddSetToFamilyAction', function (): void {
             ->once()
             ->andReturn($familySet);
 
-        $action = new AddSetToFamilyAction($rebrickableService, $updateAction);
+        $action = new AddSetToFamilyAction($getSetAction, $updateAction);
         $data = new CreateFamilySetData(
             setNum: '75192-1',
             quantity: 2,
@@ -64,8 +64,8 @@ describe('AddSetToFamilyAction', function (): void {
         $set = Mockery::mock(Set::class)->makePartial();
         $set->id = 42;
 
-        $rebrickableService = Mockery::mock(RebrickableService::class);
-        $rebrickableService->shouldReceive('getSet')->andReturn($set);
+        $getSetAction = Mockery::mock(GetSetAction::class);
+        $getSetAction->shouldReceive('execute')->andReturn($set);
 
         $familySet = Mockery::mock(FamilySet::class)->makePartial();
         $familySet->shouldReceive('load')->with('set');
@@ -82,7 +82,7 @@ describe('AddSetToFamilyAction', function (): void {
         $updateAction = Mockery::mock(UpdateFamilySetAction::class);
         $updateAction->shouldReceive('execute')->andReturn($familySet);
 
-        $action = new AddSetToFamilyAction($rebrickableService, $updateAction);
+        $action = new AddSetToFamilyAction($getSetAction, $updateAction);
         $data = new CreateFamilySetData(
             setNum: '75192-1',
             quantity: 1,
@@ -103,8 +103,8 @@ describe('AddSetToFamilyAction', function (): void {
         $set = Mockery::mock(Set::class)->makePartial();
         $set->id = 1;
 
-        $rebrickableService = Mockery::mock(RebrickableService::class);
-        $rebrickableService->shouldReceive('getSet')->andReturn($set);
+        $getSetAction = Mockery::mock(GetSetAction::class);
+        $getSetAction->shouldReceive('execute')->andReturn($set);
 
         $familySet = Mockery::mock(FamilySet::class)->makePartial();
         $familySet->shouldReceive('load')->with('set');
@@ -127,7 +127,7 @@ describe('AddSetToFamilyAction', function (): void {
             ->once()
             ->andReturn($familySet);
 
-        $action = new AddSetToFamilyAction($rebrickableService, $updateAction);
+        $action = new AddSetToFamilyAction($getSetAction, $updateAction);
         $data = new CreateFamilySetData(
             setNum: '75192-1',
             quantity: 2,
@@ -148,8 +148,8 @@ describe('AddSetToFamilyAction', function (): void {
         $set = Mockery::mock(Set::class)->makePartial();
         $set->id = 1;
 
-        $rebrickableService = Mockery::mock(RebrickableService::class);
-        $rebrickableService->shouldReceive('getSet')->andReturn($set);
+        $getSetAction = Mockery::mock(GetSetAction::class);
+        $getSetAction->shouldReceive('execute')->andReturn($set);
 
         $familySet = Mockery::mock(FamilySet::class)->makePartial();
         $familySet->shouldReceive('load')
@@ -165,7 +165,7 @@ describe('AddSetToFamilyAction', function (): void {
         $updateAction = Mockery::mock(UpdateFamilySetAction::class);
         $updateAction->shouldReceive('execute')->andReturn($familySet);
 
-        $action = new AddSetToFamilyAction($rebrickableService, $updateAction);
+        $action = new AddSetToFamilyAction($getSetAction, $updateAction);
         $data = new CreateFamilySetData(
             setNum: '75192-1',
             quantity: 1,
@@ -186,8 +186,8 @@ describe('AddSetToFamilyAction', function (): void {
         $set = Mockery::mock(Set::class)->makePartial();
         $set->id = 1;
 
-        $rebrickableService = Mockery::mock(RebrickableService::class);
-        $rebrickableService->shouldReceive('getSet')->andReturn($set);
+        $getSetAction = Mockery::mock(GetSetAction::class);
+        $getSetAction->shouldReceive('execute')->andReturn($set);
 
         $familySet = Mockery::mock(FamilySet::class)->makePartial();
         $familySet->shouldReceive('load')->with('set');
@@ -201,7 +201,7 @@ describe('AddSetToFamilyAction', function (): void {
         $updateAction = Mockery::mock(UpdateFamilySetAction::class);
         $updateAction->shouldReceive('execute')->andReturn($familySet);
 
-        $action = new AddSetToFamilyAction($rebrickableService, $updateAction);
+        $action = new AddSetToFamilyAction($getSetAction, $updateAction);
         $data = new CreateFamilySetData(
             setNum: '75192-1',
             quantity: 1,

@@ -28,18 +28,6 @@ class RebrickableService
         $this->apiKey = is_string($apiKey) ? $apiKey : '';
     }
 
-    public function getSet(string $setNum): Set
-    {
-        $set = Set::where('set_num', $setNum)->first();
-
-        if (!$set) {
-            $setData = $this->fetchSet($setNum);
-            $set = $this->createOrUpdateSet($setData);
-        }
-
-        return $set;
-    }
-
     public function getSetParts(string $setNum): SetPartsResultData
     {
         $set = Set::where('set_num', $setNum)->first();
@@ -55,6 +43,23 @@ class RebrickableService
         $set->load(['setParts.part', 'setParts.color']);
 
         return $this->toDto($set);
+    }
+
+    /**
+     * @return array{set_num: string, name: string, year: int, theme_id: int|null, num_parts: int, set_img_url: string|null}
+     */
+    public function fetchSet(string $setNum): array
+    {
+        $response = Http::withHeaders([
+            'Authorization' => 'key ' . $this->apiKey,
+        ])->get(sprintf('%s/lego/sets/%s/', $this->baseUrl, $setNum));
+
+        if ($response->failed()) {
+            throw new RequestException($response);
+        }
+
+        /** @var array{set_num: string, name: string, year: int, theme_id: int|null, num_parts: int, set_img_url: string|null} */
+        return $response->json();
     }
 
     private function toDto(Set $set): SetPartsResultData
@@ -94,23 +99,6 @@ class RebrickableService
         })->all();
 
         return new SetPartsResultData(set: $setData, parts: $parts);
-    }
-
-    /**
-     * @return array{set_num: string, name: string, year: int, theme_id: int|null, num_parts: int, set_img_url: string|null}
-     */
-    private function fetchSet(string $setNum): array
-    {
-        $response = Http::withHeaders([
-            'Authorization' => 'key ' . $this->apiKey,
-        ])->get(sprintf('%s/lego/sets/%s/', $this->baseUrl, $setNum));
-
-        if ($response->failed()) {
-            throw new RequestException($response);
-        }
-
-        /** @var array{set_num: string, name: string, year: int, theme_id: int|null, num_parts: int, set_img_url: string|null} */
-        return $response->json();
     }
 
     /**
