@@ -32,10 +32,12 @@ LEGO inventory management system. The goal is to provide a list of parts needed 
 Uses Pest PHP with the following conventions:
 
 - **Feature tests**: For API endpoints, using `actingAs()` for authentication
-- **Unit tests**: For Action and Service classes
+- **Unit tests**: For Action and Service classes (must NOT touch the database - use mocks)
 - **Structure**: Use `describe` blocks with `it('should ...')` syntax
 - **Assertions**: Use `expect()` style
 - **Architecture tests**: Located in `tests/Architecture/` to enforce code standards
+
+**Important**: When creating or running unit tests, use the `/unit-test` skill which contains detailed conventions and mocking patterns.
 
 Example:
 ```php
@@ -90,3 +92,11 @@ Before creating any commit, always:
 3. Run `composer test` to ensure all tests pass
 
 All must pass before committing. If any fail, fix them before proceeding.
+
+## Skills
+
+The following custom skills are available:
+
+| Skill | Description |
+|-------|-------------|
+| `/unit-test` | Create or run unit tests. Use `/unit-test ClassName` to generate tests for a class, or `/unit-test --run` to run all tests. |
