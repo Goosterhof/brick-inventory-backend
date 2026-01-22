@@ -5,17 +5,13 @@ declare(strict_types=1);
 use App\Actions\StorageOption\UpdateStorageOptionAction;
 use App\DataTransferObjects\UpdateStorageOptionData;
 use App\Models\StorageOption;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-
-uses(RefreshDatabase::class);
 
 describe('UpdateStorageOptionAction', function (): void {
-    it('should update a storage option', function (): void {
+    it('should update storage option properties', function (): void {
         // arrange
-        $storageOption = StorageOption::factory()->create([
-            'name' => 'Old Name',
-            'description' => 'Old description',
-        ]);
+        $storageOption = Mockery::mock(StorageOption::class)->makePartial();
+        $storageOption->shouldReceive('save')->once();
+
         $action = new UpdateStorageOptionAction;
         $data = new UpdateStorageOptionData(
             name: 'New Name',
@@ -26,16 +22,19 @@ describe('UpdateStorageOptionAction', function (): void {
         );
 
         // act
-        $updated = $action->execute($storageOption, $data);
+        $result = $action->execute($storageOption, $data);
 
         // assert
-        expect($updated->name)->toBe('New Name')
-            ->and($updated->description)->toBe('New description');
+        expect($result)->toBe($storageOption)
+            ->and($storageOption->name)->toBe('New Name')
+            ->and($storageOption->description)->toBe('New description');
     });
 
     it('should update row and column', function (): void {
         // arrange
-        $storageOption = StorageOption::factory()->create();
+        $storageOption = Mockery::mock(StorageOption::class)->makePartial();
+        $storageOption->shouldReceive('save')->once();
+
         $action = new UpdateStorageOptionAction;
         $data = new UpdateStorageOptionData(
             name: 'Drawer',
@@ -46,19 +45,42 @@ describe('UpdateStorageOptionAction', function (): void {
         );
 
         // act
-        $updated = $action->execute($storageOption, $data);
+        $action->execute($storageOption, $data);
 
         // assert
-        expect($updated->row)->toBe(3)
-            ->and($updated->column)->toBe(4);
+        expect($storageOption->row)->toBe(3)
+            ->and($storageOption->column)->toBe(4);
     });
 
-    it('should persist changes to database', function (): void {
+    it('should update parent_id', function (): void {
         // arrange
-        $storageOption = StorageOption::factory()->create(['name' => 'Old Name']);
+        $storageOption = Mockery::mock(StorageOption::class)->makePartial();
+        $storageOption->shouldReceive('save')->once();
+
         $action = new UpdateStorageOptionAction;
         $data = new UpdateStorageOptionData(
-            name: 'Updated Name',
+            name: 'Drawer',
+            description: null,
+            parentId: 5,
+            row: null,
+            column: null,
+        );
+
+        // act
+        $action->execute($storageOption, $data);
+
+        // assert
+        expect($storageOption->parent_id)->toBe(5);
+    });
+
+    it('should call save on the storage option', function (): void {
+        // arrange
+        $storageOption = Mockery::mock(StorageOption::class)->makePartial();
+        $storageOption->shouldReceive('save')->once();
+
+        $action = new UpdateStorageOptionAction;
+        $data = new UpdateStorageOptionData(
+            name: 'Updated',
             description: null,
             parentId: null,
             row: null,
@@ -68,7 +90,7 @@ describe('UpdateStorageOptionAction', function (): void {
         // act
         $action->execute($storageOption, $data);
 
-        // assert
-        expect(StorageOption::find($storageOption->id)->name)->toBe('Updated Name');
+        // assert - verification happens via Mockery expectations
+        expect(true)->toBeTrue();
     });
 });

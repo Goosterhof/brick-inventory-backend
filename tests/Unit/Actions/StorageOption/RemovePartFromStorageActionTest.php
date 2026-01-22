@@ -4,20 +4,19 @@ declare(strict_types=1);
 
 use App\Actions\StorageOption\RemovePartFromStorageAction;
 use App\Models\StorageOptionPart;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-
-uses(RefreshDatabase::class);
 
 describe('RemovePartFromStorageAction', function (): void {
-    it('should remove a part from storage option', function (): void {
+    it('should call delete on the storage option part', function (): void {
         // arrange
-        $storageOptionPart = StorageOptionPart::factory()->create();
+        $storageOptionPart = Mockery::mock(StorageOptionPart::class);
+        $storageOptionPart->shouldReceive('delete')->once();
+
         $action = new RemovePartFromStorageAction;
 
         // act
         $action->execute($storageOptionPart);
 
-        // assert
-        expect(StorageOptionPart::find($storageOptionPart->id))->toBeNull();
+        // assert - verification happens via Mockery expectations
+        expect(true)->toBeTrue();
     });
 });

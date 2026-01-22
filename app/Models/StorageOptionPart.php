@@ -9,6 +9,13 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property positive-int $id
+ * @property int $storage_option_id
+ * @property int $part_id
+ * @property int|null $color_id
+ * @property int $quantity
+ */
 class StorageOptionPart extends Model
 {
     /** @use HasFactory<StorageOptionPartFactory> */

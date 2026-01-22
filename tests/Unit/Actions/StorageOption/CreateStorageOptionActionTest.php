@@ -4,19 +4,23 @@ declare(strict_types=1);
 
 use App\Actions\StorageOption\CreateStorageOptionAction;
 use App\DataTransferObjects\CreateStorageOptionData;
-use App\Models\Family;
 use App\Models\StorageOption;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-
-uses(RefreshDatabase::class);
 
 describe('CreateStorageOptionAction', function (): void {
-    it('should create a storage option', function (): void {
+    it('should create a storage option with the provided data', function (): void {
         // arrange
-        $family = Family::factory()->create();
-        $action = new CreateStorageOptionAction;
+        $storageOptionInstance = Mockery::mock(StorageOption::class)->makePartial();
+        $storageOptionInstance->shouldReceive('save')->once();
+
+        $storageOption = Mockery::mock(StorageOption::class);
+        $storageOption->shouldReceive('newInstance')
+            ->withNoArgs()
+            ->once()
+            ->andReturn($storageOptionInstance);
+
+        $action = new CreateStorageOptionAction($storageOption);
         $data = new CreateStorageOptionData(
-            familyId: $family->id,
+            familyId: 1,
             name: 'Cabinet 1',
             description: 'Main storage cabinet',
             parentId: null,
@@ -25,45 +29,59 @@ describe('CreateStorageOptionAction', function (): void {
         );
 
         // act
-        $storageOption = $action->execute($data);
+        $result = $action->execute($data);
 
         // assert
-        expect($storageOption)->toBeInstanceOf(StorageOption::class)
-            ->and($storageOption->family_id)->toBe($family->id)
-            ->and($storageOption->name)->toBe('Cabinet 1')
-            ->and($storageOption->description)->toBe('Main storage cabinet');
+        expect($result)->toBe($storageOptionInstance)
+            ->and($storageOptionInstance->family_id)->toBe(1)
+            ->and($storageOptionInstance->name)->toBe('Cabinet 1')
+            ->and($storageOptionInstance->description)->toBe('Main storage cabinet');
     });
 
-    it('should create a storage option with parent', function (): void {
+    it('should set parent_id, row, and column when provided', function (): void {
         // arrange
-        $family = Family::factory()->create();
-        $parent = StorageOption::factory()->create(['family_id' => $family->id]);
-        $action = new CreateStorageOptionAction;
+        $storageOptionInstance = Mockery::mock(StorageOption::class)->makePartial();
+        $storageOptionInstance->shouldReceive('save')->once();
+
+        $storageOption = Mockery::mock(StorageOption::class);
+        $storageOption->shouldReceive('newInstance')
+            ->withNoArgs()
+            ->once()
+            ->andReturn($storageOptionInstance);
+
+        $action = new CreateStorageOptionAction($storageOption);
         $data = new CreateStorageOptionData(
-            familyId: $family->id,
+            familyId: 1,
             name: 'Drawer A1',
             description: null,
-            parentId: $parent->id,
+            parentId: 5,
             row: 1,
             column: 2,
         );
 
         // act
-        $storageOption = $action->execute($data);
+        $action->execute($data);
 
         // assert
-        expect($storageOption->parent_id)->toBe($parent->id)
-            ->and($storageOption->row)->toBe(1)
-            ->and($storageOption->column)->toBe(2);
+        expect($storageOptionInstance->parent_id)->toBe(5)
+            ->and($storageOptionInstance->row)->toBe(1)
+            ->and($storageOptionInstance->column)->toBe(2);
     });
 
-    it('should persist storage option to database', function (): void {
+    it('should call save on the storage option', function (): void {
         // arrange
-        $family = Family::factory()->create();
-        $action = new CreateStorageOptionAction;
+        $storageOptionInstance = Mockery::mock(StorageOption::class)->makePartial();
+        $storageOptionInstance->shouldReceive('save')->once();
+
+        $storageOption = Mockery::mock(StorageOption::class);
+        $storageOption->shouldReceive('newInstance')
+            ->withNoArgs()
+            ->andReturn($storageOptionInstance);
+
+        $action = new CreateStorageOptionAction($storageOption);
         $data = new CreateStorageOptionData(
-            familyId: $family->id,
-            name: 'Persisted Cabinet',
+            familyId: 1,
+            name: 'Test Cabinet',
             description: null,
             parentId: null,
             row: null,
@@ -73,7 +91,7 @@ describe('CreateStorageOptionAction', function (): void {
         // act
         $action->execute($data);
 
-        // assert
-        expect(StorageOption::where('name', 'Persisted Cabinet')->exists())->toBeTrue();
+        // assert - verification happens via Mockery expectations
+        expect(true)->toBeTrue();
     });
 });

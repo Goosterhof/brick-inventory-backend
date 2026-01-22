@@ -9,9 +9,13 @@ use App\Models\StorageOption;
 
 class CreateStorageOptionAction
 {
+    public function __construct(
+        private readonly StorageOption $storageOption,
+    ) {}
+
     public function execute(CreateStorageOptionData $data): StorageOption
     {
-        $storageOption = new StorageOption;
+        $storageOption = $this->storageOption->newInstance();
         $storageOption->family_id = $data->familyId;
         $storageOption->name = $data->name;
         $storageOption->description = $data->description;
