@@ -18,11 +18,6 @@ class Family extends Model
     use HasFactory;
 
     /**
-     * @var list<string>
-     */
-    protected $fillable = ['name'];
-
-    /**
      * Get the users belonging to this family.
      *
      * @return HasMany<User, $this>
