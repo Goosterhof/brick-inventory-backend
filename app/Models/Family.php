@@ -36,4 +36,14 @@ class Family extends Model
     {
         return $this->hasMany(StorageOption::class);
     }
+
+    /**
+     * Get the family sets belonging to this family.
+     *
+     * @return HasMany<FamilySet, $this>
+     */
+    public function familySets(): HasMany
+    {
+        return $this->hasMany(FamilySet::class);
+    }
 }

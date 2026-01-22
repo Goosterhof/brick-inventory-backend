@@ -45,6 +45,23 @@ class RebrickableService
         return $this->toDto($set);
     }
 
+    /**
+     * @return array{set_num: string, name: string, year: int, theme_id: int|null, num_parts: int, set_img_url: string|null}
+     */
+    public function fetchSet(string $setNum): array
+    {
+        $response = Http::withHeaders([
+            'Authorization' => 'key ' . $this->apiKey,
+        ])->get(sprintf('%s/lego/sets/%s/', $this->baseUrl, $setNum));
+
+        if ($response->failed()) {
+            throw new RequestException($response);
+        }
+
+        /** @var array{set_num: string, name: string, year: int, theme_id: int|null, num_parts: int, set_img_url: string|null} */
+        return $response->json();
+    }
+
     private function toDto(Set $set): SetPartsResultData
     {
         $setData = new SetData(
@@ -82,23 +99,6 @@ class RebrickableService
         })->all();
 
         return new SetPartsResultData(set: $setData, parts: $parts);
-    }
-
-    /**
-     * @return array{set_num: string, name: string, year: int, theme_id: int|null, num_parts: int, set_img_url: string|null}
-     */
-    private function fetchSet(string $setNum): array
-    {
-        $response = Http::withHeaders([
-            'Authorization' => 'key ' . $this->apiKey,
-        ])->get(sprintf('%s/lego/sets/%s/', $this->baseUrl, $setNum));
-
-        if ($response->failed()) {
-            throw new RequestException($response);
-        }
-
-        /** @var array{set_num: string, name: string, year: int, theme_id: int|null, num_parts: int, set_img_url: string|null} */
-        return $response->json();
     }
 
     /**
