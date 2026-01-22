@@ -48,7 +48,12 @@ describe('UpdateFamilySetAction', function (): void {
         ]);
 
         $action = new UpdateFamilySetAction;
-        $data = new UpdateFamilySetData(status: FamilySetStatus::InProgress);
+        $data = new UpdateFamilySetData(
+            quantity: null,
+            status: FamilySetStatus::InProgress,
+            purchaseDate: null,
+            notes: null,
+        );
 
         // act
         $updatedFamilySet = $action->execute($familySet, $data);
@@ -67,7 +72,12 @@ describe('UpdateFamilySetAction', function (): void {
         ]);
 
         $action = new UpdateFamilySetAction;
-        $data = new UpdateFamilySetData(quantity: 10);
+        $data = new UpdateFamilySetData(
+            quantity: 10,
+            status: null,
+            purchaseDate: null,
+            notes: null,
+        );
 
         // act
         $action->execute($familySet, $data);
@@ -82,7 +92,12 @@ describe('UpdateFamilySetAction', function (): void {
         $familySet = FamilySet::factory()->create();
 
         $action = new UpdateFamilySetAction;
-        $data = new UpdateFamilySetData(quantity: 3);
+        $data = new UpdateFamilySetData(
+            quantity: 3,
+            status: null,
+            purchaseDate: null,
+            notes: null,
+        );
 
         // act
         $result = $action->execute($familySet, $data);

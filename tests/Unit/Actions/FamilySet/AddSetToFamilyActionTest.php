@@ -49,7 +49,7 @@ describe('AddSetToFamilyAction', function (): void {
             ->and($familySet->notes)->toBe('Test notes');
     });
 
-    it('should use default values when not provided', function (): void {
+    it('should create family set with nullable fields', function (): void {
         // arrange
         $family = Family::factory()->create();
         $set = Set::factory()->create(['set_num' => '75192-1']);
@@ -61,7 +61,13 @@ describe('AddSetToFamilyAction', function (): void {
 
         $updateAction = new UpdateFamilySetAction;
         $action = new AddSetToFamilyAction($rebrickableService, $updateAction);
-        $data = new CreateFamilySetData(setNum: '75192-1');
+        $data = new CreateFamilySetData(
+            setNum: '75192-1',
+            quantity: 1,
+            status: FamilySetStatus::Sealed,
+            purchaseDate: null,
+            notes: null,
+        );
 
         // act
         $familySet = $action->execute($family, $data);
@@ -85,7 +91,13 @@ describe('AddSetToFamilyAction', function (): void {
 
         $updateAction = new UpdateFamilySetAction;
         $action = new AddSetToFamilyAction($rebrickableService, $updateAction);
-        $data = new CreateFamilySetData(setNum: '75192-1');
+        $data = new CreateFamilySetData(
+            setNum: '75192-1',
+            quantity: 1,
+            status: FamilySetStatus::Sealed,
+            purchaseDate: null,
+            notes: null,
+        );
 
         // act
         $familySet = $action->execute($family, $data);
@@ -107,7 +119,13 @@ describe('AddSetToFamilyAction', function (): void {
 
         $updateAction = new UpdateFamilySetAction;
         $action = new AddSetToFamilyAction($rebrickableService, $updateAction);
-        $data = new CreateFamilySetData(setNum: '75192-1', quantity: 3);
+        $data = new CreateFamilySetData(
+            setNum: '75192-1',
+            quantity: 3,
+            status: FamilySetStatus::Sealed,
+            purchaseDate: null,
+            notes: null,
+        );
 
         // act
         $action->execute($family, $data);

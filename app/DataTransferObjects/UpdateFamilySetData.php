@@ -10,9 +10,9 @@ use DateTimeInterface;
 final readonly class UpdateFamilySetData
 {
     public function __construct(
-        public ?int $quantity = null,
-        public ?FamilySetStatus $status = null,
-        public ?DateTimeInterface $purchaseDate = null,
-        public ?string $notes = null,
+        public ?int $quantity,
+        public ?FamilySetStatus $status,
+        public ?DateTimeInterface $purchaseDate,
+        public ?string $notes,
     ) {}
 }
