@@ -257,25 +257,20 @@ describe('FamilySetController', function (): void {
             ]);
         });
 
-        it('should allow partial updates', function (): void {
+        it('should require quantity and status', function (): void {
             $user = User::factory()->create();
             $set = Set::factory()->create();
             $familySet = FamilySet::factory()->create([
                 'family_id' => $user->family_id,
                 'set_id' => $set->id,
-                'quantity' => 2,
-                'status' => FamilySetStatus::Sealed,
-                'notes' => 'Original notes',
             ]);
 
             $response = $this->actingAs($user)->patchJson('/api/family-sets/' . $familySet->id, [
-                'status' => 'built',
+                'notes' => 'Just notes',
             ]);
 
-            $response->assertStatus(200)
-                ->assertJsonPath('data.quantity', 2)
-                ->assertJsonPath('data.status', 'built')
-                ->assertJsonPath('data.notes', 'Original notes');
+            $response->assertStatus(422)
+                ->assertJsonValidationErrors(['quantity', 'status']);
         });
 
         it('should return 404 for family set from another family', function (): void {
@@ -289,6 +284,7 @@ describe('FamilySetController', function (): void {
 
             $response = $this->actingAs($user)->patchJson('/api/family-sets/' . $familySet->id, [
                 'quantity' => 5,
+                'status' => 'built',
             ]);
 
             $response->assertStatus(404);

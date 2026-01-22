@@ -19,10 +19,10 @@ class UpdateFamilySetRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'quantity' => ['sometimes', 'integer', 'min:1'],
-            'status' => ['sometimes', 'string', Rule::enum(FamilySetStatus::class)],
-            'purchase_date' => ['sometimes', 'nullable', 'date'],
-            'notes' => ['sometimes', 'nullable', 'string', 'max:65535'],
+            'quantity' => ['required', 'integer', 'min:1'],
+            'status' => ['required', 'string', Rule::enum(FamilySetStatus::class)],
+            'purchase_date' => ['nullable', 'date'],
+            'notes' => ['nullable', 'string', 'max:65535'],
         ];
     }
 }

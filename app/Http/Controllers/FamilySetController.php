@@ -102,12 +102,12 @@ class FamilySetController extends Controller
             return response()->json(['error' => 'Not found'], 404);
         }
 
-        /** @var array{quantity?: int, status?: string, purchase_date?: string|null, notes?: string|null} $validated */
+        /** @var array{quantity: int, status: string, purchase_date?: string|null, notes?: string|null} $validated */
         $validated = $request->validated();
 
         $data = new UpdateFamilySetData(
-            quantity: $validated['quantity'] ?? null,
-            status: isset($validated['status']) ? FamilySetStatus::from($validated['status']) : null,
+            quantity: $validated['quantity'],
+            status: FamilySetStatus::from($validated['status']),
             purchaseDate: isset($validated['purchase_date']) ? Carbon::parse($validated['purchase_date']) : null,
             notes: $validated['notes'] ?? null,
         );

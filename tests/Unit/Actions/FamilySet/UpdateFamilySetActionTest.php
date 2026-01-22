@@ -12,7 +12,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 uses(RefreshDatabase::class);
 
 describe('UpdateFamilySetAction', function (): void {
-    it('should update all fields when provided', function (): void {
+    it('should update all fields', function (): void {
         // arrange
         $familySet = FamilySet::factory()->create([
             'quantity' => 1,
@@ -39,17 +39,18 @@ describe('UpdateFamilySetAction', function (): void {
             ->and($updatedFamilySet->notes)->toBe('Updated notes');
     });
 
-    it('should only update provided fields', function (): void {
+    it('should set nullable fields to null', function (): void {
         // arrange
         $familySet = FamilySet::factory()->create([
             'quantity' => 2,
             'status' => FamilySetStatus::Sealed,
+            'purchase_date' => Carbon::parse('2024-01-01'),
             'notes' => 'Original notes',
         ]);
 
         $action = new UpdateFamilySetAction;
         $data = new UpdateFamilySetData(
-            quantity: null,
+            quantity: 3,
             status: FamilySetStatus::InProgress,
             purchaseDate: null,
             notes: null,
@@ -59,9 +60,10 @@ describe('UpdateFamilySetAction', function (): void {
         $updatedFamilySet = $action->execute($familySet, $data);
 
         // assert
-        expect($updatedFamilySet->quantity)->toBe(2)
+        expect($updatedFamilySet->quantity)->toBe(3)
             ->and($updatedFamilySet->status)->toBe(FamilySetStatus::InProgress)
-            ->and($updatedFamilySet->notes)->toBe('Original notes');
+            ->and($updatedFamilySet->purchase_date)->toBeNull()
+            ->and($updatedFamilySet->notes)->toBeNull();
     });
 
     it('should persist changes to database', function (): void {
@@ -74,7 +76,7 @@ describe('UpdateFamilySetAction', function (): void {
         $action = new UpdateFamilySetAction;
         $data = new UpdateFamilySetData(
             quantity: 10,
-            status: null,
+            status: FamilySetStatus::Built,
             purchaseDate: null,
             notes: null,
         );
@@ -84,7 +86,8 @@ describe('UpdateFamilySetAction', function (): void {
 
         // assert
         $familySet->refresh();
-        expect($familySet->quantity)->toBe(10);
+        expect($familySet->quantity)->toBe(10)
+            ->and($familySet->status)->toBe(FamilySetStatus::Built);
     });
 
     it('should return the same family set instance', function (): void {
@@ -94,7 +97,7 @@ describe('UpdateFamilySetAction', function (): void {
         $action = new UpdateFamilySetAction;
         $data = new UpdateFamilySetData(
             quantity: 3,
-            status: null,
+            status: FamilySetStatus::Sealed,
             purchaseDate: null,
             notes: null,
         );
