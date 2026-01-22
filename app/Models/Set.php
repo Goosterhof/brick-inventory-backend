@@ -10,7 +10,15 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class Set extends Model
 {
-    protected $guarded = [];
+    /** @var list<string> */
+    protected $fillable = [
+        'set_num',
+        'name',
+        'year',
+        'theme',
+        'num_parts',
+        'image_url',
+    ];
 
     /**
      * @return BelongsToMany<Part, $this>

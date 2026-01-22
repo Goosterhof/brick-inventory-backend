@@ -14,7 +14,13 @@ class Color extends Model
     /** @use HasFactory<ColorFactory> */
     use HasFactory;
 
-    protected $guarded = [];
+    /** @var list<string> */
+    protected $fillable = [
+        'rebrickable_id',
+        'name',
+        'rgb',
+        'is_transparent',
+    ];
 
     /**
      * @return HasMany<SetPart, $this>

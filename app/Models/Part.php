@@ -15,7 +15,13 @@ class Part extends Model
     /** @use HasFactory<PartFactory> */
     use HasFactory;
 
-    protected $guarded = [];
+    /** @var list<string> */
+    protected $fillable = [
+        'part_num',
+        'name',
+        'category',
+        'image_url',
+    ];
 
     /**
      * @return BelongsToMany<Set, $this>

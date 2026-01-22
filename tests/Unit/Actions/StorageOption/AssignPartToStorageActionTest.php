@@ -21,6 +21,7 @@ describe('AssignPartToStorageAction', function (): void {
         $data = new AssignPartToStorageData(
             storageOptionId: $storageOption->id,
             partId: $part->id,
+            colorId: null,
             quantity: 50,
         );
 
@@ -68,6 +69,7 @@ describe('AssignPartToStorageAction', function (): void {
         $data = new AssignPartToStorageData(
             storageOptionId: $storageOption->id,
             partId: $part->id,
+            colorId: null,
             quantity: 100,
         );
 

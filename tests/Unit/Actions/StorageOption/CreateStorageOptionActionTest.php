@@ -19,6 +19,9 @@ describe('CreateStorageOptionAction', function (): void {
             familyId: $family->id,
             name: 'Cabinet 1',
             description: 'Main storage cabinet',
+            parentId: null,
+            row: null,
+            column: null,
         );
 
         // act
@@ -39,6 +42,7 @@ describe('CreateStorageOptionAction', function (): void {
         $data = new CreateStorageOptionData(
             familyId: $family->id,
             name: 'Drawer A1',
+            description: null,
             parentId: $parent->id,
             row: 1,
             column: 2,
@@ -60,6 +64,10 @@ describe('CreateStorageOptionAction', function (): void {
         $data = new CreateStorageOptionData(
             familyId: $family->id,
             name: 'Persisted Cabinet',
+            description: null,
+            parentId: null,
+            row: null,
+            column: null,
         );
 
         // act

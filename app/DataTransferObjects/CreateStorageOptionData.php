@@ -9,9 +9,9 @@ final readonly class CreateStorageOptionData
     public function __construct(
         public int $familyId,
         public string $name,
-        public ?string $description = null,
-        public ?int $parentId = null,
-        public ?int $row = null,
-        public ?int $column = null,
+        public ?string $description,
+        public ?int $parentId,
+        public ?int $row,
+        public ?int $column,
     ) {}
 }

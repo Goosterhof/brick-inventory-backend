@@ -20,6 +20,9 @@ describe('UpdateStorageOptionAction', function (): void {
         $data = new UpdateStorageOptionData(
             name: 'New Name',
             description: 'New description',
+            parentId: null,
+            row: null,
+            column: null,
         );
 
         // act
@@ -36,6 +39,8 @@ describe('UpdateStorageOptionAction', function (): void {
         $action = new UpdateStorageOptionAction;
         $data = new UpdateStorageOptionData(
             name: 'Drawer',
+            description: null,
+            parentId: null,
             row: 3,
             column: 4,
         );
@@ -52,7 +57,13 @@ describe('UpdateStorageOptionAction', function (): void {
         // arrange
         $storageOption = StorageOption::factory()->create(['name' => 'Old Name']);
         $action = new UpdateStorageOptionAction;
-        $data = new UpdateStorageOptionData(name: 'Updated Name');
+        $data = new UpdateStorageOptionData(
+            name: 'Updated Name',
+            description: null,
+            parentId: null,
+            row: null,
+            column: null,
+        );
 
         // act
         $action->execute($storageOption, $data);

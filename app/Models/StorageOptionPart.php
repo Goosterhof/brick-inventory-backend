@@ -14,7 +14,13 @@ class StorageOptionPart extends Model
     /** @use HasFactory<StorageOptionPartFactory> */
     use HasFactory;
 
-    protected $guarded = [];
+    /** @var list<string> */
+    protected $fillable = [
+        'storage_option_id',
+        'part_id',
+        'color_id',
+        'quantity',
+    ];
 
     /**
      * @return BelongsTo<StorageOption, $this>
