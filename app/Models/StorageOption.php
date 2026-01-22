@@ -24,16 +24,6 @@ class StorageOption extends Model
     /** @use HasFactory<StorageOptionFactory> */
     use HasFactory;
 
-    /** @var list<string> */
-    protected $fillable = [
-        'family_id',
-        'parent_id',
-        'name',
-        'description',
-        'row',
-        'column',
-    ];
-
     /**
      * @return BelongsTo<Family, $this>
      */

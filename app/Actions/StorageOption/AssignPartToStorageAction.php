@@ -15,11 +15,18 @@ class AssignPartToStorageAction
 
     public function execute(AssignPartToStorageData $data): StorageOptionPart
     {
-        $storageOptionPart = $this->storageOptionPart->newQuery()->firstOrNew([
-            'storage_option_id' => $data->storageOptionId,
-            'part_id' => $data->partId,
-            'color_id' => $data->colorId,
-        ]);
+        $storageOptionPart = $this->storageOptionPart->newQuery()
+            ->where('storage_option_id', $data->storageOptionId)
+            ->where('part_id', $data->partId)
+            ->where('color_id', $data->colorId)
+            ->first();
+
+        if ($storageOptionPart === null) {
+            $storageOptionPart = $this->storageOptionPart->newInstance();
+            $storageOptionPart->storage_option_id = $data->storageOptionId;
+            $storageOptionPart->part_id = $data->partId;
+            $storageOptionPart->color_id = $data->colorId;
+        }
 
         $storageOptionPart->quantity = $data->quantity;
         $storageOptionPart->save();

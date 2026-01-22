@@ -8,26 +8,20 @@ use App\Models\StorageOptionPart;
 use Illuminate\Database\Eloquent\Builder;
 
 describe('AssignPartToStorageAction', function (): void {
-    it('should assign a part to a storage option', function (): void {
+    it('should create a new assignment when one does not exist', function (): void {
         // arrange
         $storageOptionPartInstance = Mockery::mock(StorageOptionPart::class)->makePartial();
         $storageOptionPartInstance->shouldReceive('save')->once();
 
         $builder = Mockery::mock(Builder::class);
-        $builder->shouldReceive('firstOrNew')
-            ->with([
-                'storage_option_id' => 1,
-                'part_id' => 2,
-                'color_id' => null,
-            ])
-            ->once()
-            ->andReturn($storageOptionPartInstance);
+        $builder->shouldReceive('where')->with('storage_option_id', 1)->once()->andReturnSelf();
+        $builder->shouldReceive('where')->with('part_id', 2)->once()->andReturnSelf();
+        $builder->shouldReceive('where')->with('color_id', null)->once()->andReturnSelf();
+        $builder->shouldReceive('first')->once()->andReturn(null);
 
         $storageOptionPart = Mockery::mock(StorageOptionPart::class);
-        $storageOptionPart->shouldReceive('newQuery')
-            ->withNoArgs()
-            ->once()
-            ->andReturn($builder);
+        $storageOptionPart->shouldReceive('newQuery')->withNoArgs()->once()->andReturn($builder);
+        $storageOptionPart->shouldReceive('newInstance')->withNoArgs()->once()->andReturn($storageOptionPartInstance);
 
         $action = new AssignPartToStorageAction($storageOptionPart);
         $data = new AssignPartToStorageData(
@@ -42,44 +36,40 @@ describe('AssignPartToStorageAction', function (): void {
 
         // assert
         expect($result)->toBe($storageOptionPartInstance)
+            ->and($storageOptionPartInstance->storage_option_id)->toBe(1)
+            ->and($storageOptionPartInstance->part_id)->toBe(2)
+            ->and($storageOptionPartInstance->color_id)->toBeNull()
             ->and($storageOptionPartInstance->quantity)->toBe(50);
     });
 
-    it('should assign a part with color', function (): void {
+    it('should update existing assignment when one exists', function (): void {
         // arrange
-        $storageOptionPartInstance = Mockery::mock(StorageOptionPart::class)->makePartial();
-        $storageOptionPartInstance->shouldReceive('save')->once();
+        $existingInstance = Mockery::mock(StorageOptionPart::class)->makePartial();
+        $existingInstance->shouldReceive('save')->once();
 
         $builder = Mockery::mock(Builder::class);
-        $builder->shouldReceive('firstOrNew')
-            ->with([
-                'storage_option_id' => 1,
-                'part_id' => 2,
-                'color_id' => 3,
-            ])
-            ->once()
-            ->andReturn($storageOptionPartInstance);
+        $builder->shouldReceive('where')->with('storage_option_id', 1)->once()->andReturnSelf();
+        $builder->shouldReceive('where')->with('part_id', 2)->once()->andReturnSelf();
+        $builder->shouldReceive('where')->with('color_id', 3)->once()->andReturnSelf();
+        $builder->shouldReceive('first')->once()->andReturn($existingInstance);
 
         $storageOptionPart = Mockery::mock(StorageOptionPart::class);
-        $storageOptionPart->shouldReceive('newQuery')
-            ->withNoArgs()
-            ->once()
-            ->andReturn($builder);
+        $storageOptionPart->shouldReceive('newQuery')->withNoArgs()->once()->andReturn($builder);
 
         $action = new AssignPartToStorageAction($storageOptionPart);
         $data = new AssignPartToStorageData(
             storageOptionId: 1,
             partId: 2,
             colorId: 3,
-            quantity: 25,
+            quantity: 100,
         );
 
         // act
         $result = $action->execute($data);
 
         // assert
-        expect($result)->toBe($storageOptionPartInstance)
-            ->and($storageOptionPartInstance->quantity)->toBe(25);
+        expect($result)->toBe($existingInstance)
+            ->and($existingInstance->quantity)->toBe(100);
     });
 
     it('should call save on the storage option part', function (): void {
@@ -88,10 +78,12 @@ describe('AssignPartToStorageAction', function (): void {
         $storageOptionPartInstance->shouldReceive('save')->once();
 
         $builder = Mockery::mock(Builder::class);
-        $builder->shouldReceive('firstOrNew')->andReturn($storageOptionPartInstance);
+        $builder->shouldReceive('where')->andReturnSelf();
+        $builder->shouldReceive('first')->andReturn(null);
 
         $storageOptionPart = Mockery::mock(StorageOptionPart::class);
         $storageOptionPart->shouldReceive('newQuery')->andReturn($builder);
+        $storageOptionPart->shouldReceive('newInstance')->andReturn($storageOptionPartInstance);
 
         $action = new AssignPartToStorageAction($storageOptionPart);
         $data = new AssignPartToStorageData(
