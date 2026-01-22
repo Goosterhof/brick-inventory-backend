@@ -74,18 +74,24 @@ expect($result)->toBe($expectedResult);
 ```
 
 ### For Eloquent Models in Actions
-If an action uses Eloquent models, they should be injected and mocked:
+If an action uses Eloquent models, they should be injected and mocked. Use `makePartial()` on instance mocks to allow property assignment:
 
 ```php
-$modelInstance = Mockery::mock(Model::class);
+// The instance mock needs makePartial() to allow property setting
+$modelInstance = Mockery::mock(Model::class)->makePartial();
 $modelInstance->shouldReceive('save')->once();
 
+// The injected model mock returns the instance
 $model = Mockery::mock(Model::class);
 $model->shouldReceive('newInstance')
-    ->with(['field' => 'value'])
+    ->withNoArgs()
     ->andReturn($modelInstance);
 
 $action = new SomeAction($model);
+$action->execute($data);
+
+// Assert properties were set correctly
+expect($modelInstance->name)->toBe('expected value');
 ```
 
 ## When Generating Tests
