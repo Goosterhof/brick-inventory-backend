@@ -7,19 +7,12 @@ use App\DataTransferObjects\UpdateFamilySetData;
 use App\Enums\FamilySetStatus;
 use App\Models\FamilySet;
 use Carbon\Carbon;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-
-uses(RefreshDatabase::class);
 
 describe('UpdateFamilySetAction', function (): void {
-    it('should update all fields', function (): void {
+    it('should update all fields on the family set', function (): void {
         // arrange
-        $familySet = FamilySet::factory()->create([
-            'quantity' => 1,
-            'status' => FamilySetStatus::Sealed,
-            'purchase_date' => null,
-            'notes' => null,
-        ]);
+        $familySet = Mockery::mock(FamilySet::class)->makePartial();
+        $familySet->shouldReceive('save')->once();
 
         $action = new UpdateFamilySetAction;
         $data = new UpdateFamilySetData(
@@ -30,23 +23,20 @@ describe('UpdateFamilySetAction', function (): void {
         );
 
         // act
-        $updatedFamilySet = $action->execute($familySet, $data);
+        $result = $action->execute($familySet, $data);
 
         // assert
-        expect($updatedFamilySet->quantity)->toBe(5)
-            ->and($updatedFamilySet->status)->toBe(FamilySetStatus::Built)
-            ->and($updatedFamilySet->purchase_date->format('Y-m-d'))->toBe('2024-06-15')
-            ->and($updatedFamilySet->notes)->toBe('Updated notes');
+        expect($result)->toBe($familySet)
+            ->and($familySet->quantity)->toBe(5)
+            ->and($familySet->status)->toBe(FamilySetStatus::Built)
+            ->and($familySet->purchase_date->format('Y-m-d'))->toBe('2024-06-15')
+            ->and($familySet->notes)->toBe('Updated notes');
     });
 
-    it('should set nullable fields to null', function (): void {
+    it('should set purchase_date to null when not provided', function (): void {
         // arrange
-        $familySet = FamilySet::factory()->create([
-            'quantity' => 2,
-            'status' => FamilySetStatus::Sealed,
-            'purchase_date' => Carbon::parse('2024-01-01'),
-            'notes' => 'Original notes',
-        ]);
+        $familySet = Mockery::mock(FamilySet::class)->makePartial();
+        $familySet->shouldReceive('save')->once();
 
         $action = new UpdateFamilySetAction;
         $data = new UpdateFamilySetData(
@@ -57,26 +47,24 @@ describe('UpdateFamilySetAction', function (): void {
         );
 
         // act
-        $updatedFamilySet = $action->execute($familySet, $data);
+        $action->execute($familySet, $data);
 
         // assert
-        expect($updatedFamilySet->quantity)->toBe(3)
-            ->and($updatedFamilySet->status)->toBe(FamilySetStatus::InProgress)
-            ->and($updatedFamilySet->purchase_date)->toBeNull()
-            ->and($updatedFamilySet->notes)->toBeNull();
+        expect($familySet->quantity)->toBe(3)
+            ->and($familySet->status)->toBe(FamilySetStatus::InProgress)
+            ->and($familySet->purchase_date)->toBeNull()
+            ->and($familySet->notes)->toBeNull();
     });
 
-    it('should persist changes to database', function (): void {
+    it('should call save on the family set', function (): void {
         // arrange
-        $familySet = FamilySet::factory()->create([
-            'quantity' => 1,
-            'status' => FamilySetStatus::Sealed,
-        ]);
+        $familySet = Mockery::mock(FamilySet::class)->makePartial();
+        $familySet->shouldReceive('save')->once();
 
         $action = new UpdateFamilySetAction;
         $data = new UpdateFamilySetData(
-            quantity: 10,
-            status: FamilySetStatus::Built,
+            quantity: 1,
+            status: FamilySetStatus::Sealed,
             purchaseDate: null,
             notes: null,
         );
@@ -84,15 +72,14 @@ describe('UpdateFamilySetAction', function (): void {
         // act
         $action->execute($familySet, $data);
 
-        // assert
-        $familySet->refresh();
-        expect($familySet->quantity)->toBe(10)
-            ->and($familySet->status)->toBe(FamilySetStatus::Built);
+        // assert - verification happens via Mockery expectations
+        expect(true)->toBeTrue();
     });
 
     it('should return the same family set instance', function (): void {
         // arrange
-        $familySet = FamilySet::factory()->create();
+        $familySet = Mockery::mock(FamilySet::class)->makePartial();
+        $familySet->shouldReceive('save')->once();
 
         $action = new UpdateFamilySetAction;
         $data = new UpdateFamilySetData(
@@ -106,6 +93,6 @@ describe('UpdateFamilySetAction', function (): void {
         $result = $action->execute($familySet, $data);
 
         // assert
-        expect($result->id)->toBe($familySet->id);
+        expect($result)->toBe($familySet);
     });
 });

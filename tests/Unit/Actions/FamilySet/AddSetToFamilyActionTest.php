@@ -5,123 +5,87 @@ declare(strict_types=1);
 use App\Actions\FamilySet\AddSetToFamilyAction;
 use App\Actions\FamilySet\UpdateFamilySetAction;
 use App\DataTransferObjects\CreateFamilySetData;
+use App\DataTransferObjects\UpdateFamilySetData;
 use App\Enums\FamilySetStatus;
 use App\Models\Family;
 use App\Models\FamilySet;
 use App\Models\Set;
 use App\Services\RebrickableService;
 use Carbon\Carbon;
-use Illuminate\Foundation\Testing\RefreshDatabase;
-
-uses(RefreshDatabase::class);
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 describe('AddSetToFamilyAction', function (): void {
-    it('should create a family set with existing set', function (): void {
+    it('should fetch set from rebrickable service', function (): void {
         // arrange
-        $family = Family::factory()->create();
-        $set = Set::factory()->create(['set_num' => '75192-1']);
+        $set = Mockery::mock(Set::class)->makePartial();
+        $set->id = 1;
 
         $rebrickableService = Mockery::mock(RebrickableService::class);
         $rebrickableService->shouldReceive('getSet')
             ->with('75192-1')
+            ->once()
             ->andReturn($set);
 
-        $updateAction = new UpdateFamilySetAction;
+        $familySet = Mockery::mock(FamilySet::class)->makePartial();
+        $familySet->shouldReceive('load')->with('set')->once();
+
+        $familySetsRelation = Mockery::mock(HasMany::class);
+        $familySetsRelation->shouldReceive('create')
+            ->with(['set_id' => 1])
+            ->once()
+            ->andReturn($familySet);
+
+        $family = Mockery::mock(Family::class);
+        $family->shouldReceive('familySets')->once()->andReturn($familySetsRelation);
+
+        $updateAction = Mockery::mock(UpdateFamilySetAction::class);
+        $updateAction->shouldReceive('execute')
+            ->once()
+            ->andReturn($familySet);
+
         $action = new AddSetToFamilyAction($rebrickableService, $updateAction);
         $data = new CreateFamilySetData(
             setNum: '75192-1',
             quantity: 2,
             status: FamilySetStatus::Built,
-            purchaseDate: Carbon::parse('2024-01-15'),
-            notes: 'Test notes',
-        );
-
-        // act
-        $familySet = $action->execute($family, $data);
-
-        // assert
-        expect($familySet)->toBeInstanceOf(FamilySet::class)
-            ->and($familySet->family_id)->toBe($family->id)
-            ->and($familySet->set_id)->toBe($set->id)
-            ->and($familySet->quantity)->toBe(2)
-            ->and($familySet->status)->toBe(FamilySetStatus::Built)
-            ->and($familySet->purchase_date->format('Y-m-d'))->toBe('2024-01-15')
-            ->and($familySet->notes)->toBe('Test notes');
-    });
-
-    it('should create family set with nullable fields', function (): void {
-        // arrange
-        $family = Family::factory()->create();
-        $set = Set::factory()->create(['set_num' => '75192-1']);
-
-        $rebrickableService = Mockery::mock(RebrickableService::class);
-        $rebrickableService->shouldReceive('getSet')
-            ->with('75192-1')
-            ->andReturn($set);
-
-        $updateAction = new UpdateFamilySetAction;
-        $action = new AddSetToFamilyAction($rebrickableService, $updateAction);
-        $data = new CreateFamilySetData(
-            setNum: '75192-1',
-            quantity: 1,
-            status: FamilySetStatus::Sealed,
             purchaseDate: null,
             notes: null,
         );
 
         // act
-        $familySet = $action->execute($family, $data);
+        $action->execute($family, $data);
 
-        // assert
-        expect($familySet->quantity)->toBe(1)
-            ->and($familySet->status)->toBe(FamilySetStatus::Sealed)
-            ->and($familySet->purchase_date)->toBeNull()
-            ->and($familySet->notes)->toBeNull();
+        // assert - verification happens via Mockery expectations
+        expect(true)->toBeTrue();
     });
 
-    it('should load the set relationship', function (): void {
+    it('should create family set via relationship', function (): void {
         // arrange
-        $family = Family::factory()->create();
-        $set = Set::factory()->create(['set_num' => '75192-1', 'name' => 'Millennium Falcon']);
+        $set = Mockery::mock(Set::class)->makePartial();
+        $set->id = 42;
 
         $rebrickableService = Mockery::mock(RebrickableService::class);
-        $rebrickableService->shouldReceive('getSet')
-            ->with('75192-1')
-            ->andReturn($set);
+        $rebrickableService->shouldReceive('getSet')->andReturn($set);
 
-        $updateAction = new UpdateFamilySetAction;
+        $familySet = Mockery::mock(FamilySet::class)->makePartial();
+        $familySet->shouldReceive('load')->with('set');
+
+        $familySetsRelation = Mockery::mock(HasMany::class);
+        $familySetsRelation->shouldReceive('create')
+            ->with(['set_id' => 42])
+            ->once()
+            ->andReturn($familySet);
+
+        $family = Mockery::mock(Family::class);
+        $family->shouldReceive('familySets')->andReturn($familySetsRelation);
+
+        $updateAction = Mockery::mock(UpdateFamilySetAction::class);
+        $updateAction->shouldReceive('execute')->andReturn($familySet);
+
         $action = new AddSetToFamilyAction($rebrickableService, $updateAction);
         $data = new CreateFamilySetData(
             setNum: '75192-1',
             quantity: 1,
-            status: FamilySetStatus::Sealed,
-            purchaseDate: null,
-            notes: null,
-        );
-
-        // act
-        $familySet = $action->execute($family, $data);
-
-        // assert
-        expect($familySet->relationLoaded('set'))->toBeTrue()
-            ->and($familySet->set->name)->toBe('Millennium Falcon');
-    });
-
-    it('should persist the family set to database', function (): void {
-        // arrange
-        $family = Family::factory()->create();
-        $set = Set::factory()->create(['set_num' => '75192-1']);
-
-        $rebrickableService = Mockery::mock(RebrickableService::class);
-        $rebrickableService->shouldReceive('getSet')
-            ->with('75192-1')
-            ->andReturn($set);
-
-        $updateAction = new UpdateFamilySetAction;
-        $action = new AddSetToFamilyAction($rebrickableService, $updateAction);
-        $data = new CreateFamilySetData(
-            setNum: '75192-1',
-            quantity: 3,
             status: FamilySetStatus::Sealed,
             purchaseDate: null,
             notes: null,
@@ -130,7 +94,126 @@ describe('AddSetToFamilyAction', function (): void {
         // act
         $action->execute($family, $data);
 
+        // assert - verification happens via Mockery expectations
+        expect(true)->toBeTrue();
+    });
+
+    it('should delegate to update action with correct data', function (): void {
+        // arrange
+        $set = Mockery::mock(Set::class)->makePartial();
+        $set->id = 1;
+
+        $rebrickableService = Mockery::mock(RebrickableService::class);
+        $rebrickableService->shouldReceive('getSet')->andReturn($set);
+
+        $familySet = Mockery::mock(FamilySet::class)->makePartial();
+        $familySet->shouldReceive('load')->with('set');
+
+        $familySetsRelation = Mockery::mock(HasMany::class);
+        $familySetsRelation->shouldReceive('create')->andReturn($familySet);
+
+        $family = Mockery::mock(Family::class);
+        $family->shouldReceive('familySets')->andReturn($familySetsRelation);
+
+        $purchaseDate = Carbon::parse('2024-01-15');
+
+        $updateAction = Mockery::mock(UpdateFamilySetAction::class);
+        $updateAction->shouldReceive('execute')
+            ->withArgs(fn (FamilySet $fs, UpdateFamilySetData $data): bool => $fs === $familySet
+                && $data->quantity === 2
+                && $data->status === FamilySetStatus::Built
+                && $data->purchaseDate === $purchaseDate
+                && $data->notes === 'Test notes')
+            ->once()
+            ->andReturn($familySet);
+
+        $action = new AddSetToFamilyAction($rebrickableService, $updateAction);
+        $data = new CreateFamilySetData(
+            setNum: '75192-1',
+            quantity: 2,
+            status: FamilySetStatus::Built,
+            purchaseDate: $purchaseDate,
+            notes: 'Test notes',
+        );
+
+        // act
+        $action->execute($family, $data);
+
+        // assert - verification happens via Mockery expectations
+        expect(true)->toBeTrue();
+    });
+
+    it('should load the set relationship', function (): void {
+        // arrange
+        $set = Mockery::mock(Set::class)->makePartial();
+        $set->id = 1;
+
+        $rebrickableService = Mockery::mock(RebrickableService::class);
+        $rebrickableService->shouldReceive('getSet')->andReturn($set);
+
+        $familySet = Mockery::mock(FamilySet::class)->makePartial();
+        $familySet->shouldReceive('load')
+            ->with('set')
+            ->once();
+
+        $familySetsRelation = Mockery::mock(HasMany::class);
+        $familySetsRelation->shouldReceive('create')->andReturn($familySet);
+
+        $family = Mockery::mock(Family::class);
+        $family->shouldReceive('familySets')->andReturn($familySetsRelation);
+
+        $updateAction = Mockery::mock(UpdateFamilySetAction::class);
+        $updateAction->shouldReceive('execute')->andReturn($familySet);
+
+        $action = new AddSetToFamilyAction($rebrickableService, $updateAction);
+        $data = new CreateFamilySetData(
+            setNum: '75192-1',
+            quantity: 1,
+            status: FamilySetStatus::Sealed,
+            purchaseDate: null,
+            notes: null,
+        );
+
+        // act
+        $action->execute($family, $data);
+
+        // assert - verification happens via Mockery expectations
+        expect(true)->toBeTrue();
+    });
+
+    it('should return the family set from update action', function (): void {
+        // arrange
+        $set = Mockery::mock(Set::class)->makePartial();
+        $set->id = 1;
+
+        $rebrickableService = Mockery::mock(RebrickableService::class);
+        $rebrickableService->shouldReceive('getSet')->andReturn($set);
+
+        $familySet = Mockery::mock(FamilySet::class)->makePartial();
+        $familySet->shouldReceive('load')->with('set');
+
+        $familySetsRelation = Mockery::mock(HasMany::class);
+        $familySetsRelation->shouldReceive('create')->andReturn($familySet);
+
+        $family = Mockery::mock(Family::class);
+        $family->shouldReceive('familySets')->andReturn($familySetsRelation);
+
+        $updateAction = Mockery::mock(UpdateFamilySetAction::class);
+        $updateAction->shouldReceive('execute')->andReturn($familySet);
+
+        $action = new AddSetToFamilyAction($rebrickableService, $updateAction);
+        $data = new CreateFamilySetData(
+            setNum: '75192-1',
+            quantity: 1,
+            status: FamilySetStatus::Sealed,
+            purchaseDate: null,
+            notes: null,
+        );
+
+        // act
+        $result = $action->execute($family, $data);
+
         // assert
-        expect(FamilySet::where('family_id', $family->id)->where('set_id', $set->id)->exists())->toBeTrue();
+        expect($result)->toBe($familySet);
     });
 });
