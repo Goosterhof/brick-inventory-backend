@@ -9,7 +9,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class SetPart extends Model
 {
-    protected $guarded = [];
+    /** @var list<string> */
+    protected $fillable = [
+        'set_id',
+        'part_id',
+        'color_id',
+        'quantity',
+        'is_spare',
+        'element_id',
+    ];
 
     /**
      * @return BelongsTo<Set, $this>

@@ -1,0 +1,15 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Actions\StorageOption;
+
+use App\Models\StorageOptionPart;
+
+class RemovePartFromStorageAction
+{
+    public function execute(StorageOptionPart $storageOptionPart): void
+    {
+        $storageOptionPart->delete();
+    }
+}
