@@ -21,7 +21,53 @@ LEGO inventory management system. The goal is to provide a list of parts needed 
 ### Code Patterns
 - **Action classes**: For internal business logic (single-responsibility)
 - **Service classes**: For external API connections (e.g., `RebrickableService`)
+- **DTOFormRequest pattern**: Form Requests that act as DTOs with interface contracts
 - **Standard Laravel**: Controllers, Models, API Resources for the rest
+
+### Form Requests as DTOs
+
+Form Requests extend `DTOFormRequest` and implement interfaces with PHP 8.4 property hooks:
+
+```php
+// Interface defines the contract
+interface CreateProductInterface
+{
+    public string $name { get; }
+    public ?string $description { get; }
+}
+
+// Request implements validation + DTO
+final readonly class CreateProductRequest extends DTOFormRequest implements CreateProductInterface
+{
+    public const string NAME = 'name';
+
+    public function __construct(
+        public string $name,
+        public ?string $description = null,
+    ) {}
+
+    public static function rules(Request $request): array
+    {
+        return [self::NAME => ['required', 'string']];
+    }
+
+    protected static function toDTO(Request $request): static
+    {
+        return new self(name: $request->string(self::NAME)->toString());
+    }
+}
+```
+
+Actions accept interfaces (not concrete classes) for testability:
+
+```php
+class CreateProductAction
+{
+    public function execute(CreateProductInterface $data): Product { ... }
+}
+```
+
+Use `/form-request` skill for detailed patterns and templates.
 
 ### API Structure
 - Standard Laravel RESTful API
@@ -100,3 +146,4 @@ The following custom skills are available:
 | Skill | Description |
 |-------|-------------|
 | `/unit-test` | Create or run unit tests. Use `/unit-test ClassName` to generate tests for a class, or `/unit-test --run` to run all tests. |
+| `/form-request` | Create Form Requests using the DTOFormRequest pattern with interface contracts. Includes templates, type mapping, and checklist. |
