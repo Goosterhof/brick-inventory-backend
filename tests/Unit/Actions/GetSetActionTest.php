@@ -51,24 +51,14 @@ describe('GetSetAction', function (): void {
 
         $createdSet = Mockery::mock(Set::class)->makePartial();
         $createdSet->id = 1;
-
-        $queryBuilder->shouldReceive('updateOrCreate')
-            ->with(
-                ['set_num' => '75192-1'],
-                [
-                    'name' => 'Millennium Falcon',
-                    'year' => 2017,
-                    'theme' => 158,
-                    'num_parts' => 7541,
-                    'image_url' => 'https://example.com/75192.jpg',
-                ],
-            )
-            ->once()
-            ->andReturn($createdSet);
+        $createdSet->shouldReceive('save')->once();
 
         $set = Mockery::mock(Set::class);
         $set->shouldReceive('newQuery')
             ->andReturn($queryBuilder);
+        $set->shouldReceive('newInstance')
+            ->once()
+            ->andReturn($createdSet);
 
         $rebrickableService = Mockery::mock(RebrickableService::class);
         $rebrickableService->shouldReceive('fetchSet')
@@ -90,6 +80,12 @@ describe('GetSetAction', function (): void {
 
         // assert
         expect($result)->toBe($createdSet);
+        expect($result->set_num)->toBe('75192-1');
+        expect($result->name)->toBe('Millennium Falcon');
+        expect($result->year)->toBe(2017);
+        expect($result->theme)->toBe('158');
+        expect($result->num_parts)->toBe(7541);
+        expect($result->image_url)->toBe('https://example.com/75192.jpg');
     });
 
     it('should handle null theme_id from rebrickable', function (): void {
@@ -102,24 +98,14 @@ describe('GetSetAction', function (): void {
             ->andReturn(null);
 
         $createdSet = Mockery::mock(Set::class)->makePartial();
-
-        $queryBuilder->shouldReceive('updateOrCreate')
-            ->with(
-                ['set_num' => '10281-1'],
-                [
-                    'name' => 'Bonsai Tree',
-                    'year' => 2021,
-                    'theme' => null,
-                    'num_parts' => 878,
-                    'image_url' => null,
-                ],
-            )
-            ->once()
-            ->andReturn($createdSet);
+        $createdSet->shouldReceive('save')->once();
 
         $set = Mockery::mock(Set::class);
         $set->shouldReceive('newQuery')
             ->andReturn($queryBuilder);
+        $set->shouldReceive('newInstance')
+            ->once()
+            ->andReturn($createdSet);
 
         $rebrickableService = Mockery::mock(RebrickableService::class);
         $rebrickableService->shouldReceive('fetchSet')
@@ -141,5 +127,11 @@ describe('GetSetAction', function (): void {
 
         // assert
         expect($result)->toBe($createdSet);
+        expect($result->set_num)->toBe('10281-1');
+        expect($result->name)->toBe('Bonsai Tree');
+        expect($result->year)->toBe(2021);
+        expect($result->theme)->toBeNull();
+        expect($result->num_parts)->toBe(878);
+        expect($result->image_url)->toBeNull();
     });
 });
