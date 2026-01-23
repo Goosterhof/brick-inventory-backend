@@ -2,12 +2,12 @@
 
 declare(strict_types=1);
 
-use App\Actions\StorageOption\AssignPartToStorageAction;
+use App\Actions\StorageOption\CreateStorageOptionPartAction;
 use App\DataTransferObjects\AssignPartToStorageData;
 use App\Models\StorageOptionPart;
 use Illuminate\Database\Eloquent\Builder;
 
-describe('AssignPartToStorageAction', function (): void {
+describe('CreateStorageOptionPartAction', function (): void {
     it('should create a new assignment when one does not exist', function (): void {
         // arrange
         $storageOptionPartInstance = Mockery::mock(StorageOptionPart::class)->makePartial();
@@ -23,7 +23,7 @@ describe('AssignPartToStorageAction', function (): void {
         $storageOptionPart->shouldReceive('newQuery')->withNoArgs()->once()->andReturn($builder);
         $storageOptionPart->shouldReceive('newInstance')->withNoArgs()->once()->andReturn($storageOptionPartInstance);
 
-        $action = new AssignPartToStorageAction($storageOptionPart);
+        $action = new CreateStorageOptionPartAction($storageOptionPart);
         $data = new AssignPartToStorageData(
             storageOptionId: 1,
             partId: 2,
@@ -56,7 +56,7 @@ describe('AssignPartToStorageAction', function (): void {
         $storageOptionPart = Mockery::mock(StorageOptionPart::class);
         $storageOptionPart->shouldReceive('newQuery')->withNoArgs()->once()->andReturn($builder);
 
-        $action = new AssignPartToStorageAction($storageOptionPart);
+        $action = new CreateStorageOptionPartAction($storageOptionPart);
         $data = new AssignPartToStorageData(
             storageOptionId: 1,
             partId: 2,
@@ -85,7 +85,7 @@ describe('AssignPartToStorageAction', function (): void {
         $storageOptionPart->shouldReceive('newQuery')->andReturn($builder);
         $storageOptionPart->shouldReceive('newInstance')->andReturn($storageOptionPartInstance);
 
-        $action = new AssignPartToStorageAction($storageOptionPart);
+        $action = new CreateStorageOptionPartAction($storageOptionPart);
         $data = new AssignPartToStorageData(
             storageOptionId: 1,
             partId: 2,

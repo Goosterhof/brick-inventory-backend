@@ -9,7 +9,7 @@ use App\Models\Family;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
 
-class RegisterUserWithFamilyAction
+class CreateUserWithFamilyAction
 {
     public function __construct(
         private readonly User $user,

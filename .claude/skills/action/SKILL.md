@@ -17,11 +17,16 @@ The name should NOT include the `Action` suffix - it will be added automatically
 
 ## Naming Conventions
 
-### Preferred Verbs
-Suggest these standard verbs: `Create`, `Update`, `Delete`, `Get`
+### Required Verbs
+Actions MUST use one of these four verbs: `Create`, `Update`, `Delete`, `Get`
 
-If the user provides a different verb (e.g., `Add`, `Remove`, `Assign`, `Fetch`), ask them:
-> "You're using the verb '{verb}'. The standard verbs are Create, Update, Delete, Get. Would you like to use one of these instead, or keep '{verb}'?"
+If the user provides a different verb, suggest the appropriate standard verb:
+- `Add`, `Assign`, `Register` → suggest `Create`
+- `Remove` → suggest `Delete`
+- `Fetch` → suggest `Get`
+
+Example response:
+> "The verb '{verb}' is not standard. Based on the action's purpose, I suggest using `{suggested}` instead. The action would be named `{Suggested}{Subject}Action`. Proceed?"
 
 ### Action Name Format
 - Class name: `{Verb}{Subject}Action` (e.g., `CreateStorageOptionAction`)
@@ -104,7 +109,7 @@ class Update{Subject}Action
 }
 ```
 
-### Delete/Remove Action (`Delete*`, `Remove*`)
+### Delete Action (`Delete*`)
 - NO constructor (model passed to execute)
 - Execute takes the model instance, returns void
 
@@ -126,7 +131,7 @@ class Delete{Subject}Action
 }
 ```
 
-### Get/Fetch Action (`Get*`, `Fetch*`)
+### Get Action (`Get*`)
 - Constructor injects the model (for query building) and any services
 - Execute takes an identifier (string, int), returns the model
 

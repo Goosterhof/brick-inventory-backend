@@ -7,7 +7,7 @@ namespace App\Actions\StorageOption;
 use App\DataTransferObjects\AssignPartToStorageData;
 use App\Models\StorageOptionPart;
 
-class AssignPartToStorageAction
+class CreateStorageOptionPartAction
 {
     public function __construct(
         private readonly StorageOptionPart $storageOptionPart,
