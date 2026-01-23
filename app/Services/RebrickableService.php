@@ -133,16 +133,21 @@ class RebrickableService
      */
     private function createOrUpdateSet(array $data): Set
     {
-        return Set::updateOrCreate(
-            ['set_num' => $data['set_num']],
-            [
-                'name' => $data['name'],
-                'year' => $data['year'],
-                'theme' => $data['theme_id'] ?? null,
-                'num_parts' => $data['num_parts'],
-                'image_url' => $data['set_img_url'],
-            ],
-        );
+        $set = Set::where('set_num', $data['set_num'])->first();
+
+        if (!$set) {
+            $set = new Set;
+            $set->set_num = $data['set_num'];
+        }
+
+        $set->name = $data['name'];
+        $set->year = $data['year'];
+        $set->theme = $data['theme_id'] !== null ? (string) $data['theme_id'] : null;
+        $set->num_parts = $data['num_parts'];
+        $set->image_url = $data['set_img_url'];
+        $set->save();
+
+        return $set;
     }
 
     /**
@@ -154,18 +159,23 @@ class RebrickableService
             $color = $this->createOrUpdateColor($partData['color']);
             $part = $this->createOrUpdatePart($partData['part']);
 
-            SetPart::updateOrCreate(
-                [
-                    'set_id' => $set->id,
-                    'part_id' => $part->id,
-                    'color_id' => $color->id,
-                    'is_spare' => $partData['is_spare'],
-                ],
-                [
-                    'quantity' => $partData['quantity'],
-                    'element_id' => $partData['element_id'] ?? null,
-                ],
-            );
+            $setPart = SetPart::where('set_id', $set->id)
+                ->where('part_id', $part->id)
+                ->where('color_id', $color->id)
+                ->where('is_spare', $partData['is_spare'])
+                ->first();
+
+            if (!$setPart) {
+                $setPart = new SetPart;
+                $setPart->set_id = $set->id;
+                $setPart->part_id = $part->id;
+                $setPart->color_id = $color->id;
+                $setPart->is_spare = $partData['is_spare'];
+            }
+
+            $setPart->quantity = $partData['quantity'];
+            $setPart->element_id = $partData['element_id'];
+            $setPart->save();
         }
     }
 
@@ -174,14 +184,19 @@ class RebrickableService
      */
     private function createOrUpdateColor(array $data): Color
     {
-        return Color::updateOrCreate(
-            ['rebrickable_id' => $data['id']],
-            [
-                'name' => $data['name'],
-                'rgb' => $data['rgb'],
-                'is_transparent' => $data['is_trans'],
-            ],
-        );
+        $color = Color::where('rebrickable_id', $data['id'])->first();
+
+        if (!$color) {
+            $color = new Color;
+            $color->rebrickable_id = $data['id'];
+        }
+
+        $color->name = $data['name'];
+        $color->rgb = $data['rgb'];
+        $color->is_transparent = $data['is_trans'];
+        $color->save();
+
+        return $color;
     }
 
     /**
@@ -189,13 +204,18 @@ class RebrickableService
      */
     private function createOrUpdatePart(array $data): Part
     {
-        return Part::updateOrCreate(
-            ['part_num' => $data['part_num']],
-            [
-                'name' => $data['name'],
-                'category' => $data['part_cat_id'] ?? null,
-                'image_url' => $data['part_img_url'],
-            ],
-        );
+        $part = Part::where('part_num', $data['part_num'])->first();
+
+        if (!$part) {
+            $part = new Part;
+            $part->part_num = $data['part_num'];
+        }
+
+        $part->name = $data['name'];
+        $part->category = $data['part_cat_id'] !== null ? (string) $data['part_cat_id'] : null;
+        $part->image_url = $data['part_img_url'];
+        $part->save();
+
+        return $part;
     }
 }

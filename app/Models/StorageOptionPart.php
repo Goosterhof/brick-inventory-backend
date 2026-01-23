@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Database\Factories\StorageOptionPartFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -15,6 +16,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $part_id
  * @property int|null $color_id
  * @property int $quantity
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  */
 class StorageOptionPart extends Model
 {
