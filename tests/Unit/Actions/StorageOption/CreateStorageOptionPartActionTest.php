@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-use App\Actions\StorageOption\AssignPartToStorageAction;
+use App\Actions\StorageOption\CreateStorageOptionPartAction;
 use App\Contracts\StorageOption\AssignPartToStorageInterface;
 use App\Models\StorageOption;
 use App\Models\StorageOptionPart;
 use Illuminate\Database\Eloquent\Builder;
 
-describe('AssignPartToStorageAction', function (): void {
+describe('CreateStorageOptionPartAction', function (): void {
     it('should create a new assignment when one does not exist', function (): void {
         // arrange
         $storageOptionPartInstance = Mockery::mock(StorageOptionPart::class)->makePartial();
@@ -27,7 +27,7 @@ describe('AssignPartToStorageAction', function (): void {
         $storageOption = Mockery::mock(StorageOption::class)->makePartial();
         $storageOption->id = 1;
 
-        $action = new AssignPartToStorageAction($storageOptionPart);
+        $action = new CreateStorageOptionPartAction($storageOptionPart);
         $data = new class implements AssignPartToStorageInterface
         {
             public int $partId = 2;
@@ -65,7 +65,7 @@ describe('AssignPartToStorageAction', function (): void {
         $storageOption = Mockery::mock(StorageOption::class)->makePartial();
         $storageOption->id = 1;
 
-        $action = new AssignPartToStorageAction($storageOptionPart);
+        $action = new CreateStorageOptionPartAction($storageOptionPart);
         $data = new class implements AssignPartToStorageInterface
         {
             public int $partId = 2;
@@ -99,7 +99,7 @@ describe('AssignPartToStorageAction', function (): void {
         $storageOption = Mockery::mock(StorageOption::class)->makePartial();
         $storageOption->id = 1;
 
-        $action = new AssignPartToStorageAction($storageOptionPart);
+        $action = new CreateStorageOptionPartAction($storageOptionPart);
         $data = new class implements AssignPartToStorageInterface
         {
             public int $partId = 2;

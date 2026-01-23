@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Actions\FamilySet\AddSetToFamilyAction;
-use App\Actions\FamilySet\RemoveFamilySetAction;
+use App\Actions\FamilySet\CreateFamilySetAction;
+use App\Actions\FamilySet\DeleteFamilySetAction;
 use App\Actions\FamilySet\UpdateFamilySetAction;
 use App\Http\Requests\StoreFamilySetRequest;
 use App\Http\Requests\UpdateFamilySetRequest;
@@ -20,9 +20,9 @@ use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 class FamilySetController extends Controller
 {
     public function __construct(
-        private readonly AddSetToFamilyAction $addSetToFamilyAction,
+        private readonly CreateFamilySetAction $createFamilySetAction,
         private readonly UpdateFamilySetAction $updateFamilySetAction,
-        private readonly RemoveFamilySetAction $removeFamilySetAction,
+        private readonly DeleteFamilySetAction $deleteFamilySetAction,
     ) {}
 
     public function index(#[CurrentUser] User $user): AnonymousResourceCollection
@@ -44,7 +44,7 @@ class FamilySetController extends Controller
                 return response()->json(['error' => 'User does not belong to a family'], 400);
             }
 
-            $familySet = $this->addSetToFamilyAction->execute($family, $request);
+            $familySet = $this->createFamilySetAction->execute($family, $request);
 
             return new FamilySetResource($familySet);
         } catch (RequestException $requestException) {
@@ -91,7 +91,7 @@ class FamilySetController extends Controller
             return response()->json(['error' => 'Not found'], 404);
         }
 
-        $this->removeFamilySetAction->execute($familySet);
+        $this->deleteFamilySetAction->execute($familySet);
 
         return response()->json(null, 204);
     }

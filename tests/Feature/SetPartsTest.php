@@ -13,7 +13,7 @@ uses(RefreshDatabase::class);
 
 describe('SetPartsController', function (): void {
     it('should return parts for a cached set', function (): void {
-        $set = Set::create([
+        $set = Set::factory()->create([
             'set_num' => '75192-1',
             'name' => 'Millennium Falcon',
             'year' => 2017,
@@ -22,28 +22,28 @@ describe('SetPartsController', function (): void {
             'image_url' => 'https://example.com/falcon.jpg',
         ]);
 
-        $color = Color::create([
+        $color = Color::factory()->create([
             'rebrickable_id' => 1,
             'name' => 'White',
             'rgb' => 'FFFFFF',
             'is_transparent' => false,
         ]);
 
-        $part = Part::create([
+        $part = Part::factory()->create([
             'part_num' => '3001',
             'name' => 'Brick 2 x 4',
             'category' => '11',
             'image_url' => 'https://example.com/3001.jpg',
         ]);
 
-        SetPart::create([
-            'set_id' => $set->id,
-            'part_id' => $part->id,
-            'color_id' => $color->id,
-            'quantity' => 10,
-            'is_spare' => false,
-            'element_id' => '300101',
-        ]);
+        $setPart = new SetPart;
+        $setPart->set_id = $set->id;
+        $setPart->part_id = $part->id;
+        $setPart->color_id = $color->id;
+        $setPart->quantity = 10;
+        $setPart->is_spare = false;
+        $setPart->element_id = '300101';
+        $setPart->save();
 
         $response = $this->getJson('/api/sets/75192-1/parts');
 

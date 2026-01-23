@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Database\Factories\FamilyFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -11,6 +12,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property positive-int $id
+ * @property string $name
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  */
 class Family extends Model
 {
@@ -18,8 +22,6 @@ class Family extends Model
     use HasFactory;
 
     /**
-     * Get the users belonging to this family.
-     *
      * @return HasMany<User, $this>
      */
     public function users(): HasMany
@@ -28,8 +30,6 @@ class Family extends Model
     }
 
     /**
-     * Get the storage options belonging to this family.
-     *
      * @return HasMany<StorageOption, $this>
      */
     public function storageOptions(): HasMany
@@ -38,8 +38,6 @@ class Family extends Model
     }
 
     /**
-     * Get the family sets belonging to this family.
-     *
      * @return HasMany<FamilySet, $this>
      */
     public function familySets(): HasMany

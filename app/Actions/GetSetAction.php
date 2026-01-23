@@ -24,15 +24,16 @@ class GetSetAction
 
         $setData = $this->rebrickableService->fetchSet($setNum);
 
-        return $this->set->newQuery()->updateOrCreate(
-            ['set_num' => $setData['set_num']],
-            [
-                'name' => $setData['name'],
-                'year' => $setData['year'],
-                'theme' => $setData['theme_id'] ?? null,
-                'num_parts' => $setData['num_parts'],
-                'image_url' => $setData['set_img_url'],
-            ],
-        );
+        /** @var Set $newSet */
+        $newSet = $this->set->newInstance();
+        $newSet->set_num = $setData['set_num'];
+        $newSet->name = $setData['name'];
+        $newSet->year = $setData['year'];
+        $newSet->theme = $setData['theme_id'] !== null ? (string) $setData['theme_id'] : null;
+        $newSet->num_parts = $setData['num_parts'];
+        $newSet->image_url = $setData['set_img_url'];
+        $newSet->save();
+
+        return $newSet;
     }
 }
