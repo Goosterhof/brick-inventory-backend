@@ -59,6 +59,7 @@ The following rules are enforced via Pest architecture tests:
 - DTOs must end with `Data`, be `final`, and `readonly`
 - Requests must end with `Request`
 - Services must end with `Service`
+- Actions must end with `Action` and only have `execute` as public method
 - All files must declare strict types
 - No debugging statements (`dd`, `dump`, `var_dump`, `ray`)
 
