@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Auth;
 
-use App\DataTransferObjects\RegisterUserData;
+use App\Contracts\Auth\RegisterUserInterface;
 use App\Models\Family;
 use App\Models\User;
 use Illuminate\Support\Facades\DB;
@@ -16,7 +16,7 @@ class RegisterUserWithFamilyAction
         private readonly Family $family,
     ) {}
 
-    public function execute(RegisterUserData $data): User
+    public function execute(RegisterUserInterface $data): User
     {
         return DB::transaction(function () use ($data): User {
             $family = $this->family->newInstance();

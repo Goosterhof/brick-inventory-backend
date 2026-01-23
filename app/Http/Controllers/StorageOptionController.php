@@ -9,9 +9,6 @@ use App\Actions\StorageOption\CreateStorageOptionAction;
 use App\Actions\StorageOption\DeleteStorageOptionAction;
 use App\Actions\StorageOption\RemovePartFromStorageAction;
 use App\Actions\StorageOption\UpdateStorageOptionAction;
-use App\DataTransferObjects\AssignPartToStorageData;
-use App\DataTransferObjects\CreateStorageOptionData;
-use App\DataTransferObjects\UpdateStorageOptionData;
 use App\Http\Requests\StorageOption\AssignPartRequest;
 use App\Http\Requests\StorageOption\StoreStorageOptionRequest;
 use App\Http\Requests\StorageOption\UpdateStorageOptionRequest;
@@ -20,8 +17,8 @@ use App\Http\Resources\StorageOptionResource;
 use App\Models\StorageOption;
 use App\Models\StorageOptionPart;
 use App\Models\User;
+use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class StorageOptionController extends Controller
@@ -34,11 +31,8 @@ class StorageOptionController extends Controller
         private readonly RemovePartFromStorageAction $removePartFromStorageAction,
     ) {}
 
-    public function index(Request $request): AnonymousResourceCollection
+    public function index(#[CurrentUser] User $user): AnonymousResourceCollection
     {
-        /** @var User $user */
-        $user = $request->user();
-
         $storageOptions = StorageOption::where('family_id', $user->family_id)
             ->whereNull('parent_id')
             ->with('children')
@@ -49,31 +43,13 @@ class StorageOptionController extends Controller
 
     public function store(StoreStorageOptionRequest $request): StorageOptionResource
     {
-        /** @var User $user */
-        $user = $request->user();
-
-        /** @var array{name: string, description: ?string, parent_id: ?int, row: ?int, column: ?int} $validated */
-        $validated = $request->validated();
-
-        $data = new CreateStorageOptionData(
-            familyId: $user->family_id,
-            name: $validated['name'],
-            description: $validated['description'] ?? null,
-            parentId: $validated['parent_id'] ?? null,
-            row: $validated['row'] ?? null,
-            column: $validated['column'] ?? null,
-        );
-
-        $storageOption = $this->createStorageOptionAction->execute($data);
+        $storageOption = $this->createStorageOptionAction->execute($request);
 
         return new StorageOptionResource($storageOption);
     }
 
-    public function show(Request $request, StorageOption $storageOption): StorageOptionResource|JsonResponse
+    public function show(#[CurrentUser] User $user, StorageOption $storageOption): StorageOptionResource|JsonResponse
     {
-        /** @var User $user */
-        $user = $request->user();
-
         if ($storageOption->family_id !== $user->family_id) {
             return response()->json(['error' => 'Not found'], 404);
         }
@@ -83,36 +59,22 @@ class StorageOptionController extends Controller
         return new StorageOptionResource($storageOption);
     }
 
-    public function update(UpdateStorageOptionRequest $request, StorageOption $storageOption): StorageOptionResource|JsonResponse
-    {
-        /** @var User $user */
-        $user = $request->user();
-
+    public function update(
+        UpdateStorageOptionRequest $request,
+        StorageOption $storageOption,
+        #[CurrentUser] User $user,
+    ): StorageOptionResource|JsonResponse {
         if ($storageOption->family_id !== $user->family_id) {
             return response()->json(['error' => 'Not found'], 404);
         }
 
-        /** @var array{name: string, description: ?string, parent_id: ?int, row: ?int, column: ?int} $validated */
-        $validated = $request->validated();
-
-        $data = new UpdateStorageOptionData(
-            name: $validated['name'],
-            description: $validated['description'] ?? null,
-            parentId: $validated['parent_id'] ?? null,
-            row: $validated['row'] ?? null,
-            column: $validated['column'] ?? null,
-        );
-
-        $storageOption = $this->updateStorageOptionAction->execute($storageOption, $data);
+        $storageOption = $this->updateStorageOptionAction->execute($storageOption, $request);
 
         return new StorageOptionResource($storageOption);
     }
 
-    public function destroy(Request $request, StorageOption $storageOption): JsonResponse
+    public function destroy(#[CurrentUser] User $user, StorageOption $storageOption): JsonResponse
     {
-        /** @var User $user */
-        $user = $request->user();
-
         if ($storageOption->family_id !== $user->family_id) {
             return response()->json(['error' => 'Not found'], 404);
         }
@@ -122,11 +84,8 @@ class StorageOptionController extends Controller
         return response()->json(null, 204);
     }
 
-    public function parts(Request $request, StorageOption $storageOption): AnonymousResourceCollection|JsonResponse
+    public function parts(#[CurrentUser] User $user, StorageOption $storageOption): AnonymousResourceCollection|JsonResponse
     {
-        /** @var User $user */
-        $user = $request->user();
-
         if ($storageOption->family_id !== $user->family_id) {
             return response()->json(['error' => 'Not found'], 404);
         }
@@ -136,26 +95,16 @@ class StorageOptionController extends Controller
         return StorageOptionPartResource::collection($parts);
     }
 
-    public function assignPart(AssignPartRequest $request, StorageOption $storageOption): JsonResponse
-    {
-        /** @var User $user */
-        $user = $request->user();
-
+    public function assignPart(
+        AssignPartRequest $request,
+        StorageOption $storageOption,
+        #[CurrentUser] User $user,
+    ): JsonResponse {
         if ($storageOption->family_id !== $user->family_id) {
             return response()->json(['error' => 'Not found'], 404);
         }
 
-        /** @var array{part_id: int, color_id: ?int, quantity: int} $validated */
-        $validated = $request->validated();
-
-        $data = new AssignPartToStorageData(
-            storageOptionId: $storageOption->id,
-            partId: $validated['part_id'],
-            colorId: $validated['color_id'] ?? null,
-            quantity: $validated['quantity'],
-        );
-
-        $storageOptionPart = $this->assignPartToStorageAction->execute($data);
+        $storageOptionPart = $this->assignPartToStorageAction->execute($storageOption, $request);
         $storageOptionPart->load(['part', 'color']);
 
         $resource = new StorageOptionPartResource($storageOptionPart);
@@ -165,11 +114,11 @@ class StorageOptionController extends Controller
             : $resource->response()->setStatusCode(200);
     }
 
-    public function removePart(Request $request, StorageOption $storageOption, StorageOptionPart $part): JsonResponse
-    {
-        /** @var User $user */
-        $user = $request->user();
-
+    public function removePart(
+        #[CurrentUser] User $user,
+        StorageOption $storageOption,
+        StorageOptionPart $part,
+    ): JsonResponse {
         if ($storageOption->family_id !== $user->family_id) {
             return response()->json(['error' => 'Not found'], 404);
         }

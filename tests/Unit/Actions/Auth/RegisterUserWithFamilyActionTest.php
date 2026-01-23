@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Auth\RegisterUserWithFamilyAction;
-use App\DataTransferObjects\RegisterUserData;
+use App\Contracts\Auth\RegisterUserInterface;
 use App\Models\Family;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -30,12 +30,16 @@ describe('RegisterUserWithFamilyAction', function (): void {
             ->andReturn($userInstance);
 
         $action = new RegisterUserWithFamilyAction($user, $family);
-        $data = new RegisterUserData(
-            familyName: 'Test Family',
-            name: 'Test User',
-            email: 'test@example.com',
-            password: 'password123',
-        );
+        $data = new class implements RegisterUserInterface
+        {
+            public string $familyName = 'Test Family';
+
+            public string $name = 'Test User';
+
+            public string $email = 'test@example.com';
+
+            public string $password = 'password123';
+        };
 
         // act
         $result = $action->execute($data);
@@ -74,12 +78,16 @@ describe('RegisterUserWithFamilyAction', function (): void {
         $user->shouldReceive('newInstance')->withNoArgs()->andReturn($userInstance);
 
         $action = new RegisterUserWithFamilyAction($user, $family);
-        $data = new RegisterUserData(
-            familyName: 'Test Family',
-            name: 'Test User',
-            email: 'test@example.com',
-            password: 'password123',
-        );
+        $data = new class implements RegisterUserInterface
+        {
+            public string $familyName = 'Test Family';
+
+            public string $name = 'Test User';
+
+            public string $email = 'test@example.com';
+
+            public string $password = 'password123';
+        };
 
         // act
         $action->execute($data);
@@ -109,12 +117,16 @@ describe('RegisterUserWithFamilyAction', function (): void {
         $user->shouldReceive('newInstance')->withNoArgs()->andReturn($userInstance);
 
         $action = new RegisterUserWithFamilyAction($user, $family);
-        $data = new RegisterUserData(
-            familyName: 'Test Family',
-            name: 'Test User',
-            email: 'test@example.com',
-            password: 'password123',
-        );
+        $data = new class implements RegisterUserInterface
+        {
+            public string $familyName = 'Test Family';
+
+            public string $name = 'Test User';
+
+            public string $email = 'test@example.com';
+
+            public string $password = 'password123';
+        };
 
         // act
         $action->execute($data);
@@ -141,12 +153,16 @@ describe('RegisterUserWithFamilyAction', function (): void {
             ->andReturn($userInstance);
 
         $action = new RegisterUserWithFamilyAction($user, $family);
-        $data = new RegisterUserData(
-            familyName: 'Test Family',
-            name: 'John Doe',
-            email: 'john@example.com',
-            password: 'secret123',
-        );
+        $data = new class implements RegisterUserInterface
+        {
+            public string $familyName = 'Test Family';
+
+            public string $name = 'John Doe';
+
+            public string $email = 'john@example.com';
+
+            public string $password = 'secret123';
+        };
 
         // act
         $action->execute($data);

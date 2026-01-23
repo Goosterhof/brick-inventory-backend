@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\FamilySet\UpdateFamilySetAction;
-use App\DataTransferObjects\UpdateFamilySetData;
+use App\Contracts\FamilySet\UpdateFamilySetInterface;
 use App\Enums\FamilySetStatus;
 use App\Models\FamilySet;
 use Carbon\Carbon;
@@ -14,13 +14,21 @@ describe('UpdateFamilySetAction', function (): void {
         $familySet = Mockery::mock(FamilySet::class)->makePartial();
         $familySet->shouldReceive('save')->once();
 
+        $purchaseDate = Carbon::parse('2024-06-15');
+
         $action = new UpdateFamilySetAction;
-        $data = new UpdateFamilySetData(
-            quantity: 5,
-            status: FamilySetStatus::Built,
-            purchaseDate: Carbon::parse('2024-06-15'),
-            notes: 'Updated notes',
-        );
+        $data = new class($purchaseDate) implements UpdateFamilySetInterface
+        {
+            public int $quantity = 5;
+
+            public FamilySetStatus $status = FamilySetStatus::Built;
+
+            public ?string $notes = 'Updated notes';
+
+            public function __construct(
+                public ?\DateTimeInterface $purchaseDate,
+            ) {}
+        };
 
         // act
         $result = $action->execute($familySet, $data);
@@ -39,12 +47,16 @@ describe('UpdateFamilySetAction', function (): void {
         $familySet->shouldReceive('save')->once();
 
         $action = new UpdateFamilySetAction;
-        $data = new UpdateFamilySetData(
-            quantity: 3,
-            status: FamilySetStatus::InProgress,
-            purchaseDate: null,
-            notes: null,
-        );
+        $data = new class implements UpdateFamilySetInterface
+        {
+            public int $quantity = 3;
+
+            public FamilySetStatus $status = FamilySetStatus::InProgress;
+
+            public ?\DateTimeInterface $purchaseDate = null;
+
+            public ?string $notes = null;
+        };
 
         // act
         $action->execute($familySet, $data);
@@ -62,12 +74,16 @@ describe('UpdateFamilySetAction', function (): void {
         $familySet->shouldReceive('save')->once();
 
         $action = new UpdateFamilySetAction;
-        $data = new UpdateFamilySetData(
-            quantity: 1,
-            status: FamilySetStatus::Sealed,
-            purchaseDate: null,
-            notes: null,
-        );
+        $data = new class implements UpdateFamilySetInterface
+        {
+            public int $quantity = 1;
+
+            public FamilySetStatus $status = FamilySetStatus::Sealed;
+
+            public ?\DateTimeInterface $purchaseDate = null;
+
+            public ?string $notes = null;
+        };
 
         // act
         $action->execute($familySet, $data);
@@ -82,12 +98,16 @@ describe('UpdateFamilySetAction', function (): void {
         $familySet->shouldReceive('save')->once();
 
         $action = new UpdateFamilySetAction;
-        $data = new UpdateFamilySetData(
-            quantity: 3,
-            status: FamilySetStatus::Sealed,
-            purchaseDate: null,
-            notes: null,
-        );
+        $data = new class implements UpdateFamilySetInterface
+        {
+            public int $quantity = 3;
+
+            public FamilySetStatus $status = FamilySetStatus::Sealed;
+
+            public ?\DateTimeInterface $purchaseDate = null;
+
+            public ?string $notes = null;
+        };
 
         // act
         $result = $action->execute($familySet, $data);

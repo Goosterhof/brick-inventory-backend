@@ -4,22 +4,39 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\StorageOption;
 
-use Illuminate\Contracts\Validation\ValidationRule;
-use Illuminate\Foundation\Http\FormRequest;
+use App\Contracts\StorageOption\AssignPartToStorageInterface;
+use App\Http\Requests\DTOFormRequest;
+use Illuminate\Http\Request;
 
-class AssignPartRequest extends FormRequest
+final readonly class AssignPartRequest extends DTOFormRequest implements AssignPartToStorageInterface
 {
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array<string, ValidationRule|array<mixed>|string>
-     */
-    public function rules(): array
+    public const string PART_ID = 'part_id';
+
+    public const string COLOR_ID = 'color_id';
+
+    public const string QUANTITY = 'quantity';
+
+    public function __construct(
+        public int $partId,
+        public int $quantity,
+        public ?int $colorId = null,
+    ) {}
+
+    public static function rules(Request $request): array
     {
         return [
-            'part_id' => ['required', 'integer', 'exists:parts,id'],
-            'color_id' => ['nullable', 'integer', 'exists:colors,id'],
-            'quantity' => ['required', 'integer', 'min:0'],
+            self::PART_ID => ['required', 'integer', 'exists:parts,id'],
+            self::COLOR_ID => ['nullable', 'integer', 'exists:colors,id'],
+            self::QUANTITY => ['required', 'integer', 'min:0'],
         ];
+    }
+
+    protected static function toDTO(Request $request): static
+    {
+        return new self(
+            partId: $request->integer(self::PART_ID),
+            quantity: $request->integer(self::QUANTITY),
+            colorId: $request->isNotFilled(self::COLOR_ID) ? null : $request->integer(self::COLOR_ID),
+        );
     }
 }
