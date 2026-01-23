@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 
 arch('controllers should end with Controller')
@@ -197,7 +198,7 @@ it('should have @property annotations in models', function (): void {
         $docComment = $reflection->getDocComment();
 
         // Skip User model as it may have special Laravel requirements
-        if ($className === 'App\\Models\\User') {
+        if ($className === User::class) {
             continue;
         }
 
@@ -216,7 +217,7 @@ it('should not have fillable property in models', function (): void {
         $reflection = new ReflectionClass($className);
 
         // Skip User model as it may have special Laravel requirements
-        if ($className === 'App\\Models\\User') {
+        if ($className === User::class) {
             continue;
         }
 
@@ -239,7 +240,7 @@ it('should not have guarded property in models', function (): void {
         $reflection = new ReflectionClass($className);
 
         // Skip User model as it may have special Laravel requirements
-        if ($className === 'App\\Models\\User') {
+        if ($className === User::class) {
             continue;
         }
 
