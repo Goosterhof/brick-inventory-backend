@@ -2,78 +2,179 @@
 
 declare(strict_types=1);
 
+use App\Http\Resources\ResourceData;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
+
+/*
+|--------------------------------------------------------------------------
+| Architecture Test Helpers
+|--------------------------------------------------------------------------
+|
+| These helper functions provide utilities for reflection-based architecture
+| tests. We use custom tests when Pest's arch() expectations don't support
+| the required logic.
+|
+| Limitations of Pest arch() to be aware of:
+| - ignoring() doesn't work as a filter after expect()
+| - toExtend() is a requirement, not a filter (all classes must extend)
+| - or() doesn't combine conditions as expected (e.g., "final OR abstract")
+|
+| For complex conditions, use custom reflection-based tests instead.
+|
+*/
+
+/**
+ * Get all class names in a directory matching a namespace.
+ *
+ * @return list<class-string>
+ */
+function getClassesInDirectory(string $directory, string $namespace): array
+{
+    if (!is_dir($directory)) {
+        return [];
+    }
+
+    $classes = [];
+    $iterator = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($directory, RecursiveDirectoryIterator::SKIP_DOTS),
+    );
+
+    foreach ($iterator as $file) {
+        if ($file->isFile() && $file->getExtension() === 'php') {
+            $relativePath = str_replace([$directory . '/', '.php'], ['', ''], $file->getPathname());
+            $classes[] = $namespace . str_replace('/', '\\', $relativePath);
+        }
+    }
+
+    return $classes;
+}
+
+/**
+ * Get all test files in the Feature and Unit directories.
+ *
+ * @return list<string>
+ */
+function getTestFiles(): array
+{
+    $testsDir = dirname(__DIR__);
+    $testFiles = [];
+
+    foreach (['Feature', 'Unit'] as $dir) {
+        $path = $testsDir . '/' . $dir;
+        if (!is_dir($path)) {
+            continue;
+        }
+
+        $iterator = new RecursiveIteratorIterator(
+            new RecursiveDirectoryIterator($path, RecursiveDirectoryIterator::SKIP_DOTS),
+        );
+
+        foreach ($iterator as $file) {
+            if ($file->isFile() && $file->getExtension() === 'php') {
+                $testFiles[] = $file->getPathname();
+            }
+        }
+    }
+
+    return $testFiles;
+}
+
+/*
+|--------------------------------------------------------------------------
+| Controller Architecture
+|--------------------------------------------------------------------------
+*/
 
 arch('controllers should end with Controller')
     ->expect('App\Http\Controllers')
     ->toHaveSuffix('Controller');
 
+/*
+|--------------------------------------------------------------------------
+| Model Architecture
+|--------------------------------------------------------------------------
+*/
+
 arch('models should extend Illuminate\Database\Eloquent\Model')
     ->expect('App\Models')
     ->toExtend(Model::class);
 
-arch('data transfer objects should end with Data')
-    ->expect('App\DataTransferObjects')
-    ->toHaveSuffix('Data');
-
-arch('requests should end with Request')
-    ->expect('App\Http\Requests')
-    ->toHaveSuffix('Request');
-
-arch('services should end with Service')
-    ->expect('App\Services')
-    ->toHaveSuffix('Service');
-
-arch('resource data classes should end with ResourceData')
-    ->expect('App\Http\Resources')
-    ->toHaveSuffix('ResourceData');
-
-arch('resource data classes should be readonly')
-    ->expect('App\Http\Resources')
-    ->toBeReadonly();
-
-it('should have all concrete resource data classes as final', function (): void {
-    $resourcesDir = dirname(__DIR__, 2) . '/app/Http/Resources';
-
-    $iterator = new RecursiveIteratorIterator(
-        new RecursiveDirectoryIterator($resourcesDir, RecursiveDirectoryIterator::SKIP_DOTS),
-    );
-
-    foreach ($iterator as $file) {
-        if ($file->isFile() && $file->getExtension() === 'php') {
-            $relativePath = str_replace([$resourcesDir . '/', '.php'], ['', ''], $file->getPathname());
-            $className = 'App\\Http\\Resources\\' . str_replace('/', '\\', $relativePath);
-
-            $reflection = new ReflectionClass($className);
-
-            // Skip abstract classes (like ResourceData base class)
-            if ($reflection->isAbstract()) {
-                continue;
-            }
-
-            expect($reflection->isFinal())->toBeTrue(
-                sprintf('Resource class %s should be final', $className),
-            );
+it('should have @property annotations in models', function (): void {
+    foreach (getClassesInDirectory(dirname(__DIR__, 2) . '/app/Models', 'App\\Models\\') as $className) {
+        // Skip User model as it may have special Laravel requirements
+        if ($className === User::class) {
+            continue;
         }
+
+        $reflection = new ReflectionClass($className);
+        $docComment = $reflection->getDocComment();
+
+        expect($docComment)->not->toBeFalse(
+            sprintf('Model %s should have a docblock with @property annotations', $className),
+        );
+
+        expect(str_contains($docComment, '@property'))->toBeTrue(
+            sprintf('Model %s should have @property annotations in its docblock', $className),
+        );
     }
 });
 
-arch('actions should end with Action')
-    ->expect('App\Actions')
-    ->toHaveSuffix('Action');
+it('should not have fillable property in models', function (): void {
+    foreach (getClassesInDirectory(dirname(__DIR__, 2) . '/app/Models', 'App\\Models\\') as $className) {
+        // Skip User model as it may have special Laravel requirements
+        if ($className === User::class) {
+            continue;
+        }
 
-arch('actions should have execute method')
-    ->expect('App\Actions')
-    ->toHaveMethod('execute');
+        $reflection = new ReflectionClass($className);
+        $hasFillable = false;
 
-arch('no debugging statements')
-    ->expect('App')
-    ->not->toUse(['dd', 'dump', 'var_dump', 'ray']);
+        foreach ($reflection->getProperties() as $property) {
+            if ($property->getDeclaringClass()->getName() === $className && $property->getName() === 'fillable') {
+                $hasFillable = true;
+                break;
+            }
+        }
 
-arch('all files should use strict types')
-    ->expect('App')
-    ->toUseStrictTypes();
+        expect($hasFillable)->toBeFalse(
+            sprintf('Model %s should not have $fillable property - use explicit property assignment instead', $className),
+        );
+    }
+});
+
+it('should not have guarded property in models', function (): void {
+    foreach (getClassesInDirectory(dirname(__DIR__, 2) . '/app/Models', 'App\\Models\\') as $className) {
+        // Skip User model as it may have special Laravel requirements
+        if ($className === User::class) {
+            continue;
+        }
+
+        $reflection = new ReflectionClass($className);
+        $hasGuarded = false;
+
+        foreach ($reflection->getProperties() as $property) {
+            if ($property->getDeclaringClass()->getName() === $className && $property->getName() === 'guarded') {
+                $hasGuarded = true;
+                break;
+            }
+        }
+
+        expect($hasGuarded)->toBeFalse(
+            sprintf('Model %s should not have $guarded property - use explicit property assignment instead', $className),
+        );
+    }
+});
+
+/*
+|--------------------------------------------------------------------------
+| Data Transfer Object Architecture
+|--------------------------------------------------------------------------
+*/
+
+arch('data transfer objects should end with Data')
+    ->expect('App\DataTransferObjects')
+    ->toHaveSuffix('Data');
 
 arch('data transfer objects should be readonly')
     ->expect('App\DataTransferObjects')
@@ -83,28 +184,8 @@ arch('data transfer objects should be final')
     ->expect('App\DataTransferObjects')
     ->toBeFinal();
 
-function getDtoClasses(): array
-{
-    $dtosDir = dirname(__DIR__, 2) . '/app/DataTransferObjects';
-    $classes = [];
-
-    $iterator = new RecursiveIteratorIterator(
-        new RecursiveDirectoryIterator($dtosDir, RecursiveDirectoryIterator::SKIP_DOTS),
-    );
-
-    foreach ($iterator as $file) {
-        if ($file->isFile() && $file->getExtension() === 'php') {
-            $relativePath = str_replace([$dtosDir . '/', '.php'], ['', ''], $file->getPathname());
-            $className = 'App\\DataTransferObjects\\' . str_replace('/', '\\', $relativePath);
-            $classes[] = $className;
-        }
-    }
-
-    return $classes;
-}
-
 it('should not have methods in DTOs', function (): void {
-    foreach (getDtoClasses() as $className) {
+    foreach (getClassesInDirectory(dirname(__DIR__, 2) . '/app/DataTransferObjects', 'App\\DataTransferObjects\\') as $className) {
         $reflection = new ReflectionClass($className);
         $methods = array_filter(
             $reflection->getMethods(),
@@ -120,28 +201,85 @@ it('should not have methods in DTOs', function (): void {
     }
 });
 
-function getActionClasses(): array
-{
-    $actionsDir = dirname(__DIR__, 2) . '/app/Actions';
-    $classes = [];
+/*
+|--------------------------------------------------------------------------
+| Request Architecture
+|--------------------------------------------------------------------------
+*/
 
-    $iterator = new RecursiveIteratorIterator(
-        new RecursiveDirectoryIterator($actionsDir, RecursiveDirectoryIterator::SKIP_DOTS),
-    );
+arch('requests should end with Request')
+    ->expect('App\Http\Requests')
+    ->toHaveSuffix('Request');
 
-    foreach ($iterator as $file) {
-        if ($file->isFile() && $file->getExtension() === 'php') {
-            $relativePath = str_replace([$actionsDir . '/', '.php'], ['', ''], $file->getPathname());
-            $className = 'App\\Actions\\' . str_replace('/', '\\', $relativePath);
-            $classes[] = $className;
+/*
+|--------------------------------------------------------------------------
+| Service Architecture
+|--------------------------------------------------------------------------
+*/
+
+arch('services should end with Service')
+    ->expect('App\Services')
+    ->toHaveSuffix('Service');
+
+/*
+|--------------------------------------------------------------------------
+| ResourceData Architecture
+|--------------------------------------------------------------------------
+|
+| ResourceData classes are DTO-style API response objects that:
+| - End with "ResourceData" suffix
+| - Are readonly (immutable)
+| - Are final (concrete classes) or abstract (base class only)
+| - Extend the ResourceData base class
+|
+*/
+
+arch('resource data classes should end with ResourceData')
+    ->expect('App\Http\Resources')
+    ->toHaveSuffix('ResourceData');
+
+arch('resource data classes should be readonly')
+    ->expect('App\Http\Resources')
+    ->toBeReadonly();
+
+it('should have ResourceData as abstract readonly base class', function (): void {
+    $reflection = new ReflectionClass(ResourceData::class);
+
+    expect($reflection->isAbstract())->toBeTrue('ResourceData base class should be abstract')
+        ->and($reflection->isReadOnly())->toBeTrue('ResourceData base class should be readonly');
+});
+
+it('should have all concrete resource data classes as final', function (): void {
+    foreach (getClassesInDirectory(dirname(__DIR__, 2) . '/app/Http/Resources', 'App\\Http\\Resources\\') as $className) {
+        $reflection = new ReflectionClass($className);
+
+        // Skip abstract classes (like ResourceData base class)
+        if ($reflection->isAbstract()) {
+            continue;
         }
-    }
 
-    return $classes;
-}
+        expect($reflection->isFinal())->toBeTrue(
+            sprintf('Resource class %s should be final', $className),
+        );
+    }
+});
+
+/*
+|--------------------------------------------------------------------------
+| Action Architecture
+|--------------------------------------------------------------------------
+*/
+
+arch('actions should end with Action')
+    ->expect('App\Actions')
+    ->toHaveSuffix('Action');
+
+arch('actions should have execute method')
+    ->expect('App\Actions')
+    ->toHaveMethod('execute');
 
 it('should only have execute as public method in actions', function (): void {
-    foreach (getActionClasses() as $className) {
+    foreach (getClassesInDirectory(dirname(__DIR__, 2) . '/app/Actions', 'App\\Actions\\') as $className) {
         $reflection = new ReflectionClass($className);
         $publicMethods = array_filter(
             $reflection->getMethods(ReflectionMethod::IS_PUBLIC),
@@ -158,26 +296,25 @@ it('should only have execute as public method in actions', function (): void {
     }
 });
 
-function getTestFiles(): array
-{
-    $testsDir = dirname(__DIR__);
-    $testFiles = [];
+/*
+|--------------------------------------------------------------------------
+| General Code Quality
+|--------------------------------------------------------------------------
+*/
 
-    $directories = ['Feature', 'Unit'];
-    foreach ($directories as $dir) {
-        $iterator = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($testsDir . '/' . $dir, RecursiveDirectoryIterator::SKIP_DOTS),
-        );
+arch('no debugging statements')
+    ->expect('App')
+    ->not->toUse(['dd', 'dump', 'var_dump', 'ray']);
 
-        foreach ($iterator as $file) {
-            if ($file->isFile() && $file->getExtension() === 'php') {
-                $testFiles[] = $file->getPathname();
-            }
-        }
-    }
+arch('all files should use strict types')
+    ->expect('App')
+    ->toUseStrictTypes();
 
-    return $testFiles;
-}
+/*
+|--------------------------------------------------------------------------
+| Test File Conventions
+|--------------------------------------------------------------------------
+*/
 
 it('should use describe blocks in test files', function (): void {
     foreach (getTestFiles() as $file) {
@@ -199,91 +336,5 @@ it('should use it should syntax in test files', function (): void {
             expect(preg_match('/\bit\s*\(\s*[\'"]should\s/', $content))
                 ->toBe(1, sprintf("Test file %s should use it('should ...') syntax", $relativePath));
         }
-    }
-});
-
-function getModelClasses(): array
-{
-    $modelsDir = dirname(__DIR__, 2) . '/app/Models';
-    $classes = [];
-
-    $iterator = new RecursiveIteratorIterator(
-        new RecursiveDirectoryIterator($modelsDir, RecursiveDirectoryIterator::SKIP_DOTS),
-    );
-
-    foreach ($iterator as $file) {
-        if ($file->isFile() && $file->getExtension() === 'php') {
-            $relativePath = str_replace([$modelsDir . '/', '.php'], ['', ''], $file->getPathname());
-            $className = 'App\\Models\\' . str_replace('/', '\\', $relativePath);
-            $classes[] = $className;
-        }
-    }
-
-    return $classes;
-}
-
-it('should have @property annotations in models', function (): void {
-    foreach (getModelClasses() as $className) {
-        $reflection = new ReflectionClass($className);
-        $docComment = $reflection->getDocComment();
-
-        // Skip User model as it may have special Laravel requirements
-        if ($className === User::class) {
-            continue;
-        }
-
-        expect($docComment)->not->toBeFalse(
-            sprintf('Model %s should have a docblock with @property annotations', $className),
-        );
-
-        expect(str_contains($docComment, '@property'))->toBeTrue(
-            sprintf('Model %s should have @property annotations in its docblock', $className),
-        );
-    }
-});
-
-it('should not have fillable property in models', function (): void {
-    foreach (getModelClasses() as $className) {
-        $reflection = new ReflectionClass($className);
-
-        // Skip User model as it may have special Laravel requirements
-        if ($className === User::class) {
-            continue;
-        }
-
-        $hasFillable = false;
-        foreach ($reflection->getProperties() as $property) {
-            if ($property->getDeclaringClass()->getName() === $className && $property->getName() === 'fillable') {
-                $hasFillable = true;
-                break;
-            }
-        }
-
-        expect($hasFillable)->toBeFalse(
-            sprintf('Model %s should not have $fillable property - use explicit property assignment instead', $className),
-        );
-    }
-});
-
-it('should not have guarded property in models', function (): void {
-    foreach (getModelClasses() as $className) {
-        $reflection = new ReflectionClass($className);
-
-        // Skip User model as it may have special Laravel requirements
-        if ($className === User::class) {
-            continue;
-        }
-
-        $hasGuarded = false;
-        foreach ($reflection->getProperties() as $property) {
-            if ($property->getDeclaringClass()->getName() === $className && $property->getName() === 'guarded') {
-                $hasGuarded = true;
-                break;
-            }
-        }
-
-        expect($hasGuarded)->toBeFalse(
-            sprintf('Model %s should not have $guarded property - use explicit property assignment instead', $className),
-        );
     }
 });
