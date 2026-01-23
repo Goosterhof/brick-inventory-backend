@@ -100,3 +100,4 @@ The following custom skills are available:
 | Skill | Description |
 |-------|-------------|
 | `/unit-test` | Create or run unit tests. Use `/unit-test ClassName` to generate tests for a class, or `/unit-test --run` to run all tests. |
+| `/action` | Create Action classes. Use `/action CreateUser` to generate an action. Infers type from verb (Create, Update, Delete, Get). |
