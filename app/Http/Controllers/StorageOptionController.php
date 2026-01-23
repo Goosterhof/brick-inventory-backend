@@ -15,14 +15,13 @@ use App\DataTransferObjects\UpdateStorageOptionData;
 use App\Http\Requests\StorageOption\AssignPartRequest;
 use App\Http\Requests\StorageOption\StoreStorageOptionRequest;
 use App\Http\Requests\StorageOption\UpdateStorageOptionRequest;
-use App\Http\Resources\StorageOptionPartResource;
-use App\Http\Resources\StorageOptionResource;
+use App\Http\Resources\StorageOptionPartResourceData;
+use App\Http\Resources\StorageOptionResourceData;
 use App\Models\StorageOption;
 use App\Models\StorageOptionPart;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class StorageOptionController extends Controller
 {
@@ -34,7 +33,10 @@ class StorageOptionController extends Controller
         private readonly RemovePartFromStorageAction $removePartFromStorageAction,
     ) {}
 
-    public function index(Request $request): AnonymousResourceCollection
+    /**
+     * @return array<string, array<int, array<string, mixed>>>
+     */
+    public function index(Request $request): array
     {
         /** @var User $user */
         $user = $request->user();
@@ -44,10 +46,10 @@ class StorageOptionController extends Controller
             ->with('children')
             ->get();
 
-        return StorageOptionResource::collection($storageOptions);
+        return StorageOptionResourceData::collection($storageOptions);
     }
 
-    public function store(StoreStorageOptionRequest $request): StorageOptionResource
+    public function store(StoreStorageOptionRequest $request): JsonResponse
     {
         /** @var User $user */
         $user = $request->user();
@@ -66,10 +68,10 @@ class StorageOptionController extends Controller
 
         $storageOption = $this->createStorageOptionAction->execute($data);
 
-        return new StorageOptionResource($storageOption);
+        return StorageOptionResourceData::from($storageOption)->toResponseWithStatus(201);
     }
 
-    public function show(Request $request, StorageOption $storageOption): StorageOptionResource|JsonResponse
+    public function show(Request $request, StorageOption $storageOption): StorageOptionResourceData|JsonResponse
     {
         /** @var User $user */
         $user = $request->user();
@@ -80,10 +82,10 @@ class StorageOptionController extends Controller
 
         $storageOption->load('children');
 
-        return new StorageOptionResource($storageOption);
+        return StorageOptionResourceData::from($storageOption);
     }
 
-    public function update(UpdateStorageOptionRequest $request, StorageOption $storageOption): StorageOptionResource|JsonResponse
+    public function update(UpdateStorageOptionRequest $request, StorageOption $storageOption): StorageOptionResourceData|JsonResponse
     {
         /** @var User $user */
         $user = $request->user();
@@ -105,7 +107,7 @@ class StorageOptionController extends Controller
 
         $storageOption = $this->updateStorageOptionAction->execute($storageOption, $data);
 
-        return new StorageOptionResource($storageOption);
+        return StorageOptionResourceData::from($storageOption);
     }
 
     public function destroy(Request $request, StorageOption $storageOption): JsonResponse
@@ -122,7 +124,10 @@ class StorageOptionController extends Controller
         return response()->json(null, 204);
     }
 
-    public function parts(Request $request, StorageOption $storageOption): AnonymousResourceCollection|JsonResponse
+    /**
+     * @return array<string, array<int, array<string, mixed>>>|JsonResponse
+     */
+    public function parts(Request $request, StorageOption $storageOption): array|JsonResponse
     {
         /** @var User $user */
         $user = $request->user();
@@ -133,7 +138,7 @@ class StorageOptionController extends Controller
 
         $parts = $storageOption->storageOptionParts()->with(['part', 'color'])->get();
 
-        return StorageOptionPartResource::collection($parts);
+        return StorageOptionPartResourceData::collection($parts);
     }
 
     public function assignPart(AssignPartRequest $request, StorageOption $storageOption): JsonResponse
@@ -158,11 +163,10 @@ class StorageOptionController extends Controller
         $storageOptionPart = $this->assignPartToStorageAction->execute($data);
         $storageOptionPart->load(['part', 'color']);
 
-        $resource = new StorageOptionPartResource($storageOptionPart);
+        $resource = StorageOptionPartResourceData::from($storageOptionPart);
+        $statusCode = $storageOptionPart->wasRecentlyCreated ? 201 : 200;
 
-        return $storageOptionPart->wasRecentlyCreated
-            ? $resource->response()->setStatusCode(201)
-            : $resource->response()->setStatusCode(200);
+        return $resource->toResponseWithStatus($statusCode);
     }
 
     public function removePart(Request $request, StorageOption $storageOption, StorageOptionPart $part): JsonResponse

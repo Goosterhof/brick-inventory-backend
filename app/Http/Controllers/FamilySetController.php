@@ -12,13 +12,12 @@ use App\DataTransferObjects\UpdateFamilySetData;
 use App\Enums\FamilySetStatus;
 use App\Http\Requests\StoreFamilySetRequest;
 use App\Http\Requests\UpdateFamilySetRequest;
-use App\Http\Resources\FamilySetResource;
+use App\Http\Resources\FamilySetResourceData;
 use App\Models\FamilySet;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class FamilySetController extends Controller
 {
@@ -28,7 +27,10 @@ class FamilySetController extends Controller
         private readonly RemoveFamilySetAction $removeFamilySetAction,
     ) {}
 
-    public function index(): AnonymousResourceCollection
+    /**
+     * @return array<string, array<int, array<string, mixed>>>
+     */
+    public function index(): array
     {
         /** @var User $user */
         $user = auth()->user();
@@ -38,10 +40,10 @@ class FamilySetController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        return FamilySetResource::collection($familySets);
+        return FamilySetResourceData::collection($familySets);
     }
 
-    public function store(StoreFamilySetRequest $request): FamilySetResource|JsonResponse
+    public function store(StoreFamilySetRequest $request): JsonResponse
     {
         /** @var User $user */
         $user = auth()->user();
@@ -66,7 +68,7 @@ class FamilySetController extends Controller
 
             $familySet = $this->addSetToFamilyAction->execute($family, $data);
 
-            return new FamilySetResource($familySet);
+            return FamilySetResourceData::from($familySet)->toResponseWithStatus(201);
         } catch (RequestException $requestException) {
             $status = $requestException->response->status();
             $message = match ($status) {
@@ -79,7 +81,7 @@ class FamilySetController extends Controller
         }
     }
 
-    public function show(FamilySet $familySet): FamilySetResource|JsonResponse
+    public function show(FamilySet $familySet): FamilySetResourceData|JsonResponse
     {
         /** @var User $user */
         $user = auth()->user();
@@ -90,10 +92,10 @@ class FamilySetController extends Controller
 
         $familySet->load('set');
 
-        return new FamilySetResource($familySet);
+        return FamilySetResourceData::from($familySet);
     }
 
-    public function update(UpdateFamilySetRequest $request, FamilySet $familySet): FamilySetResource|JsonResponse
+    public function update(UpdateFamilySetRequest $request, FamilySet $familySet): FamilySetResourceData|JsonResponse
     {
         /** @var User $user */
         $user = auth()->user();
@@ -115,7 +117,7 @@ class FamilySetController extends Controller
         $familySet = $this->updateFamilySetAction->execute($familySet, $data);
         $familySet->load('set');
 
-        return new FamilySetResource($familySet);
+        return FamilySetResourceData::from($familySet);
     }
 
     public function destroy(FamilySet $familySet): JsonResponse
