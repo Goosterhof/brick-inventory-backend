@@ -15,32 +15,31 @@ final readonly class StorageOptionPartResourceData extends ResourceData
 {
     public function __construct(
         public int $id,
-        public int $storageOptionId,
-        public int $partId,
-        public ?int $colorId,
+        public int $storage_option_id,
+        public int $part_id,
+        public ?int $color_id,
         public int $quantity,
-        public PartResourceData|MissingValue $part,
-        public ColorResourceData|MissingValue|null $color,
-        public ?Carbon $createdAt,
-        public ?Carbon $updatedAt,
+        public PartResourceData $part,
+        public ?ColorResourceData $color,
+        public ?Carbon $created_at,
+        public ?Carbon $updated_at,
     ) {}
 
     public static function from(Model $model): static
     {
-        /** @var StorageOptionPart $model */
         return new self(
             id: $model->id,
-            storageOptionId: $model->storage_option_id,
-            partId: $model->part_id,
-            colorId: $model->color_id,
+            storage_option_id: $model->storage_option_id,
+            part_id: $model->part_id,
+            color_id: $model->color_id,
             quantity: $model->quantity,
-            /** @phpstan-ignore argument.type (part is always set when part_id is required) */
-            part: self::whenLoaded($model, 'part', fn (): PartResourceData => PartResourceData::from($model->part)),
-            color: self::whenLoaded($model, 'color', fn (): ?ColorResourceData => $model->color !== null
+            /** @phpstan-ignore argument.type (part relation must be loaded) */
+            part: PartResourceData::from($model->part),
+            color: $model->color !== null
                 ? ColorResourceData::from($model->color)
-                : null),
-            createdAt: $model->created_at,
-            updatedAt: $model->updated_at,
+                : null,
+            created_at: $model->created_at,
+            updated_at: $model->updated_at,
         );
     }
 }

@@ -14,21 +14,20 @@ final readonly class PartResourceData extends ResourceData
 {
     public function __construct(
         public int $id,
-        public string $partNum,
+        public string $part_num,
         public string $name,
         public ?string $category,
-        public ?string $imageUrl,
+        public ?string $image_url,
     ) {}
 
     public static function from(Model $model): static
     {
-        /** @var Part $model */
         return new self(
             id: $model->id,
-            partNum: $model->part_num,
+            part_num: $model->part_num,
             name: $model->name,
             category: $model->category,
-            imageUrl: $model->image_url,
+            image_url: $model->image_url,
         );
     }
 }

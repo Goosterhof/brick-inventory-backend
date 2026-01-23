@@ -67,6 +67,7 @@ class StorageOptionController extends Controller
         );
 
         $storageOption = $this->createStorageOptionAction->execute($data);
+        $storageOption->load('children');
 
         return StorageOptionResourceData::from($storageOption)->toResponseWithStatus(201);
     }
@@ -106,6 +107,7 @@ class StorageOptionController extends Controller
         );
 
         $storageOption = $this->updateStorageOptionAction->execute($storageOption, $data);
+        $storageOption->load('children');
 
         return StorageOptionResourceData::from($storageOption);
     }

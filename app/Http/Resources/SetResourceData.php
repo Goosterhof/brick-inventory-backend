@@ -14,25 +14,24 @@ final readonly class SetResourceData extends ResourceData
 {
     public function __construct(
         public int $id,
-        public string $setNum,
+        public string $set_num,
         public string $name,
         public ?int $year,
         public ?string $theme,
-        public int $numParts,
-        public ?string $imageUrl,
+        public int $num_parts,
+        public ?string $image_url,
     ) {}
 
     public static function from(Model $model): static
     {
-        /** @var Set $model */
         return new self(
             id: $model->id,
-            setNum: $model->set_num,
+            set_num: $model->set_num,
             name: $model->name,
             year: $model->year,
             theme: $model->theme,
-            numParts: $model->num_parts,
-            imageUrl: $model->image_url,
+            num_parts: $model->num_parts,
+            image_url: $model->image_url,
         );
     }
 }

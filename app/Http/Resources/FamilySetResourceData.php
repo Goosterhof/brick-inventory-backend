@@ -18,25 +18,24 @@ final readonly class FamilySetResourceData extends ResourceData
         public int $id,
         public int $quantity,
         public FamilySetStatus $status,
-        public ?string $purchaseDate,
+        public ?string $purchase_date,
         public ?string $notes,
         public SetResourceData $set,
-        public ?Carbon $createdAt,
-        public ?Carbon $updatedAt,
+        public ?Carbon $created_at,
+        public ?Carbon $updated_at,
     ) {}
 
     public static function from(Model $model): static
     {
-        /** @var FamilySet $model */
         return new self(
             id: $model->id,
             quantity: $model->quantity,
             status: $model->status,
-            purchaseDate: $model->purchase_date?->format('Y-m-d'),
+            purchase_date: $model->purchase_date?->format('Y-m-d'),
             notes: $model->notes,
             set: SetResourceData::from($model->set),
-            createdAt: $model->created_at,
-            updatedAt: $model->updated_at,
+            created_at: $model->created_at,
+            updated_at: $model->updated_at,
         );
     }
 }

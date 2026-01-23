@@ -14,36 +14,35 @@ use Illuminate\Database\Eloquent\Model;
 final readonly class StorageOptionResourceData extends ResourceData
 {
     /**
-     * @param  array<int, StorageOptionResourceData>|MissingValue  $children
+     * @param  array<int, StorageOptionResourceData>  $children
      */
     public function __construct(
         public int $id,
         public string $name,
         public ?string $description,
-        public ?int $parentId,
+        public ?int $parent_id,
         public ?int $row,
         public ?int $column,
-        public array|MissingValue $children,
-        public ?Carbon $createdAt,
-        public ?Carbon $updatedAt,
+        public array $children,
+        public ?Carbon $created_at,
+        public ?Carbon $updated_at,
     ) {}
 
     public static function from(Model $model): static
     {
-        /** @var StorageOption $model */
         return new self(
             id: $model->id,
             name: $model->name,
             description: $model->description,
-            parentId: $model->parent_id,
+            parent_id: $model->parent_id,
             row: $model->row,
             column: $model->column,
-            children: self::whenLoaded($model, 'children', fn (): array => array_map(
+            children: array_map(
                 self::from(...),
                 $model->children->all(),
-            )),
-            createdAt: $model->created_at,
-            updatedAt: $model->updated_at,
+            ),
+            created_at: $model->created_at,
+            updated_at: $model->updated_at,
         );
     }
 }

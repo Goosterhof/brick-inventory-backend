@@ -14,21 +14,20 @@ final readonly class ColorResourceData extends ResourceData
 {
     public function __construct(
         public int $id,
-        public int $rebrickableId,
+        public int $rebrickable_id,
         public string $name,
         public string $rgb,
-        public bool $isTransparent,
+        public bool $is_transparent,
     ) {}
 
     public static function from(Model $model): static
     {
-        /** @var Color $model */
         return new self(
             id: $model->id,
-            rebrickableId: $model->rebrickable_id,
+            rebrickable_id: $model->rebrickable_id,
             name: $model->name,
             rgb: $model->rgb,
-            isTransparent: $model->is_transparent,
+            is_transparent: $model->is_transparent,
         );
     }
 }

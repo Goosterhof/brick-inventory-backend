@@ -10,7 +10,6 @@ use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Str;
 use JsonSerializable;
 use ReflectionClass;
 use ReflectionProperty;
@@ -28,7 +27,7 @@ abstract readonly class ResourceData implements JsonSerializable, Responsable
     abstract public static function from(Model $model): static;
 
     /**
-     * Convert the resource to an array with snake_case keys.
+     * Convert the resource to an array.
      *
      * @return array<string, mixed>
      */
@@ -39,13 +38,7 @@ abstract readonly class ResourceData implements JsonSerializable, Responsable
 
         foreach ($reflection->getProperties(ReflectionProperty::IS_PUBLIC) as $property) {
             $value = $property->getValue($this);
-
-            if ($value instanceof MissingValue) {
-                continue;
-            }
-
-            $key = Str::snake($property->getName());
-            $result[$key] = $this->transformValue($value);
+            $result[$property->getName()] = $this->transformValue($value);
         }
 
         return $result;
@@ -111,22 +104,5 @@ abstract readonly class ResourceData implements JsonSerializable, Responsable
         }
 
         return $value;
-    }
-
-    /**
-     * Helper to handle conditionally loaded relations.
-     *
-     * @template T
-     *
-     * @param  callable(): T  $callback
-     * @return T|MissingValue
-     */
-    protected static function whenLoaded(Model $model, string $relation, callable $callback): mixed
-    {
-        if (!$model->relationLoaded($relation)) {
-            return new MissingValue;
-        }
-
-        return $callback();
     }
 }
