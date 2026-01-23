@@ -25,9 +25,39 @@ arch('services should end with Service')
     ->expect('App\Services')
     ->toHaveSuffix('Service');
 
-arch('resources should end with Resource')
+arch('resource data classes should end with ResourceData')
     ->expect('App\Http\Resources')
-    ->toHaveSuffix('Resource');
+    ->toHaveSuffix('ResourceData');
+
+arch('resource data classes should be readonly')
+    ->expect('App\Http\Resources')
+    ->toBeReadonly();
+
+it('should have all concrete resource data classes as final', function (): void {
+    $resourcesDir = dirname(__DIR__, 2) . '/app/Http/Resources';
+
+    $iterator = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($resourcesDir, RecursiveDirectoryIterator::SKIP_DOTS),
+    );
+
+    foreach ($iterator as $file) {
+        if ($file->isFile() && $file->getExtension() === 'php') {
+            $relativePath = str_replace([$resourcesDir . '/', '.php'], ['', ''], $file->getPathname());
+            $className = 'App\\Http\\Resources\\' . str_replace('/', '\\', $relativePath);
+
+            $reflection = new ReflectionClass($className);
+
+            // Skip abstract classes (like ResourceData base class)
+            if ($reflection->isAbstract()) {
+                continue;
+            }
+
+            expect($reflection->isFinal())->toBeTrue(
+                sprintf('Resource class %s should be final', $className),
+            );
+        }
+    }
+});
 
 arch('actions should end with Action')
     ->expect('App\Actions')
