@@ -21,7 +21,8 @@ LEGO inventory management system. The goal is to provide a list of parts needed 
 ### Code Patterns
 - **Action classes**: For internal business logic (single-responsibility)
 - **Service classes**: For external API connections (e.g., `RebrickableService`)
-- **Standard Laravel**: Controllers, Models, API Resources for the rest
+- **ResourceData classes**: DTO-style classes for API responses (extend `ResourceData` base class)
+- **Standard Laravel**: Controllers, Models for the rest
 
 ### API Structure
 - Standard Laravel RESTful API
@@ -100,3 +101,4 @@ The following custom skills are available:
 | Skill | Description |
 |-------|-------------|
 | `/unit-test` | Create or run unit tests. Use `/unit-test ClassName` to generate tests for a class, or `/unit-test --run` to run all tests. |
+| `/resource-data` | Create a ResourceData class for API responses. Use `/resource-data ModelName` to generate a ResourceData class for a model. |
