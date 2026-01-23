@@ -257,3 +257,56 @@ it('should not have guarded property in models', function (): void {
         );
     }
 });
+
+function getMigrationFiles(): array
+{
+    $migrationsDir = dirname(__DIR__, 2) . '/database/migrations';
+
+    return glob($migrationsDir . '/*.php') ?: [];
+}
+
+it('should not have cascade deletes in migrations', function (): void {
+    foreach (getMigrationFiles() as $file) {
+        $content = file_get_contents($file);
+        $filename = basename($file);
+
+        expect(str_contains($content, "onDelete('cascade')"))
+            ->toBeFalse("Migration {$filename} should not use onDelete('cascade') - handle in Action classes");
+
+        expect(str_contains($content, '->cascadeOnDelete()'))
+            ->toBeFalse("Migration {$filename} should not use cascadeOnDelete() - handle in Action classes");
+    }
+});
+
+it('should use anonymous classes in migrations', function (): void {
+    foreach (getMigrationFiles() as $file) {
+        $content = file_get_contents($file);
+        $filename = basename($file);
+
+        expect(str_contains($content, 'return new class extends Migration'))
+            ->toBeTrue("Migration {$filename} should use anonymous class syntax");
+    }
+});
+
+it('should have void return types in migration methods', function (): void {
+    foreach (getMigrationFiles() as $file) {
+        $content = file_get_contents($file);
+        $filename = basename($file);
+
+        expect(preg_match('/public function up\(\):\s*void/', $content))
+            ->toBe(1, "Migration {$filename} up() method should have void return type");
+
+        expect(preg_match('/public function down\(\):\s*void/', $content))
+            ->toBe(1, "Migration {$filename} down() method should have void return type");
+    }
+});
+
+it('should use strict types in migrations', function (): void {
+    foreach (getMigrationFiles() as $file) {
+        $content = file_get_contents($file);
+        $filename = basename($file);
+
+        expect(str_contains($content, 'declare(strict_types=1)'))
+            ->toBeTrue("Migration {$filename} should declare strict types");
+    }
+});

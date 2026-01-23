@@ -115,6 +115,10 @@ The following rules are enforced via Pest architecture tests:
 - Actions must end with `Action` and only have `execute` as public method
 - All files must declare strict types
 - No debugging statements (`dd`, `dump`, `var_dump`, `ray`)
+- Migrations must use anonymous classes
+- Migrations must have `void` return types on `up()` and `down()`
+- Migrations must declare strict types
+- Migrations must NOT use cascade deletes (`onDelete('cascade')` or `cascadeOnDelete()`)
 
 ## Commands
 
