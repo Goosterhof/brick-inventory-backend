@@ -4,10 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Actions\StorageOption\AssignPartToStorageAction;
 use App\Actions\StorageOption\CreateStorageOptionAction;
+use App\Actions\StorageOption\CreateStorageOptionPartAction;
 use App\Actions\StorageOption\DeleteStorageOptionAction;
-use App\Actions\StorageOption\RemovePartFromStorageAction;
+use App\Actions\StorageOption\DeleteStorageOptionPartAction;
 use App\Actions\StorageOption\UpdateStorageOptionAction;
 use App\DataTransferObjects\AssignPartToStorageData;
 use App\DataTransferObjects\CreateStorageOptionData;
@@ -30,8 +30,8 @@ class StorageOptionController extends Controller
         private readonly CreateStorageOptionAction $createStorageOptionAction,
         private readonly UpdateStorageOptionAction $updateStorageOptionAction,
         private readonly DeleteStorageOptionAction $deleteStorageOptionAction,
-        private readonly AssignPartToStorageAction $assignPartToStorageAction,
-        private readonly RemovePartFromStorageAction $removePartFromStorageAction,
+        private readonly CreateStorageOptionPartAction $createStorageOptionPartAction,
+        private readonly DeleteStorageOptionPartAction $deleteStorageOptionPartAction,
     ) {}
 
     public function index(Request $request): AnonymousResourceCollection
@@ -155,7 +155,7 @@ class StorageOptionController extends Controller
             quantity: $validated['quantity'],
         );
 
-        $storageOptionPart = $this->assignPartToStorageAction->execute($data);
+        $storageOptionPart = $this->createStorageOptionPartAction->execute($data);
         $storageOptionPart->load(['part', 'color']);
 
         $resource = new StorageOptionPartResource($storageOptionPart);
@@ -178,7 +178,7 @@ class StorageOptionController extends Controller
             return response()->json(['error' => 'Not found'], 404);
         }
 
-        $this->removePartFromStorageAction->execute($part);
+        $this->deleteStorageOptionPartAction->execute($part);
 
         return response()->json(null, 204);
     }

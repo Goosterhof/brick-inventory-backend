@@ -79,6 +79,7 @@ The following rules are enforced via Pest architecture tests:
 - DTOs must end with `Data`, be `final`, and `readonly`
 - Requests must end with `Request`
 - Services must end with `Service`
+- Actions must end with `Action` and only have `execute` as public method
 - All files must declare strict types
 - No debugging statements (`dd`, `dump`, `var_dump`, `ray`)
 
@@ -121,4 +122,5 @@ The following custom skills are available:
 |-------|-------------|
 | `/model` | Generate an Eloquent model from an existing migration. Use `/model ModelName` to create a model. |
 | `/unit-test` | Create or run unit tests. Use `/unit-test ClassName` to generate tests for a class, or `/unit-test --run` to run all tests. |
+| `/action` | Create Action classes. Use `/action CreateUser` to generate an action. Infers type from verb (Create, Update, Delete, Get). |
 | `/controller` | Create a resource controller. Use `/controller ModelName` to generate a controller with CRUD operations, routes, and Action placeholders. |

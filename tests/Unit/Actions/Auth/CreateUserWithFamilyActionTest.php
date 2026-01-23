@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-use App\Actions\Auth\RegisterUserWithFamilyAction;
+use App\Actions\Auth\CreateUserWithFamilyAction;
 use App\DataTransferObjects\RegisterUserData;
 use App\Models\Family;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-describe('RegisterUserWithFamilyAction', function (): void {
+describe('CreateUserWithFamilyAction', function (): void {
     it('should create a family with the provided name', function (): void {
         // arrange
         $familyInstance = Mockery::mock(Family::class)->makePartial();
@@ -29,7 +29,7 @@ describe('RegisterUserWithFamilyAction', function (): void {
             ->once()
             ->andReturn($userInstance);
 
-        $action = new RegisterUserWithFamilyAction($user, $family);
+        $action = new CreateUserWithFamilyAction($user, $family);
         $data = new RegisterUserData(
             familyName: 'Test Family',
             name: 'Test User',
@@ -73,7 +73,7 @@ describe('RegisterUserWithFamilyAction', function (): void {
         $user = Mockery::mock(User::class);
         $user->shouldReceive('newInstance')->withNoArgs()->andReturn($userInstance);
 
-        $action = new RegisterUserWithFamilyAction($user, $family);
+        $action = new CreateUserWithFamilyAction($user, $family);
         $data = new RegisterUserData(
             familyName: 'Test Family',
             name: 'Test User',
@@ -108,7 +108,7 @@ describe('RegisterUserWithFamilyAction', function (): void {
         $user = Mockery::mock(User::class);
         $user->shouldReceive('newInstance')->withNoArgs()->andReturn($userInstance);
 
-        $action = new RegisterUserWithFamilyAction($user, $family);
+        $action = new CreateUserWithFamilyAction($user, $family);
         $data = new RegisterUserData(
             familyName: 'Test Family',
             name: 'Test User',
@@ -140,7 +140,7 @@ describe('RegisterUserWithFamilyAction', function (): void {
             ->once()
             ->andReturn($userInstance);
 
-        $action = new RegisterUserWithFamilyAction($user, $family);
+        $action = new CreateUserWithFamilyAction($user, $family);
         $data = new RegisterUserData(
             familyName: 'Test Family',
             name: 'John Doe',

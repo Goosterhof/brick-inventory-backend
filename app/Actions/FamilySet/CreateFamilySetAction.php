@@ -10,7 +10,7 @@ use App\DataTransferObjects\UpdateFamilySetData;
 use App\Models\Family;
 use App\Models\FamilySet;
 
-class AddSetToFamilyAction
+class CreateFamilySetAction
 {
     public function __construct(
         private readonly GetSetAction $getSetAction,

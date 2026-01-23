@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers\Auth;
 
-use App\Actions\Auth\RegisterUserWithFamilyAction;
+use App\Actions\Auth\CreateUserWithFamilyAction;
 use App\DataTransferObjects\RegisterUserData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\RegisterRequest;
@@ -13,7 +13,7 @@ use Illuminate\Http\JsonResponse;
 class RegisterController extends Controller
 {
     public function __construct(
-        private readonly RegisterUserWithFamilyAction $registerUserWithFamilyAction,
+        private readonly CreateUserWithFamilyAction $createUserWithFamilyAction,
     ) {}
 
     public function __invoke(RegisterRequest $request): JsonResponse
@@ -28,7 +28,7 @@ class RegisterController extends Controller
             password: $validated['password'],
         );
 
-        $user = $this->registerUserWithFamilyAction->execute($data);
+        $user = $this->createUserWithFamilyAction->execute($data);
 
         $token = $user->createToken('auth_token')->plainTextToken;
 
