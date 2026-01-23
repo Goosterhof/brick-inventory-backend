@@ -45,6 +45,39 @@ $model = Model::create(['name' => $data['name']]);
 - Standard Laravel RESTful API
 - Resource controllers for CRUD operations
 
+### Database Conventions
+
+#### Migration Structure
+- Use anonymous classes: `return new class extends Migration`
+- Add `void` return type to `up()`, `down()`, and Schema callbacks
+- Always implement both `up()` and `down()` methods
+
+#### Foreign Keys
+- Use `->constrained()` for foreign keys
+- **No cascade deletes**: Never use `onDelete('cascade')` or `cascadeOnDelete()`
+- Deletion cascading must be handled in Action classes (business logic), not at the database level
+- This prevents unintended data loss and keeps deletion logic explicit and controllable
+
+Example:
+```php
+// Correct - no cascade
+$table->foreignId('cabinet_id')->constrained();
+$table->foreignId('family_id')->nullable()->constrained();
+
+// Wrong - cascade delete
+$table->foreignId('cabinet_id')->constrained()->onDelete('cascade');
+```
+
+#### Tenant Scoping (family_id)
+Include `family_id` for user-owned/tenant-scoped data:
+- Storage-related: drawers, cabinets, shelves, storage options
+- User collections: inventories, wishlists, builds
+- User preferences: settings, configurations
+
+Exclude `family_id` for shared/reference data:
+- LEGO reference data: colors, parts, sets, themes, categories
+- System data: jobs, cache, tokens
+
 ## Testing
 
 Uses Pest PHP with the following conventions:
