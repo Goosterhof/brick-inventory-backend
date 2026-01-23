@@ -100,3 +100,4 @@ The following custom skills are available:
 | Skill | Description |
 |-------|-------------|
 | `/unit-test` | Create or run unit tests. Use `/unit-test ClassName` to generate tests for a class, or `/unit-test --run` to run all tests. |
+| `/controller` | Create a resource controller. Use `/controller ModelName` to generate a controller with CRUD operations, routes, and Action placeholders. |
