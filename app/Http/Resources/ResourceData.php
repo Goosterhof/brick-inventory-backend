@@ -45,20 +45,16 @@ abstract readonly class ResourceData implements JsonSerializable, Responsable
     }
 
     /**
-     * Create a collection of resources from an iterable of models.
+     * Create a collection of resources from a collection of models.
      *
-     * @param  iterable<TModel>  $models
-     * @return array<string, array<int, array<string, mixed>>>
+     * @param  Collection<int, TModel>  $models
+     * @return array<int, static>
      */
-    public static function collection(iterable $models): array
+    public static function collection(Collection $models): array
     {
-        $items = $models instanceof Collection ? $models->all() : $models;
-
-        return ['data' => array_values(array_map(
-            /** @phpstan-ignore-next-line */
-            static fn (Model $model): array => static::from($model)->toArray(),
-            is_array($items) ? $items : iterator_to_array($items),
-        ))];
+        return $models->map(
+            static fn (Model $model): static => static::from($model),
+        )->all();
     }
 
     /**
