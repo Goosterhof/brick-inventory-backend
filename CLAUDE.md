@@ -120,6 +120,7 @@ The following custom skills are available:
 
 | Skill | Description |
 |-------|-------------|
+| `/migration` | Generate a migration from a model name. Use `/migration ModelName` to create a migration. Auto-detects create vs modify, supports pivot tables. |
 | `/model` | Generate an Eloquent model from an existing migration. Use `/model ModelName` to create a model. |
 | `/unit-test` | Create or run unit tests. Use `/unit-test ClassName` to generate tests for a class, or `/unit-test --run` to run all tests. |
 | `/action` | Create Action classes. Use `/action CreateUser` to generate an action. Infers type from verb (Create, Update, Delete, Get). |
