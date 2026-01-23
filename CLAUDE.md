@@ -22,7 +22,71 @@ LEGO inventory management system. The goal is to provide a list of parts needed 
 - **Action classes**: For internal business logic (single-responsibility)
 - **Service classes**: For external API connections (e.g., `RebrickableService`)
 - **ResourceData classes**: DTO-style classes for API responses (extend `ResourceData` base class)
+- **DTOFormRequest pattern**: Form Requests that act as DTOs with interface contracts
 - **Standard Laravel**: Controllers, Models for the rest
+
+### Form Requests as DTOs
+
+Form Requests extend `DTOFormRequest` and implement interfaces with PHP 8.4 property hooks:
+
+```php
+// Interface defines the contract
+interface CreateProductInterface
+{
+    public string $name { get; }
+    public ?string $description { get; }
+}
+
+// Request implements validation + DTO
+final readonly class CreateProductRequest extends DTOFormRequest implements CreateProductInterface
+{
+    public const string NAME = 'name';
+
+    public function __construct(
+        public string $name,
+        public ?string $description = null,
+    ) {}
+
+    public static function rules(Request $request): array
+    {
+        return [self::NAME => ['required', 'string']];
+    }
+
+    protected static function toDTO(Request $request): static
+    {
+        return new self(name: $request->string(self::NAME)->toString());
+    }
+}
+```
+
+Actions accept interfaces (not concrete classes) for testability:
+
+```php
+class CreateProductAction
+{
+    public function execute(CreateProductInterface $data): Product { ... }
+}
+```
+
+Use `/form-request` skill for detailed patterns and templates.
+
+### Model Conventions
+- **No mass assignment**: Models must NOT have `$fillable` or `$guarded` properties (enforced by architecture tests)
+- **Explicit property assignment**: Always assign properties individually for type safety
+- **PHPDoc annotations**: All models must have `@property` annotations for every column
+- **Relationships**: Use PHPDoc return type annotations like `@return BelongsTo<Model, $this>`
+- **Tenant models**: Models with `family_id` automatically get a `family()` BelongsTo relationship
+
+Example property assignment (instead of mass assignment):
+```php
+// Correct - explicit assignment
+$model = new Model();
+$model->name = $data['name'];
+$model->save();
+
+// Wrong - mass assignment
+$model = Model::create(['name' => $data['name']]);
+```
 
 ### API Structure
 - Standard Laravel RESTful API
@@ -57,9 +121,12 @@ The following rules are enforced via Pest architecture tests:
 
 - Controllers must end with `Controller`
 - Models must extend `Illuminate\Database\Eloquent\Model`
+- Models must NOT have `$fillable` or `$guarded` properties (no mass assignment)
+- Models must have `@property` PHPDoc annotations
 - DTOs must end with `Data`, be `final`, and `readonly`
 - Requests must end with `Request`
 - Services must end with `Service`
+- Actions must end with `Action` and only have `execute` as public method
 - All files must declare strict types
 - No debugging statements (`dd`, `dump`, `var_dump`, `ray`)
 
@@ -100,5 +167,9 @@ The following custom skills are available:
 
 | Skill | Description |
 |-------|-------------|
+| `/model` | Generate an Eloquent model from an existing migration. Use `/model ModelName` to create a model. |
 | `/unit-test` | Create or run unit tests. Use `/unit-test ClassName` to generate tests for a class, or `/unit-test --run` to run all tests. |
 | `/resource-data` | Create a ResourceData class for API responses. Use `/resource-data ModelName` to generate a ResourceData class for a model. |
+| `/form-request` | Create Form Requests using the DTOFormRequest pattern with interface contracts. Includes templates, type mapping, and checklist. |
+| `/action` | Create Action classes. Use `/action CreateUser` to generate an action. Infers type from verb (Create, Update, Delete, Get). |
+| `/controller` | Create a resource controller. Use `/controller ModelName` to generate a controller with CRUD operations, routes, and Action placeholders. |

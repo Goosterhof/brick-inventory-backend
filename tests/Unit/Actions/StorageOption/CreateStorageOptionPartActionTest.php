@@ -2,12 +2,13 @@
 
 declare(strict_types=1);
 
-use App\Actions\StorageOption\AssignPartToStorageAction;
-use App\DataTransferObjects\AssignPartToStorageData;
+use App\Actions\StorageOption\CreateStorageOptionPartAction;
+use App\Contracts\StorageOption\AssignPartToStorageInterface;
+use App\Models\StorageOption;
 use App\Models\StorageOptionPart;
 use Illuminate\Database\Eloquent\Builder;
 
-describe('AssignPartToStorageAction', function (): void {
+describe('CreateStorageOptionPartAction', function (): void {
     it('should create a new assignment when one does not exist', function (): void {
         // arrange
         $storageOptionPartInstance = Mockery::mock(StorageOptionPart::class)->makePartial();
@@ -23,16 +24,21 @@ describe('AssignPartToStorageAction', function (): void {
         $storageOptionPart->shouldReceive('newQuery')->withNoArgs()->once()->andReturn($builder);
         $storageOptionPart->shouldReceive('newInstance')->withNoArgs()->once()->andReturn($storageOptionPartInstance);
 
-        $action = new AssignPartToStorageAction($storageOptionPart);
-        $data = new AssignPartToStorageData(
-            storageOptionId: 1,
-            partId: 2,
-            colorId: null,
-            quantity: 50,
-        );
+        $storageOption = Mockery::mock(StorageOption::class)->makePartial();
+        $storageOption->id = 1;
+
+        $action = new CreateStorageOptionPartAction($storageOptionPart);
+        $data = new class implements AssignPartToStorageInterface
+        {
+            public int $partId = 2;
+
+            public ?int $colorId = null;
+
+            public int $quantity = 50;
+        };
 
         // act
-        $result = $action->execute($data);
+        $result = $action->execute($storageOption, $data);
 
         // assert
         expect($result)->toBe($storageOptionPartInstance)
@@ -56,16 +62,21 @@ describe('AssignPartToStorageAction', function (): void {
         $storageOptionPart = Mockery::mock(StorageOptionPart::class);
         $storageOptionPart->shouldReceive('newQuery')->withNoArgs()->once()->andReturn($builder);
 
-        $action = new AssignPartToStorageAction($storageOptionPart);
-        $data = new AssignPartToStorageData(
-            storageOptionId: 1,
-            partId: 2,
-            colorId: 3,
-            quantity: 100,
-        );
+        $storageOption = Mockery::mock(StorageOption::class)->makePartial();
+        $storageOption->id = 1;
+
+        $action = new CreateStorageOptionPartAction($storageOptionPart);
+        $data = new class implements AssignPartToStorageInterface
+        {
+            public int $partId = 2;
+
+            public ?int $colorId = 3;
+
+            public int $quantity = 100;
+        };
 
         // act
-        $result = $action->execute($data);
+        $result = $action->execute($storageOption, $data);
 
         // assert
         expect($result)->toBe($existingInstance)
@@ -85,16 +96,21 @@ describe('AssignPartToStorageAction', function (): void {
         $storageOptionPart->shouldReceive('newQuery')->andReturn($builder);
         $storageOptionPart->shouldReceive('newInstance')->andReturn($storageOptionPartInstance);
 
-        $action = new AssignPartToStorageAction($storageOptionPart);
-        $data = new AssignPartToStorageData(
-            storageOptionId: 1,
-            partId: 2,
-            colorId: null,
-            quantity: 100,
-        );
+        $storageOption = Mockery::mock(StorageOption::class)->makePartial();
+        $storageOption->id = 1;
+
+        $action = new CreateStorageOptionPartAction($storageOptionPart);
+        $data = new class implements AssignPartToStorageInterface
+        {
+            public int $partId = 2;
+
+            public ?int $colorId = null;
+
+            public int $quantity = 100;
+        };
 
         // act
-        $action->execute($data);
+        $action->execute($storageOption, $data);
 
         // assert - verification happens via Mockery expectations
         expect(true)->toBeTrue();

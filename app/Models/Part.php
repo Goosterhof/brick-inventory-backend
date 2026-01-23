@@ -4,24 +4,26 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Database\Factories\PartFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+/**
+ * @property positive-int $id
+ * @property string $part_num
+ * @property string $name
+ * @property string|null $category
+ * @property string|null $image_url
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ */
 class Part extends Model
 {
     /** @use HasFactory<PartFactory> */
     use HasFactory;
-
-    /** @var list<string> */
-    protected $fillable = [
-        'part_num',
-        'name',
-        'category',
-        'image_url',
-    ];
 
     /**
      * @return BelongsToMany<Set, $this>

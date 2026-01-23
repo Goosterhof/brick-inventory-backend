@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * @property int $id
+ * @property positive-int $id
  * @property int $family_id
  * @property int $set_id
  * @property int $quantity
@@ -28,8 +28,6 @@ class FamilySet extends Model
 {
     /** @use HasFactory<FamilySetFactory> */
     use HasFactory;
-
-    protected $guarded = [];
 
     /**
      * @return BelongsTo<Family, $this>

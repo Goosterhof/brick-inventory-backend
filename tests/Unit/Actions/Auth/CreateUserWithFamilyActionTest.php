@@ -2,13 +2,13 @@
 
 declare(strict_types=1);
 
-use App\Actions\Auth\RegisterUserWithFamilyAction;
-use App\DataTransferObjects\RegisterUserData;
+use App\Actions\Auth\CreateUserWithFamilyAction;
+use App\Contracts\Auth\RegisterUserInterface;
 use App\Models\Family;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-describe('RegisterUserWithFamilyAction', function (): void {
+describe('CreateUserWithFamilyAction', function (): void {
     it('should create a family with the provided name', function (): void {
         // arrange
         $familyInstance = Mockery::mock(Family::class)->makePartial();
@@ -29,13 +29,17 @@ describe('RegisterUserWithFamilyAction', function (): void {
             ->once()
             ->andReturn($userInstance);
 
-        $action = new RegisterUserWithFamilyAction($user, $family);
-        $data = new RegisterUserData(
-            familyName: 'Test Family',
-            name: 'Test User',
-            email: 'test@example.com',
-            password: 'password123',
-        );
+        $action = new CreateUserWithFamilyAction($user, $family);
+        $data = new class implements RegisterUserInterface
+        {
+            public string $familyName = 'Test Family';
+
+            public string $name = 'Test User';
+
+            public string $email = 'test@example.com';
+
+            public string $password = 'password123';
+        };
 
         // act
         $result = $action->execute($data);
@@ -73,13 +77,17 @@ describe('RegisterUserWithFamilyAction', function (): void {
         $user = Mockery::mock(User::class);
         $user->shouldReceive('newInstance')->withNoArgs()->andReturn($userInstance);
 
-        $action = new RegisterUserWithFamilyAction($user, $family);
-        $data = new RegisterUserData(
-            familyName: 'Test Family',
-            name: 'Test User',
-            email: 'test@example.com',
-            password: 'password123',
-        );
+        $action = new CreateUserWithFamilyAction($user, $family);
+        $data = new class implements RegisterUserInterface
+        {
+            public string $familyName = 'Test Family';
+
+            public string $name = 'Test User';
+
+            public string $email = 'test@example.com';
+
+            public string $password = 'password123';
+        };
 
         // act
         $action->execute($data);
@@ -108,13 +116,17 @@ describe('RegisterUserWithFamilyAction', function (): void {
         $user = Mockery::mock(User::class);
         $user->shouldReceive('newInstance')->withNoArgs()->andReturn($userInstance);
 
-        $action = new RegisterUserWithFamilyAction($user, $family);
-        $data = new RegisterUserData(
-            familyName: 'Test Family',
-            name: 'Test User',
-            email: 'test@example.com',
-            password: 'password123',
-        );
+        $action = new CreateUserWithFamilyAction($user, $family);
+        $data = new class implements RegisterUserInterface
+        {
+            public string $familyName = 'Test Family';
+
+            public string $name = 'Test User';
+
+            public string $email = 'test@example.com';
+
+            public string $password = 'password123';
+        };
 
         // act
         $action->execute($data);
@@ -140,13 +152,17 @@ describe('RegisterUserWithFamilyAction', function (): void {
             ->once()
             ->andReturn($userInstance);
 
-        $action = new RegisterUserWithFamilyAction($user, $family);
-        $data = new RegisterUserData(
-            familyName: 'Test Family',
-            name: 'John Doe',
-            email: 'john@example.com',
-            password: 'secret123',
-        );
+        $action = new CreateUserWithFamilyAction($user, $family);
+        $data = new class implements RegisterUserInterface
+        {
+            public string $familyName = 'Test Family';
+
+            public string $name = 'John Doe';
+
+            public string $email = 'john@example.com';
+
+            public string $password = 'secret123';
+        };
 
         // act
         $action->execute($data);

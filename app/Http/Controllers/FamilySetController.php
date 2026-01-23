@@ -4,37 +4,31 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Actions\FamilySet\AddSetToFamilyAction;
-use App\Actions\FamilySet\RemoveFamilySetAction;
+use App\Actions\FamilySet\CreateFamilySetAction;
+use App\Actions\FamilySet\DeleteFamilySetAction;
 use App\Actions\FamilySet\UpdateFamilySetAction;
-use App\DataTransferObjects\CreateFamilySetData;
-use App\DataTransferObjects\UpdateFamilySetData;
-use App\Enums\FamilySetStatus;
 use App\Http\Requests\StoreFamilySetRequest;
 use App\Http\Requests\UpdateFamilySetRequest;
 use App\Http\Resources\FamilySetResourceData;
 use App\Models\FamilySet;
 use App\Models\User;
-use Carbon\Carbon;
+use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\JsonResponse;
 
 class FamilySetController extends Controller
 {
     public function __construct(
-        private readonly AddSetToFamilyAction $addSetToFamilyAction,
+        private readonly CreateFamilySetAction $createFamilySetAction,
         private readonly UpdateFamilySetAction $updateFamilySetAction,
-        private readonly RemoveFamilySetAction $removeFamilySetAction,
+        private readonly DeleteFamilySetAction $deleteFamilySetAction,
     ) {}
 
     /**
      * @return array<int, FamilySetResourceData>
      */
-    public function index(): array
+    public function index(#[CurrentUser] User $user): array
     {
-        /** @var User $user */
-        $user = auth()->user();
-
         $familySets = FamilySet::where('family_id', $user->family_id)
             ->with('set')
             ->orderBy('created_at', 'desc')
@@ -43,22 +37,8 @@ class FamilySetController extends Controller
         return FamilySetResourceData::collection($familySets);
     }
 
-    public function store(StoreFamilySetRequest $request): JsonResponse
+    public function store(StoreFamilySetRequest $request, #[CurrentUser] User $user): JsonResponse
     {
-        /** @var User $user */
-        $user = auth()->user();
-
-        /** @var array{set_num: string, quantity?: int, status?: string, purchase_date?: string|null, notes?: string|null} $validated */
-        $validated = $request->validated();
-
-        $data = new CreateFamilySetData(
-            setNum: $validated['set_num'],
-            quantity: $validated['quantity'] ?? 1,
-            status: isset($validated['status']) ? FamilySetStatus::from($validated['status']) : FamilySetStatus::Sealed,
-            purchaseDate: isset($validated['purchase_date']) ? Carbon::parse($validated['purchase_date']) : null,
-            notes: $validated['notes'] ?? null,
-        );
-
         try {
             $family = $user->family;
 
@@ -66,7 +46,7 @@ class FamilySetController extends Controller
                 return response()->json(['error' => 'User does not belong to a family'], 400);
             }
 
-            $familySet = $this->addSetToFamilyAction->execute($family, $data);
+            $familySet = $this->createFamilySetAction->execute($family, $request);
 
             return FamilySetResourceData::from($familySet)->toResponseWithStatus(201);
         } catch (RequestException $requestException) {
@@ -81,11 +61,8 @@ class FamilySetController extends Controller
         }
     }
 
-    public function show(FamilySet $familySet): FamilySetResourceData|JsonResponse
+    public function show(#[CurrentUser] User $user, FamilySet $familySet): FamilySetResourceData|JsonResponse
     {
-        /** @var User $user */
-        $user = auth()->user();
-
         if ($familySet->family_id !== $user->family_id) {
             return response()->json(['error' => 'Not found'], 404);
         }
@@ -95,41 +72,28 @@ class FamilySetController extends Controller
         return FamilySetResourceData::from($familySet);
     }
 
-    public function update(UpdateFamilySetRequest $request, FamilySet $familySet): FamilySetResourceData|JsonResponse
-    {
-        /** @var User $user */
-        $user = auth()->user();
-
+    public function update(
+        UpdateFamilySetRequest $request,
+        FamilySet $familySet,
+        #[CurrentUser] User $user,
+    ): FamilySetResourceData|JsonResponse {
         if ($familySet->family_id !== $user->family_id) {
             return response()->json(['error' => 'Not found'], 404);
         }
 
-        /** @var array{quantity: int, status: string, purchase_date?: string|null, notes?: string|null} $validated */
-        $validated = $request->validated();
-
-        $data = new UpdateFamilySetData(
-            quantity: $validated['quantity'],
-            status: FamilySetStatus::from($validated['status']),
-            purchaseDate: isset($validated['purchase_date']) ? Carbon::parse($validated['purchase_date']) : null,
-            notes: $validated['notes'] ?? null,
-        );
-
-        $familySet = $this->updateFamilySetAction->execute($familySet, $data);
+        $familySet = $this->updateFamilySetAction->execute($familySet, $request);
         $familySet->load('set');
 
         return FamilySetResourceData::from($familySet);
     }
 
-    public function destroy(FamilySet $familySet): JsonResponse
+    public function destroy(#[CurrentUser] User $user, FamilySet $familySet): JsonResponse
     {
-        /** @var User $user */
-        $user = auth()->user();
-
         if ($familySet->family_id !== $user->family_id) {
             return response()->json(['error' => 'Not found'], 404);
         }
 
-        $this->removeFamilySetAction->execute($familySet);
+        $this->deleteFamilySetAction->execute($familySet);
 
         return response()->json(null, 204);
     }

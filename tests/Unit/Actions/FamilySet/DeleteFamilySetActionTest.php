@@ -2,16 +2,16 @@
 
 declare(strict_types=1);
 
-use App\Actions\FamilySet\RemoveFamilySetAction;
+use App\Actions\FamilySet\DeleteFamilySetAction;
 use App\Models\FamilySet;
 
-describe('RemoveFamilySetAction', function (): void {
+describe('DeleteFamilySetAction', function (): void {
     it('should call delete on the family set', function (): void {
         // arrange
         $familySet = Mockery::mock(FamilySet::class);
         $familySet->shouldReceive('delete')->once();
 
-        $action = new RemoveFamilySetAction;
+        $action = new DeleteFamilySetAction;
 
         // act
         $action->execute($familySet);
