@@ -4,21 +4,23 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property positive-int $id
+ * @property int $set_id
+ * @property int $part_id
+ * @property int $color_id
+ * @property int $quantity
+ * @property bool $is_spare
+ * @property string|null $element_id
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ */
 class SetPart extends Model
 {
-    /** @var list<string> */
-    protected $fillable = [
-        'set_id',
-        'part_id',
-        'color_id',
-        'quantity',
-        'is_spare',
-        'element_id',
-    ];
-
     /**
      * @return BelongsTo<Set, $this>
      */
