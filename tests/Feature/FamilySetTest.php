@@ -20,7 +20,7 @@ describe('FamilySetController', function (): void {
             $response = $this->actingAs($user)->getJson('/api/family-sets');
 
             $response->assertStatus(200)
-                ->assertJson([]);
+                ->assertJsonCount(0);
         });
 
         it('should return family sets for authenticated user', function (): void {
