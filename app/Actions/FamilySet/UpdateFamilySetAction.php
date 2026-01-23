@@ -4,14 +4,14 @@ declare(strict_types=1);
 
 namespace App\Actions\FamilySet;
 
-use App\DataTransferObjects\UpdateFamilySetData;
+use App\Contracts\FamilySet\UpdateFamilySetInterface;
 use App\Models\FamilySet;
 use Carbon\Carbon;
 use DateTimeInterface;
 
 class UpdateFamilySetAction
 {
-    public function execute(FamilySet $familySet, UpdateFamilySetData $data): FamilySet
+    public function execute(FamilySet $familySet, UpdateFamilySetInterface $data): FamilySet
     {
         $familySet->quantity = $data->quantity;
         $familySet->status = $data->status;
