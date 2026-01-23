@@ -34,7 +34,7 @@ class StorageOptionController extends Controller
     ) {}
 
     /**
-     * @return array<string, array<int, StorageOptionResourceData>>
+     * @return array<int, StorageOptionResourceData>
      */
     public function index(Request $request): array
     {
@@ -46,7 +46,7 @@ class StorageOptionController extends Controller
             ->with('children')
             ->get();
 
-        return ['data' => StorageOptionResourceData::collection($storageOptions)];
+        return StorageOptionResourceData::collection($storageOptions);
     }
 
     public function store(StoreStorageOptionRequest $request): JsonResponse
@@ -127,7 +127,7 @@ class StorageOptionController extends Controller
     }
 
     /**
-     * @return array<string, array<int, StorageOptionPartResourceData>>|JsonResponse
+     * @return array<int, StorageOptionPartResourceData>|JsonResponse
      */
     public function parts(Request $request, StorageOption $storageOption): array|JsonResponse
     {
@@ -140,7 +140,7 @@ class StorageOptionController extends Controller
 
         $parts = $storageOption->storageOptionParts()->with(['part', 'color'])->get();
 
-        return ['data' => StorageOptionPartResourceData::collection($parts)];
+        return StorageOptionPartResourceData::collection($parts);
     }
 
     public function assignPart(AssignPartRequest $request, StorageOption $storageOption): JsonResponse

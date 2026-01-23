@@ -28,7 +28,7 @@ class FamilySetController extends Controller
     ) {}
 
     /**
-     * @return array<string, array<int, FamilySetResourceData>>
+     * @return array<int, FamilySetResourceData>
      */
     public function index(): array
     {
@@ -40,7 +40,7 @@ class FamilySetController extends Controller
             ->orderBy('created_at', 'desc')
             ->get();
 
-        return ['data' => FamilySetResourceData::collection($familySets)];
+        return FamilySetResourceData::collection($familySets);
     }
 
     public function store(StoreFamilySetRequest $request): JsonResponse

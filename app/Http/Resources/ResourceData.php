@@ -67,7 +67,7 @@ abstract readonly class ResourceData implements JsonSerializable, Responsable
 
     public function toResponse($request): JsonResponse
     {
-        return new JsonResponse(['data' => $this->toArray()]);
+        return new JsonResponse($this->toArray());
     }
 
     /**
@@ -75,7 +75,7 @@ abstract readonly class ResourceData implements JsonSerializable, Responsable
      */
     public function toResponseWithStatus(int $status): JsonResponse
     {
-        return new JsonResponse(['data' => $this->toArray()], $status);
+        return new JsonResponse($this->toArray(), $status);
     }
 
     /**
