@@ -170,3 +170,89 @@ it('should use it should syntax in test files', function (): void {
         }
     }
 });
+
+function getModelClasses(): array
+{
+    $modelsDir = dirname(__DIR__, 2) . '/app/Models';
+    $classes = [];
+
+    $iterator = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($modelsDir, RecursiveDirectoryIterator::SKIP_DOTS),
+    );
+
+    foreach ($iterator as $file) {
+        if ($file->isFile() && $file->getExtension() === 'php') {
+            $relativePath = str_replace([$modelsDir . '/', '.php'], ['', ''], $file->getPathname());
+            $className = 'App\\Models\\' . str_replace('/', '\\', $relativePath);
+            $classes[] = $className;
+        }
+    }
+
+    return $classes;
+}
+
+it('should have @property annotations in models', function (): void {
+    foreach (getModelClasses() as $className) {
+        $reflection = new ReflectionClass($className);
+        $docComment = $reflection->getDocComment();
+
+        // Skip User model as it may have special Laravel requirements
+        if ($className === 'App\\Models\\User') {
+            continue;
+        }
+
+        expect($docComment)->not->toBeFalse(
+            sprintf('Model %s should have a docblock with @property annotations', $className),
+        );
+
+        expect(str_contains($docComment, '@property'))->toBeTrue(
+            sprintf('Model %s should have @property annotations in its docblock', $className),
+        );
+    }
+});
+
+it('should not have fillable property in models', function (): void {
+    foreach (getModelClasses() as $className) {
+        $reflection = new ReflectionClass($className);
+
+        // Skip User model as it may have special Laravel requirements
+        if ($className === 'App\\Models\\User') {
+            continue;
+        }
+
+        $hasFillable = false;
+        foreach ($reflection->getProperties() as $property) {
+            if ($property->getDeclaringClass()->getName() === $className && $property->getName() === 'fillable') {
+                $hasFillable = true;
+                break;
+            }
+        }
+
+        expect($hasFillable)->toBeFalse(
+            sprintf('Model %s should not have $fillable property - use explicit property assignment instead', $className),
+        );
+    }
+});
+
+it('should not have guarded property in models', function (): void {
+    foreach (getModelClasses() as $className) {
+        $reflection = new ReflectionClass($className);
+
+        // Skip User model as it may have special Laravel requirements
+        if ($className === 'App\\Models\\User') {
+            continue;
+        }
+
+        $hasGuarded = false;
+        foreach ($reflection->getProperties() as $property) {
+            if ($property->getDeclaringClass()->getName() === $className && $property->getName() === 'guarded') {
+                $hasGuarded = true;
+                break;
+            }
+        }
+
+        expect($hasGuarded)->toBeFalse(
+            sprintf('Model %s should not have $guarded property - use explicit property assignment instead', $className),
+        );
+    }
+});

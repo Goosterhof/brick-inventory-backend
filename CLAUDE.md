@@ -23,6 +23,24 @@ LEGO inventory management system. The goal is to provide a list of parts needed 
 - **Service classes**: For external API connections (e.g., `RebrickableService`)
 - **Standard Laravel**: Controllers, Models, API Resources for the rest
 
+### Model Conventions
+- **No mass assignment**: Models must NOT have `$fillable` or `$guarded` properties (enforced by architecture tests)
+- **Explicit property assignment**: Always assign properties individually for type safety
+- **PHPDoc annotations**: All models must have `@property` annotations for every column
+- **Relationships**: Use PHPDoc return type annotations like `@return BelongsTo<Model, $this>`
+- **Tenant models**: Models with `family_id` automatically get a `family()` BelongsTo relationship
+
+Example property assignment (instead of mass assignment):
+```php
+// Correct - explicit assignment
+$model = new Model();
+$model->name = $data['name'];
+$model->save();
+
+// Wrong - mass assignment
+$model = Model::create(['name' => $data['name']]);
+```
+
 ### API Structure
 - Standard Laravel RESTful API
 - Resource controllers for CRUD operations
@@ -56,6 +74,8 @@ The following rules are enforced via Pest architecture tests:
 
 - Controllers must end with `Controller`
 - Models must extend `Illuminate\Database\Eloquent\Model`
+- Models must NOT have `$fillable` or `$guarded` properties (no mass assignment)
+- Models must have `@property` PHPDoc annotations
 - DTOs must end with `Data`, be `final`, and `readonly`
 - Requests must end with `Request`
 - Services must end with `Service`
