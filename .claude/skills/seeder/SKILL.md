@@ -198,12 +198,12 @@ class {ModelName}Seeder extends Seeder
         ];
 
         foreach ($records as $record) {
-            ${modelName} = new {ModelName}();
-            ${modelName}->family_id = $family->id;
+            $modelName = new {ModelName}();
+            $modelName->family_id = $family->id;
             // Assign each property explicitly (no mass assignment)
-            ${modelName}->column1 = $record['column1'];
-            ${modelName}->column2 = $record['column2'];
-            ${modelName}->save();
+            $modelName->column1 = $record['column1'];
+            $modelName->column2 = $record['column2'];
+            $modelName->save();
         }
     }
 }
