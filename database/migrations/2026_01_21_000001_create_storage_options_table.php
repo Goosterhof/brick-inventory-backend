@@ -12,8 +12,8 @@ return new class extends Migration
     {
         Schema::create('storage_options', function (Blueprint $table): void {
             $table->id();
-            $table->foreignId('family_id')->constrained()->onDelete('cascade');
-            $table->foreignId('parent_id')->nullable()->constrained('storage_options')->onDelete('cascade');
+            $table->foreignId('family_id')->constrained();
+            $table->foreignId('parent_id')->nullable()->constrained('storage_options');
             $table->string('name');
             $table->text('description')->nullable();
             $table->unsignedInteger('row')->nullable();

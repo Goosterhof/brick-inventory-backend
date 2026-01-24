@@ -12,9 +12,9 @@ return new class extends Migration
     {
         Schema::create('set_parts', function (Blueprint $table): void {
             $table->id();
-            $table->foreignId('set_id')->constrained()->onDelete('cascade');
-            $table->foreignId('part_id')->constrained()->onDelete('cascade');
-            $table->foreignId('color_id')->constrained()->onDelete('cascade');
+            $table->foreignId('set_id')->constrained();
+            $table->foreignId('part_id')->constrained();
+            $table->foreignId('color_id')->constrained();
             $table->integer('quantity')->default(1);
             $table->boolean('is_spare')->default(false);
             $table->string('element_id')->nullable();
