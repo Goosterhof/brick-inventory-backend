@@ -19,7 +19,7 @@ The name can be with or without the `Controller` suffix - it will be normalized.
 
 Feature tests for all methods that exist in the controller, including:
 - Success cases with full assertions
-- Authentication tests (401 for unauthenticated)
+- Authentication tests (401 for unauthenticated) - **only for routes with auth middleware**
 - Tenant isolation tests (for models with `family_id`)
 - Validation tests (for store/update endpoints)
 
@@ -48,6 +48,9 @@ Use `php artisan route:list --json` or search `routes/api.php` to find:
 - HTTP method (GET, POST, PUT, PATCH, DELETE)
 - Route path (e.g., `/api/storage-options`, `/api/storage-options/{storage_option}`)
 - Route parameters and their names
+- **Middleware**: Check if route is inside `middleware('auth:sanctum')` group
+  - If protected: Generate 401 authentication tests
+  - If public (no auth middleware): Skip authentication tests
 
 #### Model
 Identify the primary model from:
@@ -480,3 +483,4 @@ If a factory doesn't exist, inform the user:
 - Include `// arrange`, `// act`, `// assert` comments for clarity (optional but recommended)
 - For delete operations, always use `assertDatabaseMissing` (hard delete assumed)
 - Routes should use the actual route paths from `routes/api.php`, not guessed paths
+- **Only generate 401 tests for routes protected by `auth:sanctum` middleware** - check `routes/api.php` to determine if a route is inside the `middleware('auth:sanctum')` group
