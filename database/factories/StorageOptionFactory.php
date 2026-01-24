@@ -30,6 +30,13 @@ class StorageOptionFactory extends Factory
         ];
     }
 
+    public function forFamily(Family $family): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'family_id' => $family->id,
+        ]);
+    }
+
     public function withParent(StorageOption $parent): static
     {
         return $this->state(fn (array $attributes): array => [
