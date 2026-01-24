@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Resources;
+namespace App\Http\LegacyResources;
 
 use App\DataTransferObjects\SetPartData;
 use App\DataTransferObjects\SetPartsResultData;

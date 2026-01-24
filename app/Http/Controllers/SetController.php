@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Actions\GetSetPartsAction;
-use App\Http\Resources\SetPartsResource;
+use App\Http\LegacyResources\SetPartsResource;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\JsonResponse;
 

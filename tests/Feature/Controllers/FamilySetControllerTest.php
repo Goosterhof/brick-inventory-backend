@@ -20,7 +20,7 @@ describe('FamilySetController', function (): void {
             $response = $this->actingAs($user)->getJson('/api/family-sets');
 
             $response->assertStatus(200)
-                ->assertJson(['data' => []]);
+                ->assertJsonCount(0);
         });
 
         it('should return family sets for authenticated user', function (): void {
@@ -37,10 +37,10 @@ describe('FamilySetController', function (): void {
             $response = $this->actingAs($user)->getJson('/api/family-sets');
 
             $response->assertStatus(200)
-                ->assertJsonCount(1, 'data')
-                ->assertJsonPath('data.0.quantity', 2)
-                ->assertJsonPath('data.0.status', 'built')
-                ->assertJsonPath('data.0.set.set_num', '75192-1');
+                ->assertJsonCount(1)
+                ->assertJsonPath('0.quantity', 2)
+                ->assertJsonPath('0.status', 'built')
+                ->assertJsonPath('0.set.set_num', '75192-1');
         });
 
         it('should not return sets from other families', function (): void {
@@ -56,7 +56,7 @@ describe('FamilySetController', function (): void {
             $response = $this->actingAs($user)->getJson('/api/family-sets');
 
             $response->assertStatus(200)
-                ->assertJsonCount(0, 'data');
+                ->assertJsonCount(0);
         });
 
         it('should return 401 when unauthenticated', function (): void {
@@ -80,11 +80,11 @@ describe('FamilySetController', function (): void {
             ]);
 
             $response->assertStatus(201)
-                ->assertJsonPath('data.quantity', 2)
-                ->assertJsonPath('data.status', 'sealed')
-                ->assertJsonPath('data.purchase_date', '2024-01-15')
-                ->assertJsonPath('data.notes', 'Birthday gift')
-                ->assertJsonPath('data.set.set_num', '75192-1');
+                ->assertJsonPath('quantity', 2)
+                ->assertJsonPath('status', 'sealed')
+                ->assertJsonPath('purchase_date', '2024-01-15')
+                ->assertJsonPath('notes', 'Birthday gift')
+                ->assertJsonPath('set.set_num', '75192-1');
 
             $this->assertDatabaseHas('family_sets', [
                 'family_id' => $user->family_id,
@@ -112,8 +112,8 @@ describe('FamilySetController', function (): void {
             ]);
 
             $response->assertStatus(201)
-                ->assertJsonPath('data.set.set_num', '10281-1')
-                ->assertJsonPath('data.set.name', 'Bonsai Tree');
+                ->assertJsonPath('set.set_num', '10281-1')
+                ->assertJsonPath('set.name', 'Bonsai Tree');
 
             $this->assertDatabaseHas('sets', ['set_num' => '10281-1']);
             $this->assertDatabaseHas('family_sets', [
@@ -130,10 +130,10 @@ describe('FamilySetController', function (): void {
             ]);
 
             $response->assertStatus(201)
-                ->assertJsonPath('data.quantity', 1)
-                ->assertJsonPath('data.status', 'sealed')
-                ->assertJsonPath('data.purchase_date', null)
-                ->assertJsonPath('data.notes', null);
+                ->assertJsonPath('quantity', 1)
+                ->assertJsonPath('status', 'sealed')
+                ->assertJsonPath('purchase_date', null)
+                ->assertJsonPath('notes', null);
         });
 
         it('should return 404 for non-existent set from rebrickable', function (): void {
@@ -215,9 +215,9 @@ describe('FamilySetController', function (): void {
             $response = $this->actingAs($user)->getJson('/api/family-sets/' . $familySet->id);
 
             $response->assertStatus(200)
-                ->assertJsonPath('data.id', $familySet->id)
-                ->assertJsonPath('data.status', 'built')
-                ->assertJsonPath('data.set.set_num', '75192-1');
+                ->assertJsonPath('id', $familySet->id)
+                ->assertJsonPath('status', 'built')
+                ->assertJsonPath('set.set_num', '75192-1');
         });
 
         it('should return 404 for family set from another family', function (): void {
@@ -264,9 +264,9 @@ describe('FamilySetController', function (): void {
             ]);
 
             $response->assertStatus(200)
-                ->assertJsonPath('data.quantity', 3)
-                ->assertJsonPath('data.status', 'built')
-                ->assertJsonPath('data.notes', 'Updated notes');
+                ->assertJsonPath('quantity', 3)
+                ->assertJsonPath('status', 'built')
+                ->assertJsonPath('notes', 'Updated notes');
 
             $this->assertDatabaseHas('family_sets', [
                 'id' => $familySet->id,
