@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use App\Contracts\RebrickableServiceInterface;
 use App\Models\Set;
-use App\Services\RebrickableService;
 
 class GetSetAction
 {
     public function __construct(
-        private readonly RebrickableService $rebrickableService,
+        private readonly RebrickableServiceInterface $rebrickableService,
         private readonly Set $set,
     ) {}
 

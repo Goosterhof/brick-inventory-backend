@@ -3,8 +3,8 @@
 declare(strict_types=1);
 
 use App\Actions\GetSetAction;
+use App\Contracts\RebrickableServiceInterface;
 use App\Models\Set;
-use App\Services\RebrickableService;
 use Illuminate\Database\Eloquent\Builder;
 
 describe('GetSetAction', function (): void {
@@ -28,7 +28,7 @@ describe('GetSetAction', function (): void {
             ->once()
             ->andReturn($queryBuilder);
 
-        $rebrickableService = Mockery::mock(RebrickableService::class);
+        $rebrickableService = Mockery::mock(RebrickableServiceInterface::class);
         $rebrickableService->shouldNotReceive('fetchSet');
 
         $action = new GetSetAction($rebrickableService, $set);
@@ -60,7 +60,7 @@ describe('GetSetAction', function (): void {
             ->once()
             ->andReturn($createdSet);
 
-        $rebrickableService = Mockery::mock(RebrickableService::class);
+        $rebrickableService = Mockery::mock(RebrickableServiceInterface::class);
         $rebrickableService->shouldReceive('fetchSet')
             ->with('75192-1')
             ->once()
@@ -107,7 +107,7 @@ describe('GetSetAction', function (): void {
             ->once()
             ->andReturn($createdSet);
 
-        $rebrickableService = Mockery::mock(RebrickableService::class);
+        $rebrickableService = Mockery::mock(RebrickableServiceInterface::class);
         $rebrickableService->shouldReceive('fetchSet')
             ->with('10281-1')
             ->once()

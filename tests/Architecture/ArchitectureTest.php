@@ -4,7 +4,11 @@ declare(strict_types=1);
 
 use App\Http\Resources\ResourceData;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 /*
 |--------------------------------------------------------------------------
@@ -90,6 +94,14 @@ arch('controllers should end with Controller')
     ->expect('App\Http\Controllers')
     ->toHaveSuffix('Controller');
 
+arch('controllers should not use DB facade')
+    ->expect('App\Http\Controllers')
+    ->not->toUse(DB::class);
+
+arch('controllers should not use Eloquent Builder directly')
+    ->expect('App\Http\Controllers')
+    ->not->toUse(Builder::class);
+
 /*
 |--------------------------------------------------------------------------
 | Model Architecture
@@ -166,6 +178,61 @@ it('should not have guarded property in models', function (): void {
     }
 });
 
+it('should have family relationship in models with family_id', function (): void {
+    foreach (getClassesInDirectory(dirname(__DIR__, 2) . '/app/Models', 'App\\Models\\') as $className) {
+        $reflection = new ReflectionClass($className);
+        $docComment = $reflection->getDocComment();
+
+        if ($docComment === false) {
+            continue;
+        }
+
+        // Check if model has family_id property annotation
+        if (!preg_match('/@property.*\$family_id/', $docComment)) {
+            continue;
+        }
+
+        // Model has family_id, so it should have a family() method
+        expect($reflection->hasMethod('family'))->toBeTrue(
+            sprintf('Model %s has family_id but is missing family() relationship method', $className),
+        );
+    }
+});
+
+/*
+|--------------------------------------------------------------------------
+| Enum Architecture
+|--------------------------------------------------------------------------
+*/
+
+arch('enums should be backed enums')
+    ->expect('App\Enums')
+    ->toBeEnums();
+
+it('should have string or int backing type in enums', function (): void {
+    foreach (getClassesInDirectory(dirname(__DIR__, 2) . '/app/Enums', 'App\\Enums\\') as $className) {
+        $reflection = new ReflectionEnum($className);
+
+        expect($reflection->isBacked())->toBeTrue(
+            sprintf('Enum %s should be a backed enum (string or int)', $className),
+        );
+    }
+});
+
+/*
+|--------------------------------------------------------------------------
+| Contract Architecture
+|--------------------------------------------------------------------------
+*/
+
+arch('contracts should be interfaces')
+    ->expect('App\Contracts')
+    ->toBeInterfaces();
+
+arch('contracts should end with Interface')
+    ->expect('App\Contracts')
+    ->toHaveSuffix('Interface');
+
 /*
 |--------------------------------------------------------------------------
 | Data Transfer Object Architecture
@@ -221,6 +288,14 @@ arch('services should end with Service')
     ->expect('App\Services')
     ->toHaveSuffix('Service');
 
+arch('services should be final')
+    ->expect('App\Services')
+    ->toBeFinal();
+
+arch('services should not extend anything')
+    ->expect('App\Services')
+    ->toExtendNothing();
+
 /*
 |--------------------------------------------------------------------------
 | ResourceData Architecture
@@ -264,6 +339,21 @@ it('should have all concrete resource data classes as final', function (): void 
     }
 });
 
+it('should have from method in concrete resource data classes', function (): void {
+    foreach (getClassesInDirectory(dirname(__DIR__, 2) . '/app/Http/Resources', 'App\\Http\\Resources\\') as $className) {
+        $reflection = new ReflectionClass($className);
+
+        // Skip abstract classes (like ResourceData base class)
+        if ($reflection->isAbstract()) {
+            continue;
+        }
+
+        expect($reflection->hasMethod('from'))->toBeTrue(
+            sprintf('ResourceData class %s should have a from() method', $className),
+        );
+    }
+});
+
 /*
 |--------------------------------------------------------------------------
 | Action Architecture
@@ -296,6 +386,14 @@ it('should only have execute as public method in actions', function (): void {
     }
 });
 
+arch('actions should not depend on request classes directly')
+    ->expect('App\Actions')
+    ->not->toUse(Request::class);
+
+arch('actions should not depend on controllers')
+    ->expect('App\Actions')
+    ->not->toUse('App\Http\Controllers');
+
 /*
 |--------------------------------------------------------------------------
 | General Code Quality
@@ -309,6 +407,14 @@ arch('no debugging statements')
 arch('all files should use strict types')
     ->expect('App')
     ->toUseStrictTypes();
+
+arch('no env calls outside config')
+    ->expect('App')
+    ->not->toUse('env');
+
+arch('no sleep calls in application code')
+    ->expect('App')
+    ->not->toUse('sleep');
 
 /*
 |--------------------------------------------------------------------------
@@ -336,6 +442,60 @@ it('should use it should syntax in test files', function (): void {
             expect(preg_match('/\bit\s*\(\s*[\'"]should\s/', $content))
                 ->toBe(1, sprintf("Test file %s should use it('should ...') syntax", $relativePath));
         }
+    }
+});
+
+it('should use RefreshDatabase in feature tests', function (): void {
+    $featureDir = dirname(__DIR__) . '/Feature';
+    if (!is_dir($featureDir)) {
+        return;
+    }
+
+    $iterator = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($featureDir, RecursiveDirectoryIterator::SKIP_DOTS),
+    );
+
+    foreach ($iterator as $file) {
+        if (!$file->isFile()) {
+            continue;
+        }
+
+        if ($file->getExtension() !== 'php') {
+            continue;
+        }
+
+        $content = file_get_contents($file->getPathname());
+        $relativePath = str_replace(dirname(__DIR__) . '/', '', $file->getPathname());
+
+        expect(str_contains($content, 'RefreshDatabase'))
+            ->toBeTrue(sprintf('Feature test %s should use RefreshDatabase trait', $relativePath));
+    }
+});
+
+it('should not use RefreshDatabase in unit tests', function (): void {
+    $unitDir = dirname(__DIR__) . '/Unit';
+    if (!is_dir($unitDir)) {
+        return;
+    }
+
+    $iterator = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($unitDir, RecursiveDirectoryIterator::SKIP_DOTS),
+    );
+
+    foreach ($iterator as $file) {
+        if (!$file->isFile()) {
+            continue;
+        }
+
+        if ($file->getExtension() !== 'php') {
+            continue;
+        }
+
+        $content = file_get_contents($file->getPathname());
+        $relativePath = str_replace(dirname(__DIR__) . '/', '', $file->getPathname());
+
+        expect(str_contains($content, 'RefreshDatabase'))
+            ->toBeFalse(sprintf('Unit test %s should NOT use RefreshDatabase - use mocks instead', $relativePath));
     }
 });
 
@@ -402,3 +562,17 @@ it('should use strict types in migrations', function (): void {
             ->toBeTrue(sprintf('Migration %s should declare strict types', $filename));
     }
 });
+
+/*
+|--------------------------------------------------------------------------
+| Factory Architecture
+|--------------------------------------------------------------------------
+*/
+
+arch('factories should end with Factory')
+    ->expect('Database\Factories')
+    ->toHaveSuffix('Factory');
+
+arch('factories should extend Eloquent Factory')
+    ->expect('Database\Factories')
+    ->toExtend(Factory::class);
