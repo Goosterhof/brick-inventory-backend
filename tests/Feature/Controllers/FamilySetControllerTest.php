@@ -59,7 +59,7 @@ describe('FamilySetController', function (): void {
                 ->assertJsonCount(0, 'data');
         });
 
-        it('should require authentication', function (): void {
+        it('should return 401 when unauthenticated', function (): void {
             $response = $this->getJson('/api/family-sets');
 
             $response->assertStatus(401);
@@ -154,7 +154,15 @@ describe('FamilySetController', function (): void {
                 ->assertJson(['error' => 'Set not found']);
         });
 
-        it('should validate required fields', function (): void {
+        it('should return 401 when unauthenticated', function (): void {
+            $response = $this->postJson('/api/family-sets', [
+                'set_num' => '75192-1',
+            ]);
+
+            $response->assertStatus(401);
+        });
+
+        it('should require set_num', function (): void {
             $user = User::factory()->create();
 
             $response = $this->actingAs($user)->postJson('/api/family-sets', []);
@@ -225,6 +233,17 @@ describe('FamilySetController', function (): void {
 
             $response->assertStatus(404);
         });
+
+        it('should return 401 when unauthenticated', function (): void {
+            $set = Set::factory()->create();
+            $familySet = FamilySet::factory()->create([
+                'set_id' => $set->id,
+            ]);
+
+            $response = $this->getJson('/api/family-sets/' . $familySet->id);
+
+            $response->assertStatus(401);
+        });
     });
 
     describe('update', function (): void {
@@ -257,22 +276,6 @@ describe('FamilySetController', function (): void {
             ]);
         });
 
-        it('should require quantity and status', function (): void {
-            $user = User::factory()->create();
-            $set = Set::factory()->create();
-            $familySet = FamilySet::factory()->create([
-                'family_id' => $user->family_id,
-                'set_id' => $set->id,
-            ]);
-
-            $response = $this->actingAs($user)->patchJson('/api/family-sets/' . $familySet->id, [
-                'notes' => 'Just notes',
-            ]);
-
-            $response->assertStatus(422)
-                ->assertJsonValidationErrors(['quantity', 'status']);
-        });
-
         it('should return 404 for family set from another family', function (): void {
             $user = User::factory()->create();
             $otherFamily = Family::factory()->create();
@@ -288,6 +291,36 @@ describe('FamilySetController', function (): void {
             ]);
 
             $response->assertStatus(404);
+        });
+
+        it('should return 401 when unauthenticated', function (): void {
+            $set = Set::factory()->create();
+            $familySet = FamilySet::factory()->create([
+                'set_id' => $set->id,
+            ]);
+
+            $response = $this->patchJson('/api/family-sets/' . $familySet->id, [
+                'quantity' => 5,
+                'status' => 'built',
+            ]);
+
+            $response->assertStatus(401);
+        });
+
+        it('should require quantity and status', function (): void {
+            $user = User::factory()->create();
+            $set = Set::factory()->create();
+            $familySet = FamilySet::factory()->create([
+                'family_id' => $user->family_id,
+                'set_id' => $set->id,
+            ]);
+
+            $response = $this->actingAs($user)->patchJson('/api/family-sets/' . $familySet->id, [
+                'notes' => 'Just notes',
+            ]);
+
+            $response->assertStatus(422)
+                ->assertJsonValidationErrors(['quantity', 'status']);
         });
     });
 
@@ -321,6 +354,17 @@ describe('FamilySetController', function (): void {
             $response->assertStatus(404);
 
             $this->assertDatabaseHas('family_sets', ['id' => $familySet->id]);
+        });
+
+        it('should return 401 when unauthenticated', function (): void {
+            $set = Set::factory()->create();
+            $familySet = FamilySet::factory()->create([
+                'set_id' => $set->id,
+            ]);
+
+            $response = $this->deleteJson('/api/family-sets/' . $familySet->id);
+
+            $response->assertStatus(401);
         });
     });
 });
