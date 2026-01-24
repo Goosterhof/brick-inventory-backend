@@ -357,11 +357,16 @@ it('should not have cascade deletes in migrations', function (): void {
         $content = file_get_contents($file);
         $filename = basename((string) $file);
 
-        expect(str_contains($content, "onDelete('cascade')"))
-            ->toBeFalse(sprintf("Migration %s should not use onDelete('cascade') - handle in Action classes", $filename));
+        // Strip comments to avoid false positives
+        $contentWithoutComments = preg_replace('/\/\*.*?\*\/|\/\/.*$/ms', '', $content);
 
-        expect(str_contains($content, '->cascadeOnDelete()'))
-            ->toBeFalse(sprintf('Migration %s should not use cascadeOnDelete() - handle in Action classes', $filename));
+        // Check for onDelete('cascade') or onDelete("cascade") with flexible whitespace
+        expect(preg_match('/->onDelete\s*\(\s*[\'"]cascade[\'"]\s*\)/i', (string) $contentWithoutComments))
+            ->toBe(0, sprintf('Migration %s should not use onDelete(cascade) - handle in Action classes', $filename));
+
+        // Check for cascadeOnDelete() with flexible whitespace
+        expect(preg_match('/->cascadeOnDelete\s*\(\s*\)/i', (string) $contentWithoutComments))
+            ->toBe(0, sprintf('Migration %s should not use cascadeOnDelete() - handle in Action classes', $filename));
     }
 });
 
