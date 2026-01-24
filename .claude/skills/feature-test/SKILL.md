@@ -54,10 +54,10 @@ Identify the primary model from:
 - Type-hinted parameters in controller methods
 - Controller name (e.g., `StorageOptionController` → `StorageOption`)
 
-#### API Resource
-Look for `app/Http/Resources/{ModelName}Resource.php` to determine JSON structure for assertions.
+#### ResourceData Class
+Look for `app/Http/Resources/{ModelName}ResourceData.php` to determine JSON structure for assertions.
 
-Read the resource's `toArray()` method to identify expected keys.
+Read the ResourceData class constructor or `from()` method to identify expected keys. Note: ResourceData classes return directly without a `data` wrapper.
 
 #### Form Request
 For `store`/`update` methods, look for:
@@ -134,8 +134,8 @@ describe('index', function (): void {
         $response = $this->actingAs($user)->getJson('{route}');
 
         $response->assertStatus(200)
-            ->assertJsonCount(1, 'data')
-            ->assertJsonPath('data.0.id', ${resource}->id);
+            ->assertJsonCount(1)
+            ->assertJsonPath('0.id', ${resource}->id);
     });
 
     it('should not return {resources} from other families', function (): void {
@@ -145,7 +145,7 @@ describe('index', function (): void {
         $response = $this->actingAs($user)->getJson('{route}');
 
         $response->assertStatus(200)
-            ->assertJsonCount(0, 'data');
+            ->assertJsonCount(0);
     });
 
     it('should return 401 when unauthenticated', function (): void {
@@ -168,7 +168,7 @@ describe('store', function (): void {
         ]);
 
         $response->assertStatus(201)
-            ->assertJsonPath('data.{field}', {expectedValue});
+            ->assertJsonPath('{field}', {expectedValue});
 
         $this->assertDatabaseHas('{table}', [
             'family_id' => $user->family_id,
@@ -207,7 +207,7 @@ describe('show', function (): void {
         $response = $this->actingAs($user)->getJson('{route}/' . ${resource}->id);
 
         $response->assertStatus(200)
-            ->assertJsonPath('data.id', ${resource}->id);
+            ->assertJsonPath('id', ${resource}->id);
     });
 
     it('should return 404 for {resource} from another family', function (): void {
@@ -244,7 +244,7 @@ describe('update', function (): void {
         ]);
 
         $response->assertStatus(200)
-            ->assertJsonPath('data.{field}', {newValue});
+            ->assertJsonPath('{field}', {newValue});
 
         $this->assertDatabaseHas('{table}', [
             'id' => ${resource}->id,
@@ -350,7 +350,7 @@ describe('parts', function (): void {
             ->getJson("/api/storage-options/{$storageOption->id}/parts");
 
         $response->assertStatus(200)
-            ->assertJsonCount(1, 'data');
+            ->assertJsonCount(1);
     });
 
     it('should return 404 for storage option from another family', function (): void {
@@ -416,22 +416,35 @@ it('should validate {field} is {type}', function (): void {
 
 ## JSON Structure Assertions
 
-Read the API Resource's `toArray()` method to determine expected keys.
+Read the ResourceData class to determine expected keys. This codebase uses `ResourceData` classes that return directly without a `data` wrapper.
 
-For a resource returning:
+For a ResourceData returning:
 ```php
-return [
-    'id' => $this->resource->id,
-    'name' => $this->resource->name,
-    'created_at' => $this->resource->created_at,
-];
+public static function from(Model $model): self
+{
+    return new self(
+        id: $model->id,
+        name: $model->name,
+        created_at: $model->created_at,
+    );
+}
 ```
 
-Generate assertions:
+Generate assertions for single resources:
 ```php
 $response->assertStatus(200)
     ->assertJsonStructure([
-        'data' => [
+        'id',
+        'name',
+        'created_at',
+    ]);
+```
+
+For collections (returned as arrays without wrapper):
+```php
+$response->assertStatus(200)
+    ->assertJsonStructure([
+        '*' => [
             'id',
             'name',
             'created_at',
@@ -439,18 +452,11 @@ $response->assertStatus(200)
     ]);
 ```
 
-For collections:
+Use `assertJsonPath` for specific value assertions:
 ```php
 $response->assertStatus(200)
-    ->assertJsonStructure([
-        'data' => [
-            '*' => [
-                'id',
-                'name',
-                'created_at',
-            ],
-        ],
-    ]);
+    ->assertJsonPath('name', 'Expected Name')
+    ->assertJsonPath('0.name', 'First Item Name'); // For collections
 ```
 
 ## Factory Dependencies
