@@ -92,6 +92,39 @@ $model = Model::create(['name' => $data['name']]);
 - Standard Laravel RESTful API
 - Resource controllers for CRUD operations
 
+### Database Conventions
+
+#### Migration Structure
+- Use anonymous classes: `return new class extends Migration`
+- Add `void` return type to `up()`, `down()`, and Schema callbacks
+- Always implement both `up()` and `down()` methods
+
+#### Foreign Keys
+- Use `->constrained()` for foreign keys
+- **No cascade deletes**: Never use `onDelete('cascade')` or `cascadeOnDelete()`
+- Deletion cascading must be handled in Action classes (business logic), not at the database level
+- This prevents unintended data loss and keeps deletion logic explicit and controllable
+
+Example:
+```php
+// Correct - no cascade
+$table->foreignId('cabinet_id')->constrained();
+$table->foreignId('family_id')->nullable()->constrained();
+
+// Wrong - cascade delete
+$table->foreignId('cabinet_id')->constrained()->onDelete('cascade');
+```
+
+#### Tenant Scoping (family_id)
+Include `family_id` for user-owned/tenant-scoped data:
+- Storage-related: drawers, cabinets, shelves, storage options
+- User collections: inventories, wishlists, builds
+- User preferences: settings, configurations
+
+Exclude `family_id` for shared/reference data:
+- LEGO reference data: colors, parts, sets, themes, categories
+- System data: jobs, cache, tokens
+
 ## Testing
 
 Uses Pest PHP with the following conventions:
@@ -129,6 +162,10 @@ The following rules are enforced via Pest architecture tests:
 - Actions must end with `Action` and only have `execute` as public method
 - All files must declare strict types
 - No debugging statements (`dd`, `dump`, `var_dump`, `ray`)
+- Migrations must use anonymous classes
+- Migrations must have `void` return types on `up()` and `down()`
+- Migrations must declare strict types
+- Migrations must NOT use cascade deletes (`onDelete('cascade')` or `cascadeOnDelete()`)
 
 ## Commands
 
@@ -168,9 +205,11 @@ The following custom skills are available:
 | Skill | Description |
 |-------|-------------|
 | `/factory` | Generate a factory from an existing model. Use `/factory ModelName` to create a factory with faker methods and state helpers. |
+| `/migration` | Generate a migration from a model name. Use `/migration ModelName` to create a migration. Auto-detects create vs modify, supports pivot tables. |
 | `/model` | Generate an Eloquent model from an existing migration. Use `/model ModelName` to create a model. |
 | `/unit-test` | Create or run unit tests. Use `/unit-test ClassName` to generate tests for a class, or `/unit-test --run` to run all tests. |
 | `/resource-data` | Create a ResourceData class for API responses. Use `/resource-data ModelName` to generate a ResourceData class for a model. |
 | `/form-request` | Create Form Requests using the DTOFormRequest pattern with interface contracts. Includes templates, type mapping, and checklist. |
 | `/action` | Create Action classes. Use `/action CreateUser` to generate an action. Infers type from verb (Create, Update, Delete, Get). |
 | `/controller` | Create a resource controller. Use `/controller ModelName` to generate a controller with CRUD operations, routes, and Action placeholders. |
+| `/feature-test` | Generate feature tests for API controllers. Use `/feature-test ControllerName` to generate tests for all endpoints in that controller. |

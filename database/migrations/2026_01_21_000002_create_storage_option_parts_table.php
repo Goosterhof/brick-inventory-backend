@@ -12,9 +12,9 @@ return new class extends Migration
     {
         Schema::create('storage_option_parts', function (Blueprint $table): void {
             $table->id();
-            $table->foreignId('storage_option_id')->constrained()->onDelete('cascade');
-            $table->foreignId('part_id')->constrained()->onDelete('cascade');
-            $table->foreignId('color_id')->nullable()->constrained()->onDelete('cascade');
+            $table->foreignId('storage_option_id')->constrained();
+            $table->foreignId('part_id')->constrained();
+            $table->foreignId('color_id')->nullable()->constrained();
             $table->unsignedInteger('quantity')->default(0);
             $table->timestamps();
 
