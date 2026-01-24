@@ -355,45 +355,45 @@ function getMigrationFiles(): array
 it('should not have cascade deletes in migrations', function (): void {
     foreach (getMigrationFiles() as $file) {
         $content = file_get_contents($file);
-        $filename = basename($file);
+        $filename = basename((string) $file);
 
         expect(str_contains($content, "onDelete('cascade')"))
-            ->toBeFalse("Migration {$filename} should not use onDelete('cascade') - handle in Action classes");
+            ->toBeFalse(sprintf("Migration %s should not use onDelete('cascade') - handle in Action classes", $filename));
 
         expect(str_contains($content, '->cascadeOnDelete()'))
-            ->toBeFalse("Migration {$filename} should not use cascadeOnDelete() - handle in Action classes");
+            ->toBeFalse(sprintf('Migration %s should not use cascadeOnDelete() - handle in Action classes', $filename));
     }
 });
 
 it('should use anonymous classes in migrations', function (): void {
     foreach (getMigrationFiles() as $file) {
         $content = file_get_contents($file);
-        $filename = basename($file);
+        $filename = basename((string) $file);
 
         expect(str_contains($content, 'return new class extends Migration'))
-            ->toBeTrue("Migration {$filename} should use anonymous class syntax");
+            ->toBeTrue(sprintf('Migration %s should use anonymous class syntax', $filename));
     }
 });
 
 it('should have void return types in migration methods', function (): void {
     foreach (getMigrationFiles() as $file) {
         $content = file_get_contents($file);
-        $filename = basename($file);
+        $filename = basename((string) $file);
 
         expect(preg_match('/public function up\(\):\s*void/', $content))
-            ->toBe(1, "Migration {$filename} up() method should have void return type");
+            ->toBe(1, sprintf('Migration %s up() method should have void return type', $filename));
 
         expect(preg_match('/public function down\(\):\s*void/', $content))
-            ->toBe(1, "Migration {$filename} down() method should have void return type");
+            ->toBe(1, sprintf('Migration %s down() method should have void return type', $filename));
     }
 });
 
 it('should use strict types in migrations', function (): void {
     foreach (getMigrationFiles() as $file) {
         $content = file_get_contents($file);
-        $filename = basename($file);
+        $filename = basename((string) $file);
 
         expect(str_contains($content, 'declare(strict_types=1)'))
-            ->toBeTrue("Migration {$filename} should declare strict types");
+            ->toBeTrue(sprintf('Migration %s should declare strict types', $filename));
     }
 });
