@@ -158,9 +158,9 @@ Create the file with this structure:
 
 declare(strict_types=1);
 
-namespace Database\Factories{SubNamespace};
+namespace Database\Factories\{SubNamespace};
 
-use App\Models{SubNamespace}\{ModelName};
+use App\Models\{SubNamespace}\{ModelName};
 // ... other imports (related models, enums)
 use Illuminate\Database\Eloquent\Factories\Factory;
 
