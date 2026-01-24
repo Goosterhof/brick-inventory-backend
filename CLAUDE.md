@@ -21,8 +21,9 @@ LEGO inventory management system. The goal is to provide a list of parts needed 
 ### Code Patterns
 - **Action classes**: For internal business logic (single-responsibility)
 - **Service classes**: For external API connections (e.g., `RebrickableService`)
+- **ResourceData classes**: DTO-style classes for API responses (extend `ResourceData` base class)
 - **DTOFormRequest pattern**: Form Requests that act as DTOs with interface contracts
-- **Standard Laravel**: Controllers, Models, API Resources for the rest
+- **Standard Laravel**: Controllers, Models for the rest
 
 ### Form Requests as DTOs
 
@@ -168,6 +169,7 @@ The following custom skills are available:
 |-------|-------------|
 | `/model` | Generate an Eloquent model from an existing migration. Use `/model ModelName` to create a model. |
 | `/unit-test` | Create or run unit tests. Use `/unit-test ClassName` to generate tests for a class, or `/unit-test --run` to run all tests. |
+| `/resource-data` | Create a ResourceData class for API responses. Use `/resource-data ModelName` to generate a ResourceData class for a model. |
 | `/form-request` | Create Form Requests using the DTOFormRequest pattern with interface contracts. Includes templates, type mapping, and checklist. |
 | `/action` | Create Action classes. Use `/action CreateUser` to generate an action. Infers type from verb (Create, Update, Delete, Get). |
 | `/controller` | Create a resource controller. Use `/controller ModelName` to generate a controller with CRUD operations, routes, and Action placeholders. |
