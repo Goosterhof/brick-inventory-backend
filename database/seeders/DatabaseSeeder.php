@@ -36,9 +36,12 @@ class DatabaseSeeder extends Seeder
             'email' => 'test@example.com',
         ]);
 
-        // Tenant-scoped seeders (require family parameter)
-        // Uncomment to seed additional data:
+        // Tenant seeders (create tenant entities such as families)
+        // Uncomment to create additional families:
         // (new FamilySeeder())->run();
+
+        // Tenant-scoped seeders (require existing family parameter)
+        // Uncomment to seed additional data for the test family:
         // (new UserSeeder())->run($family);
         // (new FamilySetSeeder())->run($family);
         // (new StorageOptionSeeder())->run($family);
