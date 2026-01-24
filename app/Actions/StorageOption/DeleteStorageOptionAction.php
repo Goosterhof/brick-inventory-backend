@@ -10,6 +10,15 @@ class DeleteStorageOptionAction
 {
     public function execute(StorageOption $storageOption): void
     {
+        // Recursively delete children first
+        foreach ($storageOption->children as $child) {
+            $this->execute($child);
+        }
+
+        // Delete associated storage option parts
+        $storageOption->storageOptionParts()->delete();
+
+        // Delete the storage option
         $storageOption->delete();
     }
 }
