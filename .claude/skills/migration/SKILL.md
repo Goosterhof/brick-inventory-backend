@@ -30,7 +30,7 @@ ls app/Models/
 
 If the name can be split into two existing model names (e.g., `ColorPart` → `Color` + `Part`):
 - Create a pivot table migration
-- Table name follows Laravel convention: alphabetical order, snake_case (e.g., `color_part`)
+- Table name follows this project's convention: snake_case plural based on the model name (e.g., `ColorPart` → `color_parts`)
 - Include both foreign keys
 
 ### 2. Create vs Modify Detection
