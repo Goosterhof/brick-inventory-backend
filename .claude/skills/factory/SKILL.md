@@ -62,13 +62,35 @@ Create subdirectories if needed.
 
 ### Step 5: Map Properties to Faker Methods
 
-Use these mappings based on column type and name:
+**IMPORTANT: Detection Priority**
 
-**By column name patterns:**
+Foreign key detection takes precedence over column name patterns. A column is a **foreign key** if:
+1. The migration uses `foreignId()` or `->constrained()` for it, OR
+2. The model has a `BelongsTo` relationship method for it
+
+If a `*_id` column is NOT a foreign key (no constraint, no relationship), treat it as an external identifier.
+
+**Foreign keys (detected via migration/relationships):**
+
+| Constraint | Faker Method |
+|------------|--------------|
+| Required FK | `RelatedModel::factory()` |
+| Nullable FK | `null` |
+
+Example - `family_id` with `BelongsTo` relationship → `Family::factory()`
+
+**External identifiers (non-FK `*_id` columns):**
+
+| Pattern | Faker Method | Example |
+|---------|--------------|---------|
+| `rebrickable_id`, `stripe_id`, etc. | `fake()->unique()->randomNumber(4)` | External API IDs |
+
+Example - `rebrickable_id` with no relationship → `fake()->unique()->randomNumber(4)`
+
+**By column name patterns (non-FK columns):**
 
 | Pattern | Faker Method |
 |---------|--------------|
-| `*_id` (external, unique) | `fake()->unique()->randomNumber(4)` |
 | `email` | `fake()->unique()->safeEmail()` |
 | `name` (person) | `fake()->name()` |
 | `name` (thing) | `fake()->words(2, true)` |
@@ -342,6 +364,48 @@ class StorageOptionFactory extends Factory
         ]);
     }
 }
+```
+
+## Example with External Identifiers
+
+For a model with external IDs (non-FK `*_id` columns):
+
+```php
+/**
+ * @property positive-int $id
+ * @property int $rebrickable_id    // No BelongsTo relationship = external ID
+ * @property string $name
+ * @property string $rgb
+ * @property bool $is_transparent
+ */
+class Color extends Model
+{
+    // No rebrickable() relationship - it's an external identifier
+}
+```
+
+Generate:
+
+```php
+public function definition(): array
+{
+    return [
+        'rebrickable_id' => fake()->unique()->randomNumber(4),  // External ID, not a FK
+        'name' => fake()->colorName(),
+        'rgb' => fake()->hexColor(),
+        'is_transparent' => fake()->boolean(20),
+    ];
+}
+```
+
+**Contrast with foreign keys:**
+
+```php
+// This IS a foreign key (has BelongsTo relationship)
+'family_id' => Family::factory(),
+
+// This is NOT a foreign key (no relationship, external API ID)
+'rebrickable_id' => fake()->unique()->randomNumber(4),
 ```
 
 ## Example with Enums
