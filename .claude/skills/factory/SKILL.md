@@ -223,7 +223,11 @@ public function definition(): array
 
 ### Step 8: Overwrite Handling
 
-If the factory file already exists, overwrite it silently without asking.
+If the factory file already exists, **ask the user for confirmation** before overwriting:
+
+> "Factory `{FactoryName}` already exists at `{path}`. Do you want to overwrite it? (y/n)"
+
+Only proceed with overwriting if the user confirms.
 
 ### Step 9: Validation
 
