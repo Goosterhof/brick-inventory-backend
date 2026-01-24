@@ -167,6 +167,7 @@ The following custom skills are available:
 
 | Skill | Description |
 |-------|-------------|
+| `/factory` | Generate a factory from an existing model. Use `/factory ModelName` to create a factory with faker methods and state helpers. |
 | `/model` | Generate an Eloquent model from an existing migration. Use `/model ModelName` to create a model. |
 | `/unit-test` | Create or run unit tests. Use `/unit-test ClassName` to generate tests for a class, or `/unit-test --run` to run all tests. |
 | `/resource-data` | Create a ResourceData class for API responses. Use `/resource-data ModelName` to generate a ResourceData class for a model. |
