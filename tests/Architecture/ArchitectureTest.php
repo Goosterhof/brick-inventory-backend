@@ -386,7 +386,7 @@ it('should have void return types in migration methods', function (): void {
         $filename = basename((string) $file);
 
         expect(preg_match('/public function up\(\)\s*:\s*void/', $content))
-            ->toBe(1, "Migration {$filename} up() method should have void return type");
+            ->toBe(1, sprintf('Migration %s up() method should have void return type', $filename));
 
         expect(preg_match('/public function down\(\)\s*:\s*void/', $content))
             ->toBe(1, sprintf('Migration %s down() method should have void return type', $filename));
