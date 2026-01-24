@@ -42,6 +42,5 @@ class DatabaseSeeder extends Seeder
         // (new UserSeeder())->run($family);
         // (new FamilySetSeeder())->run($family);
         // (new StorageOptionSeeder())->run($family);
-        // (new StorageOptionPartSeeder())->run();
     }
 }
