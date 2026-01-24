@@ -124,3 +124,4 @@ The following custom skills are available:
 | `/unit-test` | Create or run unit tests. Use `/unit-test ClassName` to generate tests for a class, or `/unit-test --run` to run all tests. |
 | `/action` | Create Action classes. Use `/action CreateUser` to generate an action. Infers type from verb (Create, Update, Delete, Get). |
 | `/controller` | Create a resource controller. Use `/controller ModelName` to generate a controller with CRUD operations, routes, and Action placeholders. |
+| `/feature-test` | Generate feature tests for API controllers. Use `/feature-test ControllerName` to generate tests for all endpoints in that controller. |
