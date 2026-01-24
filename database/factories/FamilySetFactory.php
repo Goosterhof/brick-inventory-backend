@@ -31,4 +31,18 @@ class FamilySetFactory extends Factory
             'notes' => fake()->optional()->sentence(),
         ];
     }
+
+    public function forFamily(Family $family): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'family_id' => $family->id,
+        ]);
+    }
+
+    public function forSet(Set $set): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'set_id' => $set->id,
+        ]);
+    }
 }

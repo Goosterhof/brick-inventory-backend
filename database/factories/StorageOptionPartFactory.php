@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Database\Factories;
 
+use App\Models\Color;
 use App\Models\Part;
 use App\Models\StorageOption;
 use App\Models\StorageOptionPart;
@@ -27,5 +28,26 @@ class StorageOptionPartFactory extends Factory
             'color_id' => null,
             'quantity' => fake()->numberBetween(1, 100),
         ];
+    }
+
+    public function forStorageOption(StorageOption $storageOption): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'storage_option_id' => $storageOption->id,
+        ]);
+    }
+
+    public function forPart(Part $part): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'part_id' => $part->id,
+        ]);
+    }
+
+    public function withColor(Color $color): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'color_id' => $color->id,
+        ]);
     }
 }

@@ -46,4 +46,11 @@ class UserFactory extends Factory
             'email_verified_at' => null,
         ]);
     }
+
+    public function forFamily(Family $family): static
+    {
+        return $this->state(fn (array $attributes): array => [
+            'family_id' => $family->id,
+        ]);
+    }
 }
