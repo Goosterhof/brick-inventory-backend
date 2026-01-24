@@ -173,3 +173,4 @@ The following custom skills are available:
 | `/form-request` | Create Form Requests using the DTOFormRequest pattern with interface contracts. Includes templates, type mapping, and checklist. |
 | `/action` | Create Action classes. Use `/action CreateUser` to generate an action. Infers type from verb (Create, Update, Delete, Get). |
 | `/controller` | Create a resource controller. Use `/controller ModelName` to generate a controller with CRUD operations, routes, and Action placeholders. |
+| `/feature-test` | Generate feature tests for API controllers. Use `/feature-test ControllerName` to generate tests for all endpoints in that controller. |
