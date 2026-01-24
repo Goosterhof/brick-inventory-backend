@@ -22,8 +22,8 @@ describe('StorageOptionController', function (): void {
             $response = $this->actingAs($user)->getJson('/api/storage-options');
 
             $response->assertStatus(200)
-                ->assertJsonCount(1, 'data')
-                ->assertJsonPath('data.0.name', 'Cabinet 1');
+                ->assertJsonCount(1)
+                ->assertJsonPath('0.name', 'Cabinet 1');
         });
 
         it('should not return storage options from other families', function (): void {
@@ -33,7 +33,7 @@ describe('StorageOptionController', function (): void {
             $response = $this->actingAs($user)->getJson('/api/storage-options');
 
             $response->assertStatus(200)
-                ->assertJsonCount(0, 'data');
+                ->assertJsonCount(0);
         });
 
         it('should require authentication', function (): void {
@@ -57,8 +57,8 @@ describe('StorageOptionController', function (): void {
             $response = $this->actingAs($user)->getJson('/api/storage-options');
 
             $response->assertStatus(200)
-                ->assertJsonCount(1, 'data')
-                ->assertJsonPath('data.0.children.0.name', 'Drawer A1');
+                ->assertJsonCount(1)
+                ->assertJsonPath('0.children.0.name', 'Drawer A1');
         });
     });
 
@@ -72,8 +72,8 @@ describe('StorageOptionController', function (): void {
             ]);
 
             $response->assertStatus(201)
-                ->assertJsonPath('data.name', 'New Cabinet')
-                ->assertJsonPath('data.description', 'A test cabinet');
+                ->assertJsonPath('name', 'New Cabinet')
+                ->assertJsonPath('description', 'A test cabinet');
 
             $this->assertDatabaseHas('storage_options', [
                 'family_id' => $user->family_id,
@@ -95,9 +95,9 @@ describe('StorageOptionController', function (): void {
             ]);
 
             $response->assertStatus(201)
-                ->assertJsonPath('data.parent_id', $cabinet->id)
-                ->assertJsonPath('data.row', 1)
-                ->assertJsonPath('data.column', 1);
+                ->assertJsonPath('parent_id', $cabinet->id)
+                ->assertJsonPath('row', 1)
+                ->assertJsonPath('column', 1);
         });
 
         it('should require name', function (): void {
@@ -121,7 +121,7 @@ describe('StorageOptionController', function (): void {
             $response = $this->actingAs($user)->getJson('/api/storage-options/' . $storageOption->id);
 
             $response->assertStatus(200)
-                ->assertJsonPath('data.name', 'Cabinet 1');
+                ->assertJsonPath('name', 'Cabinet 1');
         });
 
         it('should not return storage option from another family', function (): void {
@@ -148,8 +148,8 @@ describe('StorageOptionController', function (): void {
             ]);
 
             $response->assertStatus(200)
-                ->assertJsonPath('data.name', 'New Name')
-                ->assertJsonPath('data.description', 'Updated description');
+                ->assertJsonPath('name', 'New Name')
+                ->assertJsonPath('description', 'Updated description');
         });
 
         it('should not update storage option from another family', function (): void {
@@ -221,8 +221,8 @@ describe('StorageOptionController', function (): void {
             $response = $this->actingAs($user)->getJson(sprintf('/api/storage-options/%s/parts', $storageOption->id));
 
             $response->assertStatus(200)
-                ->assertJsonCount(1, 'data')
-                ->assertJsonPath('data.0.quantity', 50);
+                ->assertJsonCount(1)
+                ->assertJsonPath('0.quantity', 50);
         });
     });
 
@@ -240,7 +240,7 @@ describe('StorageOptionController', function (): void {
             ]);
 
             $response->assertStatus(201)
-                ->assertJsonPath('data.quantity', 100);
+                ->assertJsonPath('quantity', 100);
 
             $this->assertDatabaseHas('storage_option_parts', [
                 'storage_option_id' => $storageOption->id,
@@ -267,7 +267,7 @@ describe('StorageOptionController', function (): void {
             ]);
 
             $response->assertStatus(200)
-                ->assertJsonPath('data.quantity', 150);
+                ->assertJsonPath('quantity', 150);
 
             expect(StorageOptionPart::where('storage_option_id', $storageOption->id)
                 ->where('part_id', $part->id)

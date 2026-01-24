@@ -6,7 +6,7 @@ use App\DataTransferObjects\ColorData;
 use App\DataTransferObjects\SetData;
 use App\DataTransferObjects\SetPartData;
 use App\DataTransferObjects\SetPartsResultData;
-use App\Http\Resources\SetPartsResource;
+use App\Http\LegacyResources\SetPartsResource;
 use Illuminate\Http\Request;
 
 describe('SetPartsResource', function (): void {

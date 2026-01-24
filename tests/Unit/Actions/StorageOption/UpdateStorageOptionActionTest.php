@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\StorageOption\UpdateStorageOptionAction;
-use App\DataTransferObjects\UpdateStorageOptionData;
+use App\Contracts\StorageOption\UpdateStorageOptionInterface;
 use App\Models\StorageOption;
 
 describe('UpdateStorageOptionAction', function (): void {
@@ -13,13 +13,18 @@ describe('UpdateStorageOptionAction', function (): void {
         $storageOption->shouldReceive('save')->once();
 
         $action = new UpdateStorageOptionAction;
-        $data = new UpdateStorageOptionData(
-            name: 'New Name',
-            description: 'New description',
-            parentId: null,
-            row: null,
-            column: null,
-        );
+        $data = new class implements UpdateStorageOptionInterface
+        {
+            public string $name = 'New Name';
+
+            public ?string $description = 'New description';
+
+            public ?int $parentId = null;
+
+            public ?int $row = null;
+
+            public ?int $column = null;
+        };
 
         // act
         $result = $action->execute($storageOption, $data);
@@ -36,13 +41,18 @@ describe('UpdateStorageOptionAction', function (): void {
         $storageOption->shouldReceive('save')->once();
 
         $action = new UpdateStorageOptionAction;
-        $data = new UpdateStorageOptionData(
-            name: 'Drawer',
-            description: null,
-            parentId: null,
-            row: 3,
-            column: 4,
-        );
+        $data = new class implements UpdateStorageOptionInterface
+        {
+            public string $name = 'Drawer';
+
+            public ?string $description = null;
+
+            public ?int $parentId = null;
+
+            public ?int $row = 3;
+
+            public ?int $column = 4;
+        };
 
         // act
         $action->execute($storageOption, $data);
@@ -58,13 +68,18 @@ describe('UpdateStorageOptionAction', function (): void {
         $storageOption->shouldReceive('save')->once();
 
         $action = new UpdateStorageOptionAction;
-        $data = new UpdateStorageOptionData(
-            name: 'Drawer',
-            description: null,
-            parentId: 5,
-            row: null,
-            column: null,
-        );
+        $data = new class implements UpdateStorageOptionInterface
+        {
+            public string $name = 'Drawer';
+
+            public ?string $description = null;
+
+            public ?int $parentId = 5;
+
+            public ?int $row = null;
+
+            public ?int $column = null;
+        };
 
         // act
         $action->execute($storageOption, $data);
@@ -79,13 +94,18 @@ describe('UpdateStorageOptionAction', function (): void {
         $storageOption->shouldReceive('save')->once();
 
         $action = new UpdateStorageOptionAction;
-        $data = new UpdateStorageOptionData(
-            name: 'Updated',
-            description: null,
-            parentId: null,
-            row: null,
-            column: null,
-        );
+        $data = new class implements UpdateStorageOptionInterface
+        {
+            public string $name = 'Updated';
+
+            public ?string $description = null;
+
+            public ?int $parentId = null;
+
+            public ?int $row = null;
+
+            public ?int $column = null;
+        };
 
         // act
         $action->execute($storageOption, $data);

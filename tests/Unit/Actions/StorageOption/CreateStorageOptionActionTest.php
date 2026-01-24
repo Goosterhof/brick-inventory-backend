@@ -3,8 +3,9 @@
 declare(strict_types=1);
 
 use App\Actions\StorageOption\CreateStorageOptionAction;
-use App\DataTransferObjects\CreateStorageOptionData;
+use App\Contracts\StorageOption\CreateStorageOptionInterface;
 use App\Models\StorageOption;
+use App\Models\User;
 
 describe('CreateStorageOptionAction', function (): void {
     it('should create a storage option with the provided data', function (): void {
@@ -18,15 +19,22 @@ describe('CreateStorageOptionAction', function (): void {
             ->once()
             ->andReturn($storageOptionInstance);
 
-        $action = new CreateStorageOptionAction($storageOption);
-        $data = new CreateStorageOptionData(
-            familyId: 1,
-            name: 'Cabinet 1',
-            description: 'Main storage cabinet',
-            parentId: null,
-            row: null,
-            column: null,
-        );
+        $user = Mockery::mock(User::class)->makePartial();
+        $user->family_id = 1;
+
+        $action = new CreateStorageOptionAction($storageOption, $user);
+        $data = new class implements CreateStorageOptionInterface
+        {
+            public string $name = 'Cabinet 1';
+
+            public ?string $description = 'Main storage cabinet';
+
+            public ?int $parentId = null;
+
+            public ?int $row = null;
+
+            public ?int $column = null;
+        };
 
         // act
         $result = $action->execute($data);
@@ -49,15 +57,22 @@ describe('CreateStorageOptionAction', function (): void {
             ->once()
             ->andReturn($storageOptionInstance);
 
-        $action = new CreateStorageOptionAction($storageOption);
-        $data = new CreateStorageOptionData(
-            familyId: 1,
-            name: 'Drawer A1',
-            description: null,
-            parentId: 5,
-            row: 1,
-            column: 2,
-        );
+        $user = Mockery::mock(User::class)->makePartial();
+        $user->family_id = 1;
+
+        $action = new CreateStorageOptionAction($storageOption, $user);
+        $data = new class implements CreateStorageOptionInterface
+        {
+            public string $name = 'Drawer A1';
+
+            public ?string $description = null;
+
+            public ?int $parentId = 5;
+
+            public ?int $row = 1;
+
+            public ?int $column = 2;
+        };
 
         // act
         $action->execute($data);
@@ -78,15 +93,22 @@ describe('CreateStorageOptionAction', function (): void {
             ->withNoArgs()
             ->andReturn($storageOptionInstance);
 
-        $action = new CreateStorageOptionAction($storageOption);
-        $data = new CreateStorageOptionData(
-            familyId: 1,
-            name: 'Test Cabinet',
-            description: null,
-            parentId: null,
-            row: null,
-            column: null,
-        );
+        $user = Mockery::mock(User::class)->makePartial();
+        $user->family_id = 1;
+
+        $action = new CreateStorageOptionAction($storageOption, $user);
+        $data = new class implements CreateStorageOptionInterface
+        {
+            public string $name = 'Test Cabinet';
+
+            public ?string $description = null;
+
+            public ?int $parentId = null;
+
+            public ?int $row = null;
+
+            public ?int $column = null;
+        };
 
         // act
         $action->execute($data);
