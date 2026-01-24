@@ -51,66 +51,40 @@ class StorageOptionController extends Controller
         return StorageOptionResourceData::from($storageOption)->toResponseWithStatus(201);
     }
 
-    public function show(#[CurrentUser] User $user, StorageOption $storageOption): StorageOptionResourceData|JsonResponse
+    public function show(StorageOption $storageOption): StorageOptionResourceData
     {
-        if ($storageOption->family_id !== $user->family_id) {
-            return response()->json(['error' => 'Not found'], 404);
-        }
-
         $storageOption->load('children');
 
         return StorageOptionResourceData::from($storageOption);
     }
 
-    public function update(
-        UpdateStorageOptionRequest $request,
-        StorageOption $storageOption,
-        #[CurrentUser] User $user,
-    ): StorageOptionResourceData|JsonResponse {
-        if ($storageOption->family_id !== $user->family_id) {
-            return response()->json(['error' => 'Not found'], 404);
-        }
-
+    public function update(UpdateStorageOptionRequest $request, StorageOption $storageOption): StorageOptionResourceData
+    {
         $storageOption = $this->updateStorageOptionAction->execute($storageOption, $request);
         $storageOption->load('children');
 
         return StorageOptionResourceData::from($storageOption);
     }
 
-    public function destroy(#[CurrentUser] User $user, StorageOption $storageOption): JsonResponse
+    public function destroy(StorageOption $storageOption): JsonResponse
     {
-        if ($storageOption->family_id !== $user->family_id) {
-            return response()->json(['error' => 'Not found'], 404);
-        }
-
         $this->deleteStorageOptionAction->execute($storageOption);
 
         return response()->json(null, 204);
     }
 
     /**
-     * @return array<int, StorageOptionPartResourceData>|JsonResponse
+     * @return array<int, StorageOptionPartResourceData>
      */
-    public function parts(#[CurrentUser] User $user, StorageOption $storageOption): array|JsonResponse
+    public function parts(StorageOption $storageOption): array
     {
-        if ($storageOption->family_id !== $user->family_id) {
-            return response()->json(['error' => 'Not found'], 404);
-        }
-
         $parts = $storageOption->storageOptionParts()->with(['part', 'color'])->get();
 
         return StorageOptionPartResourceData::collection($parts);
     }
 
-    public function assignPart(
-        AssignPartRequest $request,
-        StorageOption $storageOption,
-        #[CurrentUser] User $user,
-    ): JsonResponse {
-        if ($storageOption->family_id !== $user->family_id) {
-            return response()->json(['error' => 'Not found'], 404);
-        }
-
+    public function assignPart(AssignPartRequest $request, StorageOption $storageOption): JsonResponse
+    {
         $storageOptionPart = $this->createStorageOptionPartAction->execute($storageOption, $request);
         $storageOptionPart->load(['part', 'color']);
 
@@ -120,20 +94,13 @@ class StorageOptionController extends Controller
         return $resource->toResponseWithStatus($statusCode);
     }
 
-    public function removePart(
-        #[CurrentUser] User $user,
-        StorageOption $storageOption,
-        StorageOptionPart $part,
-    ): JsonResponse {
-        if ($storageOption->family_id !== $user->family_id) {
+    public function removePart(StorageOption $storageOption, StorageOptionPart $storageOptionPart): JsonResponse
+    {
+        if ($storageOptionPart->storage_option_id !== $storageOption->id) {
             return response()->json(['error' => 'Not found'], 404);
         }
 
-        if ($part->storage_option_id !== $storageOption->id) {
-            return response()->json(['error' => 'Not found'], 404);
-        }
-
-        $this->deleteStorageOptionPartAction->execute($part);
+        $this->deleteStorageOptionPartAction->execute($storageOptionPart);
 
         return response()->json(null, 204);
     }

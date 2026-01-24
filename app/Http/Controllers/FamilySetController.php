@@ -61,38 +61,23 @@ class FamilySetController extends Controller
         }
     }
 
-    public function show(#[CurrentUser] User $user, FamilySet $familySet): FamilySetResourceData|JsonResponse
+    public function show(FamilySet $familySet): FamilySetResourceData
     {
-        if ($familySet->family_id !== $user->family_id) {
-            return response()->json(['error' => 'Not found'], 404);
-        }
-
         $familySet->load('set');
 
         return FamilySetResourceData::from($familySet);
     }
 
-    public function update(
-        UpdateFamilySetRequest $request,
-        FamilySet $familySet,
-        #[CurrentUser] User $user,
-    ): FamilySetResourceData|JsonResponse {
-        if ($familySet->family_id !== $user->family_id) {
-            return response()->json(['error' => 'Not found'], 404);
-        }
-
+    public function update(UpdateFamilySetRequest $request, FamilySet $familySet): FamilySetResourceData
+    {
         $familySet = $this->updateFamilySetAction->execute($familySet, $request);
         $familySet->load('set');
 
         return FamilySetResourceData::from($familySet);
     }
 
-    public function destroy(#[CurrentUser] User $user, FamilySet $familySet): JsonResponse
+    public function destroy(FamilySet $familySet): JsonResponse
     {
-        if ($familySet->family_id !== $user->family_id) {
-            return response()->json(['error' => 'Not found'], 404);
-        }
-
         $this->deleteFamilySetAction->execute($familySet);
 
         return response()->json(null, 204);
