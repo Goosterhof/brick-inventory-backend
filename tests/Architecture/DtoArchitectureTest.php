@@ -1,0 +1,32 @@
+<?php
+
+declare(strict_types=1);
+
+arch('data transfer objects should end with Data')
+    ->expect('App\DataTransferObjects')
+    ->toHaveSuffix('Data');
+
+arch('data transfer objects should be readonly')
+    ->expect('App\DataTransferObjects')
+    ->toBeReadonly();
+
+arch('data transfer objects should be final')
+    ->expect('App\DataTransferObjects')
+    ->toBeFinal();
+
+it('should not have methods in DTOs', function (): void {
+    foreach (getClassesInDirectory(dirname(__DIR__, 2) . '/app/DataTransferObjects', 'App\\DataTransferObjects\\') as $className) {
+        $reflection = new ReflectionClass($className);
+        $methods = array_filter(
+            $reflection->getMethods(),
+            fn (ReflectionMethod $method): bool => $method->getDeclaringClass()->getName() === $className,
+        );
+
+        $methodNames = array_map(fn (ReflectionMethod $method): string => $method->getName(), $methods);
+        $nonConstructorMethods = array_diff($methodNames, ['__construct']);
+
+        expect($nonConstructorMethods)->toBeEmpty(
+            sprintf('DTO %s should only have __construct, found: %s', $className, implode(', ', $methodNames)),
+        );
+    }
+});
