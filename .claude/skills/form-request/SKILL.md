@@ -1,3 +1,10 @@
+---
+name: form-request
+description: Create Form Requests using the DTOFormRequest pattern with interface contracts
+argument-hint: <Name> [--fields="field1:type,field2:type"]
+allowed-tools: Read, Grep, Glob, Write, Edit, Bash(composer lint)
+---
+
 # Form Request Skill
 
 Create Form Requests that act as DTOs using the DTOFormRequest pattern with interface contracts.
@@ -28,6 +35,13 @@ When creating a new Form Request, create these files:
 
 1. **Interface**: `app/Contracts/{Domain}/{Name}Interface.php`
 2. **Request**: `app/Http/Requests/{Domain}/{Name}Request.php`
+
+### Interface Naming Convention
+The interface name should match the action verb:
+- `Store{Subject}Request` → `Create{Subject}Interface` (maps Store to Create)
+- `Update{Subject}Request` → `Update{Subject}Interface`
+
+This ensures compatibility with Action classes which use `Create`, `Update`, `Delete`, `Get` verbs.
 
 ## Templates
 
@@ -170,3 +184,16 @@ When creating a new Form Request:
 - [ ] Update Controller to pass request directly
 - [ ] Update unit tests to use anonymous classes
 - [ ] Run `composer lint && composer phpstan && composer test`
+
+## Workflow
+
+1. Parse the name from `$ARGUMENTS` (e.g., `StoreProduct`, `UpdateProduct`)
+2. Determine the domain from the subject (e.g., `Product` → check existing domains or create new)
+3. Map the request verb to interface verb:
+   - `Store{Subject}` → interface is `Create{Subject}Interface`
+   - `Update{Subject}` → interface is `Update{Subject}Interface`
+4. Check if the interface already exists in `app/Contracts/{Domain}/`
+5. If interface doesn't exist, create it
+6. Create the Form Request that implements the interface
+7. Run `composer lint` to format the code
+8. Inform the user about updating related Actions to accept the interface

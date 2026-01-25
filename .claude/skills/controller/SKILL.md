@@ -26,18 +26,18 @@ If no argument is provided, ask the user for the Model name.
 
 Before creating the controller, check if these files exist:
 
-### API Resource
-Check if `app/Http/Resources/{ModelName}Resource.php` exists:
+### ResourceData Class
+Check if `app/Http/Resources/{ModelName}ResourceData.php` exists:
 - If **yes**: Use it in the controller
-- If **no**: Inform the user and call the `/resource` skill to create it first
+- If **no**: Inform the user and call the `/resource-data` skill to create it first
 
 ### Form Requests
-Check if these exist:
-- `app/Http/Requests/Store{ModelName}Request.php`
-- `app/Http/Requests/Update{ModelName}Request.php`
+Check if these exist in `app/Http/Requests/{ModelName}/`:
+- `Store{ModelName}Request.php`
+- `Update{ModelName}Request.php`
 
 - If **yes**: Use them in the controller
-- If **no**: Inform the user and call the `/request` skill to create them first
+- If **no**: Inform the user and call the `/form-request` skill to create them first
 
 ## Controller Template
 
@@ -50,49 +50,65 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Actions\{ModelName}\Index{ModelPluralName}Action;
-use App\Actions\{ModelName}\Store{ModelName}Action;
-use App\Actions\{ModelName}\Show{ModelName}Action;
+use App\Actions\{ModelName}\Create{ModelName}Action;
+use App\Actions\{ModelName}\Delete{ModelName}Action;
+use App\Actions\{ModelName}\Get{ModelName}Action;
+use App\Actions\{ModelName}\Get{ModelPluralName}Action;
 use App\Actions\{ModelName}\Update{ModelName}Action;
-use App\Actions\{ModelName}\Destroy{ModelName}Action;
-use App\Http\Requests\Store{ModelName}Request;
-use App\Http\Requests\Update{ModelName}Request;
-use App\Http\Resources\{ModelName}Resource;
+use App\Http\Requests\{ModelName}\Store{ModelName}Request;
+use App\Http\Requests\{ModelName}\Update{ModelName}Request;
+use App\Http\Resources\{ModelName}ResourceData;
 use App\Models\{ModelName};
+use App\Models\User;
+use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Resources\Json\AnonymousResourceCollection;
 
 class {ModelName}Controller extends Controller
 {
-    public function index(Index{ModelPluralName}Action $action): AnonymousResourceCollection
+    public function __construct(
+        private readonly Get{ModelPluralName}Action $get{ModelPluralName}Action,
+        private readonly Get{ModelName}Action $get{ModelName}Action,
+        private readonly Create{ModelName}Action $create{ModelName}Action,
+        private readonly Update{ModelName}Action $update{ModelName}Action,
+        private readonly Delete{ModelName}Action $delete{ModelName}Action,
+    ) {}
+
+    /**
+     * @return array<int, {ModelName}ResourceData>
+     */
+    public function index(#[CurrentUser] User $user): array
     {
-        return {ModelName}Resource::collection($action->execute());
+        ${modelPluralVariable} = $this->get{ModelPluralName}Action->execute($user);
+
+        return {ModelName}ResourceData::collection(${modelPluralVariable});
     }
 
-    public function store(Store{ModelName}Request $request, Store{ModelName}Action $action): {ModelName}Resource
+    public function store(Store{ModelName}Request $request): JsonResponse
     {
-        // TODO: Create DTO from $request->validated() and pass to action
-        $model = $action->execute();
+        ${modelVariable} = $this->create{ModelName}Action->execute($request);
+        ${modelVariable} = $this->get{ModelName}Action->execute(${modelVariable});
 
-        return new {ModelName}Resource($model);
+        return {ModelName}ResourceData::from(${modelVariable})->toResponseWithStatus(201);
     }
 
-    public function show({ModelName} ${modelVariable}, Show{ModelName}Action $action): {ModelName}Resource
+    public function show({ModelName} ${modelVariable}): {ModelName}ResourceData
     {
-        return new {ModelName}Resource($action->execute(${modelVariable}));
+        ${modelVariable} = $this->get{ModelName}Action->execute(${modelVariable});
+
+        return {ModelName}ResourceData::from(${modelVariable});
     }
 
-    public function update(Update{ModelName}Request $request, {ModelName} ${modelVariable}, Update{ModelName}Action $action): {ModelName}Resource
+    public function update(Update{ModelName}Request $request, {ModelName} ${modelVariable}): {ModelName}ResourceData
     {
-        // TODO: Create DTO from $request->validated() and pass to action
-        $model = $action->execute(${modelVariable});
+        ${modelVariable} = $this->update{ModelName}Action->execute(${modelVariable}, $request);
+        ${modelVariable} = $this->get{ModelName}Action->execute(${modelVariable});
 
-        return new {ModelName}Resource($model);
+        return {ModelName}ResourceData::from(${modelVariable});
     }
 
-    public function destroy({ModelName} ${modelVariable}, Destroy{ModelName}Action $action): JsonResponse
+    public function destroy({ModelName} ${modelVariable}): JsonResponse
     {
-        $action->execute(${modelVariable});
+        $this->delete{ModelName}Action->execute(${modelVariable});
 
         return response()->json(null, 204);
     }
@@ -125,30 +141,36 @@ Route::delete('{route-name}/{route-parameter}', [{ModelName}Controller::class, '
 | Component | Convention | Example for `StorageOption` |
 |-----------|------------|----------------------------|
 | Controller | `{ModelName}Controller` | `StorageOptionController` |
-| Resource | `{ModelName}Resource` | `StorageOptionResource` |
+| ResourceData | `{ModelName}ResourceData` | `StorageOptionResourceData` |
 | Store Request | `Store{ModelName}Request` | `StoreStorageOptionRequest` |
 | Update Request | `Update{ModelName}Request` | `UpdateStorageOptionRequest` |
 | Model variable | `${camelCase}` | `$storageOption` |
+| Plural variable | `${camelCasePlural}` | `$storageOptions` |
 | Route name | `kebab-case-plural` | `storage-options` |
 | Route parameter | `snake_case_singular` | `storage_option` |
-| Index Action | `Index{PluralName}Action` | `IndexStorageOptionsAction` |
-| Other Actions | `{Method}{ModelName}Action` | `StoreStorageOptionAction` |
+| Index Action | `Get{PluralName}Action` | `GetStorageOptionsAction` |
+| Show Action | `Get{ModelName}Action` | `GetStorageOptionAction` |
+| Store Action | `Create{ModelName}Action` | `CreateStorageOptionAction` |
+| Update Action | `Update{ModelName}Action` | `UpdateStorageOptionAction` |
+| Destroy Action | `Delete{ModelName}Action` | `DeleteStorageOptionAction` |
 
 ## After Creation
 
 1. Run `composer lint` to format the code
 2. Inform the user about the Actions that need to be created using the `/action` skill:
-   - `Index{PluralName}Action`
-   - `Store{ModelName}Action`
-   - `Show{ModelName}Action`
-   - `Update{ModelName}Action`
-   - `Destroy{ModelName}Action`
-3. Remind about DTOs that may be needed for store/update operations
+   - `Get{PluralName}` (for index)
+   - `Get{ModelName}` (for show, and to reload after create/update)
+   - `Create{ModelName}` (for store)
+   - `Update{ModelName}` (for update)
+   - `Delete{ModelName}` (for destroy)
+3. Remind about Form Requests that create the interfaces needed for Create/Update actions
 
 ## Important Notes
 
-- Do NOT include multi-tenancy checks (`family_id`) - this will be handled by middleware
-- Actions are injected via method parameters, NOT constructor
+- Do NOT include multi-tenancy checks (`family_id`) - this will be handled by middleware or actions
+- Actions are injected via **constructor**, NOT method parameters
 - Always use `declare(strict_types=1);`
 - The controller extends the base `Controller` class
-- Use union return types only when necessary (e.g., `JsonResponse` for errors)
+- Use `#[CurrentUser]` attribute to get the authenticated user when needed
+- ResourceData classes have `::from()` and `::collection()` static methods
+- Use `->toResponseWithStatus(201)` for created responses
