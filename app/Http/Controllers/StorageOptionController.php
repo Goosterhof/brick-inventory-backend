@@ -10,7 +10,7 @@ use App\Actions\StorageOption\DeleteStorageOptionAction;
 use App\Actions\StorageOption\DeleteStorageOptionPartAction;
 use App\Actions\StorageOption\GetStorageOptionAction;
 use App\Actions\StorageOption\GetStorageOptionPartsAction;
-use App\Actions\StorageOption\ListStorageOptionsAction;
+use App\Actions\StorageOption\GetStorageOptionsAction;
 use App\Actions\StorageOption\UpdateStorageOptionAction;
 use App\Http\Requests\StorageOption\AssignPartRequest;
 use App\Http\Requests\StorageOption\StoreStorageOptionRequest;
@@ -26,7 +26,7 @@ use Illuminate\Http\JsonResponse;
 class StorageOptionController extends Controller
 {
     public function __construct(
-        private readonly ListStorageOptionsAction $listStorageOptionsAction,
+        private readonly GetStorageOptionsAction $getStorageOptionsAction,
         private readonly GetStorageOptionAction $getStorageOptionAction,
         private readonly GetStorageOptionPartsAction $getStorageOptionPartsAction,
         private readonly CreateStorageOptionAction $createStorageOptionAction,
@@ -41,7 +41,7 @@ class StorageOptionController extends Controller
      */
     public function index(#[CurrentUser] User $user): array
     {
-        $storageOptions = $this->listStorageOptionsAction->execute($user);
+        $storageOptions = $this->getStorageOptionsAction->execute($user);
 
         return StorageOptionResourceData::collection($storageOptions);
     }

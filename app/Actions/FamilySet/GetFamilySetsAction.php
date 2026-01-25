@@ -8,14 +8,19 @@ use App\Models\FamilySet;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 
-class ListFamilySetsAction
+class GetFamilySetsAction
 {
+    public function __construct(
+        private readonly FamilySet $familySet,
+    ) {}
+
     /**
      * @return Collection<int, FamilySet>
      */
     public function execute(User $user): Collection
     {
-        return FamilySet::where('family_id', $user->family_id)
+        return $this->familySet->newQuery()
+            ->where('family_id', $user->family_id)
             ->with('set')
             ->orderBy('created_at', 'desc')
             ->get();

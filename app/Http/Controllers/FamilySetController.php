@@ -7,7 +7,7 @@ namespace App\Http\Controllers;
 use App\Actions\FamilySet\CreateFamilySetAction;
 use App\Actions\FamilySet\DeleteFamilySetAction;
 use App\Actions\FamilySet\GetFamilySetAction;
-use App\Actions\FamilySet\ListFamilySetsAction;
+use App\Actions\FamilySet\GetFamilySetsAction;
 use App\Actions\FamilySet\UpdateFamilySetAction;
 use App\Http\Requests\StoreFamilySetRequest;
 use App\Http\Requests\UpdateFamilySetRequest;
@@ -21,7 +21,7 @@ use Illuminate\Http\JsonResponse;
 class FamilySetController extends Controller
 {
     public function __construct(
-        private readonly ListFamilySetsAction $listFamilySetsAction,
+        private readonly GetFamilySetsAction $getFamilySetsAction,
         private readonly GetFamilySetAction $getFamilySetAction,
         private readonly CreateFamilySetAction $createFamilySetAction,
         private readonly UpdateFamilySetAction $updateFamilySetAction,
@@ -33,7 +33,7 @@ class FamilySetController extends Controller
      */
     public function index(#[CurrentUser] User $user): array
     {
-        $familySets = $this->listFamilySetsAction->execute($user);
+        $familySets = $this->getFamilySetsAction->execute($user);
 
         return FamilySetResourceData::collection($familySets);
     }

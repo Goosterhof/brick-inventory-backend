@@ -132,7 +132,11 @@ class Delete{Subject}Action
 ```
 
 ### Get Action (`Get*`)
-- Constructor injects the model (for query building) and any services
+
+Get actions have three variants depending on use case:
+
+#### Variant 1: Query by Identifier
+- Constructor injects the model (for `newQuery()`)
 - Execute takes an identifier (string, int), returns the model
 
 ```php
@@ -155,6 +159,66 @@ class Get{Subject}Action
         return $this->{subject}->newQuery()
             ->where('column', $identifier)
             ->firstOrFail();
+    }
+}
+```
+
+#### Variant 2: Load Relationships on Existing Model
+When using route model binding, the model instance already exists. Use this variant to load relationships:
+- NO constructor (model passed to execute)
+- Execute takes the model instance, loads relationships, returns the model
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Actions\{Subdomain};
+
+use App\Models\{Subject};
+
+class Get{Subject}Action
+{
+    public function execute({Subject} ${subject}): {Subject}
+    {
+        ${subject}->load(['relationship1', 'relationship2']);
+
+        return ${subject};
+    }
+}
+```
+
+#### Variant 3: Query Collection (Plural Subject)
+For fetching multiple records, use a plural subject name (e.g., `GetFamilySetsAction`):
+- Constructor injects the model (for `newQuery()`)
+- Execute takes query parameters (e.g., User for tenant scoping), returns Collection
+
+```php
+<?php
+
+declare(strict_types=1);
+
+namespace App\Actions\{Subdomain};
+
+use App\Models\{Subject};
+use App\Models\User;
+use Illuminate\Database\Eloquent\Collection;
+
+class Get{Subjects}Action
+{
+    public function __construct(
+        private readonly {Subject} ${subject},
+    ) {}
+
+    /**
+     * @return Collection<int, {Subject}>
+     */
+    public function execute(User $user): Collection
+    {
+        return $this->{subject}->newQuery()
+            ->where('family_id', $user->family_id)
+            ->with(['relationship'])
+            ->get();
     }
 }
 ```

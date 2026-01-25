@@ -1,0 +1,97 @@
+<?php
+
+declare(strict_types=1);
+
+use App\Actions\FamilySet\GetFamilySetsAction;
+use App\Models\FamilySet;
+use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
+
+describe('GetFamilySetsAction', function (): void {
+    it('should query family sets by user family_id', function (): void {
+        // arrange
+        $user = Mockery::mock(User::class)->makePartial();
+        $user->family_id = 5;
+
+        $collection = new Collection;
+
+        $builder = Mockery::mock(Builder::class);
+        $builder->shouldReceive('where')
+            ->with('family_id', 5)
+            ->once()
+            ->andReturnSelf();
+        $builder->shouldReceive('with')->with('set')->andReturnSelf();
+        $builder->shouldReceive('orderBy')->with('created_at', 'desc')->andReturnSelf();
+        $builder->shouldReceive('get')->andReturn($collection);
+
+        $familySet = Mockery::mock(FamilySet::class);
+        $familySet->shouldReceive('newQuery')
+            ->once()
+            ->andReturn($builder);
+
+        $action = new GetFamilySetsAction($familySet);
+
+        // act
+        $result = $action->execute($user);
+
+        // assert
+        expect($result)->toBe($collection);
+    });
+
+    it('should load set relationship', function (): void {
+        // arrange
+        $user = Mockery::mock(User::class)->makePartial();
+        $user->family_id = 1;
+
+        $collection = new Collection;
+
+        $builder = Mockery::mock(Builder::class);
+        $builder->shouldReceive('where')->andReturnSelf();
+        $builder->shouldReceive('with')
+            ->with('set')
+            ->once()
+            ->andReturnSelf();
+        $builder->shouldReceive('orderBy')->andReturnSelf();
+        $builder->shouldReceive('get')->andReturn($collection);
+
+        $familySet = Mockery::mock(FamilySet::class);
+        $familySet->shouldReceive('newQuery')->andReturn($builder);
+
+        $action = new GetFamilySetsAction($familySet);
+
+        // act
+        $action->execute($user);
+
+        // assert - verification happens via Mockery expectations
+        expect(true)->toBeTrue();
+    });
+
+    it('should order by created_at descending', function (): void {
+        // arrange
+        $user = Mockery::mock(User::class)->makePartial();
+        $user->family_id = 1;
+
+        $collection = new Collection;
+
+        $builder = Mockery::mock(Builder::class);
+        $builder->shouldReceive('where')->andReturnSelf();
+        $builder->shouldReceive('with')->andReturnSelf();
+        $builder->shouldReceive('orderBy')
+            ->with('created_at', 'desc')
+            ->once()
+            ->andReturnSelf();
+        $builder->shouldReceive('get')->andReturn($collection);
+
+        $familySet = Mockery::mock(FamilySet::class);
+        $familySet->shouldReceive('newQuery')->andReturn($builder);
+
+        $action = new GetFamilySetsAction($familySet);
+
+        // act
+        $action->execute($user);
+
+        // assert - verification happens via Mockery expectations
+        expect(true)->toBeTrue();
+    });
+});
