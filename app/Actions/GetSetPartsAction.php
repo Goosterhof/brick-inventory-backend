@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Actions;
 
 use App\Contracts\LegoDataServiceInterface;
-use App\DataTransferObjects\SetPartsResultData;
+use App\Models\Set;
 
 class GetSetPartsAction
 {
@@ -13,7 +13,7 @@ class GetSetPartsAction
         private readonly LegoDataServiceInterface $legoDataService,
     ) {}
 
-    public function execute(string $setNum): SetPartsResultData
+    public function execute(string $setNum): Set
     {
         return $this->legoDataService->getSetParts($setNum);
     }
