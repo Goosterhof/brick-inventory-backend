@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Controllers;
 
 use App\Actions\GetSetPartsAction;
-use App\Http\LegacyResources\SetPartsResource;
+use App\Http\Resources\SetWithPartsResourceData;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\JsonResponse;
 
@@ -15,12 +15,12 @@ class SetController extends Controller
         private readonly GetSetPartsAction $getSetPartsAction,
     ) {}
 
-    public function parts(string $setNum): SetPartsResource|JsonResponse
+    public function parts(string $setNum): SetWithPartsResourceData|JsonResponse
     {
         try {
-            $result = $this->getSetPartsAction->execute($setNum);
+            $set = $this->getSetPartsAction->execute($setNum);
 
-            return new SetPartsResource($result);
+            return SetWithPartsResourceData::from($set);
         } catch (RequestException $requestException) {
             $status = $requestException->response->status();
             $message = match ($status) {

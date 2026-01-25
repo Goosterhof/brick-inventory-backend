@@ -5,17 +5,12 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Contracts\LegoDataServiceInterface;
-use App\DataTransferObjects\ColorData;
-use App\DataTransferObjects\SetData;
-use App\DataTransferObjects\SetPartData;
-use App\DataTransferObjects\SetPartsResultData;
 use App\Models\Color;
 use App\Models\Part;
 use App\Models\Set;
 use App\Models\SetPart;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Http;
-use RuntimeException;
 
 final class RebrickableService implements LegoDataServiceInterface
 {
@@ -29,7 +24,7 @@ final class RebrickableService implements LegoDataServiceInterface
         $this->apiKey = is_string($apiKey) ? $apiKey : '';
     }
 
-    public function getSetParts(string $setNum): SetPartsResultData
+    public function getSetParts(string $setNum): Set
     {
         $set = Set::where('set_num', $setNum)->first();
 
@@ -43,7 +38,7 @@ final class RebrickableService implements LegoDataServiceInterface
 
         $set->load(['setParts.part', 'setParts.color']);
 
-        return $this->toDto($set);
+        return $set;
     }
 
     /**
@@ -61,45 +56,6 @@ final class RebrickableService implements LegoDataServiceInterface
 
         /** @var array{set_num: string, name: string, year: int, theme_id: int|null, num_parts: int, set_img_url: string|null} */
         return $response->json();
-    }
-
-    private function toDto(Set $set): SetPartsResultData
-    {
-        $setData = new SetData(
-            setNum: $set->set_num,
-            name: $set->name,
-            year: $set->year,
-            theme: $set->theme,
-            numParts: $set->num_parts,
-            imageUrl: $set->image_url,
-        );
-
-        $parts = $set->setParts->map(function (SetPart $setPart): SetPartData {
-            $part = $setPart->part;
-            $color = $setPart->color;
-
-            if ($part === null || $color === null) {
-                throw new RuntimeException('SetPart is missing required relationships');
-            }
-
-            return new SetPartData(
-                partNum: $part->part_num,
-                name: $part->name,
-                category: $part->category,
-                imageUrl: $part->image_url,
-                color: new ColorData(
-                    id: $color->rebrickable_id,
-                    name: $color->name,
-                    rgb: $color->rgb,
-                    isTransparent: $color->is_transparent,
-                ),
-                quantity: $setPart->quantity,
-                isSpare: $setPart->is_spare,
-                elementId: $setPart->element_id,
-            );
-        })->all();
-
-        return new SetPartsResultData(set: $setData, parts: $parts);
     }
 
     /**

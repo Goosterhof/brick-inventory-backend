@@ -4,29 +4,18 @@ declare(strict_types=1);
 
 use App\Actions\GetSetPartsAction;
 use App\Contracts\LegoDataServiceInterface;
-use App\DataTransferObjects\SetData;
-use App\DataTransferObjects\SetPartsResultData;
+use App\Models\Set;
 
 describe('GetSetPartsAction', function (): void {
     it('should fetch set parts from the rebrickable service', function (): void {
         // arrange
-        $expectedResult = new SetPartsResultData(
-            set: new SetData(
-                setNum: '75192-1',
-                name: 'Millennium Falcon',
-                year: 2017,
-                theme: 158,
-                numParts: 7541,
-                imageUrl: 'https://example.com/falcon.jpg',
-            ),
-            parts: [],
-        );
+        $expectedSet = Mockery::mock(Set::class);
 
         $service = Mockery::mock(LegoDataServiceInterface::class);
         $service->shouldReceive('getSetParts')
             ->with('75192-1')
             ->once()
-            ->andReturn($expectedResult);
+            ->andReturn($expectedSet);
 
         $action = new GetSetPartsAction($service);
 
@@ -34,6 +23,6 @@ describe('GetSetPartsAction', function (): void {
         $result = $action->execute('75192-1');
 
         // assert
-        expect($result)->toBe($expectedResult);
+        expect($result)->toBe($expectedSet);
     });
 });

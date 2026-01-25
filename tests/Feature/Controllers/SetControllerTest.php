@@ -58,7 +58,7 @@ describe('SetController', function (): void {
                     ],
                 ])
                 ->assertJsonCount(1, 'parts')
-                ->assertJsonPath('parts.0.part_num', '3001')
+                ->assertJsonPath('parts.0.part.part_num', '3001')
                 ->assertJsonPath('parts.0.quantity', 10);
         });
 
@@ -107,7 +107,7 @@ describe('SetController', function (): void {
                     ],
                 ])
                 ->assertJsonCount(1, 'parts')
-                ->assertJsonPath('parts.0.part_num', '3024')
+                ->assertJsonPath('parts.0.part.part_num', '3024')
                 ->assertJsonPath('parts.0.color.name', 'Green');
 
             $this->assertDatabaseHas('sets', ['set_num' => '10281-1']);
