@@ -16,7 +16,7 @@ describe('EnsureFamilyOwnership', function (): void {
         $request->shouldReceive('user')->andReturn(null);
 
         $middleware = new EnsureFamilyOwnership;
-        $next = fn () => new Response('OK');
+        $next = fn (): Response => new Response('OK');
 
         // act
         $response = $middleware->handle($request, $next);
@@ -35,7 +35,7 @@ describe('EnsureFamilyOwnership', function (): void {
         $request->shouldReceive('route')->andReturn(null);
 
         $middleware = new EnsureFamilyOwnership;
-        $next = fn () => new Response('OK');
+        $next = fn (): Response => new Response('OK');
 
         // act
         $response = $middleware->handle($request, $next);
@@ -57,7 +57,7 @@ describe('EnsureFamilyOwnership', function (): void {
         $request->shouldReceive('route')->andReturn($route);
 
         $middleware = new EnsureFamilyOwnership;
-        $next = fn () => new Response('OK');
+        $next = fn (): Response => new Response('OK');
 
         // act
         $response = $middleware->handle($request, $next);
@@ -83,7 +83,7 @@ describe('EnsureFamilyOwnership', function (): void {
         $request->shouldReceive('route')->andReturn($route);
 
         $middleware = new EnsureFamilyOwnership;
-        $next = fn () => new Response('OK');
+        $next = fn (): Response => new Response('OK');
 
         // act
         $response = $middleware->handle($request, $next);
@@ -109,7 +109,7 @@ describe('EnsureFamilyOwnership', function (): void {
         $request->shouldReceive('route')->andReturn($route);
 
         $middleware = new EnsureFamilyOwnership;
-        $next = fn () => new Response('OK');
+        $next = fn (): Response => new Response('OK');
 
         // act
         $response = $middleware->handle($request, $next);
@@ -141,7 +141,7 @@ describe('EnsureFamilyOwnership', function (): void {
         $request->shouldReceive('route')->andReturn($route);
 
         $middleware = new EnsureFamilyOwnership;
-        $next = fn () => new Response('OK');
+        $next = fn (): Response => new Response('OK');
 
         // act
         $response = $middleware->handle($request, $next);
@@ -173,7 +173,7 @@ describe('EnsureFamilyOwnership', function (): void {
         $request->shouldReceive('route')->andReturn($route);
 
         $middleware = new EnsureFamilyOwnership;
-        $next = fn () => new Response('OK');
+        $next = fn (): Response => new Response('OK');
 
         // act
         $response = $middleware->handle($request, $next);

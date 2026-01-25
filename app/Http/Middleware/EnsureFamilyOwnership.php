@@ -31,10 +31,8 @@ final readonly class EnsureFamilyOwnership
         }
 
         foreach ($request->route()?->parameters() ?? [] as $parameter) {
-            if ($parameter instanceof BelongsToFamily) {
-                if ($parameter->getFamilyId() !== $user->family_id) {
-                    return response()->json(['error' => 'Not found'], 404);
-                }
+            if ($parameter instanceof BelongsToFamily && $parameter->getFamilyId() !== $user->family_id) {
+                return response()->json(['error' => 'Not found'], 404);
             }
         }
 
