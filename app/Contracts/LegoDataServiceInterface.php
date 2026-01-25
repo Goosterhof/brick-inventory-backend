@@ -6,7 +6,7 @@ namespace App\Contracts;
 
 use App\DataTransferObjects\SetPartsResultData;
 
-interface RebrickableServiceInterface
+interface LegoDataServiceInterface
 {
     public function getSetParts(string $setNum): SetPartsResultData;
 

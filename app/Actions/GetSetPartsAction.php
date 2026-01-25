@@ -4,17 +4,17 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
-use App\Contracts\RebrickableServiceInterface;
+use App\Contracts\LegoDataServiceInterface;
 use App\DataTransferObjects\SetPartsResultData;
 
 class GetSetPartsAction
 {
     public function __construct(
-        private readonly RebrickableServiceInterface $rebrickableService,
+        private readonly LegoDataServiceInterface $legoDataService,
     ) {}
 
     public function execute(string $setNum): SetPartsResultData
     {
-        return $this->rebrickableService->getSetParts($setNum);
+        return $this->legoDataService->getSetParts($setNum);
     }
 }

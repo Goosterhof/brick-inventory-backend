@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\GetSetPartsAction;
-use App\Contracts\RebrickableServiceInterface;
+use App\Contracts\LegoDataServiceInterface;
 use App\DataTransferObjects\SetData;
 use App\DataTransferObjects\SetPartsResultData;
 
@@ -22,7 +22,7 @@ describe('GetSetPartsAction', function (): void {
             parts: [],
         );
 
-        $service = Mockery::mock(RebrickableServiceInterface::class);
+        $service = Mockery::mock(LegoDataServiceInterface::class);
         $service->shouldReceive('getSetParts')
             ->with('75192-1')
             ->once()

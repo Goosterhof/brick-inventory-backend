@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\GetSetAction;
-use App\Contracts\RebrickableServiceInterface;
+use App\Contracts\LegoDataServiceInterface;
 use App\Models\Set;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -28,10 +28,10 @@ describe('GetSetAction', function (): void {
             ->once()
             ->andReturn($queryBuilder);
 
-        $rebrickableService = Mockery::mock(RebrickableServiceInterface::class);
-        $rebrickableService->shouldNotReceive('fetchSet');
+        $legoDataService = Mockery::mock(LegoDataServiceInterface::class);
+        $legoDataService->shouldNotReceive('fetchSet');
 
-        $action = new GetSetAction($rebrickableService, $set);
+        $action = new GetSetAction($legoDataService, $set);
 
         // act
         $result = $action->execute('75192-1');
@@ -60,8 +60,8 @@ describe('GetSetAction', function (): void {
             ->once()
             ->andReturn($createdSet);
 
-        $rebrickableService = Mockery::mock(RebrickableServiceInterface::class);
-        $rebrickableService->shouldReceive('fetchSet')
+        $legoDataService = Mockery::mock(LegoDataServiceInterface::class);
+        $legoDataService->shouldReceive('fetchSet')
             ->with('75192-1')
             ->once()
             ->andReturn([
@@ -73,7 +73,7 @@ describe('GetSetAction', function (): void {
                 'set_img_url' => 'https://example.com/75192.jpg',
             ]);
 
-        $action = new GetSetAction($rebrickableService, $set);
+        $action = new GetSetAction($legoDataService, $set);
 
         // act
         $result = $action->execute('75192-1');
@@ -107,8 +107,8 @@ describe('GetSetAction', function (): void {
             ->once()
             ->andReturn($createdSet);
 
-        $rebrickableService = Mockery::mock(RebrickableServiceInterface::class);
-        $rebrickableService->shouldReceive('fetchSet')
+        $legoDataService = Mockery::mock(LegoDataServiceInterface::class);
+        $legoDataService->shouldReceive('fetchSet')
             ->with('10281-1')
             ->once()
             ->andReturn([
@@ -120,7 +120,7 @@ describe('GetSetAction', function (): void {
                 'set_img_url' => null,
             ]);
 
-        $action = new GetSetAction($rebrickableService, $set);
+        $action = new GetSetAction($legoDataService, $set);
 
         // act
         $result = $action->execute('10281-1');

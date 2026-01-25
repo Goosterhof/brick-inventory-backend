@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Contracts\RebrickableServiceInterface;
+use App\Contracts\LegoDataServiceInterface;
 use App\DataTransferObjects\ColorData;
 use App\DataTransferObjects\SetData;
 use App\DataTransferObjects\SetPartData;
@@ -17,7 +17,7 @@ use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Http;
 use RuntimeException;
 
-final class RebrickableService implements RebrickableServiceInterface
+final class RebrickableService implements LegoDataServiceInterface
 {
     private string $baseUrl = 'https://rebrickable.com/api/v3';
 

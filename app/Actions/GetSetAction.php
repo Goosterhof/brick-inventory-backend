@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
-use App\Contracts\RebrickableServiceInterface;
+use App\Contracts\LegoDataServiceInterface;
 use App\Models\Set;
 
 class GetSetAction
 {
     public function __construct(
-        private readonly RebrickableServiceInterface $rebrickableService,
+        private readonly LegoDataServiceInterface $legoDataService,
         private readonly Set $set,
     ) {}
 
@@ -22,7 +22,7 @@ class GetSetAction
             return $set;
         }
 
-        $setData = $this->rebrickableService->fetchSet($setNum);
+        $setData = $this->legoDataService->fetchSet($setNum);
 
         /** @var Set $newSet */
         $newSet = $this->set->newInstance();
