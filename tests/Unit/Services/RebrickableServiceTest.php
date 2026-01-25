@@ -99,6 +99,8 @@ describe('RebrickableService', function (): void {
     describe('getSetParts', function (): void {
         it('should return existing set from database when set has parts', function (): void {
             // arrange
+            Http::preventStrayRequests();
+
             $setPartsRelation = Mockery::mock(HasMany::class);
             $setPartsRelation->shouldReceive('exists')->once()->andReturn(true);
 
