@@ -47,12 +47,12 @@ return [
         'theme' => 'light',
 
         /*
-         * Hide the `Try It` feature. Enabled by default.
+         * Hide the `Try It` feature. Disabled by default (i.e., Try It is shown).
          */
         'hide_try_it' => false,
 
         /*
-         * Hide the schemas in the Table of Contents. Enabled by default.
+         * Hide the schemas in the Table of Contents. Disabled by default (i.e., schemas are shown).
          */
         'hide_schemas' => false,
 
