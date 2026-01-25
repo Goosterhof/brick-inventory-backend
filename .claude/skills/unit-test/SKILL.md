@@ -94,6 +94,77 @@ $action->execute($data);
 expect($modelInstance->name)->toBe('expected value');
 ```
 
+### For Services with HTTP Calls
+Services that make external API calls should use Laravel's `Http::fake()` to mock responses:
+
+```php
+use Illuminate\Support\Facades\Http;
+
+it('should fetch data from API', function (): void {
+    // arrange
+    Http::fake([
+        'https://api.example.com/endpoint' => Http::response([
+            'id' => 1,
+            'name' => 'Test',
+        ]),
+    ]);
+
+    $service = new SomeService();
+
+    // act
+    $result = $service->fetchData();
+
+    // assert
+    expect($result['name'])->toBe('Test');
+    Http::assertSent(fn ($request): bool => $request->url() === 'https://api.example.com/endpoint');
+});
+
+it('should throw exception on API failure', function (): void {
+    Http::fake([
+        'https://api.example.com/endpoint' => Http::response([], 500),
+    ]);
+
+    $service = new SomeService();
+
+    expect(fn (): array => $service->fetchData())->toThrow(RequestException::class);
+});
+```
+
+### For Services with Database Queries
+Services that query the database should inject models and use `newQuery()` pattern:
+
+```php
+// Mock the query builder chain
+$queryBuilder = Mockery::mock(Builder::class);
+$queryBuilder->shouldReceive('where')->with('field', 'value')->andReturnSelf();
+$queryBuilder->shouldReceive('first')->andReturn($existingModel);
+
+// Mock the model to return the query builder
+$model = Mockery::mock(Model::class);
+$model->shouldReceive('newQuery')->andReturn($queryBuilder);
+
+$service = new SomeService($model);
+```
+
+For services that both query AND create records:
+
+```php
+// Query returns null (record doesn't exist)
+$queryBuilder = Mockery::mock(Builder::class);
+$queryBuilder->shouldReceive('where')->andReturnSelf();
+$queryBuilder->shouldReceive('first')->andReturn(null);
+
+// New instance will be created
+$newInstance = Mockery::mock(Model::class)->makePartial();
+$newInstance->shouldReceive('save')->once();
+
+$model = Mockery::mock(Model::class);
+$model->shouldReceive('newQuery')->andReturn($queryBuilder);
+$model->shouldReceive('newInstance')->andReturn($newInstance);
+
+$service = new SomeService($model);
+```
+
 ## When Generating Tests
 
 1. First, read the source file to understand its structure
@@ -108,5 +179,14 @@ expect($modelInstance->name)->toBe('expected value');
 ## When Running Tests
 
 - Use `composer test` to run all tests
-- Use `composer test -- --filter=ClassName` to run specific tests
+- Use `./vendor/bin/pest tests/Unit/Path/To/TestFile.php` to run specific tests
+- Use `composer test:coverage` to run unit tests with 100% coverage requirement (Actions & Services only)
 - After running, report the results clearly
+
+## Coverage Requirements
+
+Actions and Services require 100% unit test coverage. The CI pipeline enforces this via `composer test:coverage` which:
+- Runs only unit tests
+- Uses PCOV for coverage
+- Targets only `app/Actions` and `app/Services` directories
+- Fails if coverage drops below 100%
