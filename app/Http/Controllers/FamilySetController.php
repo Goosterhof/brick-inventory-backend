@@ -6,6 +6,8 @@ namespace App\Http\Controllers;
 
 use App\Actions\FamilySet\CreateFamilySetAction;
 use App\Actions\FamilySet\DeleteFamilySetAction;
+use App\Actions\FamilySet\GetFamilySetAction;
+use App\Actions\FamilySet\GetFamilySetsAction;
 use App\Actions\FamilySet\UpdateFamilySetAction;
 use App\Http\Requests\StoreFamilySetRequest;
 use App\Http\Requests\UpdateFamilySetRequest;
@@ -19,6 +21,8 @@ use Illuminate\Http\JsonResponse;
 class FamilySetController extends Controller
 {
     public function __construct(
+        private readonly GetFamilySetsAction $getFamilySetsAction,
+        private readonly GetFamilySetAction $getFamilySetAction,
         private readonly CreateFamilySetAction $createFamilySetAction,
         private readonly UpdateFamilySetAction $updateFamilySetAction,
         private readonly DeleteFamilySetAction $deleteFamilySetAction,
@@ -29,10 +33,7 @@ class FamilySetController extends Controller
      */
     public function index(#[CurrentUser] User $user): array
     {
-        $familySets = FamilySet::where('family_id', $user->family_id)
-            ->with('set')
-            ->orderBy('created_at', 'desc')
-            ->get();
+        $familySets = $this->getFamilySetsAction->execute($user);
 
         return FamilySetResourceData::collection($familySets);
     }
@@ -61,38 +62,23 @@ class FamilySetController extends Controller
         }
     }
 
-    public function show(#[CurrentUser] User $user, FamilySet $familySet): FamilySetResourceData|JsonResponse
+    public function show(FamilySet $familySet): FamilySetResourceData
     {
-        if ($familySet->family_id !== $user->family_id) {
-            return response()->json(['error' => 'Not found'], 404);
-        }
-
-        $familySet->load('set');
+        $familySet = $this->getFamilySetAction->execute($familySet);
 
         return FamilySetResourceData::from($familySet);
     }
 
-    public function update(
-        UpdateFamilySetRequest $request,
-        FamilySet $familySet,
-        #[CurrentUser] User $user,
-    ): FamilySetResourceData|JsonResponse {
-        if ($familySet->family_id !== $user->family_id) {
-            return response()->json(['error' => 'Not found'], 404);
-        }
-
+    public function update(UpdateFamilySetRequest $request, FamilySet $familySet): FamilySetResourceData
+    {
         $familySet = $this->updateFamilySetAction->execute($familySet, $request);
-        $familySet->load('set');
+        $familySet = $this->getFamilySetAction->execute($familySet);
 
         return FamilySetResourceData::from($familySet);
     }
 
-    public function destroy(#[CurrentUser] User $user, FamilySet $familySet): JsonResponse
+    public function destroy(FamilySet $familySet): JsonResponse
     {
-        if ($familySet->family_id !== $user->family_id) {
-            return response()->json(['error' => 'Not found'], 404);
-        }
-
         $this->deleteFamilySetAction->execute($familySet);
 
         return response()->json(null, 204);
