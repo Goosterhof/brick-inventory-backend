@@ -9,6 +9,7 @@ use App\Models\Color;
 use App\Models\Part;
 use App\Models\Set;
 use App\Models\SetPart;
+use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Http;
 
@@ -18,17 +19,21 @@ final class RebrickableService implements LegoDataServiceInterface
 
     private readonly string $apiKey;
 
-    public function __construct()
-    {
+    public function __construct(
+        private readonly Set $set,
+        private readonly Part $part,
+        private readonly Color $color,
+        private readonly SetPart $setPart,
+    ) {
         $apiKey = config('services.rebrickable.key');
         $this->apiKey = is_string($apiKey) ? $apiKey : '';
     }
 
     public function getSetParts(string $setNum): Set
     {
-        $set = Set::where('set_num', $setNum)->first();
+        $set = $this->set->newQuery()->where('set_num', $setNum)->first();
 
-        if (!$set || !$set->setParts()->exists()) {
+        if (!$set instanceof Set || !$set->setParts()->exists()) {
             $setData = $this->fetchSet($setNum);
             $set = $this->createOrUpdateSet($setData);
 
@@ -46,9 +51,7 @@ final class RebrickableService implements LegoDataServiceInterface
      */
     public function fetchSet(string $setNum): array
     {
-        $response = Http::withHeaders([
-            'Authorization' => 'key ' . $this->apiKey,
-        ])->get(sprintf('%s/lego/sets/%s/', $this->baseUrl, $setNum));
+        $response = $this->httpClient()->get(sprintf('%s/lego/sets/%s/', $this->baseUrl, $setNum));
 
         if ($response->failed()) {
             throw new RequestException($response);
@@ -56,6 +59,13 @@ final class RebrickableService implements LegoDataServiceInterface
 
         /** @var array{set_num: string, name: string, year: int, theme_id: int|null, num_parts: int, set_img_url: string|null} */
         return $response->json();
+    }
+
+    private function httpClient(): PendingRequest
+    {
+        return Http::withHeaders([
+            'Authorization' => 'key ' . $this->apiKey,
+        ]);
     }
 
     /**
@@ -68,9 +78,7 @@ final class RebrickableService implements LegoDataServiceInterface
         $url = sprintf('%s/lego/sets/%s/parts/', $this->baseUrl, $setNum);
 
         do {
-            $response = Http::withHeaders([
-                'Authorization' => 'key ' . $this->apiKey,
-            ])->get($url);
+            $response = $this->httpClient()->get($url);
 
             if ($response->failed()) {
                 throw new RequestException($response);
@@ -90,10 +98,11 @@ final class RebrickableService implements LegoDataServiceInterface
      */
     private function createOrUpdateSet(array $data): Set
     {
-        $set = Set::where('set_num', $data['set_num'])->first();
+        $set = $this->set->newQuery()->where('set_num', $data['set_num'])->first();
 
-        if (!$set) {
-            $set = new Set;
+        if (!$set instanceof Set) {
+            /** @var Set $set */
+            $set = $this->set->newInstance();
             $set->set_num = $data['set_num'];
         }
 
@@ -116,14 +125,16 @@ final class RebrickableService implements LegoDataServiceInterface
             $color = $this->createOrUpdateColor($partData['color']);
             $part = $this->createOrUpdatePart($partData['part']);
 
-            $setPart = SetPart::where('set_id', $set->id)
+            $setPart = $this->setPart->newQuery()
+                ->where('set_id', $set->id)
                 ->where('part_id', $part->id)
                 ->where('color_id', $color->id)
                 ->where('is_spare', $partData['is_spare'])
                 ->first();
 
-            if (!$setPart) {
-                $setPart = new SetPart;
+            if (!$setPart instanceof SetPart) {
+                /** @var SetPart $setPart */
+                $setPart = $this->setPart->newInstance();
                 $setPart->set_id = $set->id;
                 $setPart->part_id = $part->id;
                 $setPart->color_id = $color->id;
@@ -141,10 +152,11 @@ final class RebrickableService implements LegoDataServiceInterface
      */
     private function createOrUpdateColor(array $data): Color
     {
-        $color = Color::where('rebrickable_id', $data['id'])->first();
+        $color = $this->color->newQuery()->where('rebrickable_id', $data['id'])->first();
 
-        if (!$color) {
-            $color = new Color;
+        if (!$color instanceof Color) {
+            /** @var Color $color */
+            $color = $this->color->newInstance();
             $color->rebrickable_id = $data['id'];
         }
 
@@ -161,10 +173,11 @@ final class RebrickableService implements LegoDataServiceInterface
      */
     private function createOrUpdatePart(array $data): Part
     {
-        $part = Part::where('part_num', $data['part_num'])->first();
+        $part = $this->part->newQuery()->where('part_num', $data['part_num'])->first();
 
-        if (!$part) {
-            $part = new Part;
+        if (!$part instanceof Part) {
+            /** @var Part $part */
+            $part = $this->part->newInstance();
             $part->part_num = $data['part_num'];
         }
 

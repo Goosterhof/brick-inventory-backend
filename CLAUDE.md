@@ -174,6 +174,7 @@ The following rules are enforced via Pest architecture tests:
 | `composer dev` | Start development server |
 | `composer test` | Run tests |
 | `composer test:arch` | Run architecture tests only |
+| `composer test:coverage` | Run unit tests with 100% coverage requirement (Actions & Services) |
 | `composer lint` | Run Rector + Pint (fix mode) |
 | `composer lint:test` | Run Rector + Pint (dry-run) |
 | `composer phpstan` | Run static analysis |
