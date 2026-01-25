@@ -9,25 +9,21 @@ use App\Models\Color;
 use App\Models\Part;
 use App\Models\Set;
 use App\Models\SetPart;
+use Illuminate\Container\Attributes\Config;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Http;
 
-final class RebrickableService implements LegoDataServiceInterface
+final readonly class RebrickableService implements LegoDataServiceInterface
 {
-    private string $baseUrl = 'https://rebrickable.com/api/v3';
-
-    private readonly string $apiKey;
-
     public function __construct(
-        private readonly Set $set,
-        private readonly Part $part,
-        private readonly Color $color,
-        private readonly SetPart $setPart,
-    ) {
-        $apiKey = config('services.rebrickable.key');
-        $this->apiKey = is_string($apiKey) ? $apiKey : '';
-    }
+        #[Config('services.rebrickable.key', '')] private string $apiKey,
+        #[Config('services.rebrickable.base_url', 'https://rebrickable.com/api/v3')] private string $baseUrl,
+        private Set $set,
+        private Part $part,
+        private Color $color,
+        private SetPart $setPart,
+    ) {}
 
     public function getSetParts(string $setNum): Set
     {
@@ -51,7 +47,7 @@ final class RebrickableService implements LegoDataServiceInterface
      */
     public function fetchSet(string $setNum): array
     {
-        $response = $this->httpClient()->get(sprintf('%s/lego/sets/%s/', $this->baseUrl, $setNum));
+        $response = $this->httpClient()->get(sprintf('/lego/sets/%s/', $setNum));
 
         if ($response->failed()) {
             throw new RequestException($response);
@@ -63,9 +59,10 @@ final class RebrickableService implements LegoDataServiceInterface
 
     private function httpClient(): PendingRequest
     {
-        return Http::withHeaders([
-            'Authorization' => 'key ' . $this->apiKey,
-        ]);
+        return Http::baseUrl($this->baseUrl)
+            ->withHeaders(['Authorization' => 'key ' . $this->apiKey])
+            ->timeout(30)
+            ->retry(3, 100);
     }
 
     /**
@@ -75,7 +72,7 @@ final class RebrickableService implements LegoDataServiceInterface
     {
         /** @var list<array{part: array{part_num: string, name: string, part_cat_id: int|null, part_img_url: string|null}, color: array{id: int, name: string, rgb: string, is_trans: bool}, quantity: int, is_spare: bool, element_id: string|null}> $parts */
         $parts = [];
-        $url = sprintf('%s/lego/sets/%s/parts/', $this->baseUrl, $setNum);
+        $url = sprintf('/lego/sets/%s/parts/', $setNum);
 
         do {
             $response = $this->httpClient()->get($url);

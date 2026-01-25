@@ -12,6 +12,9 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\Client\RequestException;
 use Illuminate\Support\Facades\Http;
 
+const TEST_API_KEY = 'test-api-key';
+const TEST_BASE_URL = 'https://rebrickable.com/api/v3';
+
 describe('RebrickableService', function (): void {
     describe('fetchSet', function (): void {
         it('should return set data from API', function (): void {
@@ -32,7 +35,7 @@ describe('RebrickableService', function (): void {
             $color = Mockery::mock(Color::class);
             $setPart = Mockery::mock(SetPart::class);
 
-            $service = new RebrickableService($set, $part, $color, $setPart);
+            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL, $set, $part, $color, $setPart);
 
             // act
             $result = $service->fetchSet('75192-1');
@@ -61,7 +64,7 @@ describe('RebrickableService', function (): void {
             $color = Mockery::mock(Color::class);
             $setPart = Mockery::mock(SetPart::class);
 
-            $service = new RebrickableService($set, $part, $color, $setPart);
+            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL, $set, $part, $color, $setPart);
 
             // act & assert
             expect(fn (): array => $service->fetchSet('invalid'))->toThrow(RequestException::class);
@@ -85,7 +88,7 @@ describe('RebrickableService', function (): void {
             $color = Mockery::mock(Color::class);
             $setPart = Mockery::mock(SetPart::class);
 
-            $service = new RebrickableService($set, $part, $color, $setPart);
+            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL, $set, $part, $color, $setPart);
 
             // act
             $result = $service->fetchSet('10281-1');
@@ -121,7 +124,7 @@ describe('RebrickableService', function (): void {
             $color = Mockery::mock(Color::class);
             $setPart = Mockery::mock(SetPart::class);
 
-            $service = new RebrickableService($set, $part, $color, $setPart);
+            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL, $set, $part, $color, $setPart);
 
             // act
             $result = $service->getSetParts('75192-1');
@@ -218,7 +221,7 @@ describe('RebrickableService', function (): void {
             $setPart->shouldReceive('newQuery')->andReturn($setPartQueryBuilder);
             $setPart->shouldReceive('newInstance')->once()->andReturn($createdSetPart);
 
-            $service = new RebrickableService($set, $part, $color, $setPart);
+            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL, $set, $part, $color, $setPart);
 
             // act
             $result = $service->getSetParts('75192-1');
@@ -267,7 +270,7 @@ describe('RebrickableService', function (): void {
             $color = Mockery::mock(Color::class);
             $setPart = Mockery::mock(SetPart::class);
 
-            $service = new RebrickableService($set, $part, $color, $setPart);
+            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL, $set, $part, $color, $setPart);
 
             // act
             $result = $service->getSetParts('75192-1');
@@ -376,7 +379,7 @@ describe('RebrickableService', function (): void {
             $setPart->shouldReceive('newQuery')->andReturn($setPartQueryBuilder);
             $setPart->shouldReceive('newInstance')->twice()->andReturn($createdSetPart1, $createdSetPart2);
 
-            $service = new RebrickableService($set, $part, $color, $setPart);
+            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL, $set, $part, $color, $setPart);
 
             // act
             $result = $service->getSetParts('75192-1');
@@ -463,7 +466,7 @@ describe('RebrickableService', function (): void {
             $setPart->shouldReceive('newQuery')->andReturn($setPartQueryBuilder);
             $setPart->shouldReceive('newInstance')->once()->andReturn($createdSetPart);
 
-            $service = new RebrickableService($set, $part, $color, $setPart);
+            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL, $set, $part, $color, $setPart);
 
             // act
             $result = $service->getSetParts('75192-1');
@@ -549,7 +552,7 @@ describe('RebrickableService', function (): void {
             $setPart->shouldReceive('newQuery')->andReturn($setPartQueryBuilder);
             $setPart->shouldReceive('newInstance')->once()->andReturn($createdSetPart);
 
-            $service = new RebrickableService($set, $part, $color, $setPart);
+            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL, $set, $part, $color, $setPart);
 
             // act
             $result = $service->getSetParts('75192-1');
@@ -640,7 +643,7 @@ describe('RebrickableService', function (): void {
             $setPart = Mockery::mock(SetPart::class);
             $setPart->shouldReceive('newQuery')->andReturn($setPartQueryBuilder);
 
-            $service = new RebrickableService($set, $part, $color, $setPart);
+            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL, $set, $part, $color, $setPart);
 
             // act
             $result = $service->getSetParts('75192-1');
@@ -726,7 +729,7 @@ describe('RebrickableService', function (): void {
             $setPart->shouldReceive('newQuery')->andReturn($setPartQueryBuilder);
             $setPart->shouldReceive('newInstance')->once()->andReturn($createdSetPart);
 
-            $service = new RebrickableService($set, $part, $color, $setPart);
+            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL, $set, $part, $color, $setPart);
 
             // act
             $result = $service->getSetParts('75192-1');
@@ -766,7 +769,7 @@ describe('RebrickableService', function (): void {
             $color = Mockery::mock(Color::class);
             $setPart = Mockery::mock(SetPart::class);
 
-            $service = new RebrickableService($set, $part, $color, $setPart);
+            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL, $set, $part, $color, $setPart);
 
             // act & assert
             expect(fn (): Set => $service->getSetParts('75192-1'))->toThrow(RequestException::class);
