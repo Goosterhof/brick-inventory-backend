@@ -15,15 +15,24 @@ Parse `$ARGUMENTS` to get the action name (e.g., `CreateStorageOption`, `UpdateF
 
 The name should NOT include the `Action` suffix - it will be added automatically.
 
+## Domain Convention
+
+In this codebase, `{Domain}` refers to the subdirectory used to organize related Actions, Contracts, and Requests. The domain typically matches the primary model name (e.g., `StorageOption` model → `StorageOption` domain).
+
+Directory structure:
+- `app/Actions/{Domain}/` - Action classes
+- `app/Contracts/{Domain}/` - Interface contracts
+- `app/Http/Requests/{Domain}/` - Form Requests
+
 ## Naming Conventions
 
 ### Required Verbs
 Actions MUST use one of these four verbs: `Create`, `Update`, `Delete`, `Get`
 
 If the user provides a different verb, suggest the appropriate standard verb:
-- `Add`, `Assign`, `Register` → suggest `Create`
-- `Remove` → suggest `Delete`
-- `Fetch` → suggest `Get`
+- `Store`, `Add`, `Assign`, `Register` → suggest `Create`
+- `Destroy`, `Remove` → suggest `Delete`
+- `Show`, `Index`, `Fetch`, `List` → suggest `Get`
 
 Example response:
 > "The verb '{verb}' is not standard. Based on the action's purpose, I suggest using `{suggested}` instead. The action would be named `{Suggested}{Subject}Action`. Proceed?"
@@ -34,8 +43,8 @@ Example response:
 
 ## Directory Structure
 
-### Infer Subdirectory from Context
-Determine the appropriate subdirectory based on the primary model/domain:
+### Infer Domain from Context
+Determine the appropriate domain based on the primary model:
 
 - If the action works with `FamilySet` → `app/Actions/FamilySet/`
 - If the action works with `StorageOption` or `StorageOptionPart` → `app/Actions/StorageOption/`
@@ -52,8 +61,8 @@ ls app/Actions/
 Infer the action type from the verb in the name:
 
 ### Create Action (`Create*`)
-- Constructor injects the model (for `newInstance()`)
-- Execute takes a DTO, returns the created model
+- Constructor injects the model (for `newInstance()`) and optionally the current user via `#[CurrentUser]`
+- Execute takes an interface, returns the created model
 - Uses `$this->model->newInstance()` pattern
 
 ```php
@@ -61,20 +70,25 @@ Infer the action type from the verb in the name:
 
 declare(strict_types=1);
 
-namespace App\Actions\{Subdomain};
+namespace App\Actions\{Domain};
 
-use App\DataTransferObjects\{Create{Subject}Data};
+use App\Contracts\{Domain}\Create{Subject}Interface;
 use App\Models\{Subject};
+use App\Models\User;
+use Illuminate\Container\Attributes\CurrentUser;
 
 class Create{Subject}Action
 {
     public function __construct(
         private readonly {Subject} ${subject},
+        #[CurrentUser]
+        private readonly User $user,
     ) {}
 
-    public function execute(Create{Subject}Data $data): {Subject}
+    public function execute(Create{Subject}Interface $data): {Subject}
     {
         ${subject} = $this->{subject}->newInstance();
+        ${subject}->family_id = $this->user->family_id;
         // Set properties from $data
         ${subject}->save();
 
@@ -85,21 +99,21 @@ class Create{Subject}Action
 
 ### Update Action (`Update*`)
 - NO constructor (model passed to execute)
-- Execute takes the model instance + DTO, returns the updated model
+- Execute takes the model instance + interface, returns the updated model
 
 ```php
 <?php
 
 declare(strict_types=1);
 
-namespace App\Actions\{Subdomain};
+namespace App\Actions\{Domain};
 
-use App\DataTransferObjects\{Update{Subject}Data};
+use App\Contracts\{Domain}\Update{Subject}Interface;
 use App\Models\{Subject};
 
 class Update{Subject}Action
 {
-    public function execute({Subject} ${subject}, Update{Subject}Data $data): {Subject}
+    public function execute({Subject} ${subject}, Update{Subject}Interface $data): {Subject}
     {
         // Update properties from $data
         ${subject}->save();
@@ -118,7 +132,7 @@ class Update{Subject}Action
 
 declare(strict_types=1);
 
-namespace App\Actions\{Subdomain};
+namespace App\Actions\{Domain};
 
 use App\Models\{Subject};
 
@@ -144,7 +158,7 @@ Get actions have three variants depending on use case:
 
 declare(strict_types=1);
 
-namespace App\Actions\{Subdomain};
+namespace App\Actions\{Domain};
 
 use App\Models\{Subject};
 
@@ -173,7 +187,7 @@ When using route model binding, the model instance already exists. Use this vari
 
 declare(strict_types=1);
 
-namespace App\Actions\{Subdomain};
+namespace App\Actions\{Domain};
 
 use App\Models\{Subject};
 
@@ -198,7 +212,7 @@ For fetching multiple records, use a plural subject name (e.g., `GetFamilySetsAc
 
 declare(strict_types=1);
 
-namespace App\Actions\{Subdomain};
+namespace App\Actions\{Domain};
 
 use App\Models\{Subject};
 use App\Models\User;
@@ -223,24 +237,24 @@ class Get{Subjects}Action
 }
 ```
 
-## DTO Handling
+## Interface Handling
 
 ### For Create/Update Actions
-1. First, check if a fitting DTO already exists in `app/DataTransferObjects/`:
-   - `Create{Subject}Data` for Create actions
-   - `Update{Subject}Data` for Update actions
+1. First, check if a fitting interface already exists in `app/Contracts/{Domain}/`:
+   - `Create{Subject}Interface` for Create actions
+   - `Update{Subject}Interface` for Update actions
 
-2. List existing DTOs:
+2. List existing interfaces:
 ```bash
-ls app/DataTransferObjects/
+ls app/Contracts/
 ```
 
-3. If a fitting DTO exists, use it.
+3. If a fitting interface exists, use it.
 
-4. If NO fitting DTO exists, inform the user:
-> "No existing DTO found for this action. Please use the `/dto` skill to create `{Create|Update}{Subject}Data` first, then run this skill again."
+4. If NO fitting interface exists, inform the user:
+> "No existing interface found for this action. Please use the `/form-request` skill to create `{Store|Update}{Subject}Request` first (which creates the interface), then run this skill again."
 
-Do NOT create DTOs inline - delegate to the `/dto` skill.
+Do NOT create interfaces inline - delegate to the `/form-request` skill which creates both the interface and the form request.
 
 ## Model Injection Rules
 
@@ -266,8 +280,8 @@ All actions MUST:
 3. Determine the subject (model) from the name
 4. Infer subdirectory from context
 5. Determine action type from verb
-6. Check for existing DTO (Create/Update only)
-7. If DTO missing, stop and ask user to create it with `/dto` skill
+6. Check for existing interface (Create/Update only)
+7. If interface missing, stop and ask user to create it with `/form-request` skill
 8. Generate the action file
 9. Run `composer lint` to format the code
 10. Invoke `/unit-test {ActionName}Action` to generate tests
@@ -280,8 +294,8 @@ User runs: `/action CreateDrawer`
 2. Subject: `Drawer`
 3. Subdirectory: Check if Drawer relates to StorageOption → likely `app/Actions/StorageOption/`
 4. Type: Create action template
-5. Check DTO: Look for `CreateDrawerData` in `app/DataTransferObjects/`
-6. If missing: "No DTO found. Please run `/dto CreateDrawerData` first."
+5. Check Interface: Look for `CreateDrawerInterface` in `app/Contracts/Drawer/` or `app/Contracts/StorageOption/`
+6. If missing: "No interface found. Please run `/form-request StoreDrawer` first to create the interface."
 7. If exists: Generate `app/Actions/StorageOption/CreateDrawerAction.php`
 8. Run `composer lint`
 9. Run `/unit-test CreateDrawerAction`
