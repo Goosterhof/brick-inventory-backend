@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Sync;
 
+use App\Data\Lego\LegoSetData;
 use App\Models\Set;
 
 class UpsertSetAction
@@ -12,24 +13,21 @@ class UpsertSetAction
         private readonly Set $set,
     ) {}
 
-    /**
-     * @param  array{set_num: string, name: string, year: int, theme_id: int|null, num_parts: int, set_img_url: string|null}  $data
-     */
-    public function execute(array $data): Set
+    public function execute(LegoSetData $data): Set
     {
-        $set = $this->set->newQuery()->where('set_num', $data['set_num'])->first();
+        $set = $this->set->newQuery()->where('set_num', $data->setNum)->first();
 
         if (!$set instanceof Set) {
             /** @var Set $set */
             $set = $this->set->newInstance();
-            $set->set_num = $data['set_num'];
+            $set->set_num = $data->setNum;
         }
 
-        $set->name = $data['name'];
-        $set->year = $data['year'];
-        $set->theme = $data['theme_id'] !== null ? (string) $data['theme_id'] : null;
-        $set->num_parts = $data['num_parts'];
-        $set->image_url = $data['set_img_url'];
+        $set->name = $data->name;
+        $set->year = $data->year;
+        $set->theme = $data->themeId !== null ? (string) $data->themeId : null;
+        $set->num_parts = $data->numParts;
+        $set->image_url = $data->imageUrl;
         $set->save();
 
         return $set;

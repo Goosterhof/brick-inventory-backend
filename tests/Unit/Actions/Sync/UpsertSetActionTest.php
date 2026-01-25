@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Sync\UpsertSetAction;
+use App\Data\Lego\LegoSetData;
 use App\Models\Set;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -22,14 +23,14 @@ describe('UpsertSetAction', function (): void {
 
         $action = new UpsertSetAction($set);
 
-        $data = [
-            'set_num' => '75192-1',
-            'name' => 'Millennium Falcon',
-            'year' => 2017,
-            'theme_id' => 158,
-            'num_parts' => 7541,
-            'set_img_url' => 'https://example.com/75192.jpg',
-        ];
+        $data = new LegoSetData(
+            setNum: '75192-1',
+            name: 'Millennium Falcon',
+            year: 2017,
+            themeId: 158,
+            numParts: 7541,
+            imageUrl: 'https://example.com/75192.jpg',
+        );
 
         // act
         $result = $action->execute($data);
@@ -60,14 +61,14 @@ describe('UpsertSetAction', function (): void {
 
         $action = new UpsertSetAction($set);
 
-        $data = [
-            'set_num' => '75192-1',
-            'name' => 'Updated Millennium Falcon',
-            'year' => 2018,
-            'theme_id' => 159,
-            'num_parts' => 7600,
-            'set_img_url' => 'https://example.com/updated.jpg',
-        ];
+        $data = new LegoSetData(
+            setNum: '75192-1',
+            name: 'Updated Millennium Falcon',
+            year: 2018,
+            themeId: 159,
+            numParts: 7600,
+            imageUrl: 'https://example.com/updated.jpg',
+        );
 
         // act
         $result = $action->execute($data);
@@ -96,14 +97,14 @@ describe('UpsertSetAction', function (): void {
 
         $action = new UpsertSetAction($set);
 
-        $data = [
-            'set_num' => '10281-1',
-            'name' => 'Bonsai Tree',
-            'year' => 2021,
-            'theme_id' => null,
-            'num_parts' => 878,
-            'set_img_url' => null,
-        ];
+        $data = new LegoSetData(
+            setNum: '10281-1',
+            name: 'Bonsai Tree',
+            year: 2021,
+            themeId: null,
+            numParts: 878,
+            imageUrl: null,
+        );
 
         // act
         $result = $action->execute($data);

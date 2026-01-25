@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Sync\UpsertPartAction;
+use App\Data\Lego\LegoPartData;
 use App\Models\Part;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -22,12 +23,12 @@ describe('UpsertPartAction', function (): void {
 
         $action = new UpsertPartAction($part);
 
-        $data = [
-            'part_num' => '3001',
-            'name' => 'Brick 2 x 4',
-            'part_cat_id' => 11,
-            'part_img_url' => 'https://example.com/3001.jpg',
-        ];
+        $data = new LegoPartData(
+            partNum: '3001',
+            name: 'Brick 2 x 4',
+            categoryId: 11,
+            imageUrl: 'https://example.com/3001.jpg',
+        );
 
         // act
         $result = $action->execute($data);
@@ -56,12 +57,12 @@ describe('UpsertPartAction', function (): void {
 
         $action = new UpsertPartAction($part);
 
-        $data = [
-            'part_num' => '3001',
-            'name' => 'Updated Brick 2 x 4',
-            'part_cat_id' => 12,
-            'part_img_url' => 'https://example.com/updated.jpg',
-        ];
+        $data = new LegoPartData(
+            partNum: '3001',
+            name: 'Updated Brick 2 x 4',
+            categoryId: 12,
+            imageUrl: 'https://example.com/updated.jpg',
+        );
 
         // act
         $result = $action->execute($data);
@@ -88,12 +89,12 @@ describe('UpsertPartAction', function (): void {
 
         $action = new UpsertPartAction($part);
 
-        $data = [
-            'part_num' => '3002',
-            'name' => 'Brick 2 x 3',
-            'part_cat_id' => null,
-            'part_img_url' => null,
-        ];
+        $data = new LegoPartData(
+            partNum: '3002',
+            name: 'Brick 2 x 3',
+            categoryId: null,
+            imageUrl: null,
+        );
 
         // act
         $result = $action->execute($data);

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 use App\Actions\Sync\StoreSetPartsAction;
 use App\Actions\Sync\UpsertSetAction;
+use App\Data\Lego\LegoSetData;
+use App\Data\Lego\LegoSetPartData;
 use App\Exceptions\InvalidApiResponseException;
 use App\Exceptions\RebrickableApiException;
 use App\Exceptions\SetNotFoundException;
@@ -41,14 +43,13 @@ describe('RebrickableService', function (): void {
             $result = $service->fetchSet('75192-1');
 
             // assert
-            expect($result)->toBe([
-                'set_num' => '75192-1',
-                'name' => 'Millennium Falcon',
-                'year' => 2017,
-                'theme_id' => 158,
-                'num_parts' => 7541,
-                'set_img_url' => 'https://example.com/75192.jpg',
-            ]);
+            expect($result)->toBeInstanceOf(LegoSetData::class);
+            expect($result->setNum)->toBe('75192-1');
+            expect($result->name)->toBe('Millennium Falcon');
+            expect($result->year)->toBe(2017);
+            expect($result->themeId)->toBe(158);
+            expect($result->numParts)->toBe(7541);
+            expect($result->imageUrl)->toBe('https://example.com/75192.jpg');
 
             Http::assertSent(fn ($request): bool => $request->url() === 'https://rebrickable.com/api/v3/lego/sets/75192-1/');
         });
@@ -66,7 +67,7 @@ describe('RebrickableService', function (): void {
             $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL, $set, $upsertSetAction, $storeSetPartsAction);
 
             // act & assert
-            expect(fn (): array => $service->fetchSet('invalid'))->toThrow(SetNotFoundException::class);
+            expect(fn (): LegoSetData => $service->fetchSet('invalid'))->toThrow(SetNotFoundException::class);
         });
 
         it('should throw RebrickableApiException on server error', function (): void {
@@ -82,7 +83,7 @@ describe('RebrickableService', function (): void {
             $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL, $set, $upsertSetAction, $storeSetPartsAction);
 
             // act & assert
-            expect(fn (): array => $service->fetchSet('75192-1'))->toThrow(RebrickableApiException::class);
+            expect(fn (): LegoSetData => $service->fetchSet('75192-1'))->toThrow(RebrickableApiException::class);
         });
 
         it('should handle null theme_id and set_img_url', function (): void {
@@ -108,8 +109,8 @@ describe('RebrickableService', function (): void {
             $result = $service->fetchSet('10281-1');
 
             // assert
-            expect($result['theme_id'])->toBeNull();
-            expect($result['set_img_url'])->toBeNull();
+            expect($result->themeId)->toBeNull();
+            expect($result->imageUrl)->toBeNull();
         });
 
         it('should throw InvalidApiResponseException when response is missing required fields', function (): void {
@@ -128,7 +129,7 @@ describe('RebrickableService', function (): void {
             $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL, $set, $upsertSetAction, $storeSetPartsAction);
 
             // act & assert
-            expect(fn (): array => $service->fetchSet('75192-1'))->toThrow(InvalidApiResponseException::class);
+            expect(fn (): LegoSetData => $service->fetchSet('75192-1'))->toThrow(InvalidApiResponseException::class);
         });
 
         it('should throw InvalidApiResponseException when response is not an array', function (): void {
@@ -144,7 +145,7 @@ describe('RebrickableService', function (): void {
             $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL, $set, $upsertSetAction, $storeSetPartsAction);
 
             // act & assert
-            expect(fn (): array => $service->fetchSet('75192-1'))->toThrow(InvalidApiResponseException::class);
+            expect(fn (): LegoSetData => $service->fetchSet('75192-1'))->toThrow(InvalidApiResponseException::class);
         });
     });
 
@@ -177,7 +178,8 @@ describe('RebrickableService', function (): void {
 
             // assert
             expect($result)->toHaveCount(1);
-            expect($result[0]['part']['part_num'])->toBe('3001');
+            expect($result[0])->toBeInstanceOf(LegoSetPartData::class);
+            expect($result[0]->part->partNum)->toBe('3001');
         });
 
         it('should handle pagination', function (): void {
@@ -220,8 +222,8 @@ describe('RebrickableService', function (): void {
 
             // assert
             expect($result)->toHaveCount(2);
-            expect($result[0]['part']['part_num'])->toBe('3001');
-            expect($result[1]['part']['part_num'])->toBe('3002');
+            expect($result[0]->part->partNum)->toBe('3001');
+            expect($result[1]->part->partNum)->toBe('3002');
             Http::assertSentCount(2);
         });
 
@@ -361,7 +363,7 @@ describe('RebrickableService', function (): void {
             $upsertSetAction = Mockery::mock(UpsertSetAction::class);
             $upsertSetAction->shouldReceive('execute')
                 ->once()
-                ->with(Mockery::type('array'))
+                ->with(Mockery::type(LegoSetData::class))
                 ->andReturn($createdSet);
 
             $storeSetPartsAction = Mockery::mock(StoreSetPartsAction::class);

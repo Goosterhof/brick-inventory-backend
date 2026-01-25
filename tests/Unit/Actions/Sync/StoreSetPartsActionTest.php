@@ -5,6 +5,9 @@ declare(strict_types=1);
 use App\Actions\Sync\StoreSetPartsAction;
 use App\Actions\Sync\UpsertColorAction;
 use App\Actions\Sync\UpsertPartAction;
+use App\Data\Lego\LegoColorData;
+use App\Data\Lego\LegoPartData;
+use App\Data\Lego\LegoSetPartData;
 use App\Models\Color;
 use App\Models\Part;
 use App\Models\Set;
@@ -23,16 +26,19 @@ describe('StoreSetPartsAction', function (): void {
         $part = Mockery::mock(Part::class)->makePartial();
         $part->id = 1;
 
+        $colorData = new LegoColorData(id: 1, name: 'White', rgb: 'FFFFFF', isTransparent: false);
+        $partData = new LegoPartData(partNum: '3001', name: 'Brick 2 x 4', categoryId: 11, imageUrl: null);
+
         $upsertColorAction = Mockery::mock(UpsertColorAction::class);
         $upsertColorAction->shouldReceive('execute')
             ->once()
-            ->with(['id' => 1, 'name' => 'White', 'rgb' => 'FFFFFF', 'is_trans' => false])
+            ->withArgs(fn (LegoColorData $data): bool => $data->id === 1 && $data->name === 'White')
             ->andReturn($color);
 
         $upsertPartAction = Mockery::mock(UpsertPartAction::class);
         $upsertPartAction->shouldReceive('execute')
             ->once()
-            ->with(['part_num' => '3001', 'name' => 'Brick 2 x 4', 'part_cat_id' => 11, 'part_img_url' => null])
+            ->withArgs(fn (LegoPartData $data): bool => $data->partNum === '3001' && $data->name === 'Brick 2 x 4')
             ->andReturn($part);
 
         $setPartQueryBuilder = Mockery::mock(Builder::class);
@@ -49,13 +55,13 @@ describe('StoreSetPartsAction', function (): void {
         $action = new StoreSetPartsAction($upsertColorAction, $upsertPartAction, $setPart);
 
         $partsData = [
-            [
-                'part' => ['part_num' => '3001', 'name' => 'Brick 2 x 4', 'part_cat_id' => 11, 'part_img_url' => null],
-                'color' => ['id' => 1, 'name' => 'White', 'rgb' => 'FFFFFF', 'is_trans' => false],
-                'quantity' => 10,
-                'is_spare' => false,
-                'element_id' => '300101',
-            ],
+            new LegoSetPartData(
+                part: $partData,
+                color: $colorData,
+                quantity: 10,
+                isSpare: false,
+                elementId: '300101',
+            ),
         ];
 
         // act
@@ -105,13 +111,13 @@ describe('StoreSetPartsAction', function (): void {
         $action = new StoreSetPartsAction($upsertColorAction, $upsertPartAction, $setPart);
 
         $partsData = [
-            [
-                'part' => ['part_num' => '3001', 'name' => 'Brick 2 x 4', 'part_cat_id' => 11, 'part_img_url' => null],
-                'color' => ['id' => 1, 'name' => 'White', 'rgb' => 'FFFFFF', 'is_trans' => false],
-                'quantity' => 15,
-                'is_spare' => false,
-                'element_id' => 'NEW123',
-            ],
+            new LegoSetPartData(
+                part: new LegoPartData(partNum: '3001', name: 'Brick 2 x 4', categoryId: 11, imageUrl: null),
+                color: new LegoColorData(id: 1, name: 'White', rgb: 'FFFFFF', isTransparent: false),
+                quantity: 15,
+                isSpare: false,
+                elementId: 'NEW123',
+            ),
         ];
 
         // act
@@ -162,20 +168,20 @@ describe('StoreSetPartsAction', function (): void {
         $action = new StoreSetPartsAction($upsertColorAction, $upsertPartAction, $setPart);
 
         $partsData = [
-            [
-                'part' => ['part_num' => '3001', 'name' => 'Brick 2 x 4', 'part_cat_id' => 11, 'part_img_url' => null],
-                'color' => ['id' => 1, 'name' => 'White', 'rgb' => 'FFFFFF', 'is_trans' => false],
-                'quantity' => 5,
-                'is_spare' => false,
-                'element_id' => null,
-            ],
-            [
-                'part' => ['part_num' => '3002', 'name' => 'Brick 2 x 3', 'part_cat_id' => null, 'part_img_url' => null],
-                'color' => ['id' => 2, 'name' => 'Black', 'rgb' => '000000', 'is_trans' => false],
-                'quantity' => 3,
-                'is_spare' => true,
-                'element_id' => null,
-            ],
+            new LegoSetPartData(
+                part: new LegoPartData(partNum: '3001', name: 'Brick 2 x 4', categoryId: 11, imageUrl: null),
+                color: new LegoColorData(id: 1, name: 'White', rgb: 'FFFFFF', isTransparent: false),
+                quantity: 5,
+                isSpare: false,
+                elementId: null,
+            ),
+            new LegoSetPartData(
+                part: new LegoPartData(partNum: '3002', name: 'Brick 2 x 3', categoryId: null, imageUrl: null),
+                color: new LegoColorData(id: 2, name: 'Black', rgb: '000000', isTransparent: false),
+                quantity: 3,
+                isSpare: true,
+                elementId: null,
+            ),
         ];
 
         // act

@@ -26,12 +26,12 @@ class GetSetAction
 
         /** @var Set $newSet */
         $newSet = $this->set->newInstance();
-        $newSet->set_num = $setData['set_num'];
-        $newSet->name = $setData['name'];
-        $newSet->year = $setData['year'];
-        $newSet->theme = $setData['theme_id'] !== null ? (string) $setData['theme_id'] : null;
-        $newSet->num_parts = $setData['num_parts'];
-        $newSet->image_url = $setData['set_img_url'];
+        $newSet->set_num = $setData->setNum;
+        $newSet->name = $setData->name;
+        $newSet->year = $setData->year;
+        $newSet->theme = $setData->themeId !== null ? (string) $setData->themeId : null;
+        $newSet->num_parts = $setData->numParts;
+        $newSet->image_url = $setData->imageUrl;
         $newSet->save();
 
         return $newSet;

@@ -7,6 +7,8 @@ namespace App\Services;
 use App\Actions\Sync\StoreSetPartsAction;
 use App\Actions\Sync\UpsertSetAction;
 use App\Contracts\LegoDataServiceInterface;
+use App\Data\Lego\LegoSetData;
+use App\Data\Lego\LegoSetPartData;
 use App\Exceptions\InvalidApiResponseException;
 use App\Exceptions\RebrickableApiException;
 use App\Exceptions\SetNotFoundException;
@@ -48,13 +50,11 @@ final readonly class RebrickableService implements LegoDataServiceInterface
     }
 
     /**
-     * @return array{set_num: string, name: string, year: int, theme_id: int|null, num_parts: int, set_img_url: string|null}
-     *
      * @throws SetNotFoundException
      * @throws RebrickableApiException
      * @throws InvalidApiResponseException
      */
-    public function fetchSet(string $setNum): array
+    public function fetchSet(string $setNum): LegoSetData
     {
         $response = $this->httpClient()->get(sprintf('/lego/sets/%s/', $setNum));
 
@@ -65,36 +65,39 @@ final readonly class RebrickableService implements LegoDataServiceInterface
         $this->validateSetResponse($data, $setNum);
 
         /** @var array{set_num: string, name: string, year: int, theme_id: int|null, num_parts: int, set_img_url: string|null} $data */
-        return $data;
+        return LegoSetData::fromArray($data);
     }
 
     /**
-     * @return list<array{part: array{part_num: string, name: string, part_cat_id: int|null, part_img_url: string|null}, color: array{id: int, name: string, rgb: string, is_trans: bool}, quantity: int, is_spare: bool, element_id: string|null}>
+     * @return list<LegoSetPartData>
      *
      * @throws RebrickableApiException
      * @throws InvalidApiResponseException
      */
     public function fetchSetParts(string $setNum): array
     {
-        /** @var list<array{part: array{part_num: string, name: string, part_cat_id: int|null, part_img_url: string|null}, color: array{id: int, name: string, rgb: string, is_trans: bool}, quantity: int, is_spare: bool, element_id: string|null}> $parts */
+        /** @var list<LegoSetPartData> $parts */
         $parts = [];
-        $url = sprintf('/lego/sets/%s/parts/', $setNum);
+        $nextUrl = sprintf('/lego/sets/%s/parts/', $setNum);
 
         do {
-            $response = $this->httpClient()->get($url);
+            $response = $this->httpClient()->get($nextUrl);
 
             if ($response->failed()) {
                 throw RebrickableApiException::fromResponse($response, sprintf("Failed to fetch parts for set '%s'", $setNum));
             }
 
+            /** @var array{results: list<array{part: array{part_num: string, name: string, part_cat_id: int|null, part_img_url: string|null}, color: array{id: int, name: string, rgb: string, is_trans: bool}, quantity: int, is_spare: bool, element_id: string|null}>, next: string|null} $data */
             $data = $response->json();
 
             $this->validatePartsResponse($data, $setNum);
 
-            /** @var array{results: list<array{part: array{part_num: string, name: string, part_cat_id: int|null, part_img_url: string|null}, color: array{id: int, name: string, rgb: string, is_trans: bool}, quantity: int, is_spare: bool, element_id: string|null}>, next: string|null} $data */
-            $parts = array_merge($parts, $data['results']);
-            $url = $data['next'];
-        } while ($url !== null);
+            foreach ($data['results'] as $partData) {
+                $parts[] = LegoSetPartData::fromArray($partData);
+            }
+
+            $nextUrl = $data['next'];
+        } while (is_string($nextUrl));
 
         return $parts;
     }

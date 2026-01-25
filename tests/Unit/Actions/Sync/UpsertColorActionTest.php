@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Sync\UpsertColorAction;
+use App\Data\Lego\LegoColorData;
 use App\Models\Color;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -22,12 +23,12 @@ describe('UpsertColorAction', function (): void {
 
         $action = new UpsertColorAction($color);
 
-        $data = [
-            'id' => 1,
-            'name' => 'White',
-            'rgb' => 'FFFFFF',
-            'is_trans' => false,
-        ];
+        $data = new LegoColorData(
+            id: 1,
+            name: 'White',
+            rgb: 'FFFFFF',
+            isTransparent: false,
+        );
 
         // act
         $result = $action->execute($data);
@@ -56,12 +57,12 @@ describe('UpsertColorAction', function (): void {
 
         $action = new UpsertColorAction($color);
 
-        $data = [
-            'id' => 1,
-            'name' => 'Updated White',
-            'rgb' => 'FFFFF0',
-            'is_trans' => false,
-        ];
+        $data = new LegoColorData(
+            id: 1,
+            name: 'Updated White',
+            rgb: 'FFFFF0',
+            isTransparent: false,
+        );
 
         // act
         $result = $action->execute($data);
@@ -87,12 +88,12 @@ describe('UpsertColorAction', function (): void {
 
         $action = new UpsertColorAction($color);
 
-        $data = [
-            'id' => 41,
-            'name' => 'Trans-Red',
-            'rgb' => 'FF0000',
-            'is_trans' => true,
-        ];
+        $data = new LegoColorData(
+            id: 41,
+            name: 'Trans-Red',
+            rgb: 'FF0000',
+            isTransparent: true,
+        );
 
         // act
         $result = $action->execute($data);
