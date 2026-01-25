@@ -22,6 +22,15 @@ If no argument is provided, ask the user for the Model name.
 1. A resource controller with CRUD methods: `index`, `store`, `show`, `update`, `destroy`
 2. Routes added to `routes/api.php` as explicit individual routes
 
+## Domain Convention
+
+In this codebase, `{Domain}` refers to the subdirectory used to organize related Actions, Contracts, and Requests. The domain typically matches the primary model name (e.g., `StorageOption` model → `StorageOption` domain).
+
+Directory structure:
+- `app/Actions/{Domain}/` - Action classes
+- `app/Contracts/{Domain}/` - Interface contracts
+- `app/Http/Requests/{Domain}/` - Form Requests
+
 ## Dependencies Check
 
 Before creating the controller, check if these files exist:
@@ -32,7 +41,7 @@ Check if `app/Http/Resources/{ModelName}ResourceData.php` exists:
 - If **no**: Inform the user and call the `/resource-data` skill to create it first
 
 ### Form Requests
-Check if these exist in `app/Http/Requests/{ModelName}/`:
+Check if these exist in `app/Http/Requests/{Domain}/`:
 - `Store{ModelName}Request.php`
 - `Update{ModelName}Request.php`
 
@@ -50,13 +59,13 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
-use App\Actions\{ModelName}\Create{ModelName}Action;
-use App\Actions\{ModelName}\Delete{ModelName}Action;
-use App\Actions\{ModelName}\Get{ModelName}Action;
-use App\Actions\{ModelName}\Get{ModelPluralName}Action;
-use App\Actions\{ModelName}\Update{ModelName}Action;
-use App\Http\Requests\{ModelName}\Store{ModelName}Request;
-use App\Http\Requests\{ModelName}\Update{ModelName}Request;
+use App\Actions\{Domain}\Create{ModelName}Action;
+use App\Actions\{Domain}\Delete{ModelName}Action;
+use App\Actions\{Domain}\Get{ModelName}Action;
+use App\Actions\{Domain}\Get{ModelPluralName}Action;
+use App\Actions\{Domain}\Update{ModelName}Action;
+use App\Http\Requests\{Domain}\Store{ModelName}Request;
+use App\Http\Requests\{Domain}\Update{ModelName}Request;
 use App\Http\Resources\{ModelName}ResourceData;
 use App\Models\{ModelName};
 use App\Models\User;
@@ -140,19 +149,20 @@ Route::delete('{route-name}/{route-parameter}', [{ModelName}Controller::class, '
 
 | Component | Convention | Example for `StorageOption` |
 |-----------|------------|----------------------------|
+| Domain | `{ModelName}` (typically same as model) | `StorageOption` |
 | Controller | `{ModelName}Controller` | `StorageOptionController` |
 | ResourceData | `{ModelName}ResourceData` | `StorageOptionResourceData` |
-| Store Request | `Store{ModelName}Request` | `StoreStorageOptionRequest` |
-| Update Request | `Update{ModelName}Request` | `UpdateStorageOptionRequest` |
+| Store Request | `{Domain}\Store{ModelName}Request` | `StorageOption\StoreStorageOptionRequest` |
+| Update Request | `{Domain}\Update{ModelName}Request` | `StorageOption\UpdateStorageOptionRequest` |
 | Model variable | `${camelCase}` | `$storageOption` |
 | Plural variable | `${camelCasePlural}` | `$storageOptions` |
 | Route name | `kebab-case-plural` | `storage-options` |
 | Route parameter | `snake_case_singular` | `storage_option` |
-| Index Action | `Get{PluralName}Action` | `GetStorageOptionsAction` |
-| Show Action | `Get{ModelName}Action` | `GetStorageOptionAction` |
-| Store Action | `Create{ModelName}Action` | `CreateStorageOptionAction` |
-| Update Action | `Update{ModelName}Action` | `UpdateStorageOptionAction` |
-| Destroy Action | `Delete{ModelName}Action` | `DeleteStorageOptionAction` |
+| Index Action | `{Domain}\Get{PluralName}Action` | `StorageOption\GetStorageOptionsAction` |
+| Show Action | `{Domain}\Get{ModelName}Action` | `StorageOption\GetStorageOptionAction` |
+| Store Action | `{Domain}\Create{ModelName}Action` | `StorageOption\CreateStorageOptionAction` |
+| Update Action | `{Domain}\Update{ModelName}Action` | `StorageOption\UpdateStorageOptionAction` |
+| Destroy Action | `{Domain}\Delete{ModelName}Action` | `StorageOption\DeleteStorageOptionAction` |
 
 ## After Creation
 

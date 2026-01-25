@@ -29,6 +29,15 @@ Form Requests in this project:
 4. Use string constants for field names (DRY)
 5. Have a `toDTO()` method that maps request data to properties
 
+## Domain Convention
+
+In this codebase, `{Domain}` refers to the subdirectory used to organize related Actions, Contracts, and Requests. The domain typically matches the primary model name (e.g., `StorageOption` model → `StorageOption` domain).
+
+Directory structure:
+- `app/Actions/{Domain}/` - Action classes
+- `app/Contracts/{Domain}/` - Interface contracts
+- `app/Http/Requests/{Domain}/` - Form Requests
+
 ## File Structure
 
 When creating a new Form Request, create these files:

@@ -15,6 +15,15 @@ Parse `$ARGUMENTS` to get the action name (e.g., `CreateStorageOption`, `UpdateF
 
 The name should NOT include the `Action` suffix - it will be added automatically.
 
+## Domain Convention
+
+In this codebase, `{Domain}` refers to the subdirectory used to organize related Actions, Contracts, and Requests. The domain typically matches the primary model name (e.g., `StorageOption` model → `StorageOption` domain).
+
+Directory structure:
+- `app/Actions/{Domain}/` - Action classes
+- `app/Contracts/{Domain}/` - Interface contracts
+- `app/Http/Requests/{Domain}/` - Form Requests
+
 ## Naming Conventions
 
 ### Required Verbs
@@ -34,8 +43,8 @@ Example response:
 
 ## Directory Structure
 
-### Infer Subdirectory from Context
-Determine the appropriate subdirectory based on the primary model/domain:
+### Infer Domain from Context
+Determine the appropriate domain based on the primary model:
 
 - If the action works with `FamilySet` → `app/Actions/FamilySet/`
 - If the action works with `StorageOption` or `StorageOptionPart` → `app/Actions/StorageOption/`
@@ -61,9 +70,9 @@ Infer the action type from the verb in the name:
 
 declare(strict_types=1);
 
-namespace App\Actions\{Subdomain};
+namespace App\Actions\{Domain};
 
-use App\Contracts\{Subdomain}\Create{Subject}Interface;
+use App\Contracts\{Domain}\Create{Subject}Interface;
 use App\Models\{Subject};
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
@@ -97,9 +106,9 @@ class Create{Subject}Action
 
 declare(strict_types=1);
 
-namespace App\Actions\{Subdomain};
+namespace App\Actions\{Domain};
 
-use App\Contracts\{Subdomain}\Update{Subject}Interface;
+use App\Contracts\{Domain}\Update{Subject}Interface;
 use App\Models\{Subject};
 
 class Update{Subject}Action
@@ -123,7 +132,7 @@ class Update{Subject}Action
 
 declare(strict_types=1);
 
-namespace App\Actions\{Subdomain};
+namespace App\Actions\{Domain};
 
 use App\Models\{Subject};
 
@@ -149,7 +158,7 @@ Get actions have three variants depending on use case:
 
 declare(strict_types=1);
 
-namespace App\Actions\{Subdomain};
+namespace App\Actions\{Domain};
 
 use App\Models\{Subject};
 
@@ -178,7 +187,7 @@ When using route model binding, the model instance already exists. Use this vari
 
 declare(strict_types=1);
 
-namespace App\Actions\{Subdomain};
+namespace App\Actions\{Domain};
 
 use App\Models\{Subject};
 
@@ -203,7 +212,7 @@ For fetching multiple records, use a plural subject name (e.g., `GetFamilySetsAc
 
 declare(strict_types=1);
 
-namespace App\Actions\{Subdomain};
+namespace App\Actions\{Domain};
 
 use App\Models\{Subject};
 use App\Models\User;
@@ -231,7 +240,7 @@ class Get{Subjects}Action
 ## Interface Handling
 
 ### For Create/Update Actions
-1. First, check if a fitting interface already exists in `app/Contracts/{Subdomain}/`:
+1. First, check if a fitting interface already exists in `app/Contracts/{Domain}/`:
    - `Create{Subject}Interface` for Create actions
    - `Update{Subject}Interface` for Update actions
 
