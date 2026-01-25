@@ -213,3 +213,25 @@ The following custom skills are available:
 | `/action` | Create Action classes. Use `/action CreateUser` to generate an action. Infers type from verb (Create, Update, Delete, Get). |
 | `/controller` | Create a resource controller. Use `/controller ModelName` to generate a controller with CRUD operations, routes, and Action placeholders. |
 | `/feature-test` | Generate feature tests for API controllers. Use `/feature-test ControllerName` to generate tests for all endpoints in that controller. |
+
+### Required Skill Usage
+
+**IMPORTANT**: When creating or modifying files in these directories, you MUST use the corresponding skill. Do NOT create these files manually.
+
+| File Path Pattern | Required Skill |
+|-------------------|----------------|
+| `app/Actions/**/*Action.php` | `/action` |
+| `app/Http/Controllers/*Controller.php` | `/controller` |
+| `app/Http/Requests/*Request.php` | `/form-request` |
+| `app/Http/Resources/*ResourceData.php` | `/resource-data` |
+| `app/Models/*.php` | `/model` |
+| `database/factories/*Factory.php` | `/factory` |
+| `database/migrations/*.php` | `/migration` |
+| `tests/Unit/**/*Test.php` | `/unit-test` |
+| `tests/Feature/**/*Test.php` | `/feature-test` |
+
+This ensures:
+1. Consistent code patterns across the codebase
+2. Proper conventions are followed (naming, structure, dependencies)
+3. Related files are created together (e.g., actions with their tests)
+4. DTOs and interfaces are checked/created as needed
