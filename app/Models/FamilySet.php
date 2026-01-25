@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Contracts\BelongsToFamily;
+use App\Contracts\BelongsToFamilyInterface;
 use App\Enums\FamilySetStatus;
 use Carbon\Carbon;
 use Database\Factories\FamilySetFactory;
@@ -25,7 +25,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read Set $set
  * @property-read Family $family
  */
-class FamilySet extends Model implements BelongsToFamily
+class FamilySet extends Model implements BelongsToFamilyInterface
 {
     /** @use HasFactory<FamilySetFactory> */
     use HasFactory;

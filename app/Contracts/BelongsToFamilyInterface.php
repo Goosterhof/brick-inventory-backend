@@ -10,7 +10,7 @@ namespace App\Contracts;
  * Models implementing this interface can be automatically
  * checked for family ownership via middleware.
  */
-interface BelongsToFamily
+interface BelongsToFamilyInterface
 {
     public function getFamilyId(): int;
 }

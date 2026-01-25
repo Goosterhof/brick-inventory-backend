@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
-use App\Contracts\BelongsToFamily;
+use App\Contracts\BelongsToFamilyInterface;
 use Carbon\Carbon;
 use Database\Factories\StorageOptionFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -23,7 +23,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
-class StorageOption extends Model implements BelongsToFamily
+class StorageOption extends Model implements BelongsToFamilyInterface
 {
     /** @use HasFactory<StorageOptionFactory> */
     use HasFactory;

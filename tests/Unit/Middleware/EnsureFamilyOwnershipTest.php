@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Contracts\BelongsToFamily;
+use App\Contracts\BelongsToFamilyInterface;
 use App\Http\Middleware\EnsureFamilyOwnership;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -72,7 +72,7 @@ describe('EnsureFamilyOwnership', function (): void {
         $user = Mockery::mock(User::class)->makePartial();
         $user->family_id = 1;
 
-        $model = Mockery::mock(BelongsToFamily::class);
+        $model = Mockery::mock(BelongsToFamilyInterface::class);
         $model->shouldReceive('getFamilyId')->andReturn(1);
 
         $route = Mockery::mock(Route::class);
@@ -98,7 +98,7 @@ describe('EnsureFamilyOwnership', function (): void {
         $user = Mockery::mock(User::class)->makePartial();
         $user->family_id = 1;
 
-        $model = Mockery::mock(BelongsToFamily::class);
+        $model = Mockery::mock(BelongsToFamilyInterface::class);
         $model->shouldReceive('getFamilyId')->andReturn(2);
 
         $route = Mockery::mock(Route::class);
@@ -124,10 +124,10 @@ describe('EnsureFamilyOwnership', function (): void {
         $user = Mockery::mock(User::class)->makePartial();
         $user->family_id = 1;
 
-        $model1 = Mockery::mock(BelongsToFamily::class);
+        $model1 = Mockery::mock(BelongsToFamilyInterface::class);
         $model1->shouldReceive('getFamilyId')->andReturn(1);
 
-        $model2 = Mockery::mock(BelongsToFamily::class);
+        $model2 = Mockery::mock(BelongsToFamilyInterface::class);
         $model2->shouldReceive('getFamilyId')->andReturn(2);
 
         $route = Mockery::mock(Route::class);
@@ -156,10 +156,10 @@ describe('EnsureFamilyOwnership', function (): void {
         $user = Mockery::mock(User::class)->makePartial();
         $user->family_id = 1;
 
-        $model1 = Mockery::mock(BelongsToFamily::class);
+        $model1 = Mockery::mock(BelongsToFamilyInterface::class);
         $model1->shouldReceive('getFamilyId')->andReturn(1);
 
-        $model2 = Mockery::mock(BelongsToFamily::class);
+        $model2 = Mockery::mock(BelongsToFamilyInterface::class);
         $model2->shouldReceive('getFamilyId')->andReturn(1);
 
         $route = Mockery::mock(Route::class);

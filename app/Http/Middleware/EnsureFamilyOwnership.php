@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Middleware;
 
-use App\Contracts\BelongsToFamily;
+use App\Contracts\BelongsToFamilyInterface;
 use App\Models\User;
 use Closure;
 use Illuminate\Http\Request;
@@ -31,7 +31,7 @@ final readonly class EnsureFamilyOwnership
         }
 
         foreach ($request->route()?->parameters() ?? [] as $parameter) {
-            if ($parameter instanceof BelongsToFamily && $parameter->getFamilyId() !== $user->family_id) {
+            if ($parameter instanceof BelongsToFamilyInterface && $parameter->getFamilyId() !== $user->family_id) {
                 return response()->json(['error' => 'Not found'], 404);
             }
         }
