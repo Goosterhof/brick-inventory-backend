@@ -13,19 +13,19 @@ class UpsertColorAction
         private readonly Color $color,
     ) {}
 
-    public function execute(LegoColorData $data): Color
+    public function execute(LegoColorData $legoColorData): Color
     {
-        $color = $this->color->newQuery()->where('rebrickable_id', $data->id)->first();
+        $color = $this->color->newQuery()->where('rebrickable_id', $legoColorData->id)->first();
 
         if (!$color instanceof Color) {
             /** @var Color $color */
             $color = $this->color->newInstance();
-            $color->rebrickable_id = $data->id;
+            $color->rebrickable_id = $legoColorData->id;
         }
 
-        $color->name = $data->name;
-        $color->rgb = $data->rgb;
-        $color->is_transparent = $data->isTransparent;
+        $color->name = $legoColorData->name;
+        $color->rgb = $legoColorData->rgb;
+        $color->is_transparent = $legoColorData->isTransparent;
         $color->save();
 
         return $color;

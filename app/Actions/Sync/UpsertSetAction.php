@@ -13,21 +13,21 @@ class UpsertSetAction
         private readonly Set $set,
     ) {}
 
-    public function execute(LegoSetData $data): Set
+    public function execute(LegoSetData $legoSetData): Set
     {
-        $set = $this->set->newQuery()->where('set_num', $data->setNum)->first();
+        $set = $this->set->newQuery()->where('set_num', $legoSetData->setNum)->first();
 
         if (!$set instanceof Set) {
             /** @var Set $set */
             $set = $this->set->newInstance();
-            $set->set_num = $data->setNum;
+            $set->set_num = $legoSetData->setNum;
         }
 
-        $set->name = $data->name;
-        $set->year = $data->year;
-        $set->theme = $data->themeId !== null ? (string) $data->themeId : null;
-        $set->num_parts = $data->numParts;
-        $set->image_url = $data->imageUrl;
+        $set->name = $legoSetData->name;
+        $set->year = $legoSetData->year;
+        $set->theme = $legoSetData->themeId !== null ? (string) $legoSetData->themeId : null;
+        $set->num_parts = $legoSetData->numParts;
+        $set->image_url = $legoSetData->imageUrl;
         $set->save();
 
         return $set;

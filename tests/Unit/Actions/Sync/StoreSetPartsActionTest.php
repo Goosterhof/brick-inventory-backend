@@ -32,13 +32,13 @@ describe('StoreSetPartsAction', function (): void {
         $upsertColorAction = Mockery::mock(UpsertColorAction::class);
         $upsertColorAction->shouldReceive('execute')
             ->once()
-            ->withArgs(fn (LegoColorData $data): bool => $data->id === 1 && $data->name === 'White')
+            ->withArgs(fn (LegoColorData $legoColorData): bool => $legoColorData->id === 1 && $legoColorData->name === 'White')
             ->andReturn($color);
 
         $upsertPartAction = Mockery::mock(UpsertPartAction::class);
         $upsertPartAction->shouldReceive('execute')
             ->once()
-            ->withArgs(fn (LegoPartData $data): bool => $data->partNum === '3001' && $data->name === 'Brick 2 x 4')
+            ->withArgs(fn (LegoPartData $legoPartData): bool => $legoPartData->partNum === '3001' && $legoPartData->name === 'Brick 2 x 4')
             ->andReturn($part);
 
         $setPartQueryBuilder = Mockery::mock(Builder::class);

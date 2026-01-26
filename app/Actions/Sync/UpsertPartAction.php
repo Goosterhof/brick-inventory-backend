@@ -13,19 +13,19 @@ class UpsertPartAction
         private readonly Part $part,
     ) {}
 
-    public function execute(LegoPartData $data): Part
+    public function execute(LegoPartData $legoPartData): Part
     {
-        $part = $this->part->newQuery()->where('part_num', $data->partNum)->first();
+        $part = $this->part->newQuery()->where('part_num', $legoPartData->partNum)->first();
 
         if (!$part instanceof Part) {
             /** @var Part $part */
             $part = $this->part->newInstance();
-            $part->part_num = $data->partNum;
+            $part->part_num = $legoPartData->partNum;
         }
 
-        $part->name = $data->name;
-        $part->category = $data->categoryId !== null ? (string) $data->categoryId : null;
-        $part->image_url = $data->imageUrl;
+        $part->name = $legoPartData->name;
+        $part->category = $legoPartData->categoryId !== null ? (string) $legoPartData->categoryId : null;
+        $part->image_url = $legoPartData->imageUrl;
         $part->save();
 
         return $part;
