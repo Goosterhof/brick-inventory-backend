@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Actions\StorageOption\AssignPartToStorageAction;
 use App\Actions\StorageOption\CreateStorageOptionAction;
-use App\Actions\StorageOption\CreateStorageOptionPartAction;
 use App\Actions\StorageOption\DeleteStorageOptionAction;
 use App\Actions\StorageOption\DeleteStorageOptionPartAction;
 use App\Actions\StorageOption\GetStorageOptionAction;
@@ -32,7 +32,7 @@ class StorageOptionController extends Controller
         private readonly CreateStorageOptionAction $createStorageOptionAction,
         private readonly UpdateStorageOptionAction $updateStorageOptionAction,
         private readonly DeleteStorageOptionAction $deleteStorageOptionAction,
-        private readonly CreateStorageOptionPartAction $createStorageOptionPartAction,
+        private readonly AssignPartToStorageAction $assignPartToStorageAction,
         private readonly DeleteStorageOptionPartAction $deleteStorageOptionPartAction,
     ) {}
 
@@ -88,7 +88,7 @@ class StorageOptionController extends Controller
 
     public function assignPart(AssignPartRequest $assignPartRequest, StorageOption $storageOption): JsonResponse
     {
-        $storageOptionPart = $this->createStorageOptionPartAction->execute($storageOption, $assignPartRequest);
+        $storageOptionPart = $this->assignPartToStorageAction->execute($storageOption, $assignPartRequest);
         $storageOptionPart->load(['part', 'color']);
 
         $storageOptionPartResourceData = StorageOptionPartResourceData::from($storageOptionPart);
