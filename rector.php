@@ -52,7 +52,6 @@ return RectorConfig::configure()
         // Laravel-specific code quality improvements
         LaravelSetList::LARAVEL_CODE_QUALITY,
         LaravelSetList::LARAVEL_COLLECTION,
-        LaravelSetList::LARAVEL_IF_HELPERS,
         LaravelSetList::LARAVEL_ELOQUENT_MAGIC_METHOD_TO_QUERY_BUILDER,
         LaravelSetList::LARAVEL_FACADE_ALIASES_TO_FULL_NAMES,
     ])

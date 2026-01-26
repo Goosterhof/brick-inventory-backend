@@ -53,7 +53,9 @@ final class RebrickableService implements LegoDataServiceInterface
     {
         $response = $this->httpClient()->get(sprintf('%s/lego/sets/%s/', $this->baseUrl, $setNum));
 
-        throw_if($response->failed(), RequestException::class, $response);
+        if ($response->failed()) {
+            throw new RequestException($response);
+        }
 
         /** @var array{set_num: string, name: string, year: int, theme_id: int|null, num_parts: int, set_img_url: string|null} */
         return $response->json();
@@ -78,7 +80,9 @@ final class RebrickableService implements LegoDataServiceInterface
         do {
             $response = $this->httpClient()->get($url);
 
-            throw_if($response->failed(), RequestException::class, $response);
+            if ($response->failed()) {
+                throw new RequestException($response);
+            }
 
             /** @var array{results: list<array{part: array{part_num: string, name: string, part_cat_id: int|null, part_img_url: string|null}, color: array{id: int, name: string, rgb: string, is_trans: bool}, quantity: int, is_spare: bool, element_id: string|null}>, next: string|null} $data */
             $data = $response->json();
