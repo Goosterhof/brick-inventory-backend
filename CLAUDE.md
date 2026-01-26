@@ -19,11 +19,40 @@ LEGO inventory management system. The goal is to provide a list of parts needed 
 - No separate domains per tenant
 
 ### Code Patterns
-- **Action classes**: For internal business logic (single-responsibility)
-- **Service classes**: For external API connections (e.g., `RebrickableService`)
+- **Action classes**: For internal business logic and orchestration (single-responsibility)
+- **Service classes**: For external API connections only - no business logic (e.g., `RebrickableService`)
 - **ResourceData classes**: DTO-style classes for API responses (extend `ResourceData` base class)
 - **DTOFormRequest pattern**: Form Requests that act as DTOs with interface contracts
 - **Standard Laravel**: Controllers, Models for the rest
+
+### Action vs Service Responsibilities
+
+**Services** should ONLY handle external API communication:
+- HTTP requests/responses
+- Response parsing and validation
+- Custom exception handling for API errors
+
+**Actions** handle business logic and orchestration:
+- Database operations (via injected models)
+- Calling services for external data
+- Calling other actions for sub-operations
+- Loading relationships
+
+Example flow:
+```
+Controller
+  └─ GetSetPartsAction (orchestration)
+       ├─ LegoDataService.fetchSet() → HTTP call only
+       ├─ LegoDataService.fetchSetParts() → HTTP call only
+       ├─ UpsertSetAction → DB operation
+       └─ StoreSetPartsAction → DB operation
+```
+
+### Avoiding Action Overlap
+
+When multiple actions need similar logic, one should delegate to the other rather than duplicating code:
+- `GetSetAction` delegates to `UpsertSetAction` for set creation
+- Periodically review actions for overlap, especially within the same domain
 
 ### Form Requests as DTOs
 
