@@ -1,5 +1,6 @@
 includes:
     - vendor/larastan/larastan/extension.neon
+    - phar://phpstan.phar/conf/bleedingEdge.neon
 
 parameters:
     level: max
@@ -15,8 +16,15 @@ parameters:
         - bootstrap/cache
         - tests
 
+    # Larastan-specific rules
     checkModelProperties: true
     checkOctaneCompatibility: true
+    noModelMake: true
+    noUnnecessaryCollectionCall: true
+
+    # PHPStan strictness rules
+    reportUnmatchedIgnoredErrors: true
+    checkTooWideReturnTypesInProtectedAndPublicMethods: true
 
     ignoreErrors:
         # Laravel config files use env() which can return various types
