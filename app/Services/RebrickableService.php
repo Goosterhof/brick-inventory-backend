@@ -68,13 +68,15 @@ final readonly class RebrickableService implements LegoDataServiceInterface
 
         $this->validateSetResponse($data, $setNum);
 
-        if (!\array_key_exists('theme_id', $data)) {
+        /** @var array{set_num: string, name: string, year: int, theme_id?: int|null, num_parts: int, set_img_url?: string|null} $data */
+        if (!array_key_exists('theme_id', $data)) {
             $data['theme_id'] = null;
         }
 
-        if (!\array_key_exists('set_img_url', $data)) {
+        if (!array_key_exists('set_img_url', $data)) {
             $data['set_img_url'] = null;
         }
+
         /** @var array{set_num: string, name: string, year: int, theme_id: int|null, num_parts: int, set_img_url: string|null} $data */
         return LegoSetData::fromArray($data);
     }
@@ -89,9 +91,10 @@ final readonly class RebrickableService implements LegoDataServiceInterface
     {
         /** @var list<LegoSetPartData> $parts */
         $parts = [];
+        /** @var string|null $nextUrl @phpstan-ignore varTag.nativeType */
         $nextUrl = sprintf('/lego/sets/%s/parts/', $setNum);
 
-        do {
+        while ($nextUrl !== null) {
             $response = $this->httpClient()->get($nextUrl);
 
             if ($response->failed()) {
@@ -107,13 +110,8 @@ final readonly class RebrickableService implements LegoDataServiceInterface
                 $parts[] = LegoSetPartData::fromArray($partData);
             }
 
-            $next = $data['next'] ?? null;
-            if ($next !== null && ! is_string($next)) {
-                throw new InvalidApiResponseException(sprintf("Invalid 'next' field in parts response for set '%s'", $setNum));
-            }
-
-            $nextUrl = $next;
-        } while (is_string($nextUrl));
+            $nextUrl = $data['next'];
+        }
 
         return $parts;
     }
