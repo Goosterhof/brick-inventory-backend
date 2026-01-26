@@ -107,7 +107,12 @@ final readonly class RebrickableService implements LegoDataServiceInterface
                 $parts[] = LegoSetPartData::fromArray($partData);
             }
 
-            $nextUrl = $data['next'];
+            $next = $data['next'] ?? null;
+            if ($next !== null && ! is_string($next)) {
+                throw new InvalidApiResponseException(sprintf("Invalid 'next' field in parts response for set '%s'", $setNum));
+            }
+
+            $nextUrl = $next;
         } while (is_string($nextUrl));
 
         return $parts;
