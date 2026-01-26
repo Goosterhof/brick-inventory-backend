@@ -19,7 +19,7 @@ final readonly class LegoSetData
     ) {}
 
     /**
-     * @param  array{set_num: string, name: string, year: int, theme_id: int|null, num_parts: int, set_img_url: string|null}  $data
+     * @param array{set_num: string, name: string, year: int, theme_id: int|null, num_parts: int, set_img_url: string|null} $data
      */
     public static function fromArray(array $data): self
     {

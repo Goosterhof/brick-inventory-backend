@@ -22,7 +22,7 @@ abstract readonly class ResourceData implements JsonSerializable, Responsable
     /**
      * Create an instance from a model.
      *
-     * @param  TModel  $model
+     * @param TModel $model
      */
     abstract public static function from(Model $model): static;
 
@@ -47,7 +47,8 @@ abstract readonly class ResourceData implements JsonSerializable, Responsable
     /**
      * Create a collection of resources from a collection of models.
      *
-     * @param  Collection<int, TModel>  $models
+     * @param Collection<int, TModel> $models
+     *
      * @return array<int, static>
      */
     public static function collection(Collection $models): array

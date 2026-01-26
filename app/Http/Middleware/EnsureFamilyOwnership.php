@@ -20,7 +20,7 @@ use Symfony\Component\HttpFoundation\Response;
 final readonly class EnsureFamilyOwnership
 {
     /**
-     * @param  Closure(Request): Response  $next
+     * @param Closure(Request): Response $next
      */
     public function handle(Request $request, Closure $next): Response
     {

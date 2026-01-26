@@ -14,7 +14,7 @@ use Illuminate\Database\Eloquent\Model;
 final readonly class StorageOptionResourceData extends ResourceData
 {
     /**
-     * @param  array<int, StorageOptionResourceData>  $children
+     * @param array<int, StorageOptionResourceData> $children
      */
     public function __construct(
         public int $id,

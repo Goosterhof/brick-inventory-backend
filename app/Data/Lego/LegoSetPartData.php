@@ -18,7 +18,7 @@ final readonly class LegoSetPartData
     ) {}
 
     /**
-     * @param  array{part: array{part_num: string, name: string, part_cat_id: int|null, part_img_url: string|null}, color: array{id: int, name: string, rgb: string, is_trans: bool}, quantity: int, is_spare: bool, element_id: string|null}  $data
+     * @param array{part: array{part_num: string, name: string, part_cat_id: int|null, part_img_url: string|null}, color: array{id: int, name: string, rgb: string, is_trans: bool}, quantity: int, is_spare: bool, element_id: string|null} $data
      */
     public static function fromArray(array $data): self
     {

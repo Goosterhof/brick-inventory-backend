@@ -17,7 +17,7 @@ class StoreSetPartsAction
     ) {}
 
     /**
-     * @param  list<LegoSetPartData>  $partsData
+     * @param list<LegoSetPartData> $partsData
      */
     public function execute(Set $set, array $partsData): void
     {

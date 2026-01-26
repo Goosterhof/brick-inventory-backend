@@ -17,7 +17,7 @@ final readonly class LegoPartData
     ) {}
 
     /**
-     * @param  array{part_num: string, name: string, part_cat_id: int|null, part_img_url: string|null}  $data
+     * @param array{part_num: string, name: string, part_cat_id: int|null, part_img_url: string|null} $data
      */
     public static function fromArray(array $data): self
     {

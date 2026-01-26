@@ -82,10 +82,10 @@ final readonly class RebrickableService implements LegoDataServiceInterface
     }
 
     /**
-     * @return list<LegoSetPartData>
-     *
      * @throws RebrickableApiException
      * @throws InvalidApiResponseException
+     *
+     * @return list<LegoSetPartData>
      */
     public function fetchSetParts(string $setNum): array
     {

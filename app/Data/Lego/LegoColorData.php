@@ -17,7 +17,7 @@ final readonly class LegoColorData
     ) {}
 
     /**
-     * @param  array{id: int, name: string, rgb: string, is_trans: bool}  $data
+     * @param array{id: int, name: string, rgb: string, is_trans: bool} $data
      */
     public static function fromArray(array $data): self
     {

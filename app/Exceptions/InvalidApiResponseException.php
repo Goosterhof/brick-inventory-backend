@@ -10,7 +10,7 @@ namespace App\Exceptions;
 class InvalidApiResponseException extends RebrickableApiException
 {
     /**
-     * @param  list<string>  $missingFields
+     * @param list<string> $missingFields
      */
     public static function missingFields(array $missingFields, string $context = ''): self
     {
