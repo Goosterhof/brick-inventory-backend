@@ -132,6 +132,60 @@ describe('RebrickableService', function (): void {
             expect(fn (): LegoSetData => $service->fetchSet('75192-1'))->toThrow(InvalidApiResponseException::class);
         });
 
+        it('should handle missing theme_id key in response', function (): void {
+            // arrange
+            Http::fake([
+                'https://rebrickable.com/api/v3/lego/sets/10281-1/' => Http::response([
+                    'set_num' => '10281-1',
+                    'name' => 'Bonsai Tree',
+                    'year' => 2021,
+                    'num_parts' => 878,
+                    'set_img_url' => 'https://example.com/10281.jpg',
+                    // theme_id key is completely missing
+                ]),
+            ]);
+
+            $set = Mockery::mock(Set::class);
+            $upsertSetAction = Mockery::mock(UpsertSetAction::class);
+            $storeSetPartsAction = Mockery::mock(StoreSetPartsAction::class);
+
+            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL, $set, $upsertSetAction, $storeSetPartsAction);
+
+            // act
+            $result = $service->fetchSet('10281-1');
+
+            // assert
+            expect($result->themeId)->toBeNull();
+            expect($result->imageUrl)->toBe('https://example.com/10281.jpg');
+        });
+
+        it('should handle missing set_img_url key in response', function (): void {
+            // arrange
+            Http::fake([
+                'https://rebrickable.com/api/v3/lego/sets/10281-1/' => Http::response([
+                    'set_num' => '10281-1',
+                    'name' => 'Bonsai Tree',
+                    'year' => 2021,
+                    'theme_id' => 158,
+                    'num_parts' => 878,
+                    // set_img_url key is completely missing
+                ]),
+            ]);
+
+            $set = Mockery::mock(Set::class);
+            $upsertSetAction = Mockery::mock(UpsertSetAction::class);
+            $storeSetPartsAction = Mockery::mock(StoreSetPartsAction::class);
+
+            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL, $set, $upsertSetAction, $storeSetPartsAction);
+
+            // act
+            $result = $service->fetchSet('10281-1');
+
+            // assert
+            expect($result->themeId)->toBe(158);
+            expect($result->imageUrl)->toBeNull();
+        });
+
         it('should throw InvalidApiResponseException when response is not an array', function (): void {
             // arrange
             Http::fake([
@@ -243,11 +297,48 @@ describe('RebrickableService', function (): void {
             expect(fn (): array => $service->fetchSetParts('75192-1'))->toThrow(RebrickableApiException::class);
         });
 
+        it('should throw InvalidApiResponseException when response is not an array', function (): void {
+            // arrange
+            Http::fake([
+                'https://rebrickable.com/api/v3/lego/sets/75192-1/parts/' => Http::response('invalid'),
+            ]);
+
+            $set = Mockery::mock(Set::class);
+            $upsertSetAction = Mockery::mock(UpsertSetAction::class);
+            $storeSetPartsAction = Mockery::mock(StoreSetPartsAction::class);
+
+            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL, $set, $upsertSetAction, $storeSetPartsAction);
+
+            // act & assert
+            expect(fn (): array => $service->fetchSetParts('75192-1'))->toThrow(InvalidApiResponseException::class);
+        });
+
         it('should throw InvalidApiResponseException when results field is missing', function (): void {
             // arrange
             Http::fake([
                 'https://rebrickable.com/api/v3/lego/sets/75192-1/parts/' => Http::response([
                     'data' => [], // wrong field name
+                    'next' => null,
+                ]),
+            ]);
+
+            $set = Mockery::mock(Set::class);
+            $upsertSetAction = Mockery::mock(UpsertSetAction::class);
+            $storeSetPartsAction = Mockery::mock(StoreSetPartsAction::class);
+
+            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL, $set, $upsertSetAction, $storeSetPartsAction);
+
+            // act & assert
+            expect(fn (): array => $service->fetchSetParts('75192-1'))->toThrow(InvalidApiResponseException::class);
+        });
+
+        it('should throw InvalidApiResponseException when part at index is not an array', function (): void {
+            // arrange
+            Http::fake([
+                'https://rebrickable.com/api/v3/lego/sets/75192-1/parts/' => Http::response([
+                    'results' => [
+                        'not-an-array', // string instead of array
+                    ],
                     'next' => null,
                 ]),
             ]);
