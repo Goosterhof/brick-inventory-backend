@@ -39,7 +39,7 @@ class FamilySetController extends Controller
         return FamilySetResourceData::collection($familySets);
     }
 
-    public function store(StoreFamilySetRequest $request, #[CurrentUser] User $user): JsonResponse
+    public function store(StoreFamilySetRequest $storeFamilySetRequest, #[CurrentUser] User $user): JsonResponse
     {
         try {
             $family = $user->family;
@@ -48,7 +48,7 @@ class FamilySetController extends Controller
                 return response()->json(['error' => 'User does not belong to a family'], 400);
             }
 
-            $familySet = $this->createFamilySetAction->execute($family, $request);
+            $familySet = $this->createFamilySetAction->execute($family, $storeFamilySetRequest);
 
             return FamilySetResourceData::from($familySet)->toResponseWithStatus(201);
         } catch (SetNotFoundException) {
@@ -71,9 +71,9 @@ class FamilySetController extends Controller
         return FamilySetResourceData::from($familySet);
     }
 
-    public function update(UpdateFamilySetRequest $request, FamilySet $familySet): FamilySetResourceData
+    public function update(UpdateFamilySetRequest $updateFamilySetRequest, FamilySet $familySet): FamilySetResourceData
     {
-        $familySet = $this->updateFamilySetAction->execute($familySet, $request);
+        $familySet = $this->updateFamilySetAction->execute($familySet, $updateFamilySetRequest);
         $familySet = $this->getFamilySetAction->execute($familySet);
 
         return FamilySetResourceData::from($familySet);

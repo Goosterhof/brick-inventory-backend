@@ -15,17 +15,17 @@ final class DTOFormRequestProvider extends ServiceProvider
     #[Override]
     public function register(): void
     {
-        $this->app->beforeResolving(DTOFormRequest::class, function (string $class, mixed $parameters, Application $app): void {
-            if ($app->has($class)) {
+        $this->app->beforeResolving(DTOFormRequest::class, function (string $class, mixed $parameters, Application $application): void {
+            if ($application->has($class)) {
                 return;
             }
 
-            $app->bind(
+            $application->bind(
                 $class,
                 /** @phpstan-ignore return.type */
-                fn (Application $container): DTOFormRequest => $class::fromRequest(
-                    $container->make('request'),
-                    $container->make(Factory::class),
+                fn (Application $application): DTOFormRequest => $class::fromRequest(
+                    $application->make('request'),
+                    $application->make(Factory::class),
                 ),
             );
         });

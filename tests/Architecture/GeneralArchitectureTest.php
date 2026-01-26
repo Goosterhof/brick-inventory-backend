@@ -17,3 +17,7 @@ arch('no env calls outside config')
 arch('no sleep calls in application code')
     ->expect('App')
     ->not->toUse('sleep');
+
+arch('no Laravel if helpers - use explicit if statements instead')
+    ->expect('App')
+    ->not->toUse(['throw_if', 'throw_unless', 'abort_if', 'abort_unless']);

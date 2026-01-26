@@ -326,7 +326,7 @@ describe('StorageOptionController', function (): void {
             $response->assertStatus(200)
                 ->assertJsonPath('quantity', 150);
 
-            expect(StorageOptionPart::where('storage_option_id', $storageOption->id)
+            expect(StorageOptionPart::query()->where('storage_option_id', $storageOption->id)
                 ->where('part_id', $part->id)
                 ->count())->toBe(1);
         });
