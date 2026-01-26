@@ -22,16 +22,16 @@ class GetSetAction
             return $set;
         }
 
-        $setData = $this->legoDataService->fetchSet($setNum);
+        $legoSetData = $this->legoDataService->fetchSet($setNum);
 
         /** @var Set $newSet */
         $newSet = $this->set->newInstance();
-        $newSet->set_num = $setData['set_num'];
-        $newSet->name = $setData['name'];
-        $newSet->year = $setData['year'];
-        $newSet->theme = $setData['theme_id'] !== null ? (string) $setData['theme_id'] : null;
-        $newSet->num_parts = $setData['num_parts'];
-        $newSet->image_url = $setData['set_img_url'];
+        $newSet->set_num = $legoSetData->setNum;
+        $newSet->name = $legoSetData->name;
+        $newSet->year = $legoSetData->year;
+        $newSet->theme = $legoSetData->themeId !== null ? (string) $legoSetData->themeId : null;
+        $newSet->num_parts = $legoSetData->numParts;
+        $newSet->image_url = $legoSetData->imageUrl;
         $newSet->save();
 
         return $newSet;

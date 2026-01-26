@@ -1,0 +1,19 @@
+<?php
+
+declare(strict_types=1);
+
+namespace App\Exceptions;
+
+/**
+ * Exception thrown when a LEGO set is not found in the Rebrickable API.
+ */
+class SetNotFoundException extends RebrickableApiException
+{
+    public static function forSetNum(string $setNum): self
+    {
+        return new self(
+            message: sprintf("Set '%s' not found in Rebrickable", $setNum),
+            statusCode: 404,
+        );
+    }
+}
