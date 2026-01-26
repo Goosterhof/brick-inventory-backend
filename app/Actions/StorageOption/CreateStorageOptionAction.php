@@ -17,15 +17,15 @@ class CreateStorageOptionAction
         private readonly User $user,
     ) {}
 
-    public function execute(CreateStorageOptionInterface $data): StorageOption
+    public function execute(CreateStorageOptionInterface $createStorageOption): StorageOption
     {
         $storageOption = $this->storageOption->newInstance();
         $storageOption->family_id = $this->user->family_id;
-        $storageOption->name = $data->name;
-        $storageOption->description = $data->description;
-        $storageOption->parent_id = $data->parentId;
-        $storageOption->row = $data->row;
-        $storageOption->column = $data->column;
+        $storageOption->name = $createStorageOption->name;
+        $storageOption->description = $createStorageOption->description;
+        $storageOption->parent_id = $createStorageOption->parentId;
+        $storageOption->row = $createStorageOption->row;
+        $storageOption->column = $createStorageOption->column;
         $storageOption->save();
 
         return $storageOption;

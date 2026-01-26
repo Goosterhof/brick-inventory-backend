@@ -34,11 +34,11 @@ abstract readonly class ResourceData implements JsonSerializable, Responsable
     public function toArray(): array
     {
         $result = [];
-        $reflection = new ReflectionClass($this);
+        $reflectionClass = new ReflectionClass($this);
 
-        foreach ($reflection->getProperties(ReflectionProperty::IS_PUBLIC) as $property) {
-            $value = $property->getValue($this);
-            $result[$property->getName()] = $this->transformValue($value);
+        foreach ($reflectionClass->getProperties(ReflectionProperty::IS_PUBLIC) as $reflectionProperty) {
+            $value = $reflectionProperty->getValue($this);
+            $result[$reflectionProperty->getName()] = $this->transformValue($value);
         }
 
         return $result;

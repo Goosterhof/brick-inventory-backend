@@ -22,7 +22,7 @@ describe('GetFamilySetsAction', function (): void {
             ->once()
             ->andReturnSelf();
         $builder->shouldReceive('with')->with('set')->andReturnSelf();
-        $builder->shouldReceive('orderBy')->with('created_at', 'desc')->andReturnSelf();
+        $builder->shouldReceive('latest')->andReturnSelf();
         $builder->shouldReceive('get')->andReturn($collection);
 
         $familySet = Mockery::mock(FamilySet::class);
@@ -52,7 +52,7 @@ describe('GetFamilySetsAction', function (): void {
             ->with('set')
             ->once()
             ->andReturnSelf();
-        $builder->shouldReceive('orderBy')->andReturnSelf();
+        $builder->shouldReceive('latest')->andReturnSelf();
         $builder->shouldReceive('get')->andReturn($collection);
 
         $familySet = Mockery::mock(FamilySet::class);
@@ -67,7 +67,7 @@ describe('GetFamilySetsAction', function (): void {
         expect(true)->toBeTrue();
     });
 
-    it('should order by created_at descending', function (): void {
+    it('should order by latest (created_at descending)', function (): void {
         // arrange
         $user = Mockery::mock(User::class)->makePartial();
         $user->family_id = 1;
@@ -77,8 +77,7 @@ describe('GetFamilySetsAction', function (): void {
         $builder = Mockery::mock(Builder::class);
         $builder->shouldReceive('where')->andReturnSelf();
         $builder->shouldReceive('with')->andReturnSelf();
-        $builder->shouldReceive('orderBy')
-            ->with('created_at', 'desc')
+        $builder->shouldReceive('latest')
             ->once()
             ->andReturnSelf();
         $builder->shouldReceive('get')->andReturn($collection);
