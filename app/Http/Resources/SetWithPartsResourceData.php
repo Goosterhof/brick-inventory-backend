@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 final readonly class SetWithPartsResourceData extends ResourceData
 {
     /**
-     * @param  array<int, SetPartResourceData>  $parts
+     * @param array<int, SetPartResourceData> $parts
      */
     public function __construct(
         public SetResourceData $set,

@@ -198,7 +198,7 @@ describe('FamilySetController', function (): void {
 
             $response->assertStatus(201);
 
-            expect(FamilySet::where('family_id', $user->family_id)->count())->toBe(2);
+            expect(FamilySet::query()->where('family_id', $user->family_id)->count())->toBe(2);
         });
     });
 

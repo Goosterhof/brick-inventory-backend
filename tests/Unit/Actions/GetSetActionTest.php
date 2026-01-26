@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Actions\GetSetAction;
 use App\Contracts\LegoDataServiceInterface;
+use App\Data\Lego\LegoSetData;
 use App\Models\Set;
 use Illuminate\Database\Eloquent\Builder;
 
@@ -64,14 +65,14 @@ describe('GetSetAction', function (): void {
         $legoDataService->shouldReceive('fetchSet')
             ->with('75192-1')
             ->once()
-            ->andReturn([
-                'set_num' => '75192-1',
-                'name' => 'Millennium Falcon',
-                'year' => 2017,
-                'theme_id' => 158,
-                'num_parts' => 7541,
-                'set_img_url' => 'https://example.com/75192.jpg',
-            ]);
+            ->andReturn(new LegoSetData(
+                setNum: '75192-1',
+                name: 'Millennium Falcon',
+                year: 2017,
+                themeId: 158,
+                numParts: 7541,
+                imageUrl: 'https://example.com/75192.jpg',
+            ));
 
         $action = new GetSetAction($legoDataService, $set);
 
@@ -111,14 +112,14 @@ describe('GetSetAction', function (): void {
         $legoDataService->shouldReceive('fetchSet')
             ->with('10281-1')
             ->once()
-            ->andReturn([
-                'set_num' => '10281-1',
-                'name' => 'Bonsai Tree',
-                'year' => 2021,
-                'theme_id' => null,
-                'num_parts' => 878,
-                'set_img_url' => null,
-            ]);
+            ->andReturn(new LegoSetData(
+                setNum: '10281-1',
+                name: 'Bonsai Tree',
+                year: 2021,
+                themeId: null,
+                numParts: 878,
+                imageUrl: null,
+            ));
 
         $action = new GetSetAction($legoDataService, $set);
 

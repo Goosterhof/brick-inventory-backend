@@ -14,20 +14,20 @@ class CreateFamilySetAction
     public function __construct(
         private readonly GetSetAction $getSetAction,
         private readonly UpdateFamilySetAction $updateFamilySetAction,
-        private readonly FamilySet $familySetModel,
+        private readonly FamilySet $familySet,
     ) {}
 
-    public function execute(Family $family, CreateFamilySetInterface $data): FamilySet
+    public function execute(Family $family, CreateFamilySetInterface $createFamilySet): FamilySet
     {
-        $set = $this->getSetAction->execute($data->setNum);
+        $set = $this->getSetAction->execute($createFamilySet->setNum);
 
         /** @var FamilySet $familySet */
-        $familySet = $this->familySetModel->newInstance();
+        $familySet = $this->familySet->newInstance();
         $familySet->family_id = $family->id;
         $familySet->set_id = $set->id;
         $familySet->save();
 
-        $familySet = $this->updateFamilySetAction->execute($familySet, $data);
+        $familySet = $this->updateFamilySetAction->execute($familySet, $createFamilySet);
         $familySet->load('set');
 
         return $familySet;

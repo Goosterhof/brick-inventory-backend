@@ -22,7 +22,7 @@ abstract readonly class ResourceData implements JsonSerializable, Responsable
     /**
      * Create an instance from a model.
      *
-     * @param  TModel  $model
+     * @param TModel $model
      */
     abstract public static function from(Model $model): static;
 
@@ -34,11 +34,11 @@ abstract readonly class ResourceData implements JsonSerializable, Responsable
     public function toArray(): array
     {
         $result = [];
-        $reflection = new ReflectionClass($this);
+        $reflectionClass = new ReflectionClass($this);
 
-        foreach ($reflection->getProperties(ReflectionProperty::IS_PUBLIC) as $property) {
-            $value = $property->getValue($this);
-            $result[$property->getName()] = $this->transformValue($value);
+        foreach ($reflectionClass->getProperties(ReflectionProperty::IS_PUBLIC) as $reflectionProperty) {
+            $value = $reflectionProperty->getValue($this);
+            $result[$reflectionProperty->getName()] = $this->transformValue($value);
         }
 
         return $result;
@@ -47,7 +47,8 @@ abstract readonly class ResourceData implements JsonSerializable, Responsable
     /**
      * Create a collection of resources from a collection of models.
      *
-     * @param  Collection<int, TModel>  $models
+     * @param Collection<int, TModel> $models
+     *
      * @return array<int, static>
      */
     public static function collection(Collection $models): array

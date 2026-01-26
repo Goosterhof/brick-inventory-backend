@@ -39,6 +39,7 @@ return [
 
     'rebrickable' => [
         'key' => env('REBRICKABLE_API_KEY'),
+        'base_url' => env('REBRICKABLE_BASE_URL', 'https://rebrickable.com/api/v3'),
     ],
 
 ];

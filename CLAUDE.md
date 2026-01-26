@@ -214,6 +214,7 @@ The following custom skills are available:
 | `/action` | Create Action classes. Use `/action CreateUser` to generate an action. Infers type from verb (Create, Update, Delete, Get). |
 | `/controller` | Create a resource controller. Use `/controller ModelName` to generate a controller with CRUD operations, routes, and Action placeholders. |
 | `/feature-test` | Generate feature tests for API controllers. Use `/feature-test ControllerName` to generate tests for all endpoints in that controller. |
+| `/service` | Create Service classes for external API connections. Use `/service Stripe` to generate a service with HTTP client, custom exceptions, and response validation. |
 
 ### Required Skill Usage
 
@@ -226,6 +227,7 @@ The following custom skills are available:
 | `app/Http/Requests/*Request.php` | `/form-request` |
 | `app/Http/Resources/*ResourceData.php` | `/resource-data` |
 | `app/Models/*.php` | `/model` |
+| `app/Services/*Service.php` | `/service` |
 | `database/factories/*Factory.php` | `/factory` |
 | `database/migrations/*.php` | `/migration` |
 | `tests/Unit/**/*Test.php` | `/unit-test` |

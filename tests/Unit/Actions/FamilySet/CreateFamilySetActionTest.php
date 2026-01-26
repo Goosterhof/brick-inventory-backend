@@ -11,7 +11,7 @@ use App\Enums\FamilySetStatus;
 use App\Models\Family;
 use App\Models\FamilySet;
 use App\Models\Set;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\Date;
 
 describe('CreateFamilySetAction', function (): void {
     it('should fetch set using GetSetAction', function (): void {
@@ -51,7 +51,7 @@ describe('CreateFamilySetAction', function (): void {
 
             public FamilySetStatus $status = FamilySetStatus::Built;
 
-            public ?\DateTimeInterface $purchaseDate = null;
+            public ?DateTimeInterface $purchaseDate = null;
 
             public ?string $notes = null;
         };
@@ -95,7 +95,7 @@ describe('CreateFamilySetAction', function (): void {
 
             public FamilySetStatus $status = FamilySetStatus::Sealed;
 
-            public ?\DateTimeInterface $purchaseDate = null;
+            public ?DateTimeInterface $purchaseDate = null;
 
             public ?string $notes = null;
         };
@@ -126,15 +126,15 @@ describe('CreateFamilySetAction', function (): void {
         $family = Mockery::mock(Family::class)->makePartial();
         $family->id = 10;
 
-        $purchaseDate = Carbon::parse('2024-01-15');
+        $purchaseDate = Date::parse('2024-01-15');
 
         $updateAction = Mockery::mock(UpdateFamilySetAction::class);
         $updateAction->shouldReceive('execute')
-            ->withArgs(fn (FamilySet $fs, UpdateFamilySetInterface $data): bool => $fs === $familySet
-                && $data->quantity === 2
-                && $data->status === FamilySetStatus::Built
-                && $data->purchaseDate === $purchaseDate
-                && $data->notes === 'Test notes')
+            ->withArgs(fn (FamilySet $fs, UpdateFamilySetInterface $updateFamilySet): bool => $fs === $familySet
+                && $updateFamilySet->quantity === 2
+                && $updateFamilySet->status === FamilySetStatus::Built
+                && $updateFamilySet->purchaseDate === $purchaseDate
+                && $updateFamilySet->notes === 'Test notes')
             ->once()
             ->andReturn($familySet);
 
@@ -150,7 +150,7 @@ describe('CreateFamilySetAction', function (): void {
             public ?string $notes = 'Test notes';
 
             public function __construct(
-                public ?\DateTimeInterface $purchaseDate,
+                public ?DateTimeInterface $purchaseDate,
             ) {}
         };
 
@@ -193,7 +193,7 @@ describe('CreateFamilySetAction', function (): void {
 
             public FamilySetStatus $status = FamilySetStatus::Sealed;
 
-            public ?\DateTimeInterface $purchaseDate = null;
+            public ?DateTimeInterface $purchaseDate = null;
 
             public ?string $notes = null;
         };
@@ -235,7 +235,7 @@ describe('CreateFamilySetAction', function (): void {
 
             public FamilySetStatus $status = FamilySetStatus::Sealed;
 
-            public ?\DateTimeInterface $purchaseDate = null;
+            public ?DateTimeInterface $purchaseDate = null;
 
             public ?string $notes = null;
         };

@@ -9,13 +9,14 @@ use App\Actions\FamilySet\DeleteFamilySetAction;
 use App\Actions\FamilySet\GetFamilySetAction;
 use App\Actions\FamilySet\GetFamilySetsAction;
 use App\Actions\FamilySet\UpdateFamilySetAction;
+use App\Exceptions\RebrickableApiException;
+use App\Exceptions\SetNotFoundException;
 use App\Http\Requests\StoreFamilySetRequest;
 use App\Http\Requests\UpdateFamilySetRequest;
 use App\Http\Resources\FamilySetResourceData;
 use App\Models\FamilySet;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
-use Illuminate\Http\Client\RequestException;
 use Illuminate\Http\JsonResponse;
 
 class FamilySetController extends Controller
@@ -38,7 +39,7 @@ class FamilySetController extends Controller
         return FamilySetResourceData::collection($familySets);
     }
 
-    public function store(StoreFamilySetRequest $request, #[CurrentUser] User $user): JsonResponse
+    public function store(StoreFamilySetRequest $storeFamilySetRequest, #[CurrentUser] User $user): JsonResponse
     {
         try {
             $family = $user->family;
@@ -47,13 +48,14 @@ class FamilySetController extends Controller
                 return response()->json(['error' => 'User does not belong to a family'], 400);
             }
 
-            $familySet = $this->createFamilySetAction->execute($family, $request);
+            $familySet = $this->createFamilySetAction->execute($family, $storeFamilySetRequest);
 
             return FamilySetResourceData::from($familySet)->toResponseWithStatus(201);
-        } catch (RequestException $requestException) {
-            $status = $requestException->response->status();
+        } catch (SetNotFoundException) {
+            return response()->json(['error' => 'Set not found'], 404);
+        } catch (RebrickableApiException $exception) {
+            $status = $exception->statusCode ?? 500;
             $message = match ($status) {
-                404 => 'Set not found',
                 401 => 'Invalid API key',
                 default => 'Failed to fetch set data',
             };
@@ -69,9 +71,9 @@ class FamilySetController extends Controller
         return FamilySetResourceData::from($familySet);
     }
 
-    public function update(UpdateFamilySetRequest $request, FamilySet $familySet): FamilySetResourceData
+    public function update(UpdateFamilySetRequest $updateFamilySetRequest, FamilySet $familySet): FamilySetResourceData
     {
-        $familySet = $this->updateFamilySetAction->execute($familySet, $request);
+        $familySet = $this->updateFamilySetAction->execute($familySet, $updateFamilySetRequest);
         $familySet = $this->getFamilySetAction->execute($familySet);
 
         return FamilySetResourceData::from($familySet);

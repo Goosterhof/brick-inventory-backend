@@ -15,9 +15,9 @@ class RegisterController extends Controller
         private readonly CreateUserWithFamilyAction $createUserWithFamilyAction,
     ) {}
 
-    public function __invoke(RegisterRequest $request): JsonResponse
+    public function __invoke(RegisterRequest $registerRequest): JsonResponse
     {
-        $user = $this->createUserWithFamilyAction->execute($request);
+        $user = $this->createUserWithFamilyAction->execute($registerRequest);
 
         $token = $user->createToken('auth_token')->plainTextToken;
 

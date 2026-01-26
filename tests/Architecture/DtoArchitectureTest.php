@@ -19,10 +19,10 @@ it('should not have methods in DTOs', function (): void {
         $reflection = new ReflectionClass($className);
         $methods = array_filter(
             $reflection->getMethods(),
-            fn (ReflectionMethod $method): bool => $method->getDeclaringClass()->getName() === $className,
+            fn (ReflectionMethod $reflectionMethod): bool => $reflectionMethod->getDeclaringClass()->getName() === $className,
         );
 
-        $methodNames = array_map(fn (ReflectionMethod $method): string => $method->getName(), $methods);
+        $methodNames = array_map(fn (ReflectionMethod $reflectionMethod): string => $reflectionMethod->getName(), $methods);
         $nonConstructorMethods = array_diff($methodNames, ['__construct']);
 
         expect($nonConstructorMethods)->toBeEmpty(

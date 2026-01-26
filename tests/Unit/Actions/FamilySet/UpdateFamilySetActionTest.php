@@ -6,7 +6,7 @@ use App\Actions\FamilySet\UpdateFamilySetAction;
 use App\Contracts\FamilySet\UpdateFamilySetInterface;
 use App\Enums\FamilySetStatus;
 use App\Models\FamilySet;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\Date;
 
 describe('UpdateFamilySetAction', function (): void {
     it('should update all fields on the family set', function (): void {
@@ -14,7 +14,7 @@ describe('UpdateFamilySetAction', function (): void {
         $familySet = Mockery::mock(FamilySet::class)->makePartial();
         $familySet->shouldReceive('save')->once();
 
-        $purchaseDate = Carbon::parse('2024-06-15');
+        $purchaseDate = Date::parse('2024-06-15');
 
         $action = new UpdateFamilySetAction;
         $data = new class($purchaseDate) implements UpdateFamilySetInterface
@@ -26,7 +26,7 @@ describe('UpdateFamilySetAction', function (): void {
             public ?string $notes = 'Updated notes';
 
             public function __construct(
-                public ?\DateTimeInterface $purchaseDate,
+                public ?DateTimeInterface $purchaseDate,
             ) {}
         };
 
@@ -53,7 +53,7 @@ describe('UpdateFamilySetAction', function (): void {
 
             public FamilySetStatus $status = FamilySetStatus::InProgress;
 
-            public ?\DateTimeInterface $purchaseDate = null;
+            public ?DateTimeInterface $purchaseDate = null;
 
             public ?string $notes = null;
         };
@@ -80,7 +80,7 @@ describe('UpdateFamilySetAction', function (): void {
 
             public FamilySetStatus $status = FamilySetStatus::Sealed;
 
-            public ?\DateTimeInterface $purchaseDate = null;
+            public ?DateTimeInterface $purchaseDate = null;
 
             public ?string $notes = null;
         };
@@ -104,7 +104,7 @@ describe('UpdateFamilySetAction', function (): void {
 
             public FamilySetStatus $status = FamilySetStatus::Sealed;
 
-            public ?\DateTimeInterface $purchaseDate = null;
+            public ?DateTimeInterface $purchaseDate = null;
 
             public ?string $notes = null;
         };

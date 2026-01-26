@@ -6,19 +6,19 @@ namespace App\Actions\FamilySet;
 
 use App\Contracts\FamilySet\UpdateFamilySetInterface;
 use App\Models\FamilySet;
-use Carbon\Carbon;
 use DateTimeInterface;
+use Illuminate\Support\Facades\Date;
 
 class UpdateFamilySetAction
 {
-    public function execute(FamilySet $familySet, UpdateFamilySetInterface $data): FamilySet
+    public function execute(FamilySet $familySet, UpdateFamilySetInterface $updateFamilySet): FamilySet
     {
-        $familySet->quantity = $data->quantity;
-        $familySet->status = $data->status;
-        $familySet->purchase_date = $data->purchaseDate instanceof DateTimeInterface
-            ? Carbon::instance($data->purchaseDate)
+        $familySet->quantity = $updateFamilySet->quantity;
+        $familySet->status = $updateFamilySet->status;
+        $familySet->purchase_date = $updateFamilySet->purchaseDate instanceof DateTimeInterface
+            ? Date::instance($updateFamilySet->purchaseDate)
             : null;
-        $familySet->notes = $data->notes;
+        $familySet->notes = $updateFamilySet->notes;
         $familySet->save();
 
         return $familySet;
