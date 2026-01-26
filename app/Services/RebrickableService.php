@@ -68,6 +68,13 @@ final readonly class RebrickableService implements LegoDataServiceInterface
 
         $this->validateSetResponse($data, $setNum);
 
+        if (!\array_key_exists('theme_id', $data)) {
+            $data['theme_id'] = null;
+        }
+
+        if (!\array_key_exists('set_img_url', $data)) {
+            $data['set_img_url'] = null;
+        }
         /** @var array{set_num: string, name: string, year: int, theme_id: int|null, num_parts: int, set_img_url: string|null} $data */
         return LegoSetData::fromArray($data);
     }
