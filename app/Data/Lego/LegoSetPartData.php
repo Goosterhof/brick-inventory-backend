@@ -27,7 +27,7 @@ final readonly class LegoSetPartData
             color: LegoColorData::fromArray($data['color']),
             quantity: $data['quantity'],
             isSpare: $data['is_spare'],
-            elementId: $data['element_id'],
+            elementId: $data['element_id'] ?? null,
         );
     }
 }

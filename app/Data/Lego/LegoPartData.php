@@ -24,8 +24,8 @@ final readonly class LegoPartData
         return new self(
             partNum: $data['part_num'],
             name: $data['name'],
-            categoryId: $data['part_cat_id'],
-            imageUrl: $data['part_img_url'],
+            categoryId: $data['part_cat_id'] ?? null,
+            imageUrl: $data['part_img_url'] ?? null,
         );
     }
 }

@@ -24,6 +24,10 @@ final readonly class RebrickableService implements LegoDataServiceInterface
 
     private const array PART_REQUIRED_FIELDS = ['part', 'color', 'quantity', 'is_spare'];
 
+    private const array PART_NESTED_REQUIRED_FIELDS = ['part_num', 'name'];
+
+    private const array COLOR_NESTED_REQUIRED_FIELDS = ['id', 'name', 'rgb', 'is_trans'];
+
     public function __construct(
         #[Config('services.rebrickable.key', '')] private string $apiKey,
         #[Config('services.rebrickable.base_url', 'https://rebrickable.com/api/v3')] private string $baseUrl,
@@ -191,6 +195,63 @@ final readonly class RebrickableService implements LegoDataServiceInterface
         foreach (self::PART_REQUIRED_FIELDS as $field) {
             if (!array_key_exists($field, $partData)) {
                 $missingFields[] = $field;
+            }
+        }
+
+        if ($missingFields !== []) {
+            throw InvalidApiResponseException::missingFields(
+                $missingFields,
+                sprintf("Part at index %d for set '%s'", $index, $setNum),
+            );
+        }
+
+        $this->validateNestedPartData($partData['part'], $setNum, $index);
+        $this->validateNestedColorData($partData['color'], $setNum, $index);
+    }
+
+    /**
+     * @throws InvalidApiResponseException
+     */
+    private function validateNestedPartData(mixed $partData, string $setNum, int $index): void
+    {
+        if (!is_array($partData)) {
+            throw InvalidApiResponseException::invalidStructure(
+                sprintf("Part at index %d for set '%s'", $index, $setNum),
+                "'part' field is not an array",
+            );
+        }
+
+        $missingFields = [];
+        foreach (self::PART_NESTED_REQUIRED_FIELDS as $field) {
+            if (!array_key_exists($field, $partData)) {
+                $missingFields[] = 'part.' . $field;
+            }
+        }
+
+        if ($missingFields !== []) {
+            throw InvalidApiResponseException::missingFields(
+                $missingFields,
+                sprintf("Part at index %d for set '%s'", $index, $setNum),
+            );
+        }
+    }
+
+    /**
+     * @throws InvalidApiResponseException
+     */
+    private function validateNestedColorData(mixed $colorData, string $setNum, int $index): void
+    {
+        if (!is_array($colorData)) {
+            throw InvalidApiResponseException::invalidStructure(
+                sprintf("Part at index %d for set '%s'", $index, $setNum),
+                "'color' field is not an array",
+            );
+        }
+
+        $missingFields = [];
+        foreach (self::COLOR_NESTED_REQUIRED_FIELDS as $field) {
+            if (!array_key_exists($field, $colorData)) {
+                $missingFields[] = 'color.' . $field;
             }
         }
 
