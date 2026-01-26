@@ -94,7 +94,7 @@ final class RebrickableService implements LegoDataServiceInterface
     }
 
     /**
-     * @param  array{set_num: string, name: string, year: int, theme_id: int|null, num_parts: int, set_img_url: string|null}  $data
+     * @param array{set_num: string, name: string, year: int, theme_id: int|null, num_parts: int, set_img_url: string|null} $data
      */
     private function createOrUpdateSet(array $data): Set
     {
@@ -117,7 +117,7 @@ final class RebrickableService implements LegoDataServiceInterface
     }
 
     /**
-     * @param  list<array{part: array{part_num: string, name: string, part_cat_id: int|null, part_img_url: string|null}, color: array{id: int, name: string, rgb: string, is_trans: bool}, quantity: int, is_spare: bool, element_id: string|null}>  $partsData
+     * @param list<array{part: array{part_num: string, name: string, part_cat_id: int|null, part_img_url: string|null}, color: array{id: int, name: string, rgb: string, is_trans: bool}, quantity: int, is_spare: bool, element_id: string|null}> $partsData
      */
     private function storeSetParts(Set $set, array $partsData): void
     {
@@ -148,7 +148,7 @@ final class RebrickableService implements LegoDataServiceInterface
     }
 
     /**
-     * @param  array{id: int, name: string, rgb: string, is_trans: bool}  $data
+     * @param array{id: int, name: string, rgb: string, is_trans: bool} $data
      */
     private function createOrUpdateColor(array $data): Color
     {
@@ -169,7 +169,7 @@ final class RebrickableService implements LegoDataServiceInterface
     }
 
     /**
-     * @param  array{part_num: string, name: string, part_cat_id: int|null, part_img_url: string|null}  $data
+     * @param array{part_num: string, name: string, part_cat_id: int|null, part_img_url: string|null} $data
      */
     private function createOrUpdatePart(array $data): Part
     {

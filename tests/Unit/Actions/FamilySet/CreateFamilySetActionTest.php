@@ -51,7 +51,7 @@ describe('CreateFamilySetAction', function (): void {
 
             public FamilySetStatus $status = FamilySetStatus::Built;
 
-            public ?\DateTimeInterface $purchaseDate = null;
+            public ?DateTimeInterface $purchaseDate = null;
 
             public ?string $notes = null;
         };
@@ -95,7 +95,7 @@ describe('CreateFamilySetAction', function (): void {
 
             public FamilySetStatus $status = FamilySetStatus::Sealed;
 
-            public ?\DateTimeInterface $purchaseDate = null;
+            public ?DateTimeInterface $purchaseDate = null;
 
             public ?string $notes = null;
         };
@@ -150,7 +150,7 @@ describe('CreateFamilySetAction', function (): void {
             public ?string $notes = 'Test notes';
 
             public function __construct(
-                public ?\DateTimeInterface $purchaseDate,
+                public ?DateTimeInterface $purchaseDate,
             ) {}
         };
 
@@ -193,7 +193,7 @@ describe('CreateFamilySetAction', function (): void {
 
             public FamilySetStatus $status = FamilySetStatus::Sealed;
 
-            public ?\DateTimeInterface $purchaseDate = null;
+            public ?DateTimeInterface $purchaseDate = null;
 
             public ?string $notes = null;
         };
@@ -235,7 +235,7 @@ describe('CreateFamilySetAction', function (): void {
 
             public FamilySetStatus $status = FamilySetStatus::Sealed;
 
-            public ?\DateTimeInterface $purchaseDate = null;
+            public ?DateTimeInterface $purchaseDate = null;
 
             public ?string $notes = null;
         };

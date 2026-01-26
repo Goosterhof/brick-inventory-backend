@@ -26,7 +26,7 @@ describe('UpdateFamilySetAction', function (): void {
             public ?string $notes = 'Updated notes';
 
             public function __construct(
-                public ?\DateTimeInterface $purchaseDate,
+                public ?DateTimeInterface $purchaseDate,
             ) {}
         };
 
@@ -53,7 +53,7 @@ describe('UpdateFamilySetAction', function (): void {
 
             public FamilySetStatus $status = FamilySetStatus::InProgress;
 
-            public ?\DateTimeInterface $purchaseDate = null;
+            public ?DateTimeInterface $purchaseDate = null;
 
             public ?string $notes = null;
         };
@@ -80,7 +80,7 @@ describe('UpdateFamilySetAction', function (): void {
 
             public FamilySetStatus $status = FamilySetStatus::Sealed;
 
-            public ?\DateTimeInterface $purchaseDate = null;
+            public ?DateTimeInterface $purchaseDate = null;
 
             public ?string $notes = null;
         };
@@ -104,7 +104,7 @@ describe('UpdateFamilySetAction', function (): void {
 
             public FamilySetStatus $status = FamilySetStatus::Sealed;
 
-            public ?\DateTimeInterface $purchaseDate = null;
+            public ?DateTimeInterface $purchaseDate = null;
 
             public ?string $notes = null;
         };
