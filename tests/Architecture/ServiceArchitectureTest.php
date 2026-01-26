@@ -13,3 +13,17 @@ arch('services should be final')
 arch('services should not extend anything')
     ->expect('App\Services')
     ->toExtendNothing();
+
+arch('services should not depend on Actions')
+    ->expect('App\Services')
+    ->toUseNothing()
+    ->ignoring([
+        'App\Contracts',
+        'App\Data',
+        'App\Exceptions',
+        'Illuminate',
+    ]);
+
+arch('services should not use Models directly')
+    ->expect('App\Services')
+    ->not->toUse('App\Models');
