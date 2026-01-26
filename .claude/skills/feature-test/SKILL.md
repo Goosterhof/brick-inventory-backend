@@ -2,12 +2,16 @@
 name: feature-test
 description: Generate feature tests for API endpoint controllers
 argument-hint: ControllerName
-allowed-tools: Read, Grep, Glob, Write, Edit, Bash(composer test, composer lint, php artisan route:list)
+allowed-tools: Read, Grep, Glob, Write, Edit, Bash(composer test, composer test:feature-coverage, composer lint, php artisan route:list)
 ---
 
 # Feature Test Skill
 
 Generate comprehensive feature tests for Laravel API controllers.
+
+## Coverage Requirement
+
+Feature tests must maintain **80% code coverage** for Controllers. This is enforced by CI via `composer test:feature-coverage`.
 
 ## Arguments
 
@@ -471,8 +475,9 @@ If a factory doesn't exist, inform the user:
 ## After Generation
 
 1. Run `composer lint` to format the code
-2. Report the created test file path to the user
-3. Suggest running `composer test` to verify the tests pass
+2. Run `composer test:feature-coverage` to verify 80% coverage is maintained
+3. Report the created test file path to the user
+4. Suggest running `composer test` to verify the tests pass
 
 ## Important Notes
 

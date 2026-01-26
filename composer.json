@@ -54,6 +54,7 @@
         ],
         "test:arch": "./vendor/bin/pest tests/Architecture",
         "test:coverage": "./vendor/bin/pest tests/Unit --coverage --configuration=phpunit.coverage.xml --min=100",
+        "test:feature-coverage": "./vendor/bin/pest tests/Feature --coverage --configuration=phpunit.feature-coverage.xml --min=80",
         "lint": [
             "@rector",
             "@pint"

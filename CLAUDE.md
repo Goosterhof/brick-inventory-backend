@@ -175,6 +175,7 @@ The following rules are enforced via Pest architecture tests:
 | `composer test` | Run tests |
 | `composer test:arch` | Run architecture tests only |
 | `composer test:coverage` | Run unit tests with 100% coverage requirement (Actions & Services) |
+| `composer test:feature-coverage` | Run feature tests with 80% coverage requirement (Controllers) |
 | `composer lint` | Run Rector + Pint (fix mode) |
 | `composer lint:test` | Run Rector + Pint (dry-run) |
 | `composer phpstan` | Run static analysis |
