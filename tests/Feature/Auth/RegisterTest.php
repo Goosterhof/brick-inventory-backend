@@ -30,7 +30,7 @@ describe('RegisterController', function (): void {
             'email' => 'john@example.com',
         ]);
 
-        $user = User::where('email', 'john@example.com')->first();
+        $user = User::query()->where('email', 'john@example.com')->first();
         expect($user->family)->toBeInstanceOf(Family::class)
             ->and($user->family->name)->toBe('Smith Family');
     });

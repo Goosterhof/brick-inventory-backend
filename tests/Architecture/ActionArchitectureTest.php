@@ -17,10 +17,10 @@ it('should only have execute as public method in actions', function (): void {
         $reflection = new ReflectionClass($className);
         $publicMethods = array_filter(
             $reflection->getMethods(ReflectionMethod::IS_PUBLIC),
-            fn (ReflectionMethod $method): bool => $method->getDeclaringClass()->getName() === $className,
+            fn (ReflectionMethod $reflectionMethod): bool => $reflectionMethod->getDeclaringClass()->getName() === $className,
         );
 
-        $methodNames = array_map(fn (ReflectionMethod $method): string => $method->getName(), $publicMethods);
+        $methodNames = array_map(fn (ReflectionMethod $reflectionMethod): string => $reflectionMethod->getName(), $publicMethods);
         $extraMethods = array_diff($methodNames, ['__construct', 'execute']);
 
         expect($methodNames)->toContain('execute');

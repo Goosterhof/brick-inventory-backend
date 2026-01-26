@@ -16,17 +16,17 @@ class CreateUserWithFamilyAction
         private readonly Family $family,
     ) {}
 
-    public function execute(RegisterUserInterface $data): User
+    public function execute(RegisterUserInterface $registerUser): User
     {
-        return DB::transaction(function () use ($data): User {
+        return DB::transaction(function () use ($registerUser): User {
             $family = $this->family->newInstance();
-            $family->name = $data->familyName;
+            $family->name = $registerUser->familyName;
             $family->save();
 
             $user = $this->user->newInstance();
-            $user->name = $data->name;
-            $user->email = $data->email;
-            $user->password = $data->password;
+            $user->name = $registerUser->name;
+            $user->email = $registerUser->email;
+            $user->password = $registerUser->password;
 
             $family->users()->save($user);
 

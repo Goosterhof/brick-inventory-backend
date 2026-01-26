@@ -3,8 +3,11 @@
 declare(strict_types=1);
 
 use Rector\Config\RectorConfig;
+use Rector\Naming\Rector\Assign\RenameVariableToMatchMethodCallReturnTypeRector;
+use Rector\Naming\Rector\ClassMethod\RenameParamToMatchTypeRector;
+use Rector\Naming\Rector\ClassMethod\RenameVariableToMatchNewTypeRector;
 use Rector\Php83\Rector\ClassMethod\AddOverrideAttributeToOverriddenMethodsRector;
-use Rector\Set\ValueObject\SetList;
+use RectorLaravel\Set\LaravelSetList;
 
 return RectorConfig::configure()
     ->withPaths([
@@ -22,17 +25,19 @@ return RectorConfig::configure()
         __DIR__ . '/vendor',
         // Skip override attribute for Laravel - causes issues with framework classes
         AddOverrideAttributeToOverriddenMethodsRector::class,
+        // Skip aggressive naming rules for migrations (keeps Laravel convention of $table)
+        RenameParamToMatchTypeRector::class => [
+            __DIR__ . '/database/migrations',
+        ],
+        // Skip variable renaming in tests (keeps meaningful mock variable names)
+        RenameVariableToMatchMethodCallReturnTypeRector::class => [
+            __DIR__ . '/tests',
+        ],
+        RenameVariableToMatchNewTypeRector::class => [
+            __DIR__ . '/tests',
+        ],
     ])
     ->withPhpSets(php84: true)
-    ->withSets([
-        SetList::CODE_QUALITY,
-        SetList::CODING_STYLE,
-        SetList::DEAD_CODE,
-        SetList::EARLY_RETURN,
-        SetList::TYPE_DECLARATION,
-        SetList::PRIVATIZATION,
-        SetList::INSTANCEOF,
-    ])
     ->withPreparedSets(
         deadCode: true,
         codeQuality: true,
@@ -41,7 +46,16 @@ return RectorConfig::configure()
         privatization: true,
         earlyReturn: true,
         instanceOf: true,
+        naming: true,
     )
+    ->withSets([
+        // Laravel-specific code quality improvements
+        LaravelSetList::LARAVEL_CODE_QUALITY,
+        LaravelSetList::LARAVEL_COLLECTION,
+        LaravelSetList::LARAVEL_IF_HELPERS,
+        LaravelSetList::LARAVEL_ELOQUENT_MAGIC_METHOD_TO_QUERY_BUILDER,
+        LaravelSetList::LARAVEL_FACADE_ALIASES_TO_FULL_NAMES,
+    ])
     ->withImportNames(
         importNames: true,
         importDocBlockNames: true,

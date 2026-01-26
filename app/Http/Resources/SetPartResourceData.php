@@ -27,9 +27,7 @@ final readonly class SetPartResourceData extends ResourceData
         $part = $model->part;
         $color = $model->color;
 
-        if ($part === null || $color === null) {
-            throw new RuntimeException('SetPart is missing required relationships');
-        }
+        throw_if($part === null || $color === null, RuntimeException::class, 'SetPart is missing required relationships');
 
         return new self(
             id: $model->id,
