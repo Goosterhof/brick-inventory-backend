@@ -115,6 +115,35 @@ final readonly class {Name}Request extends DTOFormRequest implements {Name}Inter
 }
 ```
 
+## Interface Inheritance Pattern
+
+When `Create` and `Update` interfaces share common fields, use interface inheritance to avoid duplication:
+
+```php
+// Base interface with shared fields
+interface UpdateProductInterface
+{
+    public string $name { get; }
+    public ?string $description { get; }
+    public int $price { get; }
+}
+
+// Create interface extends Update and adds create-specific fields
+interface CreateProductInterface extends UpdateProductInterface
+{
+    public string $sku { get; }  // Only needed on create
+}
+```
+
+This pattern is useful when:
+- Update operations use a subset of Create fields
+- You want to ensure consistency between Create and Update
+- You want to avoid duplicating property definitions
+
+The Request classes then implement the appropriate interface:
+- `StoreProductRequest implements CreateProductInterface`
+- `UpdateProductRequest implements UpdateProductInterface`
+
 ## Type Mapping in toDTO()
 
 | PHP Type | Request Method | Nullable Pattern |
@@ -122,9 +151,11 @@ final readonly class {Name}Request extends DTOFormRequest implements {Name}Inter
 | `string` | `$request->string('field')->toString()` | `$request->isNotFilled('field') ? null : $request->string('field')->toString()` |
 | `int` | `$request->integer('field')` | `$request->isNotFilled('field') ? null : $request->integer('field')` |
 | `bool` | `$request->boolean('field')` | Direct use (defaults to false) |
-| `array` | `$request->array('field')` | Direct use or check `isNotFilled()` |
-| `Enum` | `EnumClass::from($request->integer('field'))` | `$request->isNotFilled('field') ? null : EnumClass::from(...)` |
-| `Carbon` | `$request->date('field')` | `$request->isNotFilled('field') ? null : $request->date('field')` |
+| `array` | `$request->input('field', [])` | `$request->isNotFilled('field') ? [] : $request->input('field', [])` |
+| `Enum` | `EnumClass::from($request->string('field')->toString())` | `$request->isNotFilled('field') ? null : EnumClass::from(...)` |
+| `DateTimeInterface` | `CarbonImmutable::parse($request->string('field')->toString())` | `$request->isNotFilled('field') ? null : CarbonImmutable::parse($request->string('field')->toString())` |
+
+**Note:** For `DateTimeInterface`, import `Carbon\CarbonImmutable` and use the interface type for flexibility.
 
 ## Updating Actions
 
