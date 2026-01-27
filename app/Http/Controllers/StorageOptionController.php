@@ -90,10 +90,6 @@ class StorageOptionController extends Controller
 
     public function removePart(StorageOption $storageOption, StorageOptionPart $storageOptionPart): JsonResponse
     {
-        if ($storageOptionPart->storage_option_id !== $storageOption->id) {
-            return response()->json(['error' => 'Not found'], 404);
-        }
-
         $this->deleteStorageOptionPartAction->execute($storageOptionPart);
 
         return response()->json(null, 204);
