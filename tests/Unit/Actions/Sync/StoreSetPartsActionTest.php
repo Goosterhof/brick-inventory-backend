@@ -200,16 +200,18 @@ describe('StoreSetPartsAction', function (): void {
         $set->id = 1;
 
         $upsertColorAction = Mockery::mock(UpsertColorAction::class);
+        $upsertColorAction->shouldReceive('execute')->never();
+
         $upsertPartAction = Mockery::mock(UpsertPartAction::class);
+        $upsertPartAction->shouldReceive('execute')->never();
+
         $setPart = Mockery::mock(SetPart::class);
 
         $action = new StoreSetPartsAction($upsertColorAction, $upsertPartAction, $setPart);
 
-        // act - no exception should be thrown
+        // act
         $action->execute($set, []);
 
-        // assert - verify no calls were made
-        $upsertColorAction->shouldNotHaveReceived('execute');
-        $upsertPartAction->shouldNotHaveReceived('execute');
+        // assert - Mockery verifies expectations automatically
     });
 });
