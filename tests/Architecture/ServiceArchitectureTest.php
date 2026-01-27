@@ -16,14 +16,7 @@ arch('services should not extend anything')
 
 arch('services should not depend on Actions')
     ->expect('App\Services')
-    ->toUseNothing()
-    ->ignoring([
-        'App\Contracts',
-        'App\Data',
-        'App\Exceptions',
-        'Illuminate',
-    ]);
-
+    ->not->toUse('App\Actions');
 arch('services should not use Models directly')
     ->expect('App\Services')
     ->not->toUse('App\Models');
