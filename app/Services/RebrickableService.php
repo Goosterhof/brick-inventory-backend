@@ -4,15 +4,12 @@ declare(strict_types=1);
 
 namespace App\Services;
 
-use App\Actions\Sync\StoreSetPartsAction;
-use App\Actions\Sync\UpsertSetAction;
 use App\Contracts\LegoDataServiceInterface;
 use App\Data\Lego\LegoSetData;
 use App\Data\Lego\LegoSetPartData;
 use App\Exceptions\InvalidApiResponseException;
 use App\Exceptions\RebrickableApiException;
 use App\Exceptions\SetNotFoundException;
-use App\Models\Set;
 use Illuminate\Container\Attributes\Config;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
@@ -31,27 +28,7 @@ final readonly class RebrickableService implements LegoDataServiceInterface
     public function __construct(
         #[Config('services.rebrickable.key', '')] private string $apiKey,
         #[Config('services.rebrickable.base_url', 'https://rebrickable.com/api/v3')] private string $baseUrl,
-        private Set $set,
-        private UpsertSetAction $upsertSetAction,
-        private StoreSetPartsAction $storeSetPartsAction,
     ) {}
-
-    public function getSetParts(string $setNum): Set
-    {
-        $set = $this->set->newQuery()->where('set_num', $setNum)->first();
-
-        if (!$set instanceof Set || !$set->setParts()->exists()) {
-            $setData = $this->fetchSet($setNum);
-            $set = $this->upsertSetAction->execute($setData);
-
-            $parts = $this->fetchSetParts($setNum);
-            $this->storeSetPartsAction->execute($set, $parts);
-        }
-
-        $set->load(['setParts.part', 'setParts.color']);
-
-        return $set;
-    }
 
     /**
      * @throws SetNotFoundException

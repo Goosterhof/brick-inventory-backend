@@ -26,16 +26,30 @@ Directory structure:
 
 ## Naming Conventions
 
-### Required Verbs
-Actions MUST use one of these four verbs: `Create`, `Update`, `Delete`, `Get`
+### Standard Verbs
+Actions typically use one of these four verbs: `Create`, `Update`, `Delete`, `Get`
 
 If the user provides a different verb, suggest the appropriate standard verb:
-- `Store`, `Add`, `Assign`, `Register` → suggest `Create`
+- `Store`, `Add`, `Register` → suggest `Create`
 - `Destroy`, `Remove` → suggest `Delete`
 - `Show`, `Index`, `Fetch`, `List` → suggest `Get`
 
-Example response:
-> "The verb '{verb}' is not standard. Based on the action's purpose, I suggest using `{suggested}` instead. The action would be named `{Suggested}{Subject}Action`. Proceed?"
+### Extended Verbs (when standard verbs don't fit)
+Some operations need more specific verbs to accurately describe behavior:
+
+| Verb | Use When | Example |
+|------|----------|---------|
+| `Upsert` | Create-or-update based on identifier | `UpsertSetAction` - creates if not exists, updates if exists |
+| `Assign` | Linking/associating records with upsert semantics | `AssignPartToStorageAction` - assigns part to storage, updates if already assigned |
+| `Store` | Bulk persistence of related data | `StoreSetPartsAction` - stores multiple parts for a set |
+
+**Naming accuracy over consistency**: Choose a verb that accurately reflects the action's behavior. A misleading name (e.g., `Create*` for upsert logic) causes more confusion than using a non-standard verb.
+
+Example response for non-standard verb:
+> "The verb '{verb}' is not standard. Based on the action's purpose:
+> - If it only creates new records → use `Create`
+> - If it creates OR updates existing records → use `Upsert` or `Assign`
+> Which behavior does this action need?"
 
 ### Action Name Format
 - Class name: `{Verb}{Subject}Action` (e.g., `CreateStorageOptionAction`)
@@ -264,6 +278,48 @@ Apply these rules based on how the model is used:
 |-------|---------|--------|
 | Query building (`newQuery()`, `newInstance()`) | Constructor injection | Easier to mock in tests |
 | Modifying specific instance | Execute parameter | Cleaner API, instance already exists |
+
+## Avoiding Action Overlap
+
+Before creating a new action, check for existing actions that might already handle the same logic:
+
+```bash
+ls app/Actions/
+ls app/Actions/{Domain}/
+```
+
+### Delegation Pattern
+When an action needs logic that another action provides, **delegate** rather than duplicate:
+
+```php
+// Good - GetSetAction delegates to UpsertSetAction
+class GetSetAction
+{
+    public function __construct(
+        private readonly LegoDataServiceInterface $legoDataService,
+        private readonly UpsertSetAction $upsertSetAction,  // Delegate
+        private readonly Set $set,
+    ) {}
+
+    public function execute(string $setNum): Set
+    {
+        $set = $this->set->newQuery()->where('set_num', $setNum)->first();
+
+        if ($set instanceof Set) {
+            return $set;
+        }
+
+        // Delegate creation to UpsertSetAction instead of duplicating logic
+        $legoSetData = $this->legoDataService->fetchSet($setNum);
+        return $this->upsertSetAction->execute($legoSetData);
+    }
+}
+```
+
+### Common Overlap Patterns to Avoid
+- `Get*Action` and `Upsert*Action` both creating records → `Get*` should delegate to `Upsert*`
+- `Create*Action` with update logic → rename to `Upsert*` or `Assign*`
+- Multiple actions calling the same service method with persistence → create orchestration action
 
 ## Code Quality Requirements
 

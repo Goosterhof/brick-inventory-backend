@@ -8,7 +8,7 @@ use App\Contracts\StorageOption\AssignPartToStorageInterface;
 use App\Models\StorageOption;
 use App\Models\StorageOptionPart;
 
-class CreateStorageOptionPartAction
+class AssignPartToStorageAction
 {
     public function __construct(
         private readonly StorageOptionPart $storageOptionPart,

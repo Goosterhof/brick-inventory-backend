@@ -257,22 +257,71 @@ private function httpClient(): PendingRequest
 
 **Important:** Use `throw: false` in `retry()` to allow custom exception handling instead of Laravel's `RequestException`.
 
-### 3. Separation of Concerns
+### 3. Separation of Concerns (CRITICAL)
 
-Services should ONLY handle HTTP communication. Delegate persistence to Action classes:
+Services should ONLY handle HTTP communication. **Never** include:
+- Database queries or persistence logic
+- Calls to Action classes
+- Business logic or orchestration
 
 ```php
-// Good - Service fetches, Action persists
-public function __construct(
-    private UpsertResourceAction $upsertAction,
-) {}
-
-public function syncResource(string $id): Resource
+// BAD - Service does orchestration (DON'T DO THIS)
+class RebrickableService
 {
-    $data = $this->fetchResource($id);  // HTTP only
-    return $this->upsertAction->execute($data);  // Persistence delegated
+    public function __construct(
+        private UpsertSetAction $upsertAction,      // NO - don't inject actions
+        private StoreSetPartsAction $storeAction,   // NO - don't inject actions
+    ) {}
+
+    public function getSetParts(string $setNum): Set
+    {
+        $data = $this->fetchSet($setNum);
+        $set = $this->upsertAction->execute($data);     // NO - orchestration in service
+        $parts = $this->fetchSetParts($setNum);
+        $this->storeAction->execute($set, $parts);      // NO - orchestration in service
+        return $set;
+    }
+}
+
+// GOOD - Service only handles HTTP, returns DTOs
+class RebrickableService
+{
+    public function fetchSet(string $setNum): LegoSetData
+    {
+        $response = $this->httpClient()->get("/sets/{$setNum}/");
+        // ... validation and error handling
+        return LegoSetData::fromArray($response->json());
+    }
+
+    /** @return list<LegoSetPartData> */
+    public function fetchSetParts(string $setNum): array
+    {
+        // ... HTTP call, pagination, validation
+        return $parts;
+    }
+}
+
+// Orchestration belongs in an Action
+class GetSetPartsAction
+{
+    public function __construct(
+        private LegoDataServiceInterface $legoDataService,
+        private UpsertSetAction $upsertSetAction,
+        private StoreSetPartsAction $storeSetPartsAction,
+    ) {}
+
+    public function execute(string $setNum): Set
+    {
+        $setData = $this->legoDataService->fetchSet($setNum);
+        $set = $this->upsertSetAction->execute($setData);
+        $parts = $this->legoDataService->fetchSetParts($setNum);
+        $this->storeSetPartsAction->execute($set, $parts);
+        return $set;
+    }
 }
 ```
+
+**Rule of thumb**: If a service method needs to inject an Action or Model for persistence, the logic belongs in an Action instead.
 
 ### 4. PHPDoc Type Annotations
 

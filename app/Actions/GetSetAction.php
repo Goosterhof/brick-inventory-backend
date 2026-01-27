@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions;
 
+use App\Actions\Sync\UpsertSetAction;
 use App\Contracts\LegoDataServiceInterface;
 use App\Models\Set;
 
@@ -11,6 +12,7 @@ class GetSetAction
 {
     public function __construct(
         private readonly LegoDataServiceInterface $legoDataService,
+        private readonly UpsertSetAction $upsertSetAction,
         private readonly Set $set,
     ) {}
 
@@ -24,16 +26,6 @@ class GetSetAction
 
         $legoSetData = $this->legoDataService->fetchSet($setNum);
 
-        /** @var Set $newSet */
-        $newSet = $this->set->newInstance();
-        $newSet->set_num = $legoSetData->setNum;
-        $newSet->name = $legoSetData->name;
-        $newSet->year = $legoSetData->year;
-        $newSet->theme = $legoSetData->themeId !== null ? (string) $legoSetData->themeId : null;
-        $newSet->num_parts = $legoSetData->numParts;
-        $newSet->image_url = $legoSetData->imageUrl;
-        $newSet->save();
-
-        return $newSet;
+        return $this->upsertSetAction->execute($legoSetData);
     }
 }
