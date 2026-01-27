@@ -24,7 +24,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
-        $exceptions->render(fn (SetNotFoundException $exception, Request $request): JsonResponse => response()->json(['error' => 'Set not found'], 404));
+        $exceptions->render(fn (SetNotFoundException $setNotFoundException, Request $request): JsonResponse => response()->json(['error' => 'Set not found'], 404));
 
         $exceptions->render(function (RebrickableApiException $rebrickableApiException, Request $request): JsonResponse {
             $status = $rebrickableApiException->statusCode ?? 500;

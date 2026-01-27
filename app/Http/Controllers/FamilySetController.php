@@ -39,13 +39,7 @@ class FamilySetController extends Controller
 
     public function store(StoreFamilySetRequest $storeFamilySetRequest, #[CurrentUser] User $user): JsonResponse
     {
-        $family = $user->family;
-
-        if ($family === null) {
-            return response()->json(['error' => 'User does not belong to a family'], 400);
-        }
-
-        $familySet = $this->createFamilySetAction->execute($family, $storeFamilySetRequest);
+        $familySet = $this->createFamilySetAction->execute($user->family, $storeFamilySetRequest);
 
         return FamilySetResourceData::from($familySet)->toResponseWithStatus(201);
     }
