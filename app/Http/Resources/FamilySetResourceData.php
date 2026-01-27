@@ -27,6 +27,8 @@ final readonly class FamilySetResourceData extends ResourceData
 
     public static function from(Model $model): static
     {
+        $model->loadMissing(self::requiredRelations());
+
         return new self(
             id: $model->id,
             quantity: $model->quantity,
@@ -37,5 +39,10 @@ final readonly class FamilySetResourceData extends ResourceData
             created_at: $model->created_at,
             updated_at: $model->updated_at,
         );
+    }
+
+    protected static function requiredRelations(): array
+    {
+        return ['set'];
     }
 }

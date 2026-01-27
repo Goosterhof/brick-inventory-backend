@@ -6,7 +6,6 @@ namespace App\Http\Controllers;
 
 use App\Actions\FamilySet\CreateFamilySetAction;
 use App\Actions\FamilySet\DeleteFamilySetAction;
-use App\Actions\FamilySet\GetFamilySetAction;
 use App\Actions\FamilySet\GetFamilySetsAction;
 use App\Actions\FamilySet\UpdateFamilySetAction;
 use App\Http\Requests\StoreFamilySetRequest;
@@ -21,7 +20,6 @@ class FamilySetController extends Controller
 {
     public function __construct(
         private readonly GetFamilySetsAction $getFamilySetsAction,
-        private readonly GetFamilySetAction $getFamilySetAction,
         private readonly CreateFamilySetAction $createFamilySetAction,
         private readonly UpdateFamilySetAction $updateFamilySetAction,
         private readonly DeleteFamilySetAction $deleteFamilySetAction,
@@ -46,15 +44,12 @@ class FamilySetController extends Controller
 
     public function show(FamilySet $familySet): FamilySetResourceData
     {
-        $familySet = $this->getFamilySetAction->execute($familySet);
-
         return FamilySetResourceData::from($familySet);
     }
 
     public function update(UpdateFamilySetRequest $updateFamilySetRequest, FamilySet $familySet): FamilySetResourceData
     {
         $familySet = $this->updateFamilySetAction->execute($familySet, $updateFamilySetRequest);
-        $familySet = $this->getFamilySetAction->execute($familySet);
 
         return FamilySetResourceData::from($familySet);
     }

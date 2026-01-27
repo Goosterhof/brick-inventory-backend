@@ -15,8 +15,6 @@ class GetStorageOptionPartsAction
      */
     public function execute(StorageOption $storageOption): Collection
     {
-        return $storageOption->storageOptionParts()
-            ->with(['part', 'color'])
-            ->get();
+        return $storageOption->storageOptionParts()->get();
     }
 }

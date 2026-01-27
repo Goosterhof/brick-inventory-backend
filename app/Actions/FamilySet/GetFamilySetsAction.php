@@ -21,7 +21,7 @@ class GetFamilySetsAction
     {
         return $this->familySet->newQuery()
             ->where('family_id', $user->family_id)
-            ->with('set')->latest()
+            ->latest()
             ->get();
     }
 }

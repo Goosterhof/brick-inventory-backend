@@ -22,7 +22,6 @@ describe('GetSetPartsAction', function (): void {
         $existingSet->id = 1;
         $existingSet->set_num = '75192-1';
         $existingSet->shouldReceive('setParts')->once()->andReturn($setPartsRelation);
-        $existingSet->shouldReceive('load')->with(['setParts.part', 'setParts.color'])->once()->andReturnSelf();
 
         $queryBuilder = Mockery::mock(Builder::class);
         $queryBuilder->shouldReceive('where')->with('set_num', '75192-1')->once()->andReturnSelf();
@@ -87,7 +86,6 @@ describe('GetSetPartsAction', function (): void {
             ->andReturn([$legoSetPartData]);
 
         $createdSet = Mockery::mock(Set::class);
-        $createdSet->shouldReceive('load')->with(['setParts.part', 'setParts.color'])->once()->andReturnSelf();
 
         $upsertSetAction = Mockery::mock(UpsertSetAction::class);
         $upsertSetAction->shouldReceive('execute')
@@ -148,7 +146,6 @@ describe('GetSetPartsAction', function (): void {
         $upsertedSet = Mockery::mock(Set::class)->makePartial();
         $upsertedSet->id = 1;
         $upsertedSet->set_num = '75192-1';
-        $upsertedSet->shouldReceive('load')->with(['setParts.part', 'setParts.color'])->once()->andReturnSelf();
 
         $upsertSetAction = Mockery::mock(UpsertSetAction::class);
         $upsertSetAction->shouldReceive('execute')
@@ -168,38 +165,5 @@ describe('GetSetPartsAction', function (): void {
 
         // assert
         expect($result)->toBe($upsertedSet);
-    });
-
-    it('should load set parts relationships on the returned set', function (): void {
-        // arrange
-        $setPartsRelation = Mockery::mock(HasMany::class);
-        $setPartsRelation->shouldReceive('exists')->once()->andReturn(true);
-
-        $existingSet = Mockery::mock(Set::class)->makePartial();
-        $existingSet->id = 1;
-        $existingSet->shouldReceive('setParts')->once()->andReturn($setPartsRelation);
-        $existingSet->shouldReceive('load')
-            ->with(['setParts.part', 'setParts.color'])
-            ->once()
-            ->andReturnSelf();
-
-        $queryBuilder = Mockery::mock(Builder::class);
-        $queryBuilder->shouldReceive('where')->andReturnSelf();
-        $queryBuilder->shouldReceive('first')->andReturn($existingSet);
-
-        $set = Mockery::mock(Set::class);
-        $set->shouldReceive('newQuery')->andReturn($queryBuilder);
-
-        $legoDataService = Mockery::mock(LegoDataServiceInterface::class);
-        $upsertSetAction = Mockery::mock(UpsertSetAction::class);
-        $storeSetPartsAction = Mockery::mock(StoreSetPartsAction::class);
-
-        $action = new GetSetPartsAction($legoDataService, $upsertSetAction, $storeSetPartsAction, $set);
-
-        // act
-        $result = $action->execute('75192-1');
-
-        // assert
-        expect($result)->toBe($existingSet);
     });
 });
