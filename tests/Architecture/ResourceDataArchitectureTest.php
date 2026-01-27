@@ -61,3 +61,59 @@ it('should have from method in concrete resource data classes', function (): voi
         );
     }
 });
+
+it('should override requiredRelations when using nested ResourceData', function (): void {
+    foreach (getClassesInDirectory(dirname(__DIR__, 2) . '/app/Http/Resources', 'App\\Http\\Resources\\') as $className) {
+        $reflection = new ReflectionClass($className);
+
+        // Skip abstract classes (like ResourceData base class)
+        if ($reflection->isAbstract()) {
+            continue;
+        }
+
+        // Check if constructor has any ResourceData-typed parameters
+        $constructor = $reflection->getConstructor();
+        if ($constructor === null) {
+            continue;
+        }
+
+        $hasNestedResourceData = false;
+        foreach ($constructor->getParameters() as $parameter) {
+            $type = $parameter->getType();
+            if ($type instanceof ReflectionNamedType && !$type->isBuiltin()) {
+                $typeName = $type->getName();
+                if (is_subclass_of($typeName, ResourceData::class)) {
+                    $hasNestedResourceData = true;
+                    break;
+                }
+            }
+        }
+
+        // Also check for arrays that might contain ResourceData (property types)
+        foreach ($reflection->getProperties() as $property) {
+            $type = $property->getType();
+            // Check docblock for array types like @var SetPartResourceData[]
+            $docComment = $property->getDocComment();
+            if ($docComment && preg_match('/@var\s+(\w+ResourceData)\[\]/', $docComment)) {
+                $hasNestedResourceData = true;
+                break;
+            }
+        }
+
+        if (!$hasNestedResourceData) {
+            continue;
+        }
+
+        // Verify requiredRelations is overridden
+        $requiredRelationsMethod = $reflection->getMethod('requiredRelations');
+        $declaringClass = $requiredRelationsMethod->getDeclaringClass()->getName();
+
+        expect($declaringClass)->toBe(
+            $className,
+            sprintf(
+                'ResourceData class %s has nested ResourceData but does not override requiredRelations()',
+                $className,
+            ),
+        );
+    }
+});
