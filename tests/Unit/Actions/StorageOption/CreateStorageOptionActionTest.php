@@ -113,7 +113,6 @@ describe('CreateStorageOptionAction', function (): void {
         // act
         $action->execute($data);
 
-        // assert - verification happens via Mockery expectations
-        expect(true)->toBeTrue();
+        // assert - Mockery expectations verify save() was called
     });
 });

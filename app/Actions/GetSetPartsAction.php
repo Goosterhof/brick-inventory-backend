@@ -30,8 +30,6 @@ class GetSetPartsAction
             $this->storeSetPartsAction->execute($set, $parts);
         }
 
-        $set->load(['setParts.part', 'setParts.color']);
-
         return $set;
     }
 }

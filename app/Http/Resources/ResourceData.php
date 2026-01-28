@@ -7,9 +7,9 @@ namespace App\Http\Resources;
 use BackedEnum;
 use DateTimeInterface;
 use Illuminate\Contracts\Support\Responsable;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Collection;
 use JsonSerializable;
 use ReflectionClass;
 use ReflectionProperty;
@@ -53,6 +53,8 @@ abstract readonly class ResourceData implements JsonSerializable, Responsable
      */
     public static function collection(Collection $models): array
     {
+        $models->loadMissing(static::requiredRelations());
+
         return $models->map(
             static fn (Model $model): static => static::from($model),
         )->all();
@@ -77,6 +79,16 @@ abstract readonly class ResourceData implements JsonSerializable, Responsable
     public function toResponseWithStatus(int $status): JsonResponse
     {
         return new JsonResponse($this->toArray(), $status);
+    }
+
+    /**
+     * Get the relationships that should be loaded for this resource.
+     *
+     * @return array<int, string>
+     */
+    protected static function requiredRelations(): array
+    {
+        return [];
     }
 
     /**

@@ -36,7 +36,8 @@ LEGO inventory management system. The goal is to provide a list of parts needed 
 - Database operations (via injected models)
 - Calling services for external data
 - Calling other actions for sub-operations
-- Loading relationships
+
+**Note**: Actions should NOT load relationships for API responses. That responsibility belongs to ResourceData classes (see below).
 
 Example flow:
 ```
@@ -121,6 +122,83 @@ $model = Model::create(['name' => $data['name']]);
 - Standard Laravel RESTful API
 - Resource controllers for CRUD operations
 
+### ResourceData Relationship Loading
+
+ResourceData classes are responsible for loading their own relationships. This keeps relationship knowledge centralized and avoids N+1 queries.
+
+**Pattern**: Override `requiredRelations()` to declare needed relationships:
+
+```php
+final readonly class FamilySetResourceData extends ResourceData
+{
+    protected static function requiredRelations(): array
+    {
+        return ['set'];  // Relationships this ResourceData needs
+    }
+
+    public static function from(Model $model): static
+    {
+        $model->loadMissing(self::requiredRelations());  // Load if not already loaded
+
+        return new self(
+            // ... map properties
+            set: SetResourceData::from($model->set),
+        );
+    }
+}
+```
+
+**For nested relationships** (e.g., SetParts with Part and Color):
+```php
+protected static function requiredRelations(): array
+{
+    return ['setParts.part', 'setParts.color'];
+}
+```
+
+**Benefits**:
+- Self-documenting: ResourceData declares its own dependencies
+- No N+1 queries: `collection()` method bulk-loads via `loadMissing()`
+- Actions stay simple: No need to know what the response format requires
+
+### Exception Handling
+
+Application exceptions are handled globally in `bootstrap/app.php`. Controllers should NOT use try-catch blocks for expected exceptions.
+
+```php
+// bootstrap/app.php
+->withExceptions(function (Exceptions $exceptions): void {
+    $exceptions->render(fn (SetNotFoundException $e, Request $r): JsonResponse
+        => response()->json(['error' => 'Set not found'], 404));
+
+    $exceptions->render(function (RebrickableApiException $e, Request $r): JsonResponse {
+        $status = $e->statusCode ?? 500;
+        $message = match ($status) {
+            401 => 'Invalid API key',
+            default => 'Failed to fetch set data',
+        };
+        return response()->json(['error' => $message], $status);
+    });
+})
+```
+
+**Benefits**:
+- Consistent error responses across the API
+- Controllers stay clean (no try-catch blocks)
+- Single place to update error handling logic
+
+### Route Model Binding
+
+Use Laravel's scoped route model binding for parent-child relationships:
+
+```php
+// routes/api.php
+Route::delete('/storage-options/{storage_option}/parts/{storage_option_part}', ...)
+    ->scopeBindings();  // Automatically verifies storage_option_part belongs to storage_option
+```
+
+This replaces manual ownership checks in controllers. Laravel returns 404 automatically if the child doesn't belong to the parent.
+
 ### Database Conventions
 
 #### Migration Structure
@@ -186,6 +264,8 @@ The following rules are enforced via Pest architecture tests:
 - Models must NOT have `$fillable` or `$guarded` properties (no mass assignment)
 - Models must have `@property` PHPDoc annotations
 - DTOs must end with `Data`, be `final`, and `readonly`
+- ResourceData classes must be `readonly`, concrete classes must be `final`
+- ResourceData classes that access relationships must override `requiredRelations()`
 - Requests must end with `Request`
 - Services must end with `Service`
 - Services must NOT depend on Actions (separation of concerns)
@@ -197,6 +277,9 @@ The following rules are enforced via Pest architecture tests:
 - Migrations must have `void` return types on `up()` and `down()`
 - Migrations must declare strict types
 - Migrations must NOT use cascade deletes (`onDelete('cascade')` or `cascadeOnDelete()`)
+- Tests must use `describe()` blocks and `it('should ...')` syntax
+- Tests must NOT use placeholder assertions (`expect(true)->toBeTrue()`)
+- Unit tests must NOT use `shouldHaveReceived()`/`shouldNotHaveReceived()` - use `shouldReceive()->never()` in arrange block instead
 
 ## Commands
 

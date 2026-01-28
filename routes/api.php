@@ -20,6 +20,7 @@ Route::middleware(['auth:sanctum', 'family.ownership'])->group(function (): void
     Route::apiResource('storage-options', StorageOptionController::class);
     Route::get('/storage-options/{storage_option}/parts', [StorageOptionController::class, 'parts']);
     Route::post('/storage-options/{storage_option}/parts', [StorageOptionController::class, 'assignPart']);
-    Route::delete('/storage-options/{storage_option}/parts/{storage_option_part}', [StorageOptionController::class, 'removePart']);
+    Route::delete('/storage-options/{storage_option}/parts/{storage_option_part}', [StorageOptionController::class, 'removePart'])
+        ->scopeBindings();
     Route::apiResource('family-sets', FamilySetController::class);
 });

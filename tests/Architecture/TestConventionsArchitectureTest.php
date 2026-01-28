@@ -78,3 +78,42 @@ it('should not use RefreshDatabase in unit tests', function (): void {
             ->toBeFalse(sprintf('Unit test %s should NOT use RefreshDatabase - use mocks instead', $relativePath));
     }
 });
+
+it('should not use placeholder assertions in tests', function (): void {
+    foreach (getTestFiles() as $file) {
+        $content = file_get_contents($file);
+        $relativePath = str_replace(dirname(__DIR__) . '/', '', $file);
+
+        // Check for expect(true)->toBeTrue() pattern
+        expect(preg_match('/expect\s*\(\s*true\s*\)\s*->\s*toBeTrue\s*\(/', $content))
+            ->toBe(0, sprintf('Test file %s should not use placeholder assertions like expect(true)->toBeTrue()', $relativePath));
+    }
+});
+
+it('should use shouldReceive instead of shouldHaveReceived in unit tests', function (): void {
+    $unitDir = dirname(__DIR__) . '/Unit';
+    if (!is_dir($unitDir)) {
+        return;
+    }
+
+    $iterator = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($unitDir, RecursiveDirectoryIterator::SKIP_DOTS),
+    );
+
+    foreach ($iterator as $file) {
+        if (!$file->isFile()) {
+            continue;
+        }
+
+        if ($file->getExtension() !== 'php') {
+            continue;
+        }
+
+        $content = file_get_contents($file->getPathname());
+        $relativePath = str_replace(dirname(__DIR__) . '/', '', $file->getPathname());
+
+        // Check for shouldHaveReceived or shouldNotHaveReceived patterns
+        expect(preg_match('/->should(Not)?HaveReceived\s*\(/', $content))
+            ->toBe(0, sprintf('Unit test %s should use shouldReceive()->never() instead of shouldNotHaveReceived() - define expectations in arrange block', $relativePath));
+    }
+});

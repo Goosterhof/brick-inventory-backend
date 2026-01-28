@@ -21,7 +21,6 @@ describe('GetFamilySetsAction', function (): void {
             ->with('family_id', 5)
             ->once()
             ->andReturnSelf();
-        $builder->shouldReceive('with')->with('set')->andReturnSelf();
         $builder->shouldReceive('latest')->andReturnSelf();
         $builder->shouldReceive('get')->andReturn($collection);
 
@@ -39,34 +38,6 @@ describe('GetFamilySetsAction', function (): void {
         expect($result)->toBe($collection);
     });
 
-    it('should load set relationship', function (): void {
-        // arrange
-        $user = Mockery::mock(User::class)->makePartial();
-        $user->family_id = 1;
-
-        $collection = new Collection;
-
-        $builder = Mockery::mock(Builder::class);
-        $builder->shouldReceive('where')->andReturnSelf();
-        $builder->shouldReceive('with')
-            ->with('set')
-            ->once()
-            ->andReturnSelf();
-        $builder->shouldReceive('latest')->andReturnSelf();
-        $builder->shouldReceive('get')->andReturn($collection);
-
-        $familySet = Mockery::mock(FamilySet::class);
-        $familySet->shouldReceive('newQuery')->andReturn($builder);
-
-        $action = new GetFamilySetsAction($familySet);
-
-        // act
-        $action->execute($user);
-
-        // assert - verification happens via Mockery expectations
-        expect(true)->toBeTrue();
-    });
-
     it('should order by latest (created_at descending)', function (): void {
         // arrange
         $user = Mockery::mock(User::class)->makePartial();
@@ -76,7 +47,6 @@ describe('GetFamilySetsAction', function (): void {
 
         $builder = Mockery::mock(Builder::class);
         $builder->shouldReceive('where')->andReturnSelf();
-        $builder->shouldReceive('with')->andReturnSelf();
         $builder->shouldReceive('latest')
             ->once()
             ->andReturnSelf();
@@ -90,7 +60,6 @@ describe('GetFamilySetsAction', function (): void {
         // act
         $action->execute($user);
 
-        // assert - verification happens via Mockery expectations
-        expect(true)->toBeTrue();
+        // assert - Mockery expectations verify the interactions
     });
 });
