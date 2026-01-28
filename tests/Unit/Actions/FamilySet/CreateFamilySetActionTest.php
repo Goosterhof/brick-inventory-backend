@@ -27,7 +27,6 @@ describe('CreateFamilySetAction', function (): void {
 
         $familySet = Mockery::mock(FamilySet::class)->makePartial();
         $familySet->shouldReceive('save')->once();
-        $familySet->shouldReceive('load')->with('set')->once();
 
         $familySetModel = Mockery::mock(FamilySet::class);
         $familySetModel->shouldReceive('newInstance')
@@ -73,7 +72,6 @@ describe('CreateFamilySetAction', function (): void {
 
         $familySet = Mockery::mock(FamilySet::class)->makePartial();
         $familySet->shouldReceive('save')->once();
-        $familySet->shouldReceive('load')->with('set');
 
         $familySetModel = Mockery::mock(FamilySet::class);
         $familySetModel->shouldReceive('newInstance')
@@ -118,7 +116,6 @@ describe('CreateFamilySetAction', function (): void {
 
         $familySet = Mockery::mock(FamilySet::class)->makePartial();
         $familySet->shouldReceive('save');
-        $familySet->shouldReceive('load')->with('set');
 
         $familySetModel = Mockery::mock(FamilySet::class);
         $familySetModel->shouldReceive('newInstance')->andReturn($familySet);
@@ -161,50 +158,6 @@ describe('CreateFamilySetAction', function (): void {
         expect(true)->toBeTrue();
     });
 
-    it('should load the set relationship', function (): void {
-        // arrange
-        $set = Mockery::mock(Set::class)->makePartial();
-        $set->id = 1;
-
-        $getSetAction = Mockery::mock(GetSetAction::class);
-        $getSetAction->shouldReceive('execute')->andReturn($set);
-
-        $familySet = Mockery::mock(FamilySet::class)->makePartial();
-        $familySet->shouldReceive('save');
-        $familySet->shouldReceive('load')
-            ->with('set')
-            ->once();
-
-        $familySetModel = Mockery::mock(FamilySet::class);
-        $familySetModel->shouldReceive('newInstance')->andReturn($familySet);
-
-        $family = Mockery::mock(Family::class)->makePartial();
-        $family->id = 10;
-
-        $updateAction = Mockery::mock(UpdateFamilySetAction::class);
-        $updateAction->shouldReceive('execute')->andReturn($familySet);
-
-        $action = new CreateFamilySetAction($getSetAction, $updateAction, $familySetModel);
-        $data = new class implements CreateFamilySetInterface
-        {
-            public string $setNum = '75192-1';
-
-            public int $quantity = 1;
-
-            public FamilySetStatus $status = FamilySetStatus::Sealed;
-
-            public ?DateTimeInterface $purchaseDate = null;
-
-            public ?string $notes = null;
-        };
-
-        // act
-        $action->execute($family, $data);
-
-        // assert - verification happens via Mockery expectations
-        expect(true)->toBeTrue();
-    });
-
     it('should return the family set from update action', function (): void {
         // arrange
         $set = Mockery::mock(Set::class)->makePartial();
@@ -215,7 +168,6 @@ describe('CreateFamilySetAction', function (): void {
 
         $familySet = Mockery::mock(FamilySet::class)->makePartial();
         $familySet->shouldReceive('save');
-        $familySet->shouldReceive('load')->with('set');
 
         $familySetModel = Mockery::mock(FamilySet::class);
         $familySetModel->shouldReceive('newInstance')->andReturn($familySet);

@@ -33,6 +33,7 @@ describe('SetPartResourceData', function (): void {
         $setPart->element_id = '300101';
         $setPart->part = $part;
         $setPart->color = $color;
+        $setPart->shouldReceive('loadMissing')->andReturnSelf();
 
         // act
         $resource = SetPartResourceData::from($setPart);
@@ -72,6 +73,7 @@ describe('SetPartResourceData', function (): void {
         $setPart->element_id = null;
         $setPart->part = $part;
         $setPart->color = $color;
+        $setPart->shouldReceive('loadMissing')->andReturnSelf();
 
         // act
         $resource = SetPartResourceData::from($setPart);
@@ -104,6 +106,7 @@ describe('SetPartResourceData', function (): void {
         $setPart->element_id = '300101';
         $setPart->part = $part;
         $setPart->color = $color;
+        $setPart->shouldReceive('loadMissing')->andReturnSelf();
 
         // act
         $resource = SetPartResourceData::from($setPart);

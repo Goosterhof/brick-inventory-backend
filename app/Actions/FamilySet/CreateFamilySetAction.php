@@ -27,9 +27,6 @@ class CreateFamilySetAction
         $familySet->set_id = $set->id;
         $familySet->save();
 
-        $familySet = $this->updateFamilySetAction->execute($familySet, $createFamilySet);
-        $familySet->load('set');
-
-        return $familySet;
+        return $this->updateFamilySetAction->execute($familySet, $createFamilySet);
     }
 }
