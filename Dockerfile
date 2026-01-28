@@ -28,18 +28,19 @@ FROM php:8.4-cli-alpine
 # Install system dependencies and PHP extensions for PostgreSQL
 RUN apk add --no-cache \
     curl \
-    libcurl \
+    libpq \
+    oniguruma \
+    && apk add --no-cache --virtual .build-deps \
     oniguruma-dev \
     libxml2-dev \
     postgresql-dev \
-    libpq \
     && docker-php-ext-install \
     bcmath \
-    curl \
     mbstring \
     pdo_pgsql \
     pgsql \
-    opcache
+    opcache \
+    && apk del .build-deps
 
 # Configure PHP for production
 RUN mv "$PHP_INI_DIR/php.ini-production" "$PHP_INI_DIR/php.ini"
