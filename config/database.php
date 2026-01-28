@@ -34,18 +34,6 @@ return [
 
     'connections' => [
 
-        'libsql' => [
-            'driver' => 'libsql',
-            'url' => env('DB_URL', 'file:' . database_path('database.sqlite')),
-            'authToken' => env('TURSO_AUTH_TOKEN', ''),
-            'syncUrl' => env('TURSO_SYNC_URL', ''),
-            'syncInterval' => env('TURSO_SYNC_INTERVAL', 5),
-            'read_your_writes' => true,
-            'encryptionKey' => '',
-            'remoteOnly' => env('TURSO_REMOTE_ONLY', false),
-            'prefix' => '',
-        ],
-
         'sqlite' => [
             'driver' => 'sqlite',
             'url' => env('DB_URL'),

@@ -1,47 +1,106 @@
 # Deployment Guide
 
-This guide covers deploying the LEGO Storage API to **Railway** with **Turso** as the database.
+This guide covers deploying the LEGO Storage API to **Railway** with **PostgreSQL**.
 
-## Why Railway + Turso?
+## Why Railway?
 
-- **Railway**: Accepts PayPal, $5 free credit/month, easy GitHub integration
-- **Turso**: SQLite-compatible, generous free tier (9GB storage, 500M rows read/month)
+- Accepts PayPal (no credit card required)
+- $5 free credit per month
+- Easy GitHub integration with auto-deploy
+- Built-in PostgreSQL database
+- Simple environment variable management
 
 ## Prerequisites
 
-- [Turso CLI](https://docs.turso.tech/cli/installation) installed
 - Railway account (sign up at https://railway.app)
-- Turso account (sign up at https://turso.tech)
-- GitHub repository connected to Railway
+- GitHub repository
 
-## 1. Set Up Turso Database
+## 1. Create Railway Project
 
-```bash
-# Login to Turso
-turso auth login
-
-# Create a database (choose a region close to Railway's region)
-turso db create lego-storage --location ams
-
-# Get the database URL
-turso db show lego-storage --url
-# Output: libsql://lego-storage-<your-username>.turso.io
-
-# Create an auth token
-turso db tokens create lego-storage
-# Save this token securely
-```
-
-## 2. Set Up Railway
-
-### Via Dashboard (Recommended)
+### Via Dashboard
 
 1. Go to https://railway.app and sign in
-2. Click **"New Project"** → **"Deploy from GitHub repo"**
-3. Select the `Goosterhof/lego-storage` repository
-4. Railway will auto-detect the Dockerfile
+2. Click **"New Project"**
+3. Select **"Deploy from GitHub repo"**
+4. Choose the `Goosterhof/lego-storage` repository
+5. Railway will auto-detect the Dockerfile
 
-### Via CLI (Alternative)
+## 2. Add PostgreSQL Database
+
+1. In your Railway project, click **"New"** → **"Database"** → **"Add PostgreSQL"**
+2. Railway automatically creates the database and sets the `DATABASE_URL` variable
+3. The app will automatically connect using this URL
+
+## 3. Configure Environment Variables
+
+In the Railway dashboard, go to your **web service** (not the database) → **Variables** tab.
+
+### Required Variables
+
+Click **"New Variable"** and add each of these:
+
+| Variable | Value |
+|----------|-------|
+| `APP_NAME` | `LEGO Storage` |
+| `APP_ENV` | `production` |
+| `APP_DEBUG` | `false` |
+| `APP_KEY` | `base64:...` (see below) |
+| `APP_URL` | `https://your-app.up.railway.app` |
+| `DB_CONNECTION` | `pgsql` |
+| `LOG_CHANNEL` | `stderr` |
+| `LOG_LEVEL` | `warning` |
+| `SESSION_DRIVER` | `database` |
+| `CACHE_STORE` | `database` |
+| `QUEUE_CONNECTION` | `sync` |
+| `REBRICKABLE_API_KEY` | Your Rebrickable API key |
+
+### Generate APP_KEY
+
+Run this locally to generate the key:
+
+```bash
+php artisan key:generate --show
+```
+
+Copy the output (starts with `base64:`) and paste it as the `APP_KEY` value.
+
+### Link Database URL
+
+Railway provides `DATABASE_URL` from your PostgreSQL service. To make it available to your app:
+
+1. Click **"New Variable"**
+2. Click **"Add Reference"**
+3. Select your PostgreSQL service
+4. Choose `DATABASE_URL`
+
+This links the database connection string to your app.
+
+## 4. Deploy
+
+Railway deploys automatically when you push to your connected branch.
+
+### Manual Deploy
+
+Click **"Deploy"** in the Railway dashboard, or use the CLI:
+
+```bash
+npm install -g @railway/cli
+railway login
+railway up
+```
+
+## 5. Get Your App URL
+
+After deployment:
+
+1. Go to your web service → **Settings** → **Networking**
+2. Click **"Generate Domain"** to get a public URL
+3. Update your `APP_URL` environment variable with this URL
+
+Your app will be available at something like:
+`https://lego-storage-production.up.railway.app`
+
+## Useful Commands
 
 ```bash
 # Install Railway CLI
@@ -50,158 +109,78 @@ npm install -g @railway/cli
 # Login
 railway login
 
-# Initialize project
-railway init
-
-# Link to existing project (if already created via dashboard)
+# Link to project
 railway link
-```
 
-## 3. Configure Environment Variables
-
-In the Railway dashboard, go to your service → **Variables** tab and add:
-
-| Variable | Value |
-|----------|-------|
-| `APP_NAME` | `LEGO Storage` |
-| `APP_ENV` | `production` |
-| `APP_DEBUG` | `false` |
-| `APP_KEY` | `base64:...` (generate with `php artisan key:generate --show`) |
-| `APP_URL` | `https://your-app.up.railway.app` (Railway provides this) |
-| `DB_CONNECTION` | `libsql` |
-| `DB_URL` | `libsql://lego-storage-your-username.turso.io` |
-| `TURSO_AUTH_TOKEN` | Your Turso token |
-| `TURSO_REMOTE_ONLY` | `true` |
-| `LOG_CHANNEL` | `stderr` |
-| `LOG_LEVEL` | `warning` |
-| `SESSION_DRIVER` | `database` |
-| `CACHE_STORE` | `database` |
-| `QUEUE_CONNECTION` | `sync` |
-| `REBRICKABLE_API_KEY` | Your Rebrickable API key |
-
-### Generate APP_KEY locally
-
-```bash
-php artisan key:generate --show
-# Copy the output: base64:xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
-```
-
-## 4. Deploy
-
-Railway deploys automatically when you push to your connected branch. You can also:
-
-- **Manual deploy**: Click "Deploy" in the Railway dashboard
-- **CLI deploy**: Run `railway up`
-
-### First Deployment
-
-The first deploy may take a few minutes as it builds the Docker image. Subsequent deploys are faster due to layer caching.
-
-## 5. Run Migrations
-
-Migrations run automatically on each deploy (configured in `railway.json`). To run manually:
-
-```bash
-# Via Railway CLI
-railway run php artisan migrate --force
-
-# Or via the Railway shell
-railway shell
-php artisan migrate --force
-```
-
-## 6. Get Your App URL
-
-After deployment, Railway provides a URL like:
-- `https://lego-storage-production.up.railway.app`
-
-You can also add a custom domain in **Settings** → **Domains**.
-
-## Useful Commands
-
-```bash
 # View logs
 railway logs
 
-# Open a shell in the container
+# Open shell
 railway shell
 
 # Run artisan commands
 railway run php artisan migrate:status
 railway run php artisan tinker
-
-# View environment variables
-railway variables
-
-# Open the app in browser
-railway open
 ```
 
-## Monitoring
+## Cost Breakdown
 
-- **Railway Dashboard**: https://railway.app/dashboard
-- **Turso Dashboard**: https://turso.tech/app
-
-## Cost Breakdown (Free Tier)
-
-### Railway Free Tier
-- $5 credit per month
+### Railway Free Tier ($5 credit/month)
 - 512MB RAM, 1 vCPU
 - 1GB disk
+- Includes PostgreSQL
 - Enough for low-traffic personal projects
 
-### Turso Free Tier
-- 9GB total storage
-- 500 million rows read per month
-- 25 million rows written per month
-- Unlimited databases
+### Estimated Usage
+- Small Laravel app: ~$2-3/month
+- PostgreSQL: ~$1-2/month
+- **Total**: Usually stays within free tier for personal use
 
 ## Troubleshooting
 
 ### Build Fails
 
-Check the build logs in Railway dashboard. Common issues:
-- Missing environment variables
-- Dockerfile syntax errors
+Check build logs in Railway dashboard. Common issues:
+- Missing `APP_KEY` - generate and add it
+- Docker build errors - check Dockerfile syntax
 
 ### Database Connection Issues
 
-```bash
-# Test connection via Railway shell
-railway shell
-php artisan tinker --execute="DB::connection()->getPdo();"
-```
+1. Verify `DATABASE_URL` is linked from PostgreSQL service
+2. Verify `DB_CONNECTION=pgsql` is set
+3. Check logs: `railway logs`
 
-### Clear Caches
+### 500 Errors
 
 ```bash
+# Check Laravel logs
+railway logs
+
+# Clear caches
 railway run php artisan config:clear
 railway run php artisan cache:clear
-railway run php artisan route:clear
 ```
 
-### View Laravel Logs
+### Migrations Not Running
+
+Migrations run automatically on deploy. To run manually:
 
 ```bash
-railway logs
+railway run php artisan migrate --force
 ```
 
-## Local Development with Turso (Optional)
+## Local Development
 
-You can use Turso locally with embedded replicas:
+For local development, continue using SQLite:
 
 ```env
-DB_CONNECTION=libsql
-DB_URL=file:database/database.sqlite
-TURSO_SYNC_URL=libsql://lego-storage-your-username.turso.io
-TURSO_AUTH_TOKEN=your-token
-TURSO_REMOTE_ONLY=false
+DB_CONNECTION=sqlite
 ```
 
-This syncs a local SQLite file with your Turso database.
+The app will use `database/database.sqlite` locally.
 
 ---
 
-## Alternative: Fly.io Deployment
+## Alternative: Fly.io
 
-If you prefer Fly.io (requires credit card), the `fly.toml` configuration is included. See the [Fly.io docs](https://fly.io/docs/laravel/) for setup instructions.
+If you have a credit card and prefer Fly.io, the `fly.toml` configuration is included. See the [Fly.io Laravel docs](https://fly.io/docs/laravel/) for setup.
