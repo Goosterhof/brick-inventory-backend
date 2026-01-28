@@ -2,7 +2,7 @@
 NIXPACKS_PHP_VERSION = "8.4"
 
 [phases.setup]
-nixPkgs = ["php84Extensions.pdo_pgsql", "php84Extensions.pgsql"]
+nixPkgs = ["php84", "php84Extensions.pdo_pgsql", "php84Extensions.pgsql"]
 
 [phases.install]
 cmds = ["composer install --optimize-autoloader --no-dev --no-interaction"]
