@@ -115,32 +115,63 @@ final readonly class {Name}Request extends DTOFormRequest implements {Name}Inter
 }
 ```
 
-## Interface Inheritance Pattern
+## Interface Inheritance Patterns
 
-When `Create` and `Update` interfaces share common fields, use interface inheritance to avoid duplication:
+When `Create` and `Update` interfaces share common fields, use interface inheritance to avoid duplication. There are two patterns depending on whether Create has additional fields.
+
+### Pattern 1: Create Extends Update
+
+Use when **Create has additional fields** beyond what Update needs.
 
 ```php
-// Base interface with shared fields
-interface UpdateProductInterface
+// Update interface with shared fields
+interface UpdateFamilySetInterface
 {
-    public string $name { get; }
-    public ?string $description { get; }
-    public int $price { get; }
+    public int $quantity { get; }
+    public FamilySetStatus $status { get; }
+    public ?DateTimeInterface $purchaseDate { get; }
+    public ?string $notes { get; }
 }
 
 // Create interface extends Update and adds create-specific fields
-interface CreateProductInterface extends UpdateProductInterface
+interface CreateFamilySetInterface extends UpdateFamilySetInterface
 {
-    public string $sku { get; }  // Only needed on create
+    public string $setNum { get; }  // Only needed on create
 }
 ```
 
-This pattern is useful when:
+**When to use:**
+- Create requires fields that don't make sense for Update (e.g., identifiers, foreign keys)
 - Update operations use a subset of Create fields
-- You want to ensure consistency between Create and Update
-- You want to avoid duplicating property definitions
 
-The Request classes then implement the appropriate interface:
+### Pattern 2: Shared Base Interface
+
+Use when **Create and Update have identical fields**.
+
+```php
+// Base interface with all shared fields
+interface StorageOptionDataInterface
+{
+    public string $name { get; }
+    public ?string $description { get; }
+    public ?int $parentId { get; }
+    public ?int $row { get; }
+    public ?int $column { get; }
+}
+
+// Both interfaces extend the base (currently identical, but allows future divergence)
+interface CreateStorageOptionInterface extends StorageOptionDataInterface {}
+interface UpdateStorageOptionInterface extends StorageOptionDataInterface {}
+```
+
+**When to use:**
+- Create and Update accept exactly the same fields
+- You want flexibility to add interface-specific fields later
+- You want semantic clarity (actions accept `Create*` vs `Update*`)
+
+### Request Implementation
+
+The Request classes implement the appropriate interface:
 - `StoreProductRequest implements CreateProductInterface`
 - `UpdateProductRequest implements UpdateProductInterface`
 
