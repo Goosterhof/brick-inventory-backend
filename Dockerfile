@@ -5,6 +5,10 @@ FROM composer:2 AS composer
 
 WORKDIR /app
 
+# Set minimal env vars needed for composer/artisan during build
+ENV APP_URL=http://localhost
+ENV APP_KEY=base64:dGVzdGtleWZvcmJ1aWxkb25seWRvbm90dXNl
+
 COPY composer.json composer.lock ./
 
 RUN composer install \
@@ -16,7 +20,7 @@ RUN composer install \
 
 COPY . .
 
-RUN composer dump-autoload --optimize --no-dev
+RUN composer dump-autoload --optimize --no-dev --no-scripts
 
 # Production image
 FROM php:8.4-cli-alpine
