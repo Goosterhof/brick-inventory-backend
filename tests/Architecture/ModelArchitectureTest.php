@@ -37,14 +37,7 @@ it('should not have fillable property in models', function (): void {
         }
 
         $reflection = new ReflectionClass($className);
-        $hasFillable = false;
-
-        foreach ($reflection->getProperties() as $property) {
-            if ($property->getDeclaringClass()->getName() === $className && $property->getName() === 'fillable') {
-                $hasFillable = true;
-                break;
-            }
-        }
+        $hasFillable = array_any($reflection->getProperties(), fn ($property): bool => $property->getDeclaringClass()->getName() === $className && $property->getName() === 'fillable');
 
         expect($hasFillable)->toBeFalse(
             sprintf('Model %s should not have $fillable property - use explicit property assignment instead', $className),
@@ -60,14 +53,7 @@ it('should not have guarded property in models', function (): void {
         }
 
         $reflection = new ReflectionClass($className);
-        $hasGuarded = false;
-
-        foreach ($reflection->getProperties() as $property) {
-            if ($property->getDeclaringClass()->getName() === $className && $property->getName() === 'guarded') {
-                $hasGuarded = true;
-                break;
-            }
-        }
+        $hasGuarded = array_any($reflection->getProperties(), fn ($property): bool => $property->getDeclaringClass()->getName() === $className && $property->getName() === 'guarded');
 
         expect($hasGuarded)->toBeFalse(
             sprintf('Model %s should not have $guarded property - use explicit property assignment instead', $className),
