@@ -1,0 +1,49 @@
+# Git
+.git
+.gitignore
+.gitattributes
+
+# Development
+.env
+.env.local
+.env.*.local
+.phpunit.result.cache
+phpunit.xml
+phpunit.coverage.xml
+phpunit.feature-coverage.xml
+.php-cs-fixer.cache
+.idea
+.vscode
+*.swp
+*.swo
+
+# Testing
+tests/
+.pest*
+phpstan.neon
+rector.php
+
+# Documentation
+*.md
+!vendor/**/*.md
+LICENSE
+
+# Node (if any)
+node_modules/
+npm-debug.log
+yarn-error.log
+
+# Build artifacts
+*.log
+storage/logs/*
+storage/framework/cache/*
+storage/framework/sessions/*
+storage/framework/views/*
+
+# Docker
+Dockerfile
+docker-compose*.yml
+.dockerignore
+
+# Fly.io
+fly.toml
