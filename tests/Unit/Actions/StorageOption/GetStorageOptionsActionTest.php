@@ -22,7 +22,6 @@ describe('GetStorageOptionsAction', function (): void {
             ->once()
             ->andReturnSelf();
         $builder->shouldReceive('whereNull')->with('parent_id')->andReturnSelf();
-        $builder->shouldReceive('with')->with('children')->andReturnSelf();
         $builder->shouldReceive('get')->andReturn($collection);
 
         $storageOption = Mockery::mock(StorageOption::class);
@@ -50,35 +49,6 @@ describe('GetStorageOptionsAction', function (): void {
         $builder->shouldReceive('where')->andReturnSelf();
         $builder->shouldReceive('whereNull')
             ->with('parent_id')
-            ->once()
-            ->andReturnSelf();
-        $builder->shouldReceive('with')->andReturnSelf();
-        $builder->shouldReceive('get')->andReturn($collection);
-
-        $storageOption = Mockery::mock(StorageOption::class);
-        $storageOption->shouldReceive('newQuery')->andReturn($builder);
-
-        $action = new GetStorageOptionsAction($storageOption);
-
-        // act
-        $action->execute($user);
-
-        // assert - verification happens via Mockery expectations
-        expect(true)->toBeTrue();
-    });
-
-    it('should load children relationship', function (): void {
-        // arrange
-        $user = Mockery::mock(User::class)->makePartial();
-        $user->family_id = 1;
-
-        $collection = new Collection;
-
-        $builder = Mockery::mock(Builder::class);
-        $builder->shouldReceive('where')->andReturnSelf();
-        $builder->shouldReceive('whereNull')->andReturnSelf();
-        $builder->shouldReceive('with')
-            ->with('children')
             ->once()
             ->andReturnSelf();
         $builder->shouldReceive('get')->andReturn($collection);

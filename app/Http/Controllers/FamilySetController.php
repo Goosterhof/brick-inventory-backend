@@ -6,11 +6,8 @@ namespace App\Http\Controllers;
 
 use App\Actions\FamilySet\CreateFamilySetAction;
 use App\Actions\FamilySet\DeleteFamilySetAction;
-use App\Actions\FamilySet\GetFamilySetAction;
 use App\Actions\FamilySet\GetFamilySetsAction;
 use App\Actions\FamilySet\UpdateFamilySetAction;
-use App\Exceptions\RebrickableApiException;
-use App\Exceptions\SetNotFoundException;
 use App\Http\Requests\StoreFamilySetRequest;
 use App\Http\Requests\UpdateFamilySetRequest;
 use App\Http\Resources\FamilySetResourceData;
@@ -23,7 +20,6 @@ class FamilySetController extends Controller
 {
     public function __construct(
         private readonly GetFamilySetsAction $getFamilySetsAction,
-        private readonly GetFamilySetAction $getFamilySetAction,
         private readonly CreateFamilySetAction $createFamilySetAction,
         private readonly UpdateFamilySetAction $updateFamilySetAction,
         private readonly DeleteFamilySetAction $deleteFamilySetAction,
@@ -41,40 +37,19 @@ class FamilySetController extends Controller
 
     public function store(StoreFamilySetRequest $storeFamilySetRequest, #[CurrentUser] User $user): JsonResponse
     {
-        try {
-            $family = $user->family;
+        $familySet = $this->createFamilySetAction->execute($user->family, $storeFamilySetRequest);
 
-            if ($family === null) {
-                return response()->json(['error' => 'User does not belong to a family'], 400);
-            }
-
-            $familySet = $this->createFamilySetAction->execute($family, $storeFamilySetRequest);
-
-            return FamilySetResourceData::from($familySet)->toResponseWithStatus(201);
-        } catch (SetNotFoundException) {
-            return response()->json(['error' => 'Set not found'], 404);
-        } catch (RebrickableApiException $exception) {
-            $status = $exception->statusCode ?? 500;
-            $message = match ($status) {
-                401 => 'Invalid API key',
-                default => 'Failed to fetch set data',
-            };
-
-            return response()->json(['error' => $message], $status);
-        }
+        return FamilySetResourceData::from($familySet)->toResponseWithStatus(201);
     }
 
     public function show(FamilySet $familySet): FamilySetResourceData
     {
-        $familySet = $this->getFamilySetAction->execute($familySet);
-
         return FamilySetResourceData::from($familySet);
     }
 
     public function update(UpdateFamilySetRequest $updateFamilySetRequest, FamilySet $familySet): FamilySetResourceData
     {
         $familySet = $this->updateFamilySetAction->execute($familySet, $updateFamilySetRequest);
-        $familySet = $this->getFamilySetAction->execute($familySet);
 
         return FamilySetResourceData::from($familySet);
     }

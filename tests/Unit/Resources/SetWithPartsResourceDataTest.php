@@ -35,6 +35,7 @@ describe('SetWithPartsResourceData', function (): void {
         $setPart->element_id = '300101';
         $setPart->part = $part;
         $setPart->color = $color;
+        $setPart->shouldReceive('loadMissing')->andReturnSelf();
 
         $set = Mockery::mock(Set::class)->makePartial();
         $set->id = 1;
@@ -45,6 +46,7 @@ describe('SetWithPartsResourceData', function (): void {
         $set->num_parts = 7541;
         $set->image_url = 'https://example.com/falcon.jpg';
         $set->setParts = new Collection([$setPart]);
+        $set->shouldReceive('loadMissing')->andReturnSelf();
 
         // act
         $resource = SetWithPartsResourceData::from($set);
@@ -71,6 +73,7 @@ describe('SetWithPartsResourceData', function (): void {
         $set->num_parts = 878;
         $set->image_url = null;
         $set->setParts = new Collection([]);
+        $set->shouldReceive('loadMissing')->andReturnSelf();
 
         // act
         $resource = SetWithPartsResourceData::from($set);
@@ -104,6 +107,7 @@ describe('SetWithPartsResourceData', function (): void {
         $setPart->element_id = '300101';
         $setPart->part = $part;
         $setPart->color = $color;
+        $setPart->shouldReceive('loadMissing')->andReturnSelf();
 
         $set = Mockery::mock(Set::class)->makePartial();
         $set->id = 1;
@@ -114,6 +118,7 @@ describe('SetWithPartsResourceData', function (): void {
         $set->num_parts = 7541;
         $set->image_url = 'https://example.com/falcon.jpg';
         $set->setParts = new Collection([$setPart]);
+        $set->shouldReceive('loadMissing')->andReturnSelf();
 
         // act
         $resource = SetWithPartsResourceData::from($set);
@@ -165,6 +170,7 @@ describe('SetWithPartsResourceData', function (): void {
         $setPart1->element_id = null;
         $setPart1->part = $part1;
         $setPart1->color = $color1;
+        $setPart1->shouldReceive('loadMissing')->andReturnSelf();
 
         $setPart2 = Mockery::mock(SetPart::class)->makePartial();
         $setPart2->id = 2;
@@ -173,6 +179,7 @@ describe('SetWithPartsResourceData', function (): void {
         $setPart2->element_id = '300226';
         $setPart2->part = $part2;
         $setPart2->color = $color2;
+        $setPart2->shouldReceive('loadMissing')->andReturnSelf();
 
         $set = Mockery::mock(Set::class)->makePartial();
         $set->id = 1;
@@ -183,6 +190,7 @@ describe('SetWithPartsResourceData', function (): void {
         $set->num_parts = 5195;
         $set->image_url = null;
         $set->setParts = new Collection([$setPart1, $setPart2]);
+        $set->shouldReceive('loadMissing')->andReturnSelf();
 
         // act
         $resource = SetWithPartsResourceData::from($set);

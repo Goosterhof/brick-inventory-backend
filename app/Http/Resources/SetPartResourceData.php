@@ -24,6 +24,8 @@ final readonly class SetPartResourceData extends ResourceData
 
     public static function from(Model $model): static
     {
+        $model->loadMissing(self::requiredRelations());
+
         $part = $model->part;
         $color = $model->color;
 
@@ -39,5 +41,10 @@ final readonly class SetPartResourceData extends ResourceData
             part: PartResourceData::from($part),
             color: ColorResourceData::from($color),
         );
+    }
+
+    protected static function requiredRelations(): array
+    {
+        return ['part', 'color'];
     }
 }
