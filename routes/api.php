@@ -12,6 +12,11 @@ Route::get('/', fn () => response()->json([
     'message' => 'Welcome to the API',
 ]));
 
+Route::get('/health', fn () => response()->json([
+    'status' => 'ok',
+    'timestamp' => now()->toIso8601String(),
+]));
+
 Route::post('/register', RegisterController::class);
 
 Route::get('/sets/{setNum}/parts', [SetController::class, 'parts']);
