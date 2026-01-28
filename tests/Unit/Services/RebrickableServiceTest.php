@@ -243,8 +243,10 @@ describe('RebrickableService', function (): void {
 
             // Verify both requests had proper authorization
             Http::assertSent(fn ($request): bool => $request->url() === 'https://rebrickable.com/api/v3/lego/sets/75192-1/parts/'
+                && $request->method() === 'GET'
                 && $request->header('Authorization') === ['key ' . TEST_API_KEY]);
             Http::assertSent(fn ($request): bool => $request->url() === 'https://rebrickable.com/api/v3/lego/sets/75192-1/parts/?page=2'
+                && $request->method() === 'GET'
                 && $request->header('Authorization') === ['key ' . TEST_API_KEY]);
         });
 
