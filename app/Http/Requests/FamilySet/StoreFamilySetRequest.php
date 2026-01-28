@@ -2,10 +2,11 @@
 
 declare(strict_types=1);
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\FamilySet;
 
 use App\Contracts\FamilySet\CreateFamilySetInterface;
 use App\Enums\FamilySetStatus;
+use App\Http\Requests\DTOFormRequest;
 use Carbon\CarbonImmutable;
 use DateTimeInterface;
 use Illuminate\Http\Request;

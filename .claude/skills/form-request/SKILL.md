@@ -115,6 +115,66 @@ final readonly class {Name}Request extends DTOFormRequest implements {Name}Inter
 }
 ```
 
+## Interface Inheritance Patterns
+
+When `Create` and `Update` interfaces share common fields, use interface inheritance to avoid duplication. There are two patterns depending on whether Create has additional fields.
+
+### Pattern 1: Create Extends Update
+
+Use when **Create has additional fields** beyond what Update needs.
+
+```php
+// Update interface with shared fields
+interface UpdateFamilySetInterface
+{
+    public int $quantity { get; }
+    public FamilySetStatus $status { get; }
+    public ?DateTimeInterface $purchaseDate { get; }
+    public ?string $notes { get; }
+}
+
+// Create interface extends Update and adds create-specific fields
+interface CreateFamilySetInterface extends UpdateFamilySetInterface
+{
+    public string $setNum { get; }  // Only needed on create
+}
+```
+
+**When to use:**
+- Create requires fields that don't make sense for Update (e.g., identifiers, foreign keys)
+- Update operations use a subset of Create fields
+
+### Pattern 2: Shared Base Interface
+
+Use when **Create and Update have identical fields**.
+
+```php
+// Base interface with all shared fields
+interface StorageOptionDataInterface
+{
+    public string $name { get; }
+    public ?string $description { get; }
+    public ?int $parentId { get; }
+    public ?int $row { get; }
+    public ?int $column { get; }
+}
+
+// Both interfaces extend the base (currently identical, but allows future divergence)
+interface CreateStorageOptionInterface extends StorageOptionDataInterface {}
+interface UpdateStorageOptionInterface extends StorageOptionDataInterface {}
+```
+
+**When to use:**
+- Create and Update accept exactly the same fields
+- You want flexibility to add interface-specific fields later
+- You want semantic clarity (actions accept `Create*` vs `Update*`)
+
+### Request Implementation
+
+The Request classes implement the appropriate interface:
+- `StoreProductRequest implements CreateProductInterface`
+- `UpdateProductRequest implements UpdateProductInterface`
+
 ## Type Mapping in toDTO()
 
 | PHP Type | Request Method | Nullable Pattern |
@@ -122,9 +182,14 @@ final readonly class {Name}Request extends DTOFormRequest implements {Name}Inter
 | `string` | `$request->string('field')->toString()` | `$request->isNotFilled('field') ? null : $request->string('field')->toString()` |
 | `int` | `$request->integer('field')` | `$request->isNotFilled('field') ? null : $request->integer('field')` |
 | `bool` | `$request->boolean('field')` | Direct use (defaults to false) |
-| `array` | `$request->array('field')` | Direct use or check `isNotFilled()` |
-| `Enum` | `EnumClass::from($request->integer('field'))` | `$request->isNotFilled('field') ? null : EnumClass::from(...)` |
-| `Carbon` | `$request->date('field')` | `$request->isNotFilled('field') ? null : $request->date('field')` |
+| `array` | `$request->input('field', [])` | `$request->isNotFilled('field') ? [] : $request->input('field', [])` |
+| `Enum` (string-backed) | `EnumClass::from($request->string('field')->toString())` | `$request->isNotFilled('field') ? null : EnumClass::from(...)` |
+| `Enum` (int-backed) | `EnumClass::from($request->integer('field'))` | `$request->isNotFilled('field') ? null : EnumClass::from(...)` |
+| `DateTimeInterface` | `CarbonImmutable::parse($request->string('field')->toString())` | `$request->isNotFilled('field') ? null : CarbonImmutable::parse($request->string('field')->toString())` |
+
+**Notes:**
+- For `DateTimeInterface`, import `Carbon\CarbonImmutable` and use the interface type for flexibility.
+- For enums, match the backing type to the request method (`string()` for string-backed, `integer()` for int-backed).
 
 ## Updating Actions
 
