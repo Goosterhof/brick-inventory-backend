@@ -73,6 +73,72 @@ $result = $action->execute($input);
 expect($result)->toBe($expectedResult);
 ```
 
+### Mockery Assertion Style
+
+**Always define expectations in the arrange block**, not after the act:
+
+```php
+// ✅ CORRECT - expectations in arrange block
+it('should not call service when data is empty', function (): void {
+    // arrange
+    $service = Mockery::mock(SomeService::class);
+    $service->shouldReceive('process')->never();  // ← Expectation set upfront
+
+    $action = new SomeAction($service);
+
+    // act
+    $action->execute([]);
+
+    // assert - Mockery verifies expectations automatically
+});
+
+// ❌ WRONG - using shouldNotHaveReceived in assert block
+it('should not call service when data is empty', function (): void {
+    // arrange
+    $service = Mockery::mock(SomeService::class);
+    $action = new SomeAction($service);
+
+    // act
+    $action->execute([]);
+
+    // assert
+    $service->shouldNotHaveReceived('process');  // ← Avoid this pattern
+});
+```
+
+**Rationale:** Defining expectations upfront keeps all mock setup in the arrange block, and Mockery automatically verifies at test teardown.
+
+### No Placeholder Assertions
+
+When Mockery expectations are the only verification needed, don't add placeholder assertions:
+
+```php
+// ✅ CORRECT - Mockery expectations are sufficient
+it('should save the model', function (): void {
+    // arrange
+    $model = Mockery::mock(Model::class)->makePartial();
+    $model->shouldReceive('save')->once();
+
+    // act
+    $action->execute($model);
+
+    // assert - Mockery expectations verify save() was called
+});
+
+// ❌ WRONG - unnecessary placeholder assertion
+it('should save the model', function (): void {
+    // arrange
+    $model = Mockery::mock(Model::class)->makePartial();
+    $model->shouldReceive('save')->once();
+
+    // act
+    $action->execute($model);
+
+    // assert
+    expect(true)->toBeTrue();  // ← Don't do this
+});
+```
+
 ### For Eloquent Models in Actions
 If an action uses Eloquent models, they should be injected and mocked. Use `makePartial()` on instance mocks to allow property assignment:
 
@@ -109,14 +175,18 @@ it('should fetch data from API', function (): void {
         ]),
     ]);
 
-    $service = new SomeService();
+    $service = new SomeService('api-key', 'https://api.example.com');
 
     // act
     $result = $service->fetchData();
 
     // assert
     expect($result['name'])->toBe('Test');
-    Http::assertSent(fn ($request): bool => $request->url() === 'https://api.example.com/endpoint');
+
+    // Always verify HTTP requests comprehensively
+    Http::assertSent(fn ($request): bool => $request->url() === 'https://api.example.com/endpoint'
+        && $request->method() === 'GET'
+        && $request->header('Authorization') === ['Bearer api-key']);
 });
 
 it('should throw exception on API failure', function (): void {
@@ -124,11 +194,16 @@ it('should throw exception on API failure', function (): void {
         'https://api.example.com/endpoint' => Http::response([], 500),
     ]);
 
-    $service = new SomeService();
+    $service = new SomeService('api-key', 'https://api.example.com');
 
     expect(fn (): array => $service->fetchData())->toThrow(RequestException::class);
 });
 ```
+
+**HTTP Assertion Best Practices:**
+- Always verify the URL, HTTP method, and headers (especially Authorization)
+- Use `Http::assertSentCount()` when testing pagination or multiple requests
+- Verify each request in multi-request scenarios has proper authentication
 
 ### For Services with Database Queries
 Services that query the database should inject models and use `newQuery()` pattern:

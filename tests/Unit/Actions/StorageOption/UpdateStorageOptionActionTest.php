@@ -110,7 +110,6 @@ describe('UpdateStorageOptionAction', function (): void {
         // act
         $action->execute($storageOption, $data);
 
-        // assert - verification happens via Mockery expectations
-        expect(true)->toBeTrue();
+        // assert - Mockery expectations verify the interactions
     });
 });

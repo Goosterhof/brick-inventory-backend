@@ -277,6 +277,9 @@ The following rules are enforced via Pest architecture tests:
 - Migrations must have `void` return types on `up()` and `down()`
 - Migrations must declare strict types
 - Migrations must NOT use cascade deletes (`onDelete('cascade')` or `cascadeOnDelete()`)
+- Tests must use `describe()` blocks and `it('should ...')` syntax
+- Tests must NOT use placeholder assertions (`expect(true)->toBeTrue()`)
+- Unit tests must NOT use `shouldHaveReceived()`/`shouldNotHaveReceived()` - use `shouldReceive()->never()` in arrange block instead
 
 ## Commands
 

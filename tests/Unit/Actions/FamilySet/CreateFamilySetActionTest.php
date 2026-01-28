@@ -58,8 +58,7 @@ describe('CreateFamilySetAction', function (): void {
         // act
         $action->execute($family, $data);
 
-        // assert - verification happens via Mockery expectations
-        expect(true)->toBeTrue();
+        // assert - Mockery expectations verify the interactions
     });
 
     it('should create family set with correct family_id and set_id', function (): void {
@@ -154,8 +153,7 @@ describe('CreateFamilySetAction', function (): void {
         // act
         $action->execute($family, $data);
 
-        // assert - verification happens via Mockery expectations
-        expect(true)->toBeTrue();
+        // assert - Mockery expectations verify the interactions
     });
 
     it('should return the family set from update action', function (): void {

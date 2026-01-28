@@ -16,7 +16,6 @@ describe('DeleteStorageOptionPartAction', function (): void {
         // act
         $action->execute($storageOptionPart);
 
-        // assert - verification happens via Mockery expectations
-        expect(true)->toBeTrue();
+        // assert - Mockery expectations verify the interactions
     });
 });

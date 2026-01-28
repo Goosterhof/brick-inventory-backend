@@ -42,7 +42,9 @@ describe('RebrickableService', function (): void {
             expect($result->numParts)->toBe(7541);
             expect($result->imageUrl)->toBe('https://example.com/75192.jpg');
 
-            Http::assertSent(fn ($request): bool => $request->url() === 'https://rebrickable.com/api/v3/lego/sets/75192-1/');
+            Http::assertSent(fn ($request): bool => $request->url() === 'https://rebrickable.com/api/v3/lego/sets/75192-1/'
+                && $request->method() === 'GET'
+                && $request->header('Authorization') === ['key ' . TEST_API_KEY]);
         });
 
         it('should throw SetNotFoundException when set is not found', function (): void {
@@ -193,6 +195,10 @@ describe('RebrickableService', function (): void {
             expect($result)->toHaveCount(1);
             expect($result[0])->toBeInstanceOf(LegoSetPartData::class);
             expect($result[0]->part->partNum)->toBe('3001');
+
+            Http::assertSent(fn ($request): bool => $request->url() === 'https://rebrickable.com/api/v3/lego/sets/75192-1/parts/'
+                && $request->method() === 'GET'
+                && $request->header('Authorization') === ['key ' . TEST_API_KEY]);
         });
 
         it('should handle pagination', function (): void {
@@ -234,6 +240,14 @@ describe('RebrickableService', function (): void {
             expect($result[0]->part->partNum)->toBe('3001');
             expect($result[1]->part->partNum)->toBe('3002');
             Http::assertSentCount(2);
+
+            // Verify both requests had proper authorization
+            Http::assertSent(fn ($request): bool => $request->url() === 'https://rebrickable.com/api/v3/lego/sets/75192-1/parts/'
+                && $request->method() === 'GET'
+                && $request->header('Authorization') === ['key ' . TEST_API_KEY]);
+            Http::assertSent(fn ($request): bool => $request->url() === 'https://rebrickable.com/api/v3/lego/sets/75192-1/parts/?page=2'
+                && $request->method() === 'GET'
+                && $request->header('Authorization') === ['key ' . TEST_API_KEY]);
         });
 
         it('should throw RebrickableApiException when API fails', function (): void {
