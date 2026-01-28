@@ -183,10 +183,13 @@ The Request classes implement the appropriate interface:
 | `int` | `$request->integer('field')` | `$request->isNotFilled('field') ? null : $request->integer('field')` |
 | `bool` | `$request->boolean('field')` | Direct use (defaults to false) |
 | `array` | `$request->input('field', [])` | `$request->isNotFilled('field') ? [] : $request->input('field', [])` |
-| `Enum` | `EnumClass::from($request->string('field')->toString())` | `$request->isNotFilled('field') ? null : EnumClass::from(...)` |
+| `Enum` (string-backed) | `EnumClass::from($request->string('field')->toString())` | `$request->isNotFilled('field') ? null : EnumClass::from(...)` |
+| `Enum` (int-backed) | `EnumClass::from($request->integer('field'))` | `$request->isNotFilled('field') ? null : EnumClass::from(...)` |
 | `DateTimeInterface` | `CarbonImmutable::parse($request->string('field')->toString())` | `$request->isNotFilled('field') ? null : CarbonImmutable::parse($request->string('field')->toString())` |
 
-**Note:** For `DateTimeInterface`, import `Carbon\CarbonImmutable` and use the interface type for flexibility.
+**Notes:**
+- For `DateTimeInterface`, import `Carbon\CarbonImmutable` and use the interface type for flexibility.
+- For enums, match the backing type to the request method (`string()` for string-backed, `integer()` for int-backed).
 
 ## Updating Actions
 
