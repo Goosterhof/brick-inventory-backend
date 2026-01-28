@@ -131,8 +131,7 @@ describe('CreateUserWithFamilyAction', function (): void {
         // act
         $action->execute($data);
 
-        // assert - verification happens via Mockery expectations
-        expect(true)->toBeTrue();
+        // assert - Mockery expectations verify the interactions
     });
 
     it('should set the correct user properties', function (): void {

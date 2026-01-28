@@ -16,7 +16,6 @@ describe('DeleteFamilySetAction', function (): void {
         // act
         $action->execute($familySet);
 
-        // assert - verification happens via Mockery expectations
-        expect(true)->toBeTrue();
+        // assert - Mockery expectations verify the interactions
     });
 });

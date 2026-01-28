@@ -61,7 +61,6 @@ describe('GetStorageOptionsAction', function (): void {
         // act
         $action->execute($user);
 
-        // assert - verification happens via Mockery expectations
-        expect(true)->toBeTrue();
+        // assert - Mockery expectations verify the interactions
     });
 });

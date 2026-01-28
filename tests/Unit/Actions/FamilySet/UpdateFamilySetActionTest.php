@@ -88,8 +88,7 @@ describe('UpdateFamilySetAction', function (): void {
         // act
         $action->execute($familySet, $data);
 
-        // assert - verification happens via Mockery expectations
-        expect(true)->toBeTrue();
+        // assert - Mockery expectations verify the interactions
     });
 
     it('should return the same family set instance', function (): void {

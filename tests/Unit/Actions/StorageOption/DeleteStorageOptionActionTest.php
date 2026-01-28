@@ -23,8 +23,7 @@ describe('DeleteStorageOptionAction', function (): void {
         // act
         $action->execute($storageOption);
 
-        // assert - verification happens via Mockery expectations
-        expect(true)->toBeTrue();
+        // assert - Mockery expectations verify the interactions
     });
 
     it('should recursively delete children', function (): void {
@@ -50,8 +49,7 @@ describe('DeleteStorageOptionAction', function (): void {
         // act
         $action->execute($parent);
 
-        // assert - verification happens via Mockery expectations
-        expect(true)->toBeTrue();
+        // assert - Mockery expectations verify the interactions
     });
 
     it('should delete storage option parts', function (): void {
@@ -69,7 +67,6 @@ describe('DeleteStorageOptionAction', function (): void {
         // act
         $action->execute($storageOption);
 
-        // assert - verification happens via Mockery expectations
-        expect(true)->toBeTrue();
+        // assert - Mockery expectations verify the interactions
     });
 });
