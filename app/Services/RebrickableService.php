@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Contracts\LegoDataServiceInterface;
 use App\Data\Lego\LegoSetData;
 use App\Data\Lego\LegoSetPartData;
+use App\Data\Lego\RebrickableUserSetData;
 use App\Exceptions\InvalidApiResponseException;
 use App\Exceptions\RebrickableApiException;
 use App\Exceptions\SetNotFoundException;
@@ -24,6 +25,8 @@ final readonly class RebrickableService implements LegoDataServiceInterface
     private const array PART_NESTED_REQUIRED_FIELDS = ['part_num', 'name'];
 
     private const array COLOR_NESTED_REQUIRED_FIELDS = ['id', 'name', 'rgb', 'is_trans'];
+
+    private const array USER_SET_REQUIRED_FIELDS = ['set', 'quantity'];
 
     public function __construct(
         #[Config('services.rebrickable.key', '')] private string $apiKey,
@@ -91,6 +94,43 @@ final readonly class RebrickableService implements LegoDataServiceInterface
         }
 
         return $parts;
+    }
+
+    /**
+     * @throws RebrickableApiException
+     * @throws InvalidApiResponseException
+     *
+     * @return list<RebrickableUserSetData>
+     */
+    public function fetchUserSets(string $userToken): array
+    {
+        /** @var list<RebrickableUserSetData> $sets */
+        $sets = [];
+        /** @var string|null $nextUrl @phpstan-ignore varTag.nativeType */
+        $nextUrl = sprintf('/users/%s/sets/', $userToken);
+
+        while ($nextUrl !== null) {
+            $response = $this->httpClient()->get($nextUrl);
+
+            if ($response->failed()) {
+                throw RebrickableApiException::fromResponse($response, 'Failed to fetch user sets');
+            }
+
+            $data = $response->json();
+
+            $this->validateUserSetsResponse($data);
+
+            /** @var array{results: list<array{set: array{set_num: string, name: string, year: int, theme_id: int|null, num_parts: int, set_img_url: string|null}, quantity: int}>, next: string|null} $validatedData */
+            $validatedData = $data;
+
+            foreach ($validatedData['results'] as $setData) {
+                $sets[] = RebrickableUserSetData::fromArray($setData);
+            }
+
+            $nextUrl = $validatedData['next'];
+        }
+
+        return $sets;
     }
 
     private function httpClient(): PendingRequest
@@ -246,6 +286,86 @@ final readonly class RebrickableService implements LegoDataServiceInterface
             throw InvalidApiResponseException::missingFields(
                 $missingFields,
                 sprintf("Part at index %d for set '%s'", $index, $setNum),
+            );
+        }
+    }
+
+    /**
+     * @throws InvalidApiResponseException
+     */
+    private function validateUserSetsResponse(mixed $data): void
+    {
+        if (!is_array($data)) {
+            throw InvalidApiResponseException::invalidStructure(
+                'Fetching user sets',
+                'Expected array response',
+            );
+        }
+
+        if (!array_key_exists('results', $data) || !is_array($data['results'])) {
+            throw InvalidApiResponseException::invalidStructure(
+                'Fetching user sets',
+                "Missing or invalid 'results' field",
+            );
+        }
+
+        foreach ($data['results'] as $index => $setData) {
+            $this->validateUserSetData($setData, $index);
+        }
+    }
+
+    /**
+     * @throws InvalidApiResponseException
+     */
+    private function validateUserSetData(mixed $setData, int $index): void
+    {
+        if (!is_array($setData)) {
+            throw InvalidApiResponseException::invalidStructure(
+                'Fetching user sets',
+                sprintf('Set at index %d is not an array', $index),
+            );
+        }
+
+        $missingFields = [];
+        foreach (self::USER_SET_REQUIRED_FIELDS as $field) {
+            if (!array_key_exists($field, $setData)) {
+                $missingFields[] = $field;
+            }
+        }
+
+        if ($missingFields !== []) {
+            throw InvalidApiResponseException::missingFields(
+                $missingFields,
+                sprintf('User set at index %d', $index),
+            );
+        }
+
+        $this->validateNestedSetData($setData['set'], $index);
+    }
+
+    /**
+     * @throws InvalidApiResponseException
+     */
+    private function validateNestedSetData(mixed $setData, int $index): void
+    {
+        if (!is_array($setData)) {
+            throw InvalidApiResponseException::invalidStructure(
+                sprintf('User set at index %d', $index),
+                "'set' field is not an array",
+            );
+        }
+
+        $missingFields = [];
+        foreach (self::SET_REQUIRED_FIELDS as $field) {
+            if (!array_key_exists($field, $setData)) {
+                $missingFields[] = 'set.' . $field;
+            }
+        }
+
+        if ($missingFields !== []) {
+            throw InvalidApiResponseException::missingFields(
+                $missingFields,
+                sprintf('User set at index %d', $index),
             );
         }
     }

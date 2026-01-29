@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /**
  * @property positive-int $id
  * @property string $name
+ * @property string|null $rebrickable_user_token
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  */
@@ -43,5 +44,15 @@ class Family extends Model
     public function familySets(): HasMany
     {
         return $this->hasMany(FamilySet::class);
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'rebrickable_user_token' => 'encrypted',
+        ];
     }
 }
