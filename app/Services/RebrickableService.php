@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Services;
 
 use App\Contracts\LegoDataServiceInterface;
+use App\Data\Lego\LegoColorData;
+use App\Data\Lego\LegoPartData;
 use App\Data\Lego\LegoSetData;
 use App\Data\Lego\LegoSetPartData;
 use App\Data\Lego\RebrickableUserSetData;
@@ -57,8 +59,14 @@ final readonly class RebrickableService implements LegoDataServiceInterface
             $data['set_img_url'] = null;
         }
 
-        /** @var array{set_num: string, name: string, year: int, theme_id: int|null, num_parts: int, set_img_url: string|null} $data */
-        return LegoSetData::fromArray($data);
+        return new LegoSetData(
+            setNum: $data['set_num'],
+            name: $data['name'],
+            year: $data['year'],
+            themeId: $data['theme_id'],
+            numParts: $data['num_parts'],
+            imageUrl: $data['set_img_url'],
+        );
     }
 
     /**
@@ -87,7 +95,23 @@ final readonly class RebrickableService implements LegoDataServiceInterface
             $this->validatePartsResponse($data, $setNum);
 
             foreach ($data['results'] as $partData) {
-                $parts[] = LegoSetPartData::fromArray($partData);
+                $parts[] = new LegoSetPartData(
+                    part: new LegoPartData(
+                        partNum: $partData['part']['part_num'],
+                        name: $partData['part']['name'],
+                        categoryId: $partData['part']['part_cat_id'] ?? null,
+                        imageUrl: $partData['part']['part_img_url'] ?? null,
+                    ),
+                    color: new LegoColorData(
+                        id: $partData['color']['id'],
+                        name: $partData['color']['name'],
+                        rgb: $partData['color']['rgb'],
+                        isTransparent: $partData['color']['is_trans'],
+                    ),
+                    quantity: $partData['quantity'],
+                    isSpare: $partData['is_spare'],
+                    elementId: $partData['element_id'] ?? null,
+                );
             }
 
             $nextUrl = $data['next'];
@@ -125,7 +149,14 @@ final readonly class RebrickableService implements LegoDataServiceInterface
 
             foreach ($validatedData['results'] as $setData) {
                 $sets[] = new RebrickableUserSetData(
-                    set: LegoSetData::fromArray($setData['set']),
+                    set: new LegoSetData(
+                        setNum: $setData['set']['set_num'],
+                        name: $setData['set']['name'],
+                        year: $setData['set']['year'],
+                        themeId: $setData['set']['theme_id'] ?? null,
+                        numParts: $setData['set']['num_parts'],
+                        imageUrl: $setData['set']['set_img_url'] ?? null,
+                    ),
                     quantity: $setData['quantity'],
                 );
             }

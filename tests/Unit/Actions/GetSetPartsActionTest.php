@@ -6,6 +6,8 @@ use App\Actions\GetSetPartsAction;
 use App\Actions\Sync\StoreSetPartsAction;
 use App\Actions\Sync\UpsertSetAction;
 use App\Contracts\LegoDataServiceInterface;
+use App\Data\Lego\LegoColorData;
+use App\Data\Lego\LegoPartData;
 use App\Data\Lego\LegoSetData;
 use App\Data\Lego\LegoSetPartData;
 use App\Models\Set;
@@ -67,13 +69,23 @@ describe('GetSetPartsAction', function (): void {
             imageUrl: 'https://example.com/75192.jpg',
         );
 
-        $legoSetPartData = LegoSetPartData::fromArray([
-            'part' => ['part_num' => '3001', 'name' => 'Brick 2 x 4', 'part_cat_id' => 11, 'part_img_url' => null],
-            'color' => ['id' => 1, 'name' => 'White', 'rgb' => 'FFFFFF', 'is_trans' => false],
-            'quantity' => 5,
-            'is_spare' => false,
-            'element_id' => '300101',
-        ]);
+        $legoSetPartData = new LegoSetPartData(
+            part: new LegoPartData(
+                partNum: '3001',
+                name: 'Brick 2 x 4',
+                categoryId: 11,
+                imageUrl: null,
+            ),
+            color: new LegoColorData(
+                id: 1,
+                name: 'White',
+                rgb: 'FFFFFF',
+                isTransparent: false,
+            ),
+            quantity: 5,
+            isSpare: false,
+            elementId: '300101',
+        );
 
         $legoDataService = Mockery::mock(LegoDataServiceInterface::class);
         $legoDataService->shouldReceive('fetchSet')
