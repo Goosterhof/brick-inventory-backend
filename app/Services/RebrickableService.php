@@ -124,7 +124,10 @@ final readonly class RebrickableService implements LegoDataServiceInterface
             $validatedData = $data;
 
             foreach ($validatedData['results'] as $setData) {
-                $sets[] = RebrickableUserSetData::fromArray($setData);
+                $sets[] = new RebrickableUserSetData(
+                    set: LegoSetData::fromArray($setData['set']),
+                    quantity: $setData['quantity'],
+                );
             }
 
             $nextUrl = $validatedData['next'];
