@@ -14,6 +14,7 @@ use App\Models\Family;
 use App\Models\FamilySet;
 use App\Models\Set;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Collection;
 
 describe('ImportOwnedSetsAction', function (): void {
     it('should throw MissingRebrickableTokenException when family has no token', function (): void {
@@ -83,13 +84,14 @@ describe('ImportOwnedSetsAction', function (): void {
         $familySet = Mockery::mock(FamilySet::class)->makePartial();
         $familySet->shouldReceive('save')->once();
 
+        // Single query to preload all existing family sets
         $queryBuilder = Mockery::mock(Builder::class);
         $queryBuilder->shouldReceive('where')->with('family_id', 1)->andReturnSelf();
-        $queryBuilder->shouldReceive('where')->with('set_id', 42)->andReturnSelf();
-        $queryBuilder->shouldReceive('count')->andReturn(0);
+        $queryBuilder->shouldReceive('whereIn')->with('set_id', [42])->andReturnSelf();
+        $queryBuilder->shouldReceive('get')->andReturn(new Collection([]));
 
         $familySetModel = Mockery::mock(FamilySet::class);
-        $familySetModel->shouldReceive('newQuery')->andReturn($queryBuilder);
+        $familySetModel->shouldReceive('newQuery')->once()->andReturn($queryBuilder);
         $familySetModel->shouldReceive('newInstance')->andReturn($familySet);
 
         $family = Mockery::mock(Family::class)->makePartial();
@@ -124,6 +126,7 @@ describe('ImportOwnedSetsAction', function (): void {
         $set->id = 42;
 
         $existingFamilySet = Mockery::mock(FamilySet::class)->makePartial();
+        $existingFamilySet->set_id = 42;
         $existingFamilySet->quantity = 1;
         $existingFamilySet->shouldReceive('save')->once();
 
@@ -133,20 +136,14 @@ describe('ImportOwnedSetsAction', function (): void {
         $upsertSetAction = Mockery::mock(UpsertSetAction::class);
         $upsertSetAction->shouldReceive('execute')->andReturn($set);
 
-        $countQueryBuilder = Mockery::mock(Builder::class);
-        $countQueryBuilder->shouldReceive('where')->with('family_id', 1)->andReturnSelf();
-        $countQueryBuilder->shouldReceive('where')->with('set_id', 42)->andReturnSelf();
-        $countQueryBuilder->shouldReceive('count')->andReturn(1);
-
-        $firstQueryBuilder = Mockery::mock(Builder::class);
-        $firstQueryBuilder->shouldReceive('where')->with('family_id', 1)->andReturnSelf();
-        $firstQueryBuilder->shouldReceive('where')->with('set_id', 42)->andReturnSelf();
-        $firstQueryBuilder->shouldReceive('first')->andReturn($existingFamilySet);
+        // Single query returns the one existing family set
+        $queryBuilder = Mockery::mock(Builder::class);
+        $queryBuilder->shouldReceive('where')->with('family_id', 1)->andReturnSelf();
+        $queryBuilder->shouldReceive('whereIn')->with('set_id', [42])->andReturnSelf();
+        $queryBuilder->shouldReceive('get')->andReturn(new Collection([$existingFamilySet]));
 
         $familySetModel = Mockery::mock(FamilySet::class);
-        $familySetModel->shouldReceive('newQuery')
-            ->twice()
-            ->andReturn($countQueryBuilder, $firstQueryBuilder);
+        $familySetModel->shouldReceive('newQuery')->once()->andReturn($queryBuilder);
         $familySetModel->shouldReceive('newInstance')->never();
 
         $family = Mockery::mock(Family::class)->makePartial();
@@ -196,33 +193,22 @@ describe('ImportOwnedSetsAction', function (): void {
         $upsertSetAction->shouldReceive('execute')->with($legoSetData1)->andReturn($set1);
         $upsertSetAction->shouldReceive('execute')->with($legoSetData2)->andReturn($set2);
 
+        // One existing family set for set1
         $existingFamilySet = Mockery::mock(FamilySet::class)->makePartial();
+        $existingFamilySet->set_id = 1;
         $existingFamilySet->shouldReceive('save');
 
         $newFamilySet = Mockery::mock(FamilySet::class)->makePartial();
         $newFamilySet->shouldReceive('save');
 
-        // First set: count returns 1 (exists), then first returns the existing set
-        $countQueryBuilder1 = Mockery::mock(Builder::class);
-        $countQueryBuilder1->shouldReceive('where')->with('family_id', 1)->andReturnSelf();
-        $countQueryBuilder1->shouldReceive('where')->with('set_id', 1)->andReturnSelf();
-        $countQueryBuilder1->shouldReceive('count')->andReturn(1);
-
-        $firstQueryBuilder1 = Mockery::mock(Builder::class);
-        $firstQueryBuilder1->shouldReceive('where')->with('family_id', 1)->andReturnSelf();
-        $firstQueryBuilder1->shouldReceive('where')->with('set_id', 1)->andReturnSelf();
-        $firstQueryBuilder1->shouldReceive('first')->andReturn($existingFamilySet);
-
-        // Second set: count returns 0 (doesn't exist)
-        $countQueryBuilder2 = Mockery::mock(Builder::class);
-        $countQueryBuilder2->shouldReceive('where')->with('family_id', 1)->andReturnSelf();
-        $countQueryBuilder2->shouldReceive('where')->with('set_id', 2)->andReturnSelf();
-        $countQueryBuilder2->shouldReceive('count')->andReturn(0);
+        // Single query returns only the existing family set for set1
+        $queryBuilder = Mockery::mock(Builder::class);
+        $queryBuilder->shouldReceive('where')->with('family_id', 1)->andReturnSelf();
+        $queryBuilder->shouldReceive('whereIn')->with('set_id', [1, 2])->andReturnSelf();
+        $queryBuilder->shouldReceive('get')->andReturn(new Collection([$existingFamilySet]));
 
         $familySetModel = Mockery::mock(FamilySet::class);
-        $familySetModel->shouldReceive('newQuery')
-            ->times(3)
-            ->andReturn($countQueryBuilder1, $firstQueryBuilder1, $countQueryBuilder2);
+        $familySetModel->shouldReceive('newQuery')->once()->andReturn($queryBuilder);
         $familySetModel->shouldReceive('newInstance')->once()->andReturn($newFamilySet);
 
         $family = Mockery::mock(Family::class)->makePartial();
@@ -291,13 +277,21 @@ describe('ImportOwnedSetsAction', function (): void {
             ->once()
             ->andReturn($set);
 
+        // Two existing family sets for the same set (duplicates)
+        $existingFamilySet1 = Mockery::mock(FamilySet::class)->makePartial();
+        $existingFamilySet1->set_id = 42;
+
+        $existingFamilySet2 = Mockery::mock(FamilySet::class)->makePartial();
+        $existingFamilySet2->set_id = 42;
+
+        // Single query returns two family sets for the same set_id
         $queryBuilder = Mockery::mock(Builder::class);
         $queryBuilder->shouldReceive('where')->with('family_id', 1)->andReturnSelf();
-        $queryBuilder->shouldReceive('where')->with('set_id', 42)->andReturnSelf();
-        $queryBuilder->shouldReceive('count')->andReturn(2); // Multiple rows exist
+        $queryBuilder->shouldReceive('whereIn')->with('set_id', [42])->andReturnSelf();
+        $queryBuilder->shouldReceive('get')->andReturn(new Collection([$existingFamilySet1, $existingFamilySet2]));
 
         $familySetModel = Mockery::mock(FamilySet::class);
-        $familySetModel->shouldReceive('newQuery')->andReturn($queryBuilder);
+        $familySetModel->shouldReceive('newQuery')->once()->andReturn($queryBuilder);
         $familySetModel->shouldReceive('newInstance')->never();
 
         $family = Mockery::mock(Family::class)->makePartial();
@@ -315,5 +309,88 @@ describe('ImportOwnedSetsAction', function (): void {
         expect($result->skipped)->toBe(1);
         expect($result->total)->toBe(0);
         expect($result->skippedSetNums)->toBe(['75192-1']);
+    });
+
+    it('should preload all family sets in a single query', function (): void {
+        // arrange
+        $legoSetData1 = new LegoSetData(
+            setNum: '75192-1',
+            name: 'Millennium Falcon',
+            year: 2017,
+            themeId: 158,
+            numParts: 7541,
+            imageUrl: null,
+        );
+        $legoSetData2 = new LegoSetData(
+            setNum: '10179-1',
+            name: 'Ultimate Collectors Millennium Falcon',
+            year: 2007,
+            themeId: 158,
+            numParts: 5195,
+            imageUrl: null,
+        );
+        $legoSetData3 = new LegoSetData(
+            setNum: '10281-1',
+            name: 'Bonsai Tree',
+            year: 2021,
+            themeId: 598,
+            numParts: 878,
+            imageUrl: null,
+        );
+        $userSetData1 = new RebrickableUserSetData(set: $legoSetData1, quantity: 1);
+        $userSetData2 = new RebrickableUserSetData(set: $legoSetData2, quantity: 2);
+        $userSetData3 = new RebrickableUserSetData(set: $legoSetData3, quantity: 1);
+
+        $set1 = Mockery::mock(Set::class)->makePartial();
+        $set1->id = 1;
+
+        $set2 = Mockery::mock(Set::class)->makePartial();
+        $set2->id = 2;
+
+        $set3 = Mockery::mock(Set::class)->makePartial();
+        $set3->id = 3;
+
+        $legoDataService = Mockery::mock(LegoDataServiceInterface::class);
+        $legoDataService->shouldReceive('fetchUserSets')->andReturn([$userSetData1, $userSetData2, $userSetData3]);
+
+        $upsertSetAction = Mockery::mock(UpsertSetAction::class);
+        $upsertSetAction->shouldReceive('execute')->with($legoSetData1)->andReturn($set1);
+        $upsertSetAction->shouldReceive('execute')->with($legoSetData2)->andReturn($set2);
+        $upsertSetAction->shouldReceive('execute')->with($legoSetData3)->andReturn($set3);
+
+        $newFamilySet1 = Mockery::mock(FamilySet::class)->makePartial();
+        $newFamilySet1->shouldReceive('save');
+
+        $newFamilySet2 = Mockery::mock(FamilySet::class)->makePartial();
+        $newFamilySet2->shouldReceive('save');
+
+        $newFamilySet3 = Mockery::mock(FamilySet::class)->makePartial();
+        $newFamilySet3->shouldReceive('save');
+
+        // Verify only ONE query is made with all set IDs
+        $queryBuilder = Mockery::mock(Builder::class);
+        $queryBuilder->shouldReceive('where')->with('family_id', 1)->once()->andReturnSelf();
+        $queryBuilder->shouldReceive('whereIn')->with('set_id', [1, 2, 3])->once()->andReturnSelf();
+        $queryBuilder->shouldReceive('get')->once()->andReturn(new Collection([]));
+
+        $familySetModel = Mockery::mock(FamilySet::class);
+        $familySetModel->shouldReceive('newQuery')->once()->andReturn($queryBuilder);
+        $familySetModel->shouldReceive('newInstance')
+            ->times(3)
+            ->andReturn($newFamilySet1, $newFamilySet2, $newFamilySet3);
+
+        $family = Mockery::mock(Family::class)->makePartial();
+        $family->id = 1;
+        $family->rebrickable_user_token = 'user-token-123';
+
+        $action = new ImportOwnedSetsAction($legoDataService, $upsertSetAction, $familySetModel);
+
+        // act
+        $result = $action->execute($family);
+
+        // assert - Mockery verifies the single query expectation
+        expect($result->created)->toBe(3);
+        expect($result->updated)->toBe(0);
+        expect($result->total)->toBe(3);
     });
 });
