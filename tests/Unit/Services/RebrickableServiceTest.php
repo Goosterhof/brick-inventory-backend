@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Data\Lego\LegoSetData;
 use App\Data\Lego\LegoSetPartData;
+use App\Data\Lego\RebrickableUserSetData;
 use App\Exceptions\InvalidApiResponseException;
 use App\Exceptions\RebrickableApiException;
 use App\Exceptions\SetNotFoundException;
@@ -416,6 +417,231 @@ describe('RebrickableService', function (): void {
 
             // act & assert
             expect(fn (): array => $service->fetchSetParts('75192-1'))->toThrow(InvalidApiResponseException::class);
+        });
+    });
+
+    describe('fetchUserSets', function (): void {
+        it('should return user sets from API', function (): void {
+            // arrange
+            Http::fake([
+                'https://rebrickable.com/api/v3/users/user-token-123/sets/' => Http::response([
+                    'results' => [
+                        [
+                            'set' => [
+                                'set_num' => '75192-1',
+                                'name' => 'Millennium Falcon',
+                                'year' => 2017,
+                                'theme_id' => 158,
+                                'num_parts' => 7541,
+                                'set_img_url' => 'https://example.com/75192.jpg',
+                            ],
+                            'quantity' => 2,
+                        ],
+                    ],
+                    'next' => null,
+                ]),
+            ]);
+
+            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL);
+
+            // act
+            $result = $service->fetchUserSets('user-token-123');
+
+            // assert
+            expect($result)->toHaveCount(1);
+            expect($result[0])->toBeInstanceOf(RebrickableUserSetData::class);
+            expect($result[0]->set->setNum)->toBe('75192-1');
+            expect($result[0]->set->name)->toBe('Millennium Falcon');
+            expect($result[0]->quantity)->toBe(2);
+
+            Http::assertSent(fn ($request): bool => $request->url() === 'https://rebrickable.com/api/v3/users/user-token-123/sets/'
+                && $request->method() === 'GET'
+                && $request->header('Authorization') === ['key ' . TEST_API_KEY]);
+        });
+
+        it('should handle pagination', function (): void {
+            // arrange
+            Http::fake([
+                'https://rebrickable.com/api/v3/users/user-token-123/sets/' => Http::response([
+                    'results' => [
+                        [
+                            'set' => [
+                                'set_num' => '75192-1',
+                                'name' => 'Millennium Falcon',
+                                'year' => 2017,
+                                'theme_id' => 158,
+                                'num_parts' => 7541,
+                                'set_img_url' => null,
+                            ],
+                            'quantity' => 1,
+                        ],
+                    ],
+                    'next' => 'https://rebrickable.com/api/v3/users/user-token-123/sets/?page=2',
+                ]),
+                'https://rebrickable.com/api/v3/users/user-token-123/sets/?page=2' => Http::response([
+                    'results' => [
+                        [
+                            'set' => [
+                                'set_num' => '10179-1',
+                                'name' => 'Ultimate Collectors Millennium Falcon',
+                                'year' => 2007,
+                                'theme_id' => 158,
+                                'num_parts' => 5195,
+                                'set_img_url' => null,
+                            ],
+                            'quantity' => 2,
+                        ],
+                    ],
+                    'next' => null,
+                ]),
+            ]);
+
+            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL);
+
+            // act
+            $result = $service->fetchUserSets('user-token-123');
+
+            // assert
+            expect($result)->toHaveCount(2);
+            expect($result[0]->set->setNum)->toBe('75192-1');
+            expect($result[1]->set->setNum)->toBe('10179-1');
+            Http::assertSentCount(2);
+        });
+
+        it('should return empty array when user has no sets', function (): void {
+            // arrange
+            Http::fake([
+                'https://rebrickable.com/api/v3/users/user-token-123/sets/' => Http::response([
+                    'results' => [],
+                    'next' => null,
+                ]),
+            ]);
+
+            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL);
+
+            // act
+            $result = $service->fetchUserSets('user-token-123');
+
+            // assert
+            expect($result)->toHaveCount(0);
+        });
+
+        it('should throw RebrickableApiException on API error', function (): void {
+            // arrange
+            Http::fake([
+                'https://rebrickable.com/api/v3/users/user-token-123/sets/' => Http::response([], 401),
+            ]);
+
+            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL);
+
+            // act & assert
+            expect(fn (): array => $service->fetchUserSets('user-token-123'))->toThrow(RebrickableApiException::class);
+        });
+
+        it('should throw InvalidApiResponseException when response is not an array', function (): void {
+            // arrange
+            Http::fake([
+                'https://rebrickable.com/api/v3/users/user-token-123/sets/' => Http::response('invalid'),
+            ]);
+
+            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL);
+
+            // act & assert
+            expect(fn (): array => $service->fetchUserSets('user-token-123'))->toThrow(InvalidApiResponseException::class);
+        });
+
+        it('should throw InvalidApiResponseException when results field is missing', function (): void {
+            // arrange
+            Http::fake([
+                'https://rebrickable.com/api/v3/users/user-token-123/sets/' => Http::response([
+                    'data' => [],
+                    'next' => null,
+                ]),
+            ]);
+
+            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL);
+
+            // act & assert
+            expect(fn (): array => $service->fetchUserSets('user-token-123'))->toThrow(InvalidApiResponseException::class);
+        });
+
+        it('should throw InvalidApiResponseException when set data is missing required fields', function (): void {
+            // arrange
+            Http::fake([
+                'https://rebrickable.com/api/v3/users/user-token-123/sets/' => Http::response([
+                    'results' => [
+                        [
+                            // missing 'set' and 'quantity'
+                        ],
+                    ],
+                    'next' => null,
+                ]),
+            ]);
+
+            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL);
+
+            // act & assert
+            expect(fn (): array => $service->fetchUserSets('user-token-123'))->toThrow(InvalidApiResponseException::class);
+        });
+
+        it('should throw InvalidApiResponseException when nested set is not an array', function (): void {
+            // arrange
+            Http::fake([
+                'https://rebrickable.com/api/v3/users/user-token-123/sets/' => Http::response([
+                    'results' => [
+                        [
+                            'set' => 'not-an-array',
+                            'quantity' => 1,
+                        ],
+                    ],
+                    'next' => null,
+                ]),
+            ]);
+
+            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL);
+
+            // act & assert
+            expect(fn (): array => $service->fetchUserSets('user-token-123'))->toThrow(InvalidApiResponseException::class);
+        });
+
+        it('should throw InvalidApiResponseException when nested set is missing required fields', function (): void {
+            // arrange
+            Http::fake([
+                'https://rebrickable.com/api/v3/users/user-token-123/sets/' => Http::response([
+                    'results' => [
+                        [
+                            'set' => [
+                                'set_num' => '75192-1',
+                                // missing name, year, num_parts
+                            ],
+                            'quantity' => 1,
+                        ],
+                    ],
+                    'next' => null,
+                ]),
+            ]);
+
+            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL);
+
+            // act & assert
+            expect(fn (): array => $service->fetchUserSets('user-token-123'))->toThrow(InvalidApiResponseException::class);
+        });
+
+        it('should throw InvalidApiResponseException when set at index is not an array', function (): void {
+            // arrange
+            Http::fake([
+                'https://rebrickable.com/api/v3/users/user-token-123/sets/' => Http::response([
+                    'results' => [
+                        'not-an-array',
+                    ],
+                    'next' => null,
+                ]),
+            ]);
+
+            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL);
+
+            // act & assert
+            expect(fn (): array => $service->fetchUserSets('user-token-123'))->toThrow(InvalidApiResponseException::class);
         });
     });
 });

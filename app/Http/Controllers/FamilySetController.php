@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Actions\FamilySet\CreateFamilySetAction;
 use App\Actions\FamilySet\DeleteFamilySetAction;
 use App\Actions\FamilySet\GetFamilySetsAction;
+use App\Actions\FamilySet\ImportOwnedSetsAction;
 use App\Actions\FamilySet\UpdateFamilySetAction;
 use App\Http\Requests\FamilySet\StoreFamilySetRequest;
 use App\Http\Requests\FamilySet\UpdateFamilySetRequest;
@@ -23,6 +24,7 @@ class FamilySetController extends Controller
         private readonly CreateFamilySetAction $createFamilySetAction,
         private readonly UpdateFamilySetAction $updateFamilySetAction,
         private readonly DeleteFamilySetAction $deleteFamilySetAction,
+        private readonly ImportOwnedSetsAction $importOwnedSetsAction,
     ) {}
 
     /**
@@ -59,5 +61,24 @@ class FamilySetController extends Controller
         $this->deleteFamilySetAction->execute($familySet);
 
         return response()->json(null, 204);
+    }
+
+    public function importFromRebrickable(#[CurrentUser] User $user): JsonResponse
+    {
+        $importOwnedSetsResultData = $this->importOwnedSetsAction->execute($user->family);
+
+        $response = [
+            'message' => 'Import completed successfully',
+            'created' => $importOwnedSetsResultData->created,
+            'updated' => $importOwnedSetsResultData->updated,
+            'skipped' => $importOwnedSetsResultData->skipped,
+            'total' => $importOwnedSetsResultData->total,
+        ];
+
+        if ($importOwnedSetsResultData->skippedSetNums !== []) {
+            $response['skipped_set_nums'] = $importOwnedSetsResultData->skippedSetNums;
+        }
+
+        return response()->json($response);
     }
 }

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\FamilyController;
 use App\Http\Controllers\FamilySetController;
 use App\Http\Controllers\SetController;
 use App\Http\Controllers\StorageOptionController;
@@ -28,4 +29,6 @@ Route::middleware(['auth:sanctum', 'family.ownership'])->group(function (): void
     Route::delete('/storage-options/{storage_option}/parts/{storage_option_part}', [StorageOptionController::class, 'removePart'])
         ->scopeBindings();
     Route::apiResource('family-sets', FamilySetController::class);
+    Route::post('/family-sets/import-from-rebrickable', [FamilySetController::class, 'importFromRebrickable']);
+    Route::put('/family/rebrickable-token', [FamilyController::class, 'setRebrickableToken']);
 });

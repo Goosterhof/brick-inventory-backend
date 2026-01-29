@@ -6,6 +6,7 @@ namespace App\Contracts;
 
 use App\Data\Lego\LegoSetData;
 use App\Data\Lego\LegoSetPartData;
+use App\Data\Lego\RebrickableUserSetData;
 
 interface LegoDataServiceInterface
 {
@@ -15,4 +16,11 @@ interface LegoDataServiceInterface
      * @return list<LegoSetPartData>
      */
     public function fetchSetParts(string $setNum): array;
+
+    /**
+     * Fetch all sets from a user's Rebrickable collection.
+     *
+     * @return list<RebrickableUserSetData>
+     */
+    public function fetchUserSets(string $userToken): array;
 }

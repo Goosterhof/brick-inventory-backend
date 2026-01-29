@@ -367,4 +367,222 @@ describe('FamilySetController', function (): void {
             $response->assertStatus(401);
         });
     });
+
+    describe('importFromRebrickable', function (): void {
+        it('should import sets from rebrickable user collection', function (): void {
+            Http::fake([
+                'rebrickable.com/api/v3/users/test-user-token/sets/' => Http::response([
+                    'results' => [
+                        [
+                            'set' => [
+                                'set_num' => '75192-1',
+                                'name' => 'Millennium Falcon',
+                                'year' => 2017,
+                                'theme_id' => 158,
+                                'num_parts' => 7541,
+                                'set_img_url' => 'https://example.com/75192.jpg',
+                            ],
+                            'quantity' => 2,
+                        ],
+                        [
+                            'set' => [
+                                'set_num' => '10281-1',
+                                'name' => 'Bonsai Tree',
+                                'year' => 2021,
+                                'theme_id' => 598,
+                                'num_parts' => 878,
+                                'set_img_url' => null,
+                            ],
+                            'quantity' => 1,
+                        ],
+                    ],
+                    'next' => null,
+                ]),
+            ]);
+
+            $user = User::factory()->create();
+            $user->family->rebrickable_user_token = 'test-user-token';
+            $user->family->save();
+
+            $response = $this->actingAs($user)->postJson('/api/family-sets/import-from-rebrickable');
+
+            $response->assertStatus(200)
+                ->assertJsonPath('message', 'Import completed successfully')
+                ->assertJsonPath('created', 2)
+                ->assertJsonPath('updated', 0)
+                ->assertJsonPath('skipped', 0)
+                ->assertJsonPath('total', 2);
+
+            $this->assertDatabaseHas('sets', ['set_num' => '75192-1']);
+            $this->assertDatabaseHas('sets', ['set_num' => '10281-1']);
+            $this->assertDatabaseHas('family_sets', [
+                'family_id' => $user->family_id,
+                'quantity' => 2,
+            ]);
+            $this->assertDatabaseHas('family_sets', [
+                'family_id' => $user->family_id,
+                'quantity' => 1,
+            ]);
+        });
+
+        it('should update existing family sets on import', function (): void {
+            $user = User::factory()->create();
+            $user->family->rebrickable_user_token = 'test-user-token';
+            $user->family->save();
+
+            $set = Set::factory()->create(['set_num' => '75192-1', 'name' => 'Millennium Falcon']);
+            FamilySet::factory()->create([
+                'family_id' => $user->family_id,
+                'set_id' => $set->id,
+                'quantity' => 1,
+            ]);
+
+            Http::fake([
+                'rebrickable.com/api/v3/users/test-user-token/sets/' => Http::response([
+                    'results' => [
+                        [
+                            'set' => [
+                                'set_num' => '75192-1',
+                                'name' => 'Millennium Falcon',
+                                'year' => 2017,
+                                'theme_id' => 158,
+                                'num_parts' => 7541,
+                                'set_img_url' => null,
+                            ],
+                            'quantity' => 3,
+                        ],
+                    ],
+                    'next' => null,
+                ]),
+            ]);
+
+            $response = $this->actingAs($user)->postJson('/api/family-sets/import-from-rebrickable');
+
+            $response->assertStatus(200)
+                ->assertJsonPath('created', 0)
+                ->assertJsonPath('updated', 1)
+                ->assertJsonPath('skipped', 0)
+                ->assertJsonPath('total', 1);
+
+            $this->assertDatabaseHas('family_sets', [
+                'family_id' => $user->family_id,
+                'set_id' => $set->id,
+                'quantity' => 3,
+            ]);
+        });
+
+        it('should skip sets with duplicate family set entries', function (): void {
+            $user = User::factory()->create();
+            $user->family->rebrickable_user_token = 'test-user-token';
+            $user->family->save();
+
+            $set = Set::factory()->create(['set_num' => '75192-1', 'name' => 'Millennium Falcon']);
+            // Create two family sets for the same set (duplicates)
+            FamilySet::factory()->create([
+                'family_id' => $user->family_id,
+                'set_id' => $set->id,
+                'quantity' => 1,
+                'status' => FamilySetStatus::Sealed,
+            ]);
+            FamilySet::factory()->create([
+                'family_id' => $user->family_id,
+                'set_id' => $set->id,
+                'quantity' => 1,
+                'status' => FamilySetStatus::Built,
+            ]);
+
+            Http::fake([
+                'rebrickable.com/api/v3/users/test-user-token/sets/' => Http::response([
+                    'results' => [
+                        [
+                            'set' => [
+                                'set_num' => '75192-1',
+                                'name' => 'Millennium Falcon',
+                                'year' => 2017,
+                                'theme_id' => 158,
+                                'num_parts' => 7541,
+                                'set_img_url' => null,
+                            ],
+                            'quantity' => 3,
+                        ],
+                    ],
+                    'next' => null,
+                ]),
+            ]);
+
+            $response = $this->actingAs($user)->postJson('/api/family-sets/import-from-rebrickable');
+
+            $response->assertStatus(200)
+                ->assertJsonPath('created', 0)
+                ->assertJsonPath('updated', 0)
+                ->assertJsonPath('skipped', 1)
+                ->assertJsonPath('total', 0)
+                ->assertJsonPath('skipped_set_nums', ['75192-1']);
+
+            // Verify neither family set was modified
+            $this->assertDatabaseHas('family_sets', [
+                'family_id' => $user->family_id,
+                'set_id' => $set->id,
+                'quantity' => 1,
+                'status' => 'sealed',
+            ]);
+            $this->assertDatabaseHas('family_sets', [
+                'family_id' => $user->family_id,
+                'set_id' => $set->id,
+                'quantity' => 1,
+                'status' => 'built',
+            ]);
+        });
+
+        it('should return 400 when rebrickable token is not configured', function (): void {
+            $user = User::factory()->create();
+
+            $response = $this->actingAs($user)->postJson('/api/family-sets/import-from-rebrickable');
+
+            $response->assertStatus(400)
+                ->assertJson(['error' => 'Rebrickable user token not configured']);
+        });
+
+        it('should return 401 when unauthenticated', function (): void {
+            $response = $this->postJson('/api/family-sets/import-from-rebrickable');
+
+            $response->assertStatus(401);
+        });
+
+        it('should handle empty rebrickable collection', function (): void {
+            Http::fake([
+                'rebrickable.com/api/v3/users/test-user-token/sets/' => Http::response([
+                    'results' => [],
+                    'next' => null,
+                ]),
+            ]);
+
+            $user = User::factory()->create();
+            $user->family->rebrickable_user_token = 'test-user-token';
+            $user->family->save();
+
+            $response = $this->actingAs($user)->postJson('/api/family-sets/import-from-rebrickable');
+
+            $response->assertStatus(200)
+                ->assertJsonPath('created', 0)
+                ->assertJsonPath('updated', 0)
+                ->assertJsonPath('skipped', 0)
+                ->assertJsonPath('total', 0);
+        });
+
+        it('should handle rebrickable API errors', function (): void {
+            Http::fake([
+                'rebrickable.com/api/v3/users/invalid-token/sets/' => Http::response([], 401),
+            ]);
+
+            $user = User::factory()->create();
+            $user->family->rebrickable_user_token = 'invalid-token';
+            $user->family->save();
+
+            $response = $this->actingAs($user)->postJson('/api/family-sets/import-from-rebrickable');
+
+            $response->assertStatus(401)
+                ->assertJson(['error' => 'Invalid API key']);
+        });
+    });
 });
