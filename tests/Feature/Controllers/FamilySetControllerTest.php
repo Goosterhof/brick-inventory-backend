@@ -410,6 +410,7 @@ describe('FamilySetController', function (): void {
                 ->assertJsonPath('message', 'Import completed successfully')
                 ->assertJsonPath('created', 2)
                 ->assertJsonPath('updated', 0)
+                ->assertJsonPath('skipped', 0)
                 ->assertJsonPath('total', 2);
 
             $this->assertDatabaseHas('sets', ['set_num' => '75192-1']);
@@ -460,12 +461,76 @@ describe('FamilySetController', function (): void {
             $response->assertStatus(200)
                 ->assertJsonPath('created', 0)
                 ->assertJsonPath('updated', 1)
+                ->assertJsonPath('skipped', 0)
                 ->assertJsonPath('total', 1);
 
             $this->assertDatabaseHas('family_sets', [
                 'family_id' => $user->family_id,
                 'set_id' => $set->id,
                 'quantity' => 3,
+            ]);
+        });
+
+        it('should skip sets with duplicate family set entries', function (): void {
+            $user = User::factory()->create();
+            $user->family->rebrickable_user_token = 'test-user-token';
+            $user->family->save();
+
+            $set = Set::factory()->create(['set_num' => '75192-1', 'name' => 'Millennium Falcon']);
+            // Create two family sets for the same set (duplicates)
+            FamilySet::factory()->create([
+                'family_id' => $user->family_id,
+                'set_id' => $set->id,
+                'quantity' => 1,
+                'status' => FamilySetStatus::Sealed,
+            ]);
+            FamilySet::factory()->create([
+                'family_id' => $user->family_id,
+                'set_id' => $set->id,
+                'quantity' => 1,
+                'status' => FamilySetStatus::Built,
+            ]);
+
+            Http::fake([
+                'rebrickable.com/api/v3/users/test-user-token/sets/' => Http::response([
+                    'results' => [
+                        [
+                            'set' => [
+                                'set_num' => '75192-1',
+                                'name' => 'Millennium Falcon',
+                                'year' => 2017,
+                                'theme_id' => 158,
+                                'num_parts' => 7541,
+                                'set_img_url' => null,
+                            ],
+                            'quantity' => 3,
+                        ],
+                    ],
+                    'next' => null,
+                ]),
+            ]);
+
+            $response = $this->actingAs($user)->postJson('/api/family-sets/import-from-rebrickable');
+
+            $response->assertStatus(200)
+                ->assertJsonPath('created', 0)
+                ->assertJsonPath('updated', 0)
+                ->assertJsonPath('skipped', 1)
+                ->assertJsonPath('total', 0)
+                ->assertJsonPath('skipped_set_nums', ['75192-1']);
+
+            // Verify neither family set was modified
+            $this->assertDatabaseHas('family_sets', [
+                'family_id' => $user->family_id,
+                'set_id' => $set->id,
+                'quantity' => 1,
+                'status' => 'sealed',
+            ]);
+            $this->assertDatabaseHas('family_sets', [
+                'family_id' => $user->family_id,
+                'set_id' => $set->id,
+                'quantity' => 1,
+                'status' => 'built',
             ]);
         });
 
@@ -501,6 +566,7 @@ describe('FamilySetController', function (): void {
             $response->assertStatus(200)
                 ->assertJsonPath('created', 0)
                 ->assertJsonPath('updated', 0)
+                ->assertJsonPath('skipped', 0)
                 ->assertJsonPath('total', 0);
         });
 

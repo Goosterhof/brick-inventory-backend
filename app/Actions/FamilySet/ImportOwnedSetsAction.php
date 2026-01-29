@@ -33,20 +33,34 @@ class ImportOwnedSetsAction
 
         $created = 0;
         $updated = 0;
+        $skipped = 0;
+        /** @var array<string> $skippedSetNums */
+        $skippedSetNums = [];
 
         foreach ($userSets as $userSet) {
             $set = $this->upsertSetAction->execute($userSet->set);
 
-            $familySet = $this->familySet->newQuery()
+            $existingCount = $this->familySet->newQuery()
                 ->where('family_id', $family->id)
                 ->where('set_id', $set->id)
-                ->first();
+                ->count();
 
-            if ($familySet instanceof FamilySet) {
+            if ($existingCount > 1) {
+                // Multiple rows exist for this set - skip to avoid inconsistent updates
+                $skipped++;
+                $skippedSetNums[] = $userSet->set->setNum;
+            } elseif ($existingCount === 1) {
+                // Exactly one row exists - safe to update
+                /** @var FamilySet $familySet */
+                $familySet = $this->familySet->newQuery()
+                    ->where('family_id', $family->id)
+                    ->where('set_id', $set->id)
+                    ->first();
                 $familySet->quantity = $userSet->quantity;
                 $familySet->save();
                 $updated++;
             } else {
+                // No existing rows - create new
                 /** @var FamilySet $familySet */
                 $familySet = $this->familySet->newInstance();
                 $familySet->family_id = $family->id;
@@ -61,7 +75,9 @@ class ImportOwnedSetsAction
         return new ImportOwnedSetsResultData(
             created: $created,
             updated: $updated,
+            skipped: $skipped,
             total: $created + $updated,
+            skippedSetNums: $skippedSetNums,
         );
     }
 }
