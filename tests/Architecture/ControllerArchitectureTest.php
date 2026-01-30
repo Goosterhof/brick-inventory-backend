@@ -142,18 +142,39 @@ it('should not return ResourceData directly from controller methods', function (
 it('should not use try-catch blocks in controllers', function (): void {
     $controllersDir = dirname(__DIR__, 2) . '/app/Http/Controllers';
 
-    foreach (glob($controllersDir . '/*.php') as $file) {
-        $content = file_get_contents($file);
-        $filename = basename($file);
+    $iterator = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($controllersDir, RecursiveDirectoryIterator::SKIP_DOTS),
+    );
+
+    foreach ($iterator as $file) {
+        if (!$file->isFile()) {
+            continue;
+        }
+
+        if ($file->getExtension() !== 'php') {
+            continue;
+        }
+
+        $filename = $file->getFilename();
 
         // Skip base Controller class
         if ($filename === 'Controller.php') {
             continue;
         }
 
-        expect($content)->not->toContain(
-            'try {',
-            sprintf('Controller %s should not use try-catch blocks. Exception handling is done globally in bootstrap/app.php.', $filename),
-        );
+        $content = file_get_contents($file->getPathname());
+        $tokens = token_get_all($content);
+        $relativePath = str_replace($controllersDir . '/', '', $file->getPathname());
+
+        foreach ($tokens as $token) {
+            if (is_array($token) && $token[0] === T_TRY) {
+                expect(false)->toBeTrue(
+                    sprintf(
+                        'Controller %s should not use try-catch blocks. Exception handling is done globally in bootstrap/app.php.',
+                        $relativePath,
+                    ),
+                );
+            }
+        }
     }
 });
