@@ -21,6 +21,29 @@ use Illuminate\Support\Facades\DB;
 |
 */
 
+/**
+ * Extract all type names from a reflection type (handles named, union, and intersection types).
+ *
+ * @return list<string>
+ */
+function getTypeNames(ReflectionType $reflectionType): array
+{
+    if ($reflectionType instanceof ReflectionNamedType) {
+        return [$reflectionType->getName()];
+    }
+
+    if ($reflectionType instanceof ReflectionUnionType || $reflectionType instanceof ReflectionIntersectionType) {
+        $names = [];
+        foreach ($reflectionType->getTypes() as $subType) {
+            $names = array_merge($names, getTypeNames($subType));
+        }
+
+        return $names;
+    }
+
+    return [];
+}
+
 arch('controllers should end with Controller')
     ->expect('App\Http\Controllers')
     ->toHaveSuffix('Controller');
@@ -60,8 +83,8 @@ it('should have controller methods return JsonResponse or array', function (): v
                 sprintf('Controller method %s::%s() should have a return type', $className, $method->getName()),
             );
 
-            if ($returnType instanceof ReflectionNamedType) {
-                $typeName = $returnType->getName();
+            $typeNames = getTypeNames($returnType);
+            foreach ($typeNames as $typeName) {
                 expect(in_array($typeName, $allowedReturnTypes, true))->toBeTrue(
                     sprintf(
                         'Controller method %s::%s() should return JsonResponse or array, got %s',
@@ -95,21 +118,22 @@ it('should not return ResourceData directly from controller methods', function (
             }
 
             $returnType = $method->getReturnType();
-            if (!$returnType instanceof ReflectionNamedType) {
+            if ($returnType === null) {
                 continue;
             }
 
-            $typeName = $returnType->getName();
-
-            // Check if return type is a ResourceData subclass
-            if (class_exists($typeName) && is_subclass_of($typeName, ResourceData::class)) {
-                expect(false)->toBeTrue(
-                    sprintf(
-                        'Controller method %s::%s() should not return ResourceData directly. Use ->toResponse() instead.',
-                        $className,
-                        $method->getName(),
-                    ),
-                );
+            $typeNames = getTypeNames($returnType);
+            foreach ($typeNames as $typeName) {
+                // Check if return type is a ResourceData subclass
+                if (class_exists($typeName) && is_subclass_of($typeName, ResourceData::class)) {
+                    expect(false)->toBeTrue(
+                        sprintf(
+                            'Controller method %s::%s() should not return ResourceData directly. Use ->toResponse() instead.',
+                            $className,
+                            $method->getName(),
+                        ),
+                    );
+                }
             }
         }
     }
