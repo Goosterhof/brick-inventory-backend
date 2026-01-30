@@ -44,16 +44,16 @@ class FamilySetController extends Controller
         return FamilySetResourceData::from($familySet)->toResponseWithStatus(201);
     }
 
-    public function show(FamilySet $familySet): FamilySetResourceData
+    public function show(FamilySet $familySet): JsonResponse
     {
-        return FamilySetResourceData::from($familySet);
+        return FamilySetResourceData::from($familySet)->toResponse();
     }
 
-    public function update(UpdateFamilySetRequest $updateFamilySetRequest, FamilySet $familySet): FamilySetResourceData
+    public function update(UpdateFamilySetRequest $updateFamilySetRequest, FamilySet $familySet): JsonResponse
     {
         $familySet = $this->updateFamilySetAction->execute($familySet, $updateFamilySetRequest);
 
-        return FamilySetResourceData::from($familySet);
+        return FamilySetResourceData::from($familySet)->toResponse();
     }
 
     public function destroy(FamilySet $familySet): JsonResponse
