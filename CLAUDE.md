@@ -161,6 +161,41 @@ protected static function requiredRelations(): array
 - No N+1 queries: `collection()` method bulk-loads via `loadMissing()`
 - Actions stay simple: No need to know what the response format requires
 
+### Controller Return Types
+
+Controller methods must return explicit types - either `JsonResponse` or `array`:
+
+```php
+// Correct - explicit JsonResponse
+public function show(Model $model): JsonResponse
+{
+    return ModelResourceData::from($model)->toResponse();
+}
+
+public function store(StoreModelRequest $request): JsonResponse
+{
+    $model = $this->createModelAction->execute($request);
+    return ModelResourceData::from($model)->toResponseWithStatus(201);
+}
+
+// Correct - array for collections (serialized to JSON by Laravel)
+public function index(): array
+{
+    return ModelResourceData::collection($models);
+}
+
+// Wrong - returning ResourceData directly (relies on implicit Responsable conversion)
+public function show(Model $model): ModelResourceData
+{
+    return ModelResourceData::from($model);
+}
+```
+
+**Benefits**:
+- Explicit about what's returned to clients
+- Consistent patterns across all CRUD operations
+- Clear separation between data objects and HTTP responses
+
 ### Exception Handling
 
 Application exceptions are handled globally in `bootstrap/app.php`. Controllers should NOT use try-catch blocks for expected exceptions.
@@ -260,6 +295,8 @@ describe('CreateSetAction', function () {
 The following rules are enforced via Pest architecture tests:
 
 - Controllers must end with `Controller`
+- Controllers must return `JsonResponse` or `array` (not ResourceData directly)
+- Controllers must NOT use try-catch blocks (exception handling is global)
 - Models must extend `Illuminate\Database\Eloquent\Model`
 - Models must NOT have `$fillable` or `$guarded` properties (no mass assignment)
 - Models must have `@property` PHPDoc annotations

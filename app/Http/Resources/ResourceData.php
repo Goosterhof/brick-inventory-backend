@@ -68,7 +68,7 @@ abstract readonly class ResourceData implements JsonSerializable, Responsable
         return $this->toArray();
     }
 
-    public function toResponse($request): JsonResponse
+    public function toResponse($request = null): JsonResponse
     {
         return new JsonResponse($this->toArray());
     }

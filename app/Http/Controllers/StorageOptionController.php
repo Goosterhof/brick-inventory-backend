@@ -51,16 +51,16 @@ class StorageOptionController extends Controller
         return StorageOptionResourceData::from($storageOption)->toResponseWithStatus(201);
     }
 
-    public function show(StorageOption $storageOption): StorageOptionResourceData
+    public function show(StorageOption $storageOption): JsonResponse
     {
-        return StorageOptionResourceData::from($storageOption);
+        return StorageOptionResourceData::from($storageOption)->toResponse();
     }
 
-    public function update(UpdateStorageOptionRequest $updateStorageOptionRequest, StorageOption $storageOption): StorageOptionResourceData
+    public function update(UpdateStorageOptionRequest $updateStorageOptionRequest, StorageOption $storageOption): JsonResponse
     {
         $storageOption = $this->updateStorageOptionAction->execute($storageOption, $updateStorageOptionRequest);
 
-        return StorageOptionResourceData::from($storageOption);
+        return StorageOptionResourceData::from($storageOption)->toResponse();
     }
 
     public function destroy(StorageOption $storageOption): JsonResponse

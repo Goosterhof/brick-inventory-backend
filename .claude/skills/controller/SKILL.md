@@ -100,19 +100,19 @@ class {ModelName}Controller extends Controller
         return {ModelName}ResourceData::from(${modelVariable})->toResponseWithStatus(201);
     }
 
-    public function show({ModelName} ${modelVariable}): {ModelName}ResourceData
+    public function show({ModelName} ${modelVariable}): JsonResponse
     {
         ${modelVariable} = $this->get{ModelName}Action->execute(${modelVariable});
 
-        return {ModelName}ResourceData::from(${modelVariable});
+        return {ModelName}ResourceData::from(${modelVariable})->toResponse();
     }
 
-    public function update(Update{ModelName}Request $request, {ModelName} ${modelVariable}): {ModelName}ResourceData
+    public function update(Update{ModelName}Request $request, {ModelName} ${modelVariable}): JsonResponse
     {
         ${modelVariable} = $this->update{ModelName}Action->execute(${modelVariable}, $request);
         ${modelVariable} = $this->get{ModelName}Action->execute(${modelVariable});
 
-        return {ModelName}ResourceData::from(${modelVariable});
+        return {ModelName}ResourceData::from(${modelVariable})->toResponse();
     }
 
     public function destroy({ModelName} ${modelVariable}): JsonResponse
