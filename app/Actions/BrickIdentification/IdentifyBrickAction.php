@@ -39,14 +39,17 @@ class IdentifyBrickAction
         }
 
         // Get the highest scoring part prediction
-        $bestPrediction = null;
-        foreach ($partPredictions as $partPrediction) {
-            if ($bestPrediction === null || $partPrediction->score > $bestPrediction->score) {
-                $bestPrediction = $partPrediction;
-            }
-        }
+        $bestPrediction = array_reduce(
+            $partPredictions,
+            static function (?BrickognizePredictionData $carry, BrickognizePredictionData $item): BrickognizePredictionData {
+                if ($carry === null || $item->score > $carry->score) {
+                    return $item;
+                }
 
-        /** @var BrickognizePredictionData $bestPrediction */
+                return $carry;
+            },
+            null
+        );
 
         // Look up the part in our database
         $part = $this->part->newQuery()
