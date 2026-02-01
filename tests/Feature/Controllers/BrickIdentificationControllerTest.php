@@ -88,7 +88,7 @@ describe('BrickIdentificationController', function (): void {
                 ->assertJsonValidationErrors(['image']);
         });
 
-        it('should return 404 when identified part not in database', function (): void {
+        it('should create part when identified part not in database', function (): void {
             // arrange
             $user = User::factory()->create();
 
@@ -99,7 +99,7 @@ describe('BrickIdentificationController', function (): void {
                             'id' => '99999',
                             'name' => 'Unknown Part',
                             'type' => 'part',
-                            'img_url' => null,
+                            'img_url' => 'https://example.com/99999.jpg',
                             'score' => 0.95,
                         ],
                     ],
@@ -114,8 +114,17 @@ describe('BrickIdentificationController', function (): void {
             ]);
 
             // assert
-            $response->assertStatus(404)
-                ->assertJsonPath('error', 'Part not found');
+            $response->assertStatus(200)
+                ->assertJsonPath('part_num', '99999')
+                ->assertJsonPath('name', 'Unknown Part')
+                ->assertJsonPath('image_url', 'https://example.com/99999.jpg');
+
+            // Verify part was created in database
+            $this->assertDatabaseHas('parts', [
+                'part_num' => '99999',
+                'name' => 'Unknown Part',
+                'image_url' => 'https://example.com/99999.jpg',
+            ]);
         });
 
         it('should return 500 when Brickognize API fails', function (): void {

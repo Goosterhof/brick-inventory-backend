@@ -3,13 +3,13 @@
 declare(strict_types=1);
 
 use App\Actions\BrickIdentification\IdentifyBrickAction;
+use App\Actions\Sync\UpsertPartAction;
 use App\Contracts\BrickIdentification\IdentifyBrickInterface;
 use App\Contracts\BrickIdentificationServiceInterface;
 use App\Data\Brickognize\BrickognizePredictionData;
+use App\Data\Lego\LegoPartData;
 use App\Exceptions\BrickognizeApiException;
-use App\Exceptions\PartNotFoundException;
 use App\Models\Part;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\UploadedFile;
 
 /**
@@ -26,7 +26,7 @@ function createIdentifyBrickData(UploadedFile $uploadedFile): IdentifyBrickInter
 }
 
 describe('IdentifyBrickAction', function (): void {
-    it('should return part when identification succeeds and part exists in database', function (): void {
+    it('should call UpsertPartAction with correct LegoPartData', function (): void {
         // arrange
         $image = UploadedFile::fake()->image('brick.jpg');
         $data = createIdentifyBrickData($image);
@@ -47,32 +47,27 @@ describe('IdentifyBrickAction', function (): void {
             ->once()
             ->andReturn($predictions);
 
-        $existingPart = Mockery::mock(Part::class)->makePartial();
-        $existingPart->id = 1;
-        $existingPart->part_num = '3001';
-        $existingPart->name = 'Brick 2 x 4';
+        $resultPart = Mockery::mock(Part::class)->makePartial();
+        $resultPart->id = 1;
+        $resultPart->part_num = '3001';
+        $resultPart->name = 'Brick 2 x 4';
 
-        $queryBuilder = Mockery::mock(Builder::class);
-        $queryBuilder->shouldReceive('where')
-            ->with('part_num', '3001')
+        $upsertPartAction = Mockery::mock(UpsertPartAction::class);
+        $upsertPartAction->shouldReceive('execute')
+            ->withArgs(fn (LegoPartData $legoPartData): bool => $legoPartData->partNum === '3001'
+                && $legoPartData->name === 'Brick 2 x 4'
+                && $legoPartData->categoryId === null
+                && $legoPartData->imageUrl === 'https://example.com/3001.jpg')
             ->once()
-            ->andReturnSelf();
-        $queryBuilder->shouldReceive('first')
-            ->once()
-            ->andReturn($existingPart);
+            ->andReturn($resultPart);
 
-        $part = Mockery::mock(Part::class);
-        $part->shouldReceive('newQuery')
-            ->once()
-            ->andReturn($queryBuilder);
-
-        $action = new IdentifyBrickAction($brickIdentificationService, $part);
+        $action = new IdentifyBrickAction($brickIdentificationService, $upsertPartAction);
 
         // act
         $result = $action->execute($data);
 
         // assert
-        expect($result)->toBe($existingPart);
+        expect($result)->toBe($resultPart);
     });
 
     it('should select highest scoring part prediction', function (): void {
@@ -110,31 +105,26 @@ describe('IdentifyBrickAction', function (): void {
             ->once()
             ->andReturn($predictions);
 
-        $existingPart = Mockery::mock(Part::class)->makePartial();
-        $existingPart->id = 1;
-        $existingPart->part_num = '3001';
+        $resultPart = Mockery::mock(Part::class)->makePartial();
+        $resultPart->id = 1;
+        $resultPart->part_num = '3001';
 
-        $queryBuilder = Mockery::mock(Builder::class);
-        $queryBuilder->shouldReceive('where')
-            ->with('part_num', '3001') // Should use the highest scoring part
+        $upsertPartAction = Mockery::mock(UpsertPartAction::class);
+        $upsertPartAction->shouldReceive('execute')
+            ->withArgs(
+                // Should use the highest scoring part (3001 with score 0.95)
+                fn (LegoPartData $legoPartData): bool => $legoPartData->partNum === '3001'
+                && $legoPartData->name === 'Brick 2 x 4')
             ->once()
-            ->andReturnSelf();
-        $queryBuilder->shouldReceive('first')
-            ->once()
-            ->andReturn($existingPart);
+            ->andReturn($resultPart);
 
-        $part = Mockery::mock(Part::class);
-        $part->shouldReceive('newQuery')
-            ->once()
-            ->andReturn($queryBuilder);
-
-        $action = new IdentifyBrickAction($brickIdentificationService, $part);
+        $action = new IdentifyBrickAction($brickIdentificationService, $upsertPartAction);
 
         // act
         $result = $action->execute($data);
 
         // assert
-        expect($result)->toBe($existingPart);
+        expect($result)->toBe($resultPart);
     });
 
     it('should filter out non-part predictions', function (): void {
@@ -165,31 +155,25 @@ describe('IdentifyBrickAction', function (): void {
             ->once()
             ->andReturn($predictions);
 
-        $existingPart = Mockery::mock(Part::class)->makePartial();
-        $existingPart->id = 1;
-        $existingPart->part_num = '3001';
+        $resultPart = Mockery::mock(Part::class)->makePartial();
+        $resultPart->id = 1;
+        $resultPart->part_num = '3001';
 
-        $queryBuilder = Mockery::mock(Builder::class);
-        $queryBuilder->shouldReceive('where')
-            ->with('part_num', '3001') // Should use the part, not the minifig
+        $upsertPartAction = Mockery::mock(UpsertPartAction::class);
+        $upsertPartAction->shouldReceive('execute')
+            ->withArgs(
+                // Should use the part (3001), not the minifig
+                fn (LegoPartData $legoPartData): bool => $legoPartData->partNum === '3001')
             ->once()
-            ->andReturnSelf();
-        $queryBuilder->shouldReceive('first')
-            ->once()
-            ->andReturn($existingPart);
+            ->andReturn($resultPart);
 
-        $part = Mockery::mock(Part::class);
-        $part->shouldReceive('newQuery')
-            ->once()
-            ->andReturn($queryBuilder);
-
-        $action = new IdentifyBrickAction($brickIdentificationService, $part);
+        $action = new IdentifyBrickAction($brickIdentificationService, $upsertPartAction);
 
         // act
         $result = $action->execute($data);
 
         // assert
-        expect($result)->toBe($existingPart);
+        expect($result)->toBe($resultPart);
     });
 
     it('should throw BrickognizeApiException when no part predictions found', function (): void {
@@ -213,10 +197,10 @@ describe('IdentifyBrickAction', function (): void {
             ->once()
             ->andReturn($predictions);
 
-        $part = Mockery::mock(Part::class);
-        $part->shouldNotReceive('newQuery');
+        $upsertPartAction = Mockery::mock(UpsertPartAction::class);
+        $upsertPartAction->shouldReceive('execute')->never();
 
-        $action = new IdentifyBrickAction($brickIdentificationService, $part);
+        $action = new IdentifyBrickAction($brickIdentificationService, $upsertPartAction);
 
         // act & assert
         expect(fn (): Part => $action->execute($data))->toThrow(BrickognizeApiException::class);
@@ -233,24 +217,24 @@ describe('IdentifyBrickAction', function (): void {
             ->once()
             ->andReturn([]);
 
-        $part = Mockery::mock(Part::class);
-        $part->shouldNotReceive('newQuery');
+        $upsertPartAction = Mockery::mock(UpsertPartAction::class);
+        $upsertPartAction->shouldReceive('execute')->never();
 
-        $action = new IdentifyBrickAction($brickIdentificationService, $part);
+        $action = new IdentifyBrickAction($brickIdentificationService, $upsertPartAction);
 
         // act & assert
         expect(fn (): Part => $action->execute($data))->toThrow(BrickognizeApiException::class);
     });
 
-    it('should throw PartNotFoundException when part does not exist in database', function (): void {
+    it('should pass null imageUrl when prediction has no image', function (): void {
         // arrange
         $image = UploadedFile::fake()->image('brick.jpg');
         $data = createIdentifyBrickData($image);
 
         $predictions = [
             new BrickognizePredictionData(
-                id: '99999',
-                name: 'Unknown Part',
+                id: '3001',
+                name: 'Brick 2 x 4',
                 type: 'part',
                 imageUrl: null,
                 score: 0.95,
@@ -263,23 +247,20 @@ describe('IdentifyBrickAction', function (): void {
             ->once()
             ->andReturn($predictions);
 
-        $queryBuilder = Mockery::mock(Builder::class);
-        $queryBuilder->shouldReceive('where')
-            ->with('part_num', '99999')
-            ->once()
-            ->andReturnSelf();
-        $queryBuilder->shouldReceive('first')
-            ->once()
-            ->andReturn(null);
+        $resultPart = Mockery::mock(Part::class)->makePartial();
 
-        $part = Mockery::mock(Part::class);
-        $part->shouldReceive('newQuery')
+        $upsertPartAction = Mockery::mock(UpsertPartAction::class);
+        $upsertPartAction->shouldReceive('execute')
+            ->withArgs(fn (LegoPartData $legoPartData): bool => $legoPartData->imageUrl === null)
             ->once()
-            ->andReturn($queryBuilder);
+            ->andReturn($resultPart);
 
-        $action = new IdentifyBrickAction($brickIdentificationService, $part);
+        $action = new IdentifyBrickAction($brickIdentificationService, $upsertPartAction);
 
-        // act & assert
-        expect(fn (): Part => $action->execute($data))->toThrow(PartNotFoundException::class);
+        // act
+        $result = $action->execute($data);
+
+        // assert
+        expect($result)->toBe($resultPart);
     });
 });

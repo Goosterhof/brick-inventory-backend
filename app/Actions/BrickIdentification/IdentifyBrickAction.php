@@ -4,25 +4,26 @@ declare(strict_types=1);
 
 namespace App\Actions\BrickIdentification;
 
+use App\Actions\Sync\UpsertPartAction;
 use App\Contracts\BrickIdentification\IdentifyBrickInterface;
 use App\Contracts\BrickIdentificationServiceInterface;
 use App\Data\Brickognize\BrickognizePredictionData;
+use App\Data\Lego\LegoPartData;
 use App\Exceptions\BrickognizeApiException;
-use App\Exceptions\PartNotFoundException;
 use App\Models\Part;
 
 class IdentifyBrickAction
 {
     public function __construct(
         private readonly BrickIdentificationServiceInterface $brickIdentificationService,
-        private readonly Part $part,
+        private readonly UpsertPartAction $upsertPartAction,
     ) {}
 
     /**
-     * Identify a LEGO brick from an image and return the matching part from the database.
+     * Identify a LEGO brick from an image and return the matching part.
+     * If the part doesn't exist in the database, it will be created.
      *
      * @throws BrickognizeApiException
-     * @throws PartNotFoundException
      */
     public function execute(IdentifyBrickInterface $identifyBrick): Part
     {
@@ -52,15 +53,14 @@ class IdentifyBrickAction
 
         /** @var BrickognizePredictionData $bestPrediction Already verified $partPredictions is not empty */
 
-        // Look up the part in our database
-        $part = $this->part->newQuery()
-            ->where('part_num', $bestPrediction->id)
-            ->first();
+        // Upsert the part (create if doesn't exist, update if it does)
+        $legoPartData = new LegoPartData(
+            partNum: $bestPrediction->id,
+            name: $bestPrediction->name,
+            categoryId: null, // Brickognize doesn't provide category
+            imageUrl: $bestPrediction->imageUrl,
+        );
 
-        if (!$part instanceof Part) {
-            throw PartNotFoundException::forPartNum($bestPrediction->id);
-        }
-
-        return $part;
+        return $this->upsertPartAction->execute($legoPartData);
     }
 }
