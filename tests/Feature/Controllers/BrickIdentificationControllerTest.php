@@ -88,6 +88,21 @@ describe('BrickIdentificationController', function (): void {
                 ->assertJsonValidationErrors(['image']);
         });
 
+        it('should return 422 when image exceeds maximum file size', function (): void {
+            // arrange
+            $user = User::factory()->create();
+            $file = UploadedFile::fake()->image('large-brick.jpg')->size(10241); // 10241 KB > 10240 KB (10MB) limit
+
+            // act
+            $response = $this->actingAs($user)->postJson('/api/identify-brick', [
+                'image' => $file,
+            ]);
+
+            // assert
+            $response->assertStatus(422)
+                ->assertJsonValidationErrors(['image']);
+        });
+
         it('should create part when identified part not in database', function (): void {
             // arrange
             $user = User::factory()->create();
