@@ -15,7 +15,10 @@ abstract readonly class DTOFormRequest
 {
     final public static function fromRequest(Request $request, Factory $validationFactory): static
     {
-        $validator = $validationFactory->make($request->all(), static::rules($request));
+        $validator = $validationFactory->make(
+            array_merge($request->all(), $request->allFiles()),
+            static::rules($request),
+        );
 
         $validator->validate();
 

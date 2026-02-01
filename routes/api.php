@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Http\Controllers\Auth\RegisterController;
+use App\Http\Controllers\BrickIdentificationController;
 use App\Http\Controllers\FamilyController;
 use App\Http\Controllers\FamilySetController;
 use App\Http\Controllers\SetController;
@@ -31,4 +32,5 @@ Route::middleware(['auth:sanctum', 'family.ownership'])->group(function (): void
     Route::apiResource('family-sets', FamilySetController::class);
     Route::post('/family-sets/import-from-rebrickable', [FamilySetController::class, 'importFromRebrickable']);
     Route::put('/family/rebrickable-token', [FamilyController::class, 'setRebrickableToken']);
+    Route::post('/identify-brick', [BrickIdentificationController::class, 'identify']);
 });
