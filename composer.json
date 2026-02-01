@@ -9,6 +9,7 @@
         "php": "^8.4",
         "dedoc/scramble": "^0.13",
         "laravel/framework": "^12.0",
+        "laravel/octane": "^2.13",
         "laravel/sanctum": "^4.2",
         "laravel/tinker": "^2.10.1"
     },
@@ -46,7 +47,7 @@
         ],
         "dev": [
             "Composer\\Config::disableProcessTimeout",
-            "@php artisan serve"
+            "@php artisan octane:start --watch"
         ],
         "test": [
             "@php artisan config:clear --ansi",
