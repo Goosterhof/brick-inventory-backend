@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Actions\BrickIdentification;
 
+use App\Contracts\BrickIdentification\IdentifyBrickInterface;
 use App\Contracts\BrickIdentificationServiceInterface;
 use App\Data\Brickognize\BrickognizePredictionData;
 use App\Exceptions\BrickognizeApiException;
 use App\Exceptions\PartNotFoundException;
 use App\Models\Part;
-use Illuminate\Http\UploadedFile;
 
 class IdentifyBrickAction
 {
@@ -24,9 +24,9 @@ class IdentifyBrickAction
      * @throws BrickognizeApiException
      * @throws PartNotFoundException
      */
-    public function execute(UploadedFile $uploadedFile): Part
+    public function execute(IdentifyBrickInterface $identifyBrick): Part
     {
-        $predictions = $this->brickIdentificationService->identifyBrick($uploadedFile);
+        $predictions = $this->brickIdentificationService->identifyBrick($identifyBrick->image);
 
         // Filter for part predictions only (exclude minifigs, sets, etc.)
         $partPredictions = array_filter(

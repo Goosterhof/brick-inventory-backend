@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\BrickIdentification\IdentifyBrickAction;
+use App\Contracts\BrickIdentification\IdentifyBrickInterface;
 use App\Contracts\BrickIdentificationServiceInterface;
 use App\Data\Brickognize\BrickognizePredictionData;
 use App\Exceptions\BrickognizeApiException;
@@ -11,10 +12,23 @@ use App\Models\Part;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\UploadedFile;
 
+/**
+ * Create a test double for IdentifyBrickInterface.
+ */
+function createIdentifyBrickData(UploadedFile $image): IdentifyBrickInterface
+{
+    return new readonly class ($image) implements IdentifyBrickInterface {
+        public function __construct(
+            public UploadedFile $image,
+        ) {}
+    };
+}
+
 describe('IdentifyBrickAction', function (): void {
     it('should return part when identification succeeds and part exists in database', function (): void {
         // arrange
         $image = UploadedFile::fake()->image('brick.jpg');
+        $data = createIdentifyBrickData($image);
 
         $predictions = [
             new BrickognizePredictionData(
@@ -54,7 +68,7 @@ describe('IdentifyBrickAction', function (): void {
         $action = new IdentifyBrickAction($brickIdentificationService, $part);
 
         // act
-        $result = $action->execute($image);
+        $result = $action->execute($data);
 
         // assert
         expect($result)->toBe($existingPart);
@@ -63,6 +77,7 @@ describe('IdentifyBrickAction', function (): void {
     it('should select highest scoring part prediction', function (): void {
         // arrange
         $image = UploadedFile::fake()->image('brick.jpg');
+        $data = createIdentifyBrickData($image);
 
         $predictions = [
             new BrickognizePredictionData(
@@ -115,7 +130,7 @@ describe('IdentifyBrickAction', function (): void {
         $action = new IdentifyBrickAction($brickIdentificationService, $part);
 
         // act
-        $result = $action->execute($image);
+        $result = $action->execute($data);
 
         // assert
         expect($result)->toBe($existingPart);
@@ -124,6 +139,7 @@ describe('IdentifyBrickAction', function (): void {
     it('should filter out non-part predictions', function (): void {
         // arrange
         $image = UploadedFile::fake()->image('brick.jpg');
+        $data = createIdentifyBrickData($image);
 
         $predictions = [
             new BrickognizePredictionData(
@@ -169,7 +185,7 @@ describe('IdentifyBrickAction', function (): void {
         $action = new IdentifyBrickAction($brickIdentificationService, $part);
 
         // act
-        $result = $action->execute($image);
+        $result = $action->execute($data);
 
         // assert
         expect($result)->toBe($existingPart);
@@ -178,6 +194,7 @@ describe('IdentifyBrickAction', function (): void {
     it('should throw BrickognizeApiException when no part predictions found', function (): void {
         // arrange
         $image = UploadedFile::fake()->image('brick.jpg');
+        $data = createIdentifyBrickData($image);
 
         $predictions = [
             new BrickognizePredictionData(
@@ -201,12 +218,13 @@ describe('IdentifyBrickAction', function (): void {
         $action = new IdentifyBrickAction($brickIdentificationService, $part);
 
         // act & assert
-        expect(fn (): Part => $action->execute($image))->toThrow(BrickognizeApiException::class);
+        expect(fn (): Part => $action->execute($data))->toThrow(BrickognizeApiException::class);
     });
 
     it('should throw BrickognizeApiException when API returns empty predictions', function (): void {
         // arrange
         $image = UploadedFile::fake()->image('brick.jpg');
+        $data = createIdentifyBrickData($image);
 
         $brickIdentificationService = Mockery::mock(BrickIdentificationServiceInterface::class);
         $brickIdentificationService->shouldReceive('identifyBrick')
@@ -220,12 +238,13 @@ describe('IdentifyBrickAction', function (): void {
         $action = new IdentifyBrickAction($brickIdentificationService, $part);
 
         // act & assert
-        expect(fn (): Part => $action->execute($image))->toThrow(BrickognizeApiException::class);
+        expect(fn (): Part => $action->execute($data))->toThrow(BrickognizeApiException::class);
     });
 
     it('should throw PartNotFoundException when part does not exist in database', function (): void {
         // arrange
         $image = UploadedFile::fake()->image('brick.jpg');
+        $data = createIdentifyBrickData($image);
 
         $predictions = [
             new BrickognizePredictionData(
@@ -260,6 +279,6 @@ describe('IdentifyBrickAction', function (): void {
         $action = new IdentifyBrickAction($brickIdentificationService, $part);
 
         // act & assert
-        expect(fn (): Part => $action->execute($image))->toThrow(PartNotFoundException::class);
+        expect(fn (): Part => $action->execute($data))->toThrow(PartNotFoundException::class);
     });
 });

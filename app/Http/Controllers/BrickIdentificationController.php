@@ -8,7 +8,6 @@ use App\Actions\BrickIdentification\IdentifyBrickAction;
 use App\Http\Requests\BrickIdentification\IdentifyBrickRequest;
 use App\Http\Resources\PartResourceData;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\UploadedFile;
 
 class BrickIdentificationController extends Controller
 {
@@ -18,10 +17,7 @@ class BrickIdentificationController extends Controller
 
     public function identify(IdentifyBrickRequest $identifyBrickRequest): JsonResponse
     {
-        /** @var UploadedFile $image */
-        $image = $identifyBrickRequest->file(IdentifyBrickRequest::IMAGE);
-
-        $part = $this->identifyBrickAction->execute($image);
+        $part = $this->identifyBrickAction->execute($identifyBrickRequest);
 
         return PartResourceData::from($part)->toResponse();
     }
