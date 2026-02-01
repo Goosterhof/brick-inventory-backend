@@ -11,6 +11,12 @@ LEGO inventory management system. The goal is to provide a list of parts needed 
 - SQLite for local development
 - Laravel Sanctum for authentication
 
+## Deployment
+
+- **Hosting**: Railway
+- **Production URL**: https://api.brick-inventory.com
+- **DNS**: Cloudflare (proxy disabled, Railway handles SSL)
+
 ## Architecture
 
 ### Multi-tenancy
