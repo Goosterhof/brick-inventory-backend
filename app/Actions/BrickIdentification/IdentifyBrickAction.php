@@ -48,8 +48,9 @@ class IdentifyBrickAction
 
                 return $carry;
             },
-            null
         );
+
+        /** @var BrickognizePredictionData $bestPrediction Already verified $partPredictions is not empty */
 
         // Look up the part in our database
         $part = $this->part->newQuery()

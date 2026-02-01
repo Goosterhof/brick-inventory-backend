@@ -15,9 +15,10 @@ use Illuminate\Http\UploadedFile;
 /**
  * Create a test double for IdentifyBrickInterface.
  */
-function createIdentifyBrickData(UploadedFile $image): IdentifyBrickInterface
+function createIdentifyBrickData(UploadedFile $uploadedFile): IdentifyBrickInterface
 {
-    return new readonly class ($image) implements IdentifyBrickInterface {
+    return new readonly class($uploadedFile) implements IdentifyBrickInterface
+    {
         public function __construct(
             public UploadedFile $image,
         ) {}

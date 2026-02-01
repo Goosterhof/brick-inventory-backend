@@ -42,4 +42,8 @@ return [
         'base_url' => env('REBRICKABLE_BASE_URL', 'https://rebrickable.com/api/v3'),
     ],
 
+    'brickognize' => [
+        'base_url' => env('BRICKOGNIZE_BASE_URL', 'https://api.brickognize.com'),
+    ],
+
 ];
