@@ -184,3 +184,43 @@ Route::delete('{route-name}/{route-parameter}', [{ModelName}Controller::class, '
 - Use `#[CurrentUser]` attribute to get the authenticated user when needed
 - ResourceData classes have `::from()` and `::collection()` static methods
 - Use `->toResponseWithStatus(201)` for created responses
+
+## Return Type Requirements
+
+Controller methods must return explicit types - either `JsonResponse` or `array`:
+
+```php
+// Correct - explicit JsonResponse
+public function show(Model $model): JsonResponse
+{
+    return ModelResourceData::from($model)->toResponse();
+}
+
+// Correct - array for collections (serialized to JSON by Laravel)
+public function index(): array
+{
+    return ModelResourceData::collection($models);
+}
+
+// Wrong - returning ResourceData directly (relies on implicit Responsable conversion)
+public function show(Model $model): ModelResourceData  // ❌ Don't do this
+{
+    return ModelResourceData::from($model);
+}
+```
+
+## Exception Handling
+
+Controllers should NOT use try-catch blocks. Application exceptions are handled globally in `bootstrap/app.php`. This keeps controllers clean and ensures consistent error responses.
+
+## Route Model Binding
+
+Use Laravel's scoped route model binding for parent-child relationships:
+
+```php
+// routes/api.php
+Route::delete('/storage-options/{storage_option}/parts/{storage_option_part}', ...)
+    ->scopeBindings();  // Automatically verifies child belongs to parent
+```
+
+This replaces manual ownership checks. Laravel returns 404 automatically if the child doesn't belong to the parent.

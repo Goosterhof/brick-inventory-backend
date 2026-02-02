@@ -166,6 +166,46 @@ return PartResourceData::collection($parts);
 return PartResourceData::from($part)->toResponseWithStatus(201);
 ```
 
+## Relationship Loading Pattern
+
+ResourceData classes are responsible for loading their own relationships. This keeps relationship knowledge centralized and avoids N+1 queries.
+
+**Pattern**: Override `requiredRelations()` to declare needed relationships:
+
+```php
+final readonly class FamilySetResourceData extends ResourceData
+{
+    protected static function requiredRelations(): array
+    {
+        return ['set'];  // Relationships this ResourceData needs
+    }
+
+    public static function from(Model $model): static
+    {
+        $model->loadMissing(static::requiredRelations());  // Load if not already loaded
+
+        return new self(
+            id: $model->id,
+            quantity: $model->quantity,
+            set: SetResourceData::from($model->set),
+        );
+    }
+}
+```
+
+**For nested relationships** (e.g., SetParts with Part and Color):
+```php
+protected static function requiredRelations(): array
+{
+    return ['setParts.part', 'setParts.color'];
+}
+```
+
+**Benefits**:
+- Self-documenting: ResourceData declares its own dependencies
+- No N+1 queries: `collection()` method bulk-loads via `loadMissing()`
+- Actions stay simple: No need to know what the response format requires
+
 ## When Generating ResourceData
 
 1. First, read the model to understand its properties and relations
@@ -173,4 +213,5 @@ return PartResourceData::from($part)->toResponseWithStatus(201);
 3. Identify relations that need nested ResourceData classes
 4. Check if nested ResourceData classes exist; if not, create them first
 5. Use snake_case for all property names
-6. Add PHPStan ignore comments only when necessary (e.g., nullable relations)
+6. If accessing relationships, override `requiredRelations()` to declare them
+7. Add PHPStan ignore comments only when necessary (e.g., nullable relations)

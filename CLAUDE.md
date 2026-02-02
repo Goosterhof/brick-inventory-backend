@@ -25,304 +25,13 @@ LEGO inventory management system. The goal is to provide a list of parts needed 
 - No separate domains per tenant
 
 ### Code Patterns
-- **Action classes**: For internal business logic and orchestration (single-responsibility)
-- **Service classes**: For external API connections only - no business logic (e.g., `RebrickableService`)
-- **ResourceData classes**: DTO-style classes for API responses (extend `ResourceData` base class)
+- **Action classes**: Business logic and orchestration (single-responsibility)
+- **Service classes**: External API connections only (e.g., `RebrickableService`)
+- **ResourceData classes**: DTO-style classes for API responses
 - **DTOFormRequest pattern**: Form Requests that act as DTOs with interface contracts
 - **Standard Laravel**: Controllers, Models for the rest
 
-### Action vs Service Responsibilities
-
-**Services** should ONLY handle external API communication:
-- HTTP requests/responses
-- Response parsing and validation
-- Custom exception handling for API errors
-
-**Actions** handle business logic and orchestration:
-- Database operations (via injected models)
-- Calling services for external data
-- Calling other actions for sub-operations
-
-**Note**: Actions should NOT load relationships for API responses. That responsibility belongs to ResourceData classes (see below).
-
-Example flow:
-```
-Controller
-  └─ GetSetPartsAction (orchestration)
-       ├─ LegoDataService.fetchSet() → HTTP call only
-       ├─ LegoDataService.fetchSetParts() → HTTP call only
-       ├─ UpsertSetAction → DB operation
-       └─ StoreSetPartsAction → DB operation
-```
-
-### Avoiding Action Overlap
-
-When multiple actions need similar logic, one should delegate to the other rather than duplicating code:
-- `GetSetAction` delegates to `UpsertSetAction` for set creation
-- Periodically review actions for overlap, especially within the same domain
-
-### Form Requests as DTOs
-
-Form Requests extend `DTOFormRequest` and implement interfaces with PHP 8.4 property hooks:
-
-```php
-// Interface defines the contract
-interface CreateProductInterface
-{
-    public string $name { get; }
-    public ?string $description { get; }
-}
-
-// Request implements validation + DTO
-final readonly class CreateProductRequest extends DTOFormRequest implements CreateProductInterface
-{
-    public const string NAME = 'name';
-
-    public function __construct(
-        public string $name,
-        public ?string $description = null,
-    ) {}
-
-    public static function rules(Request $request): array
-    {
-        return [self::NAME => ['required', 'string']];
-    }
-
-    protected static function toDTO(Request $request): static
-    {
-        return new self(name: $request->string(self::NAME)->toString());
-    }
-}
-```
-
-Actions accept interfaces (not concrete classes) for testability:
-
-```php
-class CreateProductAction
-{
-    public function execute(CreateProductInterface $data): Product { ... }
-}
-```
-
-Use `/form-request` skill for detailed patterns and templates.
-
-### Model Conventions
-- **No mass assignment**: Models must NOT have `$fillable` or `$guarded` properties (enforced by architecture tests)
-- **Explicit property assignment**: Always assign properties individually for type safety
-- **PHPDoc annotations**: All models must have `@property` annotations for every column
-- **Relationships**: Use PHPDoc return type annotations like `@return BelongsTo<Model, $this>`
-- **Tenant models**: Models with `family_id` automatically get a `family()` BelongsTo relationship
-
-Example property assignment (instead of mass assignment):
-```php
-// Correct - explicit assignment
-$model = new Model();
-$model->name = $data['name'];
-$model->save();
-
-// Wrong - mass assignment
-$model = Model::create(['name' => $data['name']]);
-```
-
-### API Structure
-- Standard Laravel RESTful API
-- Resource controllers for CRUD operations
-
-### ResourceData Relationship Loading
-
-ResourceData classes are responsible for loading their own relationships. This keeps relationship knowledge centralized and avoids N+1 queries.
-
-**Pattern**: Override `requiredRelations()` to declare needed relationships:
-
-```php
-final readonly class FamilySetResourceData extends ResourceData
-{
-    protected static function requiredRelations(): array
-    {
-        return ['set'];  // Relationships this ResourceData needs
-    }
-
-    public static function from(Model $model): static
-    {
-        $model->loadMissing(self::requiredRelations());  // Load if not already loaded
-
-        return new self(
-            // ... map properties
-            set: SetResourceData::from($model->set),
-        );
-    }
-}
-```
-
-**For nested relationships** (e.g., SetParts with Part and Color):
-```php
-protected static function requiredRelations(): array
-{
-    return ['setParts.part', 'setParts.color'];
-}
-```
-
-**Benefits**:
-- Self-documenting: ResourceData declares its own dependencies
-- No N+1 queries: `collection()` method bulk-loads via `loadMissing()`
-- Actions stay simple: No need to know what the response format requires
-
-### Controller Return Types
-
-Controller methods must return explicit types - either `JsonResponse` or `array`:
-
-```php
-// Correct - explicit JsonResponse
-public function show(Model $model): JsonResponse
-{
-    return ModelResourceData::from($model)->toResponse();
-}
-
-public function store(StoreModelRequest $request): JsonResponse
-{
-    $model = $this->createModelAction->execute($request);
-    return ModelResourceData::from($model)->toResponseWithStatus(201);
-}
-
-// Correct - array for collections (serialized to JSON by Laravel)
-public function index(): array
-{
-    return ModelResourceData::collection($models);
-}
-
-// Wrong - returning ResourceData directly (relies on implicit Responsable conversion)
-public function show(Model $model): ModelResourceData
-{
-    return ModelResourceData::from($model);
-}
-```
-
-**Benefits**:
-- Explicit about what's returned to clients
-- Consistent patterns across all CRUD operations
-- Clear separation between data objects and HTTP responses
-
-### Exception Handling
-
-Application exceptions are handled globally in `bootstrap/app.php`. Controllers should NOT use try-catch blocks for expected exceptions.
-
-```php
-// bootstrap/app.php
-->withExceptions(function (Exceptions $exceptions): void {
-    $exceptions->render(fn (SetNotFoundException $e, Request $r): JsonResponse
-        => response()->json(['error' => 'Set not found'], 404));
-
-    $exceptions->render(function (RebrickableApiException $e, Request $r): JsonResponse {
-        $status = $e->statusCode ?? 500;
-        $message = match ($status) {
-            401 => 'Invalid API key',
-            default => 'Failed to fetch set data',
-        };
-        return response()->json(['error' => $message], $status);
-    });
-})
-```
-
-**Benefits**:
-- Consistent error responses across the API
-- Controllers stay clean (no try-catch blocks)
-- Single place to update error handling logic
-
-### Route Model Binding
-
-Use Laravel's scoped route model binding for parent-child relationships:
-
-```php
-// routes/api.php
-Route::delete('/storage-options/{storage_option}/parts/{storage_option_part}', ...)
-    ->scopeBindings();  // Automatically verifies storage_option_part belongs to storage_option
-```
-
-This replaces manual ownership checks in controllers. Laravel returns 404 automatically if the child doesn't belong to the parent.
-
-### Database Conventions
-
-#### Migration Structure
-- Use anonymous classes: `return new class extends Migration`
-- Add `void` return type to `up()`, `down()`, and Schema callbacks
-- Always implement both `up()` and `down()` methods
-
-#### Foreign Keys
-- Use `->constrained()` for foreign keys
-- **No cascade deletes**: Never use `onDelete('cascade')` or `cascadeOnDelete()`
-- Deletion cascading must be handled in Action classes (business logic), not at the database level
-- This prevents unintended data loss and keeps deletion logic explicit and controllable
-
-Example:
-```php
-// Correct - no cascade
-$table->foreignId('cabinet_id')->constrained();
-$table->foreignId('family_id')->nullable()->constrained();
-
-// Wrong - cascade delete
-$table->foreignId('cabinet_id')->constrained()->onDelete('cascade');
-```
-
-#### Tenant Scoping (family_id)
-Include `family_id` for user-owned/tenant-scoped data:
-- Storage-related: drawers, cabinets, shelves, storage options
-- User collections: inventories, wishlists, builds
-- User preferences: settings, configurations
-
-Exclude `family_id` for shared/reference data:
-- LEGO reference data: colors, parts, sets, themes, categories
-- System data: jobs, cache, tokens
-
-## Testing
-
-Uses Pest PHP with the following conventions:
-
-- **Feature tests**: For API endpoints, using `actingAs()` for authentication
-- **Unit tests**: For Action and Service classes (must NOT touch the database - use mocks)
-- **Structure**: Use `describe` blocks with `it('should ...')` syntax
-- **Assertions**: Use `expect()` style
-- **Architecture tests**: Located in `tests/Architecture/` to enforce code standards
-
-**Important**: When creating or running unit tests, use the `/unit-test` skill which contains detailed conventions and mocking patterns.
-
-Example:
-```php
-describe('CreateSetAction', function () {
-    it('should create a set with valid data', function () {
-        // arrange
-        // act
-        // assert with expect()
-    });
-});
-```
-
-### Architecture Rules
-
-The following rules are enforced via Pest architecture tests:
-
-- Controllers must end with `Controller`
-- Controllers must return `JsonResponse` or `array` (not ResourceData directly)
-- Controllers must NOT use try-catch blocks (exception handling is global)
-- Models must extend `Illuminate\Database\Eloquent\Model`
-- Models must NOT have `$fillable` or `$guarded` properties (no mass assignment)
-- Models must have `@property` PHPDoc annotations
-- DTOs must end with `Data`, be `final`, and `readonly`
-- ResourceData classes must be `readonly`, concrete classes must be `final`
-- ResourceData classes that access relationships must override `requiredRelations()`
-- Requests must end with `Request`
-- Services must end with `Service`
-- Services must NOT depend on Actions (separation of concerns)
-- Services must NOT use Models directly (no persistence logic in services)
-- Actions must end with `Action` and only have `execute` as public method
-- All files must declare strict types
-- No debugging statements (`dd`, `dump`, `var_dump`, `ray`)
-- Migrations must use anonymous classes
-- Migrations must have `void` return types on `up()` and `down()`
-- Migrations must declare strict types
-- Migrations must NOT use cascade deletes (`onDelete('cascade')` or `cascadeOnDelete()`)
-- Tests must use `describe()` blocks and `it('should ...')` syntax
-- Tests must NOT use placeholder assertions (`expect(true)->toBeTrue()`)
-- Unit tests must NOT use `shouldHaveReceived()`/`shouldNotHaveReceived()` - use `shouldReceive()->never()` in arrange block instead
+Use `/conventions` skill for detailed patterns on Action vs Service responsibilities, exception handling, and architecture rules.
 
 ## Commands
 
@@ -331,8 +40,8 @@ The following rules are enforced via Pest architecture tests:
 | `composer dev` | Start development server |
 | `composer test` | Run tests |
 | `composer test:arch` | Run architecture tests only |
-| `composer test:coverage` | Run unit tests with 100% coverage requirement (Actions & Services) |
-| `composer test:feature-coverage` | Run feature tests with 80% coverage requirement (Controllers) |
+| `composer test:coverage` | Run unit tests with 100% coverage (Actions & Services) |
+| `composer test:feature-coverage` | Run feature tests with 80% coverage (Controllers) |
 | `composer lint` | Run Rector + Pint (fix mode) |
 | `composer lint:test` | Run Rector + Pint (dry-run) |
 | `composer phpstan` | Run static analysis |
@@ -345,8 +54,6 @@ After making any changes to PHP files, always run:
 composer lint
 ```
 
-This runs Rector (refactoring) followed by Pint (formatting) to ensure code quality.
-
 ## Before Committing
 
 Before creating any commit, always:
@@ -355,28 +62,29 @@ Before creating any commit, always:
 2. Run `composer phpstan` to check for type errors
 3. Run `composer test` to ensure all tests pass
 
-All must pass before committing. If any fail, fix them before proceeding.
+All must pass before committing.
 
 ## Skills
 
-The following custom skills are available:
+Use skills for file creation - they contain detailed templates and conventions.
 
 | Skill | Description |
 |-------|-------------|
-| `/factory` | Generate a factory from an existing model. Use `/factory ModelName` to create a factory with faker methods and state helpers. |
-| `/migration` | Generate a migration from a model name. Use `/migration ModelName` to create a migration. Auto-detects create vs modify, supports pivot tables. |
-| `/model` | Generate an Eloquent model from an existing migration. Use `/model ModelName` to create a model. |
-| `/unit-test` | Create or run unit tests. Use `/unit-test ClassName` to generate tests for a class, or `/unit-test --run` to run all tests. |
-| `/resource-data` | Create a ResourceData class for API responses. Use `/resource-data ModelName` to generate a ResourceData class for a model. |
-| `/form-request` | Create Form Requests using the DTOFormRequest pattern with interface contracts. Includes templates, type mapping, and checklist. |
-| `/action` | Create Action classes. Use `/action CreateUser` to generate an action. Infers type from verb (Create, Update, Delete, Get). |
-| `/controller` | Create a resource controller. Use `/controller ModelName` to generate a controller with CRUD operations, routes, and Action placeholders. |
-| `/feature-test` | Generate feature tests for API controllers. Use `/feature-test ControllerName` to generate tests for all endpoints in that controller. |
-| `/service` | Create Service classes for external API connections. Use `/service Stripe` to generate a service with HTTP client, custom exceptions, and response validation. |
+| `/action` | Create Action classes |
+| `/controller` | Create resource controllers with CRUD operations |
+| `/conventions` | Architecture patterns and code conventions reference |
+| `/factory` | Generate factories from models |
+| `/feature-test` | Generate feature tests for controllers |
+| `/form-request` | Create Form Requests with DTOFormRequest pattern |
+| `/migration` | Generate migrations from model names |
+| `/model` | Generate models from migrations |
+| `/resource-data` | Create ResourceData classes for API responses |
+| `/service` | Create Service classes for external APIs |
+| `/unit-test` | Create or run unit tests |
 
 ### Required Skill Usage
 
-**IMPORTANT**: When creating or modifying files in these directories, you MUST use the corresponding skill. Do NOT create these files manually.
+**IMPORTANT**: When creating files in these directories, use the corresponding skill:
 
 | File Path Pattern | Required Skill |
 |-------------------|----------------|
@@ -390,9 +98,3 @@ The following custom skills are available:
 | `database/migrations/*.php` | `/migration` |
 | `tests/Unit/**/*Test.php` | `/unit-test` |
 | `tests/Feature/**/*Test.php` | `/feature-test` |
-
-This ensures:
-1. Consistent code patterns across the codebase
-2. Proper conventions are followed (naming, structure, dependencies)
-3. Related files are created together (e.g., actions with their tests)
-4. DTOs and interfaces are checked/created as needed
