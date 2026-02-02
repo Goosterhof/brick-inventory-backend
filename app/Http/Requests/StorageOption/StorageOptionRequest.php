@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\StorageOption;
 
-use App\Contracts\StorageOption\CreateStorageOptionInterface;
+use App\Contracts\StorageOption\StorageOptionDataInterface;
 use App\Http\Requests\DTOFormRequest;
 use Illuminate\Http\Request;
 
-final readonly class StoreStorageOptionRequest extends DTOFormRequest implements CreateStorageOptionInterface
+final readonly class StorageOptionRequest extends DTOFormRequest implements StorageOptionDataInterface
 {
     public const string NAME = 'name';
 
