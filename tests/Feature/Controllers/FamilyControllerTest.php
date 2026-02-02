@@ -76,5 +76,38 @@ describe('FamilyController', function (): void {
             $response->assertStatus(422)
                 ->assertJsonValidationErrors(['rebrickable_user_token']);
         });
+
+        it('should return 403 when non-head user tries to set token', function (): void {
+            // Create first user who becomes the family head
+            $headUser = User::factory()->create();
+
+            // Create second user in the same family (not the head)
+            $nonHeadUser = User::factory()->forFamily($headUser->family)->create();
+
+            $response = $this->actingAs($nonHeadUser)->putJson('/api/family/rebrickable-token', [
+                'rebrickable_user_token' => 'my-token',
+            ]);
+
+            $response->assertStatus(403)
+                ->assertJson(['error' => 'Only the family head can perform this action']);
+        });
+
+        it('should allow family head to set token when other users exist', function (): void {
+            // Create first user who becomes the family head
+            $headUser = User::factory()->create();
+
+            // Create second user in the same family (not the head)
+            User::factory()->forFamily($headUser->family)->create();
+
+            $response = $this->actingAs($headUser)->putJson('/api/family/rebrickable-token', [
+                'rebrickable_user_token' => 'head-token',
+            ]);
+
+            $response->assertStatus(200)
+                ->assertJson(['message' => 'Rebrickable user token configured successfully']);
+
+            $headUser->family->refresh();
+            expect($headUser->family->rebrickable_user_token)->toBe('head-token');
+        });
     });
 });

@@ -30,6 +30,11 @@ class CreateUserWithFamilyAction
 
             $family->users()->save($user);
 
+            /** @var positive-int $userId */
+            $userId = $user->id;
+            $family->head_id = $userId;
+            $family->save();
+
             return $user;
         });
     }

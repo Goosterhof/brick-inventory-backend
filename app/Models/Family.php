@@ -8,19 +8,30 @@ use Carbon\Carbon;
 use Database\Factories\FamilyFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property positive-int $id
  * @property string $name
+ * @property positive-int|null $head_id
  * @property string|null $rebrickable_user_token
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ * @property-read User|null $headUser
  */
 class Family extends Model
 {
     /** @use HasFactory<FamilyFactory> */
     use HasFactory;
+
+    /**
+     * @return BelongsTo<User, $this>
+     */
+    public function headUser(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'head_id');
+    }
 
     /**
      * @return HasMany<User, $this>

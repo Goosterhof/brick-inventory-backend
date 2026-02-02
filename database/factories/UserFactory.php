@@ -38,6 +38,22 @@ class UserFactory extends Factory
     }
 
     /**
+     * Configure the model factory.
+     */
+    public function configure(): static
+    {
+        return $this->afterCreating(function (User $user): void {
+            // Set the user as family head if no head is set yet
+            if ($user->family->head_id === null) {
+                /** @var positive-int $userId */
+                $userId = $user->id;
+                $user->family->head_id = $userId;
+                $user->family->save();
+            }
+        });
+    }
+
+    /**
      * Indicate that the model's email address should be unverified.
      */
     public function unverified(): static

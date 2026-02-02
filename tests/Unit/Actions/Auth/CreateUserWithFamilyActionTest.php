@@ -12,7 +12,7 @@ describe('CreateUserWithFamilyAction', function (): void {
     it('should create a family with the provided name', function (): void {
         // arrange
         $familyInstance = Mockery::mock(Family::class)->makePartial();
-        $familyInstance->shouldReceive('save')->once();
+        $familyInstance->shouldReceive('save')->twice();
         $familyInstance->shouldReceive('users->save')->once();
 
         $family = Mockery::mock(Family::class);
@@ -54,7 +54,7 @@ describe('CreateUserWithFamilyAction', function (): void {
         $saveOrder = [];
 
         $familyInstance = Mockery::mock(Family::class)->makePartial();
-        $familyInstance->shouldReceive('save')->once()->andReturnUsing(function () use (&$saveOrder): bool {
+        $familyInstance->shouldReceive('save')->twice()->andReturnUsing(function () use (&$saveOrder): bool {
             $saveOrder[] = 'family';
 
             return true;
@@ -93,13 +93,13 @@ describe('CreateUserWithFamilyAction', function (): void {
         $action->execute($data);
 
         // assert
-        expect($saveOrder)->toBe(['family', 'user']);
+        expect($saveOrder)->toBe(['family', 'user', 'family']);
     });
 
     it('should associate the user with the family via the relationship', function (): void {
         // arrange
         $familyInstance = Mockery::mock(Family::class)->makePartial();
-        $familyInstance->shouldReceive('save')->once();
+        $familyInstance->shouldReceive('save')->twice();
 
         $userInstance = Mockery::mock(User::class)->makePartial();
 
@@ -137,7 +137,7 @@ describe('CreateUserWithFamilyAction', function (): void {
     it('should set the correct user properties', function (): void {
         // arrange
         $familyInstance = Mockery::mock(Family::class)->makePartial();
-        $familyInstance->shouldReceive('save')->once();
+        $familyInstance->shouldReceive('save')->twice();
         $familyInstance->shouldReceive('users->save')->once();
 
         $family = Mockery::mock(Family::class);
@@ -170,5 +170,45 @@ describe('CreateUserWithFamilyAction', function (): void {
         expect($userInstance->name)->toBe('John Doe')
             ->and($userInstance->email)->toBe('john@example.com')
             ->and($userInstance->password)->toBe('secret123');
+    });
+
+    it('should set the created user as family head', function (): void {
+        // arrange
+        $familyInstance = Mockery::mock(Family::class)->makePartial();
+        $familyInstance->shouldReceive('save')->twice();
+
+        $userInstance = Mockery::mock(User::class)->makePartial();
+        $userInstance->id = 42;
+
+        $usersRelation = Mockery::mock(HasMany::class);
+        $usersRelation->shouldReceive('save')
+            ->with($userInstance)
+            ->once();
+
+        $familyInstance->shouldReceive('users')->once()->andReturn($usersRelation);
+
+        $family = Mockery::mock(Family::class);
+        $family->shouldReceive('newInstance')->withNoArgs()->andReturn($familyInstance);
+
+        $user = Mockery::mock(User::class);
+        $user->shouldReceive('newInstance')->withNoArgs()->andReturn($userInstance);
+
+        $action = new CreateUserWithFamilyAction($user, $family);
+        $data = new class implements RegisterUserInterface
+        {
+            public string $familyName = 'Test Family';
+
+            public string $name = 'Test User';
+
+            public string $email = 'test@example.com';
+
+            public string $password = 'password123';
+        };
+
+        // act
+        $action->execute($data);
+
+        // assert
+        expect($familyInstance->head_id)->toBe(42);
     });
 });

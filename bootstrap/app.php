@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Exceptions\BrickognizeApiException;
 use App\Exceptions\MissingRebrickableTokenException;
+use App\Exceptions\NotFamilyHeadException;
 use App\Exceptions\PartNotFoundException;
 use App\Exceptions\RebrickableApiException;
 use App\Exceptions\SetNotFoundException;
@@ -32,6 +33,8 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(fn (PartNotFoundException $partNotFoundException, Request $request): JsonResponse => response()->json(['error' => 'Part not found'], 404));
 
         $exceptions->render(fn (MissingRebrickableTokenException $missingRebrickableTokenException, Request $request): JsonResponse => response()->json(['error' => 'Rebrickable user token not configured'], 400));
+
+        $exceptions->render(fn (NotFamilyHeadException $notFamilyHeadException, Request $request): JsonResponse => response()->json(['error' => 'Only the family head can perform this action'], 403));
 
         $exceptions->render(function (RebrickableApiException $rebrickableApiException, Request $request): JsonResponse {
             $status = $rebrickableApiException->statusCode ?? 500;
