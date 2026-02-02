@@ -7,10 +7,12 @@ namespace App\Actions\FamilySet;
 use App\Actions\Sync\UpsertSetAction;
 use App\Contracts\LegoDataServiceInterface;
 use App\Data\ImportOwnedSetsResultData;
+use App\Data\Lego\RebrickableUserSetData;
 use App\Enums\FamilySetStatus;
 use App\Exceptions\MissingRebrickableTokenException;
 use App\Models\Family;
 use App\Models\FamilySet;
+use App\Models\Set;
 use Illuminate\Support\Facades\DB;
 
 class ImportOwnedSetsAction
@@ -41,69 +43,116 @@ class ImportOwnedSetsAction
             );
         }
 
-        // Wrap all database operations in a transaction for atomicity
-        return DB::transaction(function () use ($family, $userSets): ImportOwnedSetsResultData {
-            // First pass: Upsert all sets and build a map of set_num -> Set
-            $setsByNum = [];
-            foreach ($userSets as $userSet) {
-                $setsByNum[$userSet->set->setNum] = $this->upsertSetAction->execute($userSet->set);
+        return DB::transaction(fn (): ImportOwnedSetsResultData => $this->importSets($family, $userSets));
+    }
+
+    /**
+     * @param array<RebrickableUserSetData> $userSets
+     */
+    private function importSets(Family $family, array $userSets): ImportOwnedSetsResultData
+    {
+        $setsByNum = $this->upsertSetsFromUserData($userSets);
+        $familySetsBySetId = $this->loadExistingFamilySetsGroupedBySetId($family, $setsByNum);
+
+        return $this->processUserSets($family, $userSets, $setsByNum, $familySetsBySetId);
+    }
+
+    /**
+     * @param array<RebrickableUserSetData> $userSets
+     *
+     * @return array<string, Set>
+     */
+    private function upsertSetsFromUserData(array $userSets): array
+    {
+        $setsByNum = [];
+
+        foreach ($userSets as $userSet) {
+            $setsByNum[$userSet->set->setNum] = $this->upsertSetAction->execute($userSet->set);
+        }
+
+        return $setsByNum;
+    }
+
+    /**
+     * @param array<string, Set> $setsByNum
+     *
+     * @return array<int, array<FamilySet>>
+     */
+    private function loadExistingFamilySetsGroupedBySetId(Family $family, array $setsByNum): array
+    {
+        $setIds = array_values(array_map(fn (Set $set) => $set->id, $setsByNum));
+
+        $existingFamilySets = $this->familySet->newQuery()
+            ->where('family_id', $family->id)
+            ->whereIn('set_id', $setIds)
+            ->get();
+
+        $familySetsBySetId = [];
+
+        foreach ($existingFamilySets as $existingFamilySet) {
+            $familySetsBySetId[$existingFamilySet->set_id][] = $existingFamilySet;
+        }
+
+        return $familySetsBySetId;
+    }
+
+    /**
+     * @param array<RebrickableUserSetData> $userSets
+     * @param array<string, Set> $setsByNum
+     * @param array<int, array<FamilySet>> $familySetsBySetId
+     */
+    private function processUserSets(
+        Family $family,
+        array $userSets,
+        array $setsByNum,
+        array $familySetsBySetId,
+    ): ImportOwnedSetsResultData {
+        $created = 0;
+        $updated = 0;
+        $skipped = 0;
+        /** @var array<string> $skippedSetNums */
+        $skippedSetNums = [];
+
+        foreach ($userSets as $userSet) {
+            $set = $setsByNum[$userSet->set->setNum];
+            $existingForSet = $familySetsBySetId[$set->id] ?? [];
+            $existingCount = count($existingForSet);
+
+            if ($existingCount > 1) {
+                $skipped++;
+                $skippedSetNums[] = $userSet->set->setNum;
+            } elseif ($existingCount === 1) {
+                $this->updateExistingFamilySet($existingForSet[0], $userSet->quantity);
+                $updated++;
+            } else {
+                $this->createFamilySet($family, $set, $userSet->quantity);
+                $created++;
             }
+        }
 
-            // Preload all existing FamilySets for this family in a single query
-            $setIds = array_values(array_map(fn ($set) => $set->id, $setsByNum));
-            $existingFamilySets = $this->familySet->newQuery()
-                ->where('family_id', $family->id)
-                ->whereIn('set_id', $setIds)
-                ->get();
+        return new ImportOwnedSetsResultData(
+            created: $created,
+            updated: $updated,
+            skipped: $skipped,
+            total: $created + $updated,
+            skippedSetNums: $skippedSetNums,
+        );
+    }
 
-            // Group by set_id to detect duplicates
-            /** @var array<int, array<FamilySet>> $familySetsBySetId */
-            $familySetsBySetId = [];
-            foreach ($existingFamilySets as $familySet) {
-                $familySetsBySetId[$familySet->set_id][] = $familySet;
-            }
+    private function updateExistingFamilySet(FamilySet $familySet, int $quantity): void
+    {
+        $familySet->quantity = $quantity;
+        $familySet->save();
+    }
 
-            // Second pass: Create/update/skip based on the preloaded data
-            $created = 0;
-            $updated = 0;
-            $skipped = 0;
-            /** @var array<string> $skippedSetNums */
-            $skippedSetNums = [];
-
-            foreach ($userSets as $userSet) {
-                $set = $setsByNum[$userSet->set->setNum];
-                $existingForSet = $familySetsBySetId[$set->id] ?? [];
-                $existingCount = count($existingForSet);
-
-                if ($existingCount > 1) {
-                    // Multiple rows exist for this set - skip to avoid inconsistent updates
-                    $skipped++;
-                    $skippedSetNums[] = $userSet->set->setNum;
-                } elseif ($existingCount === 1) {
-                    // Exactly one row exists - safe to update
-                    $existingForSet[0]->quantity = $userSet->quantity;
-                    $existingForSet[0]->save();
-                    $updated++;
-                } else {
-                    // No existing rows - create new
-                    /** @var FamilySet $familySet */
-                    $familySet = $this->familySet->newInstance();
-                    $familySet->family_id = $family->id;
-                    $familySet->set_id = $set->id;
-                    $familySet->quantity = $userSet->quantity;
-                    $familySet->status = FamilySetStatus::Sealed;
-                    $familySet->save();
-                    $created++;
-                }
-            }
-
-            return new ImportOwnedSetsResultData(
-                created: $created,
-                updated: $updated,
-                skipped: $skipped,
-                total: $created + $updated,
-                skippedSetNums: $skippedSetNums,
-            );
-        });
+    private function createFamilySet(Family $family, Set $set, int $quantity): void
+    {
+        /** @var FamilySet $familySet */
+        $familySet = $this->familySet->newInstance();
+        $familySet->family_id = $family->id;
+        $familySet->set_id = $set->id;
+        $familySet->quantity = $quantity;
+        $familySet->status = FamilySetStatus::Sealed;
+        $familySet->save();
     }
 }
