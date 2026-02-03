@@ -21,10 +21,10 @@ return [
 
     'allowed_methods' => ['*'],
 
-    'allowed_origins' => [
+    'allowed_origins' => array_filter([
         env('FRONTEND_URL', 'http://localhost:5173'),
-        'https://brick-inventory.com',
-    ],
+        env('FRONTEND_URL_PRODUCTION'),
+    ]),
 
     'allowed_origins_patterns' => [],
 
