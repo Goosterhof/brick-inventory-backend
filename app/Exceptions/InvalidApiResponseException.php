@@ -5,9 +5,9 @@ declare(strict_types=1);
 namespace App\Exceptions;
 
 /**
- * Exception thrown when the Rebrickable API returns an unexpected response structure.
+ * Exception thrown when an external API returns an unexpected response structure.
  */
-class InvalidApiResponseException extends RebrickableApiException
+class InvalidApiResponseException extends ExternalApiException
 {
     /**
      * @param list<string> $missingFields

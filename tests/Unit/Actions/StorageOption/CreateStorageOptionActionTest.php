@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\StorageOption\CreateStorageOptionAction;
-use App\Contracts\StorageOption\CreateStorageOptionInterface;
+use App\Contracts\StorageOption\StorageOptionDataInterface;
 use App\Models\StorageOption;
 use App\Models\User;
 
@@ -23,7 +23,7 @@ describe('CreateStorageOptionAction', function (): void {
         $user->family_id = 1;
 
         $action = new CreateStorageOptionAction($storageOption, $user);
-        $data = new class implements CreateStorageOptionInterface
+        $data = new class implements StorageOptionDataInterface
         {
             public string $name = 'Cabinet 1';
 
@@ -61,7 +61,7 @@ describe('CreateStorageOptionAction', function (): void {
         $user->family_id = 1;
 
         $action = new CreateStorageOptionAction($storageOption, $user);
-        $data = new class implements CreateStorageOptionInterface
+        $data = new class implements StorageOptionDataInterface
         {
             public string $name = 'Drawer A1';
 
@@ -97,7 +97,7 @@ describe('CreateStorageOptionAction', function (): void {
         $user->family_id = 1;
 
         $action = new CreateStorageOptionAction($storageOption, $user);
-        $data = new class implements CreateStorageOptionInterface
+        $data = new class implements StorageOptionDataInterface
         {
             public string $name = 'Test Cabinet';
 
