@@ -40,7 +40,7 @@ describe('FamilySetController', function (): void {
                 ->assertJsonCount(1)
                 ->assertJsonPath('0.quantity', 2)
                 ->assertJsonPath('0.status', 'built')
-                ->assertJsonPath('0.set.set_num', '75192-1');
+                ->assertJsonPath('0.set_id', $set->id);
         });
 
         it('should not return sets from other families', function (): void {
@@ -84,7 +84,7 @@ describe('FamilySetController', function (): void {
                 ->assertJsonPath('status', 'sealed')
                 ->assertJsonPath('purchase_date', '2024-01-15')
                 ->assertJsonPath('notes', 'Birthday gift')
-                ->assertJsonPath('set.set_num', '75192-1');
+                ->assertJsonPath('set_id', $set->id);
 
             $this->assertDatabaseHas('family_sets', [
                 'family_id' => $user->family_id,
@@ -111,13 +111,14 @@ describe('FamilySetController', function (): void {
                 'set_num' => '10281-1',
             ]);
 
-            $response->assertStatus(201)
-                ->assertJsonPath('set.set_num', '10281-1')
-                ->assertJsonPath('set.name', 'Bonsai Tree');
+            $response->assertStatus(201);
 
             $this->assertDatabaseHas('sets', ['set_num' => '10281-1']);
+            $createdSet = Set::query()->where('set_num', '10281-1')->firstOrFail();
+            $response->assertJsonPath('set_id', $createdSet->id);
             $this->assertDatabaseHas('family_sets', [
                 'family_id' => $user->family_id,
+                'set_id' => $createdSet->id,
             ]);
         });
 
@@ -217,7 +218,7 @@ describe('FamilySetController', function (): void {
             $response->assertStatus(200)
                 ->assertJsonPath('id', $familySet->id)
                 ->assertJsonPath('status', 'built')
-                ->assertJsonPath('set.set_num', '75192-1');
+                ->assertJsonPath('set_id', $set->id);
         });
 
         it('should return 404 for family set from another family', function (): void {

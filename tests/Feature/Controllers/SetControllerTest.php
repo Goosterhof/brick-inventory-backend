@@ -50,15 +50,13 @@ describe('SetController', function (): void {
 
             $response->assertStatus(200)
                 ->assertJson([
-                    'set' => [
-                        'set_num' => '75192-1',
-                        'name' => 'Millennium Falcon',
-                        'year' => 2017,
-                        'num_parts' => 7541,
-                    ],
+                    'set_num' => '75192-1',
+                    'name' => 'Millennium Falcon',
+                    'year' => 2017,
+                    'num_parts' => 7541,
                 ])
                 ->assertJsonCount(1, 'parts')
-                ->assertJsonPath('parts.0.part.part_num', '3001')
+                ->assertJsonPath('parts.0.part_id', $part->id)
                 ->assertJsonPath('parts.0.quantity', 10);
         });
 
@@ -101,18 +99,19 @@ describe('SetController', function (): void {
 
             $response->assertStatus(200)
                 ->assertJson([
-                    'set' => [
-                        'set_num' => '10281-1',
-                        'name' => 'Bonsai Tree',
-                    ],
+                    'set_num' => '10281-1',
+                    'name' => 'Bonsai Tree',
                 ])
-                ->assertJsonCount(1, 'parts')
-                ->assertJsonPath('parts.0.part.part_num', '3024')
-                ->assertJsonPath('parts.0.color.name', 'Green');
+                ->assertJsonCount(1, 'parts');
 
             $this->assertDatabaseHas('sets', ['set_num' => '10281-1']);
             $this->assertDatabaseHas('parts', ['part_num' => '3024']);
             $this->assertDatabaseHas('colors', ['rebrickable_id' => 6]);
+
+            $part = Part::query()->where('part_num', '3024')->firstOrFail();
+            $color = Color::query()->where('rebrickable_id', 6)->firstOrFail();
+            $response->assertJsonPath('parts.0.part_id', $part->id)
+                ->assertJsonPath('parts.0.color_id', $color->id);
         });
 
         it('should return 404 for non-existent set', function (): void {

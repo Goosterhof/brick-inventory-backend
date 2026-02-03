@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Resources;
 
+use App\Exceptions\MissingRelationException;
 use BackedEnum;
 use DateTimeInterface;
 use Illuminate\Contracts\Support\Responsable;
@@ -11,8 +12,6 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use JsonSerializable;
-use ReflectionClass;
-use ReflectionProperty;
 
 /**
  * @template TModel of Model
@@ -24,7 +23,7 @@ abstract readonly class ResourceData implements JsonSerializable, Responsable
      *
      * @param TModel $model
      */
-    abstract public static function from(Model $model): static;
+    abstract public static function from($model): static;
 
     /**
      * Convert the resource to an array.
@@ -33,15 +32,10 @@ abstract readonly class ResourceData implements JsonSerializable, Responsable
      */
     public function toArray(): array
     {
-        $result = [];
-        $reflectionClass = new ReflectionClass($this);
-
-        foreach ($reflectionClass->getProperties(ReflectionProperty::IS_PUBLIC) as $reflectionProperty) {
-            $value = $reflectionProperty->getValue($this);
-            $result[$reflectionProperty->getName()] = $this->transformValue($value);
-        }
-
-        return $result;
+        return array_map(
+            $this->transformValue(...),
+            get_object_vars($this),
+        );
     }
 
     /**
@@ -89,6 +83,25 @@ abstract readonly class ResourceData implements JsonSerializable, Responsable
     protected static function requiredRelations(): array
     {
         return [];
+    }
+
+    /**
+     * Validate that required relations are loaded on the model.
+     *
+     * @param TModel $model
+     *
+     * @throws MissingRelationException
+     */
+    protected static function validateRelationsLoaded(Model $model): void
+    {
+        $missingRelations = array_filter(
+            static::requiredRelations(),
+            static fn (string $relation): bool => !$model->relationLoaded($relation),
+        );
+
+        if ($missingRelations !== []) {
+            throw MissingRelationException::forRelations(static::class, array_values($missingRelations));
+        }
     }
 
     /**
