@@ -24,7 +24,7 @@ abstract readonly class ResourceData implements JsonSerializable, Responsable
      *
      * @param TModel $model
      */
-    abstract public static function from(Model $model): static;
+    abstract public static function from($model): static;
 
     /**
      * Convert the resource to an array.

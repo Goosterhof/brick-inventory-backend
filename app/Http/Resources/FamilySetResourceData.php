@@ -8,7 +8,6 @@ use App\Enums\FamilySetStatus;
 use App\Exceptions\MissingRelationException;
 use App\Models\FamilySet;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Model;
 
 /**
  * @extends ResourceData<FamilySet>
@@ -26,7 +25,10 @@ final readonly class FamilySetResourceData extends ResourceData
         public ?Carbon $updated_at,
     ) {}
 
-    public static function from(Model $model): static
+    /**
+     * @param FamilySet $model
+     */
+    public static function from($model): static
     {
         $model->loadMissing(self::requiredRelations());
 

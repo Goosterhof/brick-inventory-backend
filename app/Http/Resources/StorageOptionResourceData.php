@@ -6,7 +6,6 @@ namespace App\Http\Resources;
 
 use App\Models\StorageOption;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Model;
 
 /**
  * @extends ResourceData<StorageOption>
@@ -28,7 +27,10 @@ final readonly class StorageOptionResourceData extends ResourceData
         public ?Carbon $updated_at,
     ) {}
 
-    public static function from(Model $model): static
+    /**
+     * @param StorageOption $model
+     */
+    public static function from($model): static
     {
         $model->loadMissing(self::requiredRelations());
 

@@ -7,7 +7,6 @@ namespace App\Http\Resources;
 use App\Exceptions\MissingRelationException;
 use App\Models\StorageOptionPart;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Model;
 
 /**
  * @extends ResourceData<StorageOptionPart>
@@ -26,7 +25,10 @@ final readonly class StorageOptionPartResourceData extends ResourceData
         public ?Carbon $updated_at,
     ) {}
 
-    public static function from(Model $model): static
+    /**
+     * @param StorageOptionPart $model
+     */
+    public static function from($model): static
     {
         $model->loadMissing(self::requiredRelations());
 

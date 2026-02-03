@@ -6,7 +6,6 @@ namespace App\Http\Resources;
 
 use App\Exceptions\MissingRelationException;
 use App\Models\SetPart;
-use Illuminate\Database\Eloquent\Model;
 
 /**
  * @extends ResourceData<SetPart>
@@ -22,7 +21,10 @@ final readonly class SetPartResourceData extends ResourceData
         public ColorResourceData $color,
     ) {}
 
-    public static function from(Model $model): static
+    /**
+     * @param SetPart $model
+     */
+    public static function from($model): static
     {
         $model->loadMissing(self::requiredRelations());
 
