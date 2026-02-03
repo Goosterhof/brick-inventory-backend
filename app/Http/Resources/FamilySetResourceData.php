@@ -6,7 +6,6 @@ namespace App\Http\Resources;
 
 use App\Enums\FamilySetStatus;
 use App\Models\FamilySet;
-use Carbon\Carbon;
 
 /**
  * @extends ResourceData<FamilySet>
@@ -20,8 +19,6 @@ final readonly class FamilySetResourceData extends ResourceData
         public FamilySetStatus $status,
         public ?string $purchase_date,
         public ?string $notes,
-        public ?Carbon $created_at,
-        public ?Carbon $updated_at,
     ) {}
 
     /**
@@ -36,8 +33,6 @@ final readonly class FamilySetResourceData extends ResourceData
             status: $model->status,
             purchase_date: $model->purchase_date?->format('Y-m-d'),
             notes: $model->notes,
-            created_at: $model->created_at,
-            updated_at: $model->updated_at,
         );
     }
 }

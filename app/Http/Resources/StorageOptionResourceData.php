@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Http\Resources;
 
 use App\Models\StorageOption;
-use Carbon\Carbon;
 
 /**
  * @extends ResourceData<StorageOption>
@@ -23,8 +22,6 @@ final readonly class StorageOptionResourceData extends ResourceData
         public ?int $row,
         public ?int $column,
         public array $child_ids,
-        public ?Carbon $created_at,
-        public ?Carbon $updated_at,
     ) {}
 
     /**
@@ -45,8 +42,6 @@ final readonly class StorageOptionResourceData extends ResourceData
             row: $model->row,
             column: $model->column,
             child_ids: $childIds,
-            created_at: $model->created_at,
-            updated_at: $model->updated_at,
         );
     }
 

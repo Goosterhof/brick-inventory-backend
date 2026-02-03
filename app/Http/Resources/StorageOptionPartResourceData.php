@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Http\Resources;
 
 use App\Models\StorageOptionPart;
-use Carbon\Carbon;
 
 /**
  * @extends ResourceData<StorageOptionPart>
@@ -18,8 +17,6 @@ final readonly class StorageOptionPartResourceData extends ResourceData
         public int $part_id,
         public ?int $color_id,
         public int $quantity,
-        public ?Carbon $created_at,
-        public ?Carbon $updated_at,
     ) {}
 
     /**
@@ -33,8 +30,6 @@ final readonly class StorageOptionPartResourceData extends ResourceData
             part_id: $model->part_id,
             color_id: $model->color_id,
             quantity: $model->quantity,
-            created_at: $model->created_at,
-            updated_at: $model->updated_at,
         );
     }
 }
