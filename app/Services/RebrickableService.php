@@ -167,6 +167,7 @@ final readonly class RebrickableService implements LegoDataServiceInterface
     {
         return Http::baseUrl($this->baseUrl)
             ->withHeaders(['Authorization' => 'key ' . $this->apiKey])
+            ->acceptJson()
             ->timeout(30)
             ->retry(3, 100, throw: false);
     }
