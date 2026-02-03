@@ -29,6 +29,7 @@ describe('SetWithPartsResourceData', function (): void {
         $set->image_url = 'https://example.com/falcon.jpg';
         $set->setParts = new Collection([$setPart]);
         $set->shouldReceive('loadMissing')->andReturnSelf();
+        $set->shouldReceive('relationLoaded')->with('setParts')->andReturnTrue();
 
         // act
         $resource = SetWithPartsResourceData::from($set);
@@ -60,6 +61,7 @@ describe('SetWithPartsResourceData', function (): void {
         $set->image_url = null;
         $set->setParts = new Collection([]);
         $set->shouldReceive('loadMissing')->andReturnSelf();
+        $set->shouldReceive('relationLoaded')->with('setParts')->andReturnTrue();
 
         // act
         $resource = SetWithPartsResourceData::from($set);
@@ -90,6 +92,7 @@ describe('SetWithPartsResourceData', function (): void {
         $set->image_url = 'https://example.com/falcon.jpg';
         $set->setParts = new Collection([$setPart]);
         $set->shouldReceive('loadMissing')->andReturnSelf();
+        $set->shouldReceive('relationLoaded')->with('setParts')->andReturnTrue();
 
         // act
         $resource = SetWithPartsResourceData::from($set);
@@ -133,6 +136,7 @@ describe('SetWithPartsResourceData', function (): void {
         $set->image_url = null;
         $set->setParts = new Collection([$setPart1, $setPart2]);
         $set->shouldReceive('loadMissing')->andReturnSelf();
+        $set->shouldReceive('relationLoaded')->with('setParts')->andReturnTrue();
 
         // act
         $resource = SetWithPartsResourceData::from($set);

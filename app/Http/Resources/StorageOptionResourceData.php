@@ -30,6 +30,7 @@ final readonly class StorageOptionResourceData extends ResourceData
     public static function from($model): static
     {
         $model->loadMissing(self::requiredRelations());
+        self::validateRelationsLoaded($model);
 
         /** @var array<int, int> $childIds */
         $childIds = $model->children->pluck('id')->all();

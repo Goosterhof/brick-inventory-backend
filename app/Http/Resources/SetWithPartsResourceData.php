@@ -31,6 +31,7 @@ final readonly class SetWithPartsResourceData extends ResourceData
     public static function from($model): static
     {
         $model->loadMissing(self::requiredRelations());
+        self::validateRelationsLoaded($model);
 
         return new self(
             id: $model->id,

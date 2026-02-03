@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Resources;
 
+use App\Exceptions\MissingRelationException;
 use BackedEnum;
 use DateTimeInterface;
 use Illuminate\Contracts\Support\Responsable;
@@ -82,6 +83,25 @@ abstract readonly class ResourceData implements JsonSerializable, Responsable
     protected static function requiredRelations(): array
     {
         return [];
+    }
+
+    /**
+     * Validate that required relations are loaded on the model.
+     *
+     * @param TModel $model
+     *
+     * @throws MissingRelationException
+     */
+    protected static function validateRelationsLoaded(Model $model): void
+    {
+        $missingRelations = array_filter(
+            static::requiredRelations(),
+            static fn (string $relation): bool => !$model->relationLoaded($relation),
+        );
+
+        if ($missingRelations !== []) {
+            throw MissingRelationException::forRelations(static::class, array_values($missingRelations));
+        }
     }
 
     /**
