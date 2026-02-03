@@ -23,7 +23,7 @@ Route::get('/health', fn () => response()->json([
 ]));
 
 Route::post('/register', RegisterController::class);
-Route::post('/login', LoginController::class);
+Route::post('/login', LoginController::class)->middleware('throttle:5,1');
 Route::post('/logout', LogoutController::class)->middleware('auth:sanctum');
 Route::get('/me', MeController::class)->middleware('auth:sanctum');
 
