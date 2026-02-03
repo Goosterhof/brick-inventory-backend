@@ -6,12 +6,12 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 
 class LogoutController extends Controller
 {
-    public function __invoke(Request $request): Response
+    public function __invoke(Request $request): JsonResponse
     {
         $user = $request->user();
 
@@ -19,6 +19,6 @@ class LogoutController extends Controller
             $user->currentAccessToken()->delete();
         }
 
-        return response()->noContent();
+        return response()->json(null, 204);
     }
 }
