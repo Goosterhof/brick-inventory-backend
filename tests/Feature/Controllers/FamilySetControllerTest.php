@@ -114,7 +114,7 @@ describe('FamilySetController', function (): void {
             $response->assertStatus(201);
 
             $this->assertDatabaseHas('sets', ['set_num' => '10281-1']);
-            $createdSet = Set::query()->where('set_num', '10281-1')->first();
+            $createdSet = Set::query()->where('set_num', '10281-1')->firstOrFail();
             $response->assertJsonPath('set_id', $createdSet->id);
             $this->assertDatabaseHas('family_sets', [
                 'family_id' => $user->family_id,
