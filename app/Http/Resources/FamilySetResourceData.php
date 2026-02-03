@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Resources;
 
 use App\Enums\FamilySetStatus;
+use App\Exceptions\MissingRelationException;
 use App\Models\FamilySet;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
@@ -29,13 +30,19 @@ final readonly class FamilySetResourceData extends ResourceData
     {
         $model->loadMissing(self::requiredRelations());
 
+        $set = $model->set;
+
+        if ($set === null) {
+            throw MissingRelationException::forRelation(self::class, 'set');
+        }
+
         return new self(
             id: $model->id,
             quantity: $model->quantity,
             status: $model->status,
             purchase_date: $model->purchase_date?->format('Y-m-d'),
             notes: $model->notes,
-            set: SetResourceData::from($model->set),
+            set: SetResourceData::from($set),
             created_at: $model->created_at,
             updated_at: $model->updated_at,
         );

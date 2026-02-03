@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace App\Http\Resources;
 
+use App\Exceptions\MissingRelationException;
 use App\Models\SetPart;
 use Illuminate\Database\Eloquent\Model;
-use RuntimeException;
 
 /**
  * @extends ResourceData<SetPart>
@@ -30,7 +30,9 @@ final readonly class SetPartResourceData extends ResourceData
         $color = $model->color;
 
         if ($part === null || $color === null) {
-            throw new RuntimeException('SetPart is missing required relationships');
+            $missing = array_filter(['part' => $part, 'color' => $color], fn ($v): bool => $v === null);
+
+            throw MissingRelationException::forRelations(self::class, array_keys($missing));
         }
 
         return new self(

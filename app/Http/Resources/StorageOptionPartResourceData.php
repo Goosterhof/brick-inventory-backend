@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Http\Resources;
 
+use App\Exceptions\MissingRelationException;
 use App\Models\StorageOptionPart;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Model;
@@ -29,14 +30,19 @@ final readonly class StorageOptionPartResourceData extends ResourceData
     {
         $model->loadMissing(self::requiredRelations());
 
+        $part = $model->part;
+
+        if ($part === null) {
+            throw MissingRelationException::forRelation(self::class, 'part');
+        }
+
         return new self(
             id: $model->id,
             storage_option_id: $model->storage_option_id,
             part_id: $model->part_id,
             color_id: $model->color_id,
             quantity: $model->quantity,
-            /** @phpstan-ignore argument.type (part relation must be loaded) */
-            part: PartResourceData::from($model->part),
+            part: PartResourceData::from($part),
             color: $model->color !== null
                 ? ColorResourceData::from($model->color)
                 : null,
