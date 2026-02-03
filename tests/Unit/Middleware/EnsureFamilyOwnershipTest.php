@@ -69,8 +69,8 @@ describe('EnsureFamilyOwnership', function (): void {
 
     it('should continue when model family_id matches user family_id', function (): void {
         // arrange
-        $user = Mockery::mock(User::class)->makePartial();
-        $user->family_id = 1;
+        $user = Mockery::mock(User::class);
+        $user->allows('getAttribute')->with('family_id')->andReturn(1);
 
         $model = Mockery::mock(BelongsToFamilyInterface::class);
         $model->shouldReceive('getFamilyId')->andReturn(1);
@@ -95,8 +95,8 @@ describe('EnsureFamilyOwnership', function (): void {
 
     it('should return 404 when model family_id does not match user family_id', function (): void {
         // arrange
-        $user = Mockery::mock(User::class)->makePartial();
-        $user->family_id = 1;
+        $user = Mockery::mock(User::class);
+        $user->allows('getAttribute')->with('family_id')->andReturn(1);
 
         $model = Mockery::mock(BelongsToFamilyInterface::class);
         $model->shouldReceive('getFamilyId')->andReturn(2);
@@ -121,8 +121,8 @@ describe('EnsureFamilyOwnership', function (): void {
 
     it('should return 404 when any model in multiple parameters does not match', function (): void {
         // arrange
-        $user = Mockery::mock(User::class)->makePartial();
-        $user->family_id = 1;
+        $user = Mockery::mock(User::class);
+        $user->allows('getAttribute')->with('family_id')->andReturn(1);
 
         $model1 = Mockery::mock(BelongsToFamilyInterface::class);
         $model1->shouldReceive('getFamilyId')->andReturn(1);
@@ -153,8 +153,8 @@ describe('EnsureFamilyOwnership', function (): void {
 
     it('should continue when all models in multiple parameters match', function (): void {
         // arrange
-        $user = Mockery::mock(User::class)->makePartial();
-        $user->family_id = 1;
+        $user = Mockery::mock(User::class);
+        $user->allows('getAttribute')->with('family_id')->andReturn(1);
 
         $model1 = Mockery::mock(BelongsToFamilyInterface::class);
         $model1->shouldReceive('getFamilyId')->andReturn(1);

@@ -20,9 +20,9 @@ describe('GetSetPartsAction', function (): void {
         $setPartsRelation = Mockery::mock(HasMany::class);
         $setPartsRelation->shouldReceive('exists')->once()->andReturn(true);
 
-        $existingSet = Mockery::mock(Set::class)->makePartial();
-        $existingSet->id = 1;
-        $existingSet->set_num = '75192-1';
+        $existingSet = Mockery::mock(Set::class);
+        $existingSet->allows('getAttribute')->with('id')->andReturn(1);
+        $existingSet->allows('getAttribute')->with('set_num')->andReturn('75192-1');
         $existingSet->shouldReceive('setParts')->once()->andReturn($setPartsRelation);
 
         $queryBuilder = Mockery::mock(Builder::class);
@@ -124,9 +124,9 @@ describe('GetSetPartsAction', function (): void {
         $setPartsRelation = Mockery::mock(HasMany::class);
         $setPartsRelation->shouldReceive('exists')->once()->andReturn(false);
 
-        $existingSet = Mockery::mock(Set::class)->makePartial();
-        $existingSet->id = 1;
-        $existingSet->set_num = '75192-1';
+        $existingSet = Mockery::mock(Set::class);
+        $existingSet->allows('getAttribute')->with('id')->andReturn(1);
+        $existingSet->allows('getAttribute')->with('set_num')->andReturn('75192-1');
         $existingSet->shouldReceive('setParts')->once()->andReturn($setPartsRelation);
 
         $queryBuilder = Mockery::mock(Builder::class);
@@ -155,9 +155,9 @@ describe('GetSetPartsAction', function (): void {
             ->once()
             ->andReturn([]);
 
-        $upsertedSet = Mockery::mock(Set::class)->makePartial();
-        $upsertedSet->id = 1;
-        $upsertedSet->set_num = '75192-1';
+        $upsertedSet = Mockery::mock(Set::class);
+        $upsertedSet->allows('getAttribute')->with('id')->andReturn(1);
+        $upsertedSet->allows('getAttribute')->with('set_num')->andReturn('75192-1');
 
         $upsertSetAction = Mockery::mock(UpsertSetAction::class);
         $upsertSetAction->shouldReceive('execute')

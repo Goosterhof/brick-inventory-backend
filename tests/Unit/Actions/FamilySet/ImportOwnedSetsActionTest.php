@@ -23,9 +23,9 @@ describe('ImportOwnedSetsAction', function (): void {
         $upsertSetAction = Mockery::mock(UpsertSetAction::class);
         $familySetModel = Mockery::mock(FamilySet::class);
 
-        $family = Mockery::mock(Family::class)->makePartial();
-        $family->id = 1;
-        $family->rebrickable_user_token = null;
+        $family = Mockery::mock(Family::class);
+        $family->allows('getAttribute')->with('id')->andReturn(1);
+        $family->allows('getAttribute')->with('rebrickable_user_token')->andReturn(null);
 
         $action = new ImportOwnedSetsAction($legoDataService, $upsertSetAction, $familySetModel);
 
@@ -45,9 +45,9 @@ describe('ImportOwnedSetsAction', function (): void {
         $upsertSetAction = Mockery::mock(UpsertSetAction::class);
         $familySetModel = Mockery::mock(FamilySet::class);
 
-        $family = Mockery::mock(Family::class)->makePartial();
-        $family->id = 1;
-        $family->rebrickable_user_token = 'user-token-123';
+        $family = Mockery::mock(Family::class);
+        $family->allows('getAttribute')->with('id')->andReturn(1);
+        $family->allows('getAttribute')->with('rebrickable_user_token')->andReturn('user-token-123');
 
         $action = new ImportOwnedSetsAction($legoDataService, $upsertSetAction, $familySetModel);
 
@@ -69,8 +69,8 @@ describe('ImportOwnedSetsAction', function (): void {
         );
         $userSetData = new RebrickableUserSetData(set: $legoSetData, quantity: 2);
 
-        $set = Mockery::mock(Set::class)->makePartial();
-        $set->id = 42;
+        $set = Mockery::mock(Set::class);
+        $set->allows('getAttribute')->with('id')->andReturn(42);
 
         $legoDataService = Mockery::mock(LegoDataServiceInterface::class);
         $legoDataService->shouldReceive('fetchUserSets')->andReturn([$userSetData]);
@@ -81,7 +81,14 @@ describe('ImportOwnedSetsAction', function (): void {
             ->once()
             ->andReturn($set);
 
-        $familySet = Mockery::mock(FamilySet::class)->makePartial();
+        $familySetSavedValues = [];
+        $familySet = Mockery::mock(FamilySet::class);
+        $familySet->allows('setAttribute')->andReturnUsing(function ($key, $value) use (&$familySetSavedValues): void {
+            $familySetSavedValues[$key] = $value;
+        });
+        $familySet->allows('getAttribute')->andReturnUsing(function ($key) use (&$familySetSavedValues): mixed {
+            return $familySetSavedValues[$key] ?? null;
+        });
         $familySet->shouldReceive('save')->once();
 
         // Single query to preload all existing family sets
@@ -94,9 +101,9 @@ describe('ImportOwnedSetsAction', function (): void {
         $familySetModel->shouldReceive('newQuery')->once()->andReturn($queryBuilder);
         $familySetModel->shouldReceive('newInstance')->andReturn($familySet);
 
-        $family = Mockery::mock(Family::class)->makePartial();
-        $family->id = 1;
-        $family->rebrickable_user_token = 'user-token-123';
+        $family = Mockery::mock(Family::class);
+        $family->allows('getAttribute')->with('id')->andReturn(1);
+        $family->allows('getAttribute')->with('rebrickable_user_token')->andReturn('user-token-123');
 
         $action = new ImportOwnedSetsAction($legoDataService, $upsertSetAction, $familySetModel);
 
@@ -104,10 +111,10 @@ describe('ImportOwnedSetsAction', function (): void {
         $action->execute($family);
 
         // assert
-        expect($familySet->family_id)->toBe(1);
-        expect($familySet->set_id)->toBe(42);
-        expect($familySet->quantity)->toBe(2);
-        expect($familySet->status)->toBe(FamilySetStatus::Sealed);
+        expect($familySetSavedValues['family_id'])->toBe(1);
+        expect($familySetSavedValues['set_id'])->toBe(42);
+        expect($familySetSavedValues['quantity'])->toBe(2);
+        expect($familySetSavedValues['status'])->toBe(FamilySetStatus::Sealed);
     });
 
     it('should update quantity for existing family sets when exactly one exists', function (): void {
@@ -122,12 +129,17 @@ describe('ImportOwnedSetsAction', function (): void {
         );
         $userSetData = new RebrickableUserSetData(set: $legoSetData, quantity: 3);
 
-        $set = Mockery::mock(Set::class)->makePartial();
-        $set->id = 42;
+        $set = Mockery::mock(Set::class);
+        $set->allows('getAttribute')->with('id')->andReturn(42);
 
-        $existingFamilySet = Mockery::mock(FamilySet::class)->makePartial();
-        $existingFamilySet->set_id = 42;
-        $existingFamilySet->quantity = 1;
+        $existingSavedValues = ['set_id' => 42, 'quantity' => 1];
+        $existingFamilySet = Mockery::mock(FamilySet::class);
+        $existingFamilySet->allows('setAttribute')->andReturnUsing(function ($key, $value) use (&$existingSavedValues): void {
+            $existingSavedValues[$key] = $value;
+        });
+        $existingFamilySet->allows('getAttribute')->andReturnUsing(function ($key) use (&$existingSavedValues): mixed {
+            return $existingSavedValues[$key] ?? null;
+        });
         $existingFamilySet->shouldReceive('save')->once();
 
         $legoDataService = Mockery::mock(LegoDataServiceInterface::class);
@@ -146,9 +158,9 @@ describe('ImportOwnedSetsAction', function (): void {
         $familySetModel->shouldReceive('newQuery')->once()->andReturn($queryBuilder);
         $familySetModel->shouldReceive('newInstance')->never();
 
-        $family = Mockery::mock(Family::class)->makePartial();
-        $family->id = 1;
-        $family->rebrickable_user_token = 'user-token-123';
+        $family = Mockery::mock(Family::class);
+        $family->allows('getAttribute')->with('id')->andReturn(1);
+        $family->allows('getAttribute')->with('rebrickable_user_token')->andReturn('user-token-123');
 
         $action = new ImportOwnedSetsAction($legoDataService, $upsertSetAction, $familySetModel);
 
@@ -156,7 +168,7 @@ describe('ImportOwnedSetsAction', function (): void {
         $action->execute($family);
 
         // assert
-        expect($existingFamilySet->quantity)->toBe(3);
+        expect($existingSavedValues['quantity'])->toBe(3);
     });
 
     it('should return correct counts for created and updated sets', function (): void {
@@ -180,11 +192,11 @@ describe('ImportOwnedSetsAction', function (): void {
         $userSetData1 = new RebrickableUserSetData(set: $legoSetData1, quantity: 1);
         $userSetData2 = new RebrickableUserSetData(set: $legoSetData2, quantity: 2);
 
-        $set1 = Mockery::mock(Set::class)->makePartial();
-        $set1->id = 1;
+        $set1 = Mockery::mock(Set::class);
+        $set1->allows('getAttribute')->with('id')->andReturn(1);
 
-        $set2 = Mockery::mock(Set::class)->makePartial();
-        $set2->id = 2;
+        $set2 = Mockery::mock(Set::class);
+        $set2->allows('getAttribute')->with('id')->andReturn(2);
 
         $legoDataService = Mockery::mock(LegoDataServiceInterface::class);
         $legoDataService->shouldReceive('fetchUserSets')->andReturn([$userSetData1, $userSetData2]);
@@ -194,11 +206,14 @@ describe('ImportOwnedSetsAction', function (): void {
         $upsertSetAction->shouldReceive('execute')->with($legoSetData2)->andReturn($set2);
 
         // One existing family set for set1
-        $existingFamilySet = Mockery::mock(FamilySet::class)->makePartial();
-        $existingFamilySet->set_id = 1;
+        $existingFamilySet = Mockery::mock(FamilySet::class);
+        $existingFamilySet->allows('getAttribute')->with('set_id')->andReturn(1);
+        $existingFamilySet->allows('setAttribute');
         $existingFamilySet->shouldReceive('save');
 
-        $newFamilySet = Mockery::mock(FamilySet::class)->makePartial();
+        $newFamilySet = Mockery::mock(FamilySet::class);
+        $newFamilySet->allows('setAttribute');
+        $newFamilySet->allows('getAttribute');
         $newFamilySet->shouldReceive('save');
 
         // Single query returns only the existing family set for set1
@@ -211,9 +226,9 @@ describe('ImportOwnedSetsAction', function (): void {
         $familySetModel->shouldReceive('newQuery')->once()->andReturn($queryBuilder);
         $familySetModel->shouldReceive('newInstance')->once()->andReturn($newFamilySet);
 
-        $family = Mockery::mock(Family::class)->makePartial();
-        $family->id = 1;
-        $family->rebrickable_user_token = 'user-token-123';
+        $family = Mockery::mock(Family::class);
+        $family->allows('getAttribute')->with('id')->andReturn(1);
+        $family->allows('getAttribute')->with('rebrickable_user_token')->andReturn('user-token-123');
 
         $action = new ImportOwnedSetsAction($legoDataService, $upsertSetAction, $familySetModel);
 
@@ -236,9 +251,9 @@ describe('ImportOwnedSetsAction', function (): void {
         $upsertSetAction = Mockery::mock(UpsertSetAction::class);
         $familySetModel = Mockery::mock(FamilySet::class);
 
-        $family = Mockery::mock(Family::class)->makePartial();
-        $family->id = 1;
-        $family->rebrickable_user_token = 'user-token-123';
+        $family = Mockery::mock(Family::class);
+        $family->allows('getAttribute')->with('id')->andReturn(1);
+        $family->allows('getAttribute')->with('rebrickable_user_token')->andReturn('user-token-123');
 
         $action = new ImportOwnedSetsAction($legoDataService, $upsertSetAction, $familySetModel);
 
@@ -265,8 +280,8 @@ describe('ImportOwnedSetsAction', function (): void {
         );
         $userSetData = new RebrickableUserSetData(set: $legoSetData, quantity: 3);
 
-        $set = Mockery::mock(Set::class)->makePartial();
-        $set->id = 42;
+        $set = Mockery::mock(Set::class);
+        $set->allows('getAttribute')->with('id')->andReturn(42);
 
         $legoDataService = Mockery::mock(LegoDataServiceInterface::class);
         $legoDataService->shouldReceive('fetchUserSets')->andReturn([$userSetData]);
@@ -278,11 +293,11 @@ describe('ImportOwnedSetsAction', function (): void {
             ->andReturn($set);
 
         // Two existing family sets for the same set (duplicates)
-        $existingFamilySet1 = Mockery::mock(FamilySet::class)->makePartial();
-        $existingFamilySet1->set_id = 42;
+        $existingFamilySet1 = Mockery::mock(FamilySet::class);
+        $existingFamilySet1->allows('getAttribute')->with('set_id')->andReturn(42);
 
-        $existingFamilySet2 = Mockery::mock(FamilySet::class)->makePartial();
-        $existingFamilySet2->set_id = 42;
+        $existingFamilySet2 = Mockery::mock(FamilySet::class);
+        $existingFamilySet2->allows('getAttribute')->with('set_id')->andReturn(42);
 
         // Single query returns two family sets for the same set_id
         $queryBuilder = Mockery::mock(Builder::class);
@@ -294,9 +309,9 @@ describe('ImportOwnedSetsAction', function (): void {
         $familySetModel->shouldReceive('newQuery')->once()->andReturn($queryBuilder);
         $familySetModel->shouldReceive('newInstance')->never();
 
-        $family = Mockery::mock(Family::class)->makePartial();
-        $family->id = 1;
-        $family->rebrickable_user_token = 'user-token-123';
+        $family = Mockery::mock(Family::class);
+        $family->allows('getAttribute')->with('id')->andReturn(1);
+        $family->allows('getAttribute')->with('rebrickable_user_token')->andReturn('user-token-123');
 
         $action = new ImportOwnedSetsAction($legoDataService, $upsertSetAction, $familySetModel);
 
@@ -341,14 +356,14 @@ describe('ImportOwnedSetsAction', function (): void {
         $userSetData2 = new RebrickableUserSetData(set: $legoSetData2, quantity: 2);
         $userSetData3 = new RebrickableUserSetData(set: $legoSetData3, quantity: 1);
 
-        $set1 = Mockery::mock(Set::class)->makePartial();
-        $set1->id = 1;
+        $set1 = Mockery::mock(Set::class);
+        $set1->allows('getAttribute')->with('id')->andReturn(1);
 
-        $set2 = Mockery::mock(Set::class)->makePartial();
-        $set2->id = 2;
+        $set2 = Mockery::mock(Set::class);
+        $set2->allows('getAttribute')->with('id')->andReturn(2);
 
-        $set3 = Mockery::mock(Set::class)->makePartial();
-        $set3->id = 3;
+        $set3 = Mockery::mock(Set::class);
+        $set3->allows('getAttribute')->with('id')->andReturn(3);
 
         $legoDataService = Mockery::mock(LegoDataServiceInterface::class);
         $legoDataService->shouldReceive('fetchUserSets')->andReturn([$userSetData1, $userSetData2, $userSetData3]);
@@ -358,13 +373,19 @@ describe('ImportOwnedSetsAction', function (): void {
         $upsertSetAction->shouldReceive('execute')->with($legoSetData2)->andReturn($set2);
         $upsertSetAction->shouldReceive('execute')->with($legoSetData3)->andReturn($set3);
 
-        $newFamilySet1 = Mockery::mock(FamilySet::class)->makePartial();
+        $newFamilySet1 = Mockery::mock(FamilySet::class);
+        $newFamilySet1->allows('setAttribute');
+        $newFamilySet1->allows('getAttribute');
         $newFamilySet1->shouldReceive('save');
 
-        $newFamilySet2 = Mockery::mock(FamilySet::class)->makePartial();
+        $newFamilySet2 = Mockery::mock(FamilySet::class);
+        $newFamilySet2->allows('setAttribute');
+        $newFamilySet2->allows('getAttribute');
         $newFamilySet2->shouldReceive('save');
 
-        $newFamilySet3 = Mockery::mock(FamilySet::class)->makePartial();
+        $newFamilySet3 = Mockery::mock(FamilySet::class);
+        $newFamilySet3->allows('setAttribute');
+        $newFamilySet3->allows('getAttribute');
         $newFamilySet3->shouldReceive('save');
 
         // Verify only ONE query is made with all set IDs
@@ -379,9 +400,9 @@ describe('ImportOwnedSetsAction', function (): void {
             ->times(3)
             ->andReturn($newFamilySet1, $newFamilySet2, $newFamilySet3);
 
-        $family = Mockery::mock(Family::class)->makePartial();
-        $family->id = 1;
-        $family->rebrickable_user_token = 'user-token-123';
+        $family = Mockery::mock(Family::class);
+        $family->allows('getAttribute')->with('id')->andReturn(1);
+        $family->allows('getAttribute')->with('rebrickable_user_token')->andReturn('user-token-123');
 
         $action = new ImportOwnedSetsAction($legoDataService, $upsertSetAction, $familySetModel);
 

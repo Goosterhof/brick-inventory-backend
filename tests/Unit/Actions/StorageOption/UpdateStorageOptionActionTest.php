@@ -9,7 +9,14 @@ use App\Models\StorageOption;
 describe('UpdateStorageOptionAction', function (): void {
     it('should update storage option properties', function (): void {
         // arrange
-        $storageOption = Mockery::mock(StorageOption::class)->makePartial();
+        $savedValues = [];
+        $storageOption = Mockery::mock(StorageOption::class);
+        $storageOption->allows('setAttribute')->andReturnUsing(function ($key, $value) use (&$savedValues): void {
+            $savedValues[$key] = $value;
+        });
+        $storageOption->allows('getAttribute')->andReturnUsing(function ($key) use (&$savedValues): mixed {
+            return $savedValues[$key] ?? null;
+        });
         $storageOption->shouldReceive('save')->once();
 
         $action = new UpdateStorageOptionAction;
@@ -31,13 +38,20 @@ describe('UpdateStorageOptionAction', function (): void {
 
         // assert
         expect($result)->toBe($storageOption)
-            ->and($storageOption->name)->toBe('New Name')
-            ->and($storageOption->description)->toBe('New description');
+            ->and($savedValues['name'])->toBe('New Name')
+            ->and($savedValues['description'])->toBe('New description');
     });
 
     it('should update row and column', function (): void {
         // arrange
-        $storageOption = Mockery::mock(StorageOption::class)->makePartial();
+        $savedValues = [];
+        $storageOption = Mockery::mock(StorageOption::class);
+        $storageOption->allows('setAttribute')->andReturnUsing(function ($key, $value) use (&$savedValues): void {
+            $savedValues[$key] = $value;
+        });
+        $storageOption->allows('getAttribute')->andReturnUsing(function ($key) use (&$savedValues): mixed {
+            return $savedValues[$key] ?? null;
+        });
         $storageOption->shouldReceive('save')->once();
 
         $action = new UpdateStorageOptionAction;
@@ -58,13 +72,20 @@ describe('UpdateStorageOptionAction', function (): void {
         $action->execute($storageOption, $data);
 
         // assert
-        expect($storageOption->row)->toBe(3)
-            ->and($storageOption->column)->toBe(4);
+        expect($savedValues['row'])->toBe(3)
+            ->and($savedValues['column'])->toBe(4);
     });
 
     it('should update parent_id', function (): void {
         // arrange
-        $storageOption = Mockery::mock(StorageOption::class)->makePartial();
+        $savedValues = [];
+        $storageOption = Mockery::mock(StorageOption::class);
+        $storageOption->allows('setAttribute')->andReturnUsing(function ($key, $value) use (&$savedValues): void {
+            $savedValues[$key] = $value;
+        });
+        $storageOption->allows('getAttribute')->andReturnUsing(function ($key) use (&$savedValues): mixed {
+            return $savedValues[$key] ?? null;
+        });
         $storageOption->shouldReceive('save')->once();
 
         $action = new UpdateStorageOptionAction;
@@ -85,12 +106,14 @@ describe('UpdateStorageOptionAction', function (): void {
         $action->execute($storageOption, $data);
 
         // assert
-        expect($storageOption->parent_id)->toBe(5);
+        expect($savedValues['parent_id'])->toBe(5);
     });
 
     it('should call save on the storage option', function (): void {
         // arrange
-        $storageOption = Mockery::mock(StorageOption::class)->makePartial();
+        $storageOption = Mockery::mock(StorageOption::class);
+        $storageOption->allows('setAttribute');
+        $storageOption->allows('getAttribute');
         $storageOption->shouldReceive('save')->once();
 
         $action = new UpdateStorageOptionAction;

@@ -116,7 +116,7 @@ When Mockery expectations are the only verification needed, don't add placeholde
 // ✅ CORRECT - Mockery expectations are sufficient
 it('should save the model', function (): void {
     // arrange
-    $model = Mockery::mock(Model::class)->makePartial();
+    $model = Mockery::mock(Model::class);
     $model->shouldReceive('save')->once();
 
     // act
@@ -128,7 +128,7 @@ it('should save the model', function (): void {
 // ❌ WRONG - unnecessary placeholder assertion
 it('should save the model', function (): void {
     // arrange
-    $model = Mockery::mock(Model::class)->makePartial();
+    $model = Mockery::mock(Model::class);
     $model->shouldReceive('save')->once();
 
     // act
@@ -139,12 +139,64 @@ it('should save the model', function (): void {
 });
 ```
 
-### For Eloquent Models in Actions
-If an action uses Eloquent models, they should be injected and mocked. Use `makePartial()` on instance mocks to allow property assignment:
+### Pure Mocks (Recommended - Faster)
+
+Avoid `makePartial()` which instantiates real Eloquent models with boot logic. Instead, mock `getAttribute` and `setAttribute` directly.
+
+**Only mock attributes actually accessed by the code under test.** Before adding `getAttribute` or `setAttribute` mocks, verify the Action actually reads or writes that attribute. Common mistakes:
+- Mocking `getAttribute('id')` when the Action never reads `id`
+- Mocking `getAttribute('name')` when the Action only *sets* `name` (use `setAttribute` mock instead)
+- Mocking `getAttribute('exists')` out of habit - only mock if the Action checks existence
 
 ```php
-// The instance mock needs makePartial() to allow property setting
-$modelInstance = Mockery::mock(Model::class)->makePartial();
+$savedValue = null;
+$model = Mockery::mock(Model::class);
+
+// Mock property reads via getAttribute
+$model->allows('getAttribute')->with('name')->andReturn('John');
+$model->allows('getAttribute')->with('email')->andReturn('john@example.com');
+
+// Mock property writes via setAttribute - capture values for assertions
+$model->allows('setAttribute')->andReturnUsing(function ($key, $value) use (&$savedValue): void {
+    if ($key === 'status') {
+        $savedValue = $value;
+    }
+});
+
+// Mock methods
+$model->shouldReceive('save')->once();
+
+$action = new SomeAction();
+$action->execute($model);
+
+expect($savedValue)->toBe('active');
+```
+
+**Important:** For mutable state tracking, use full closures with `use (&$var)` reference capture. Arrow functions (`fn() => $var`) capture by **value** and won't see updates:
+
+```php
+// WRONG - arrow function captures by value
+$model->allows('getAttribute')->with('location')->andReturnUsing(fn () => $savedLocation);
+
+// CORRECT - full closure captures by reference
+$model->allows('getAttribute')->with('location')->andReturnUsing(function () use (&$savedLocation) {
+    return $savedLocation;
+});
+```
+
+### For Eloquent Models in Actions
+If an action uses Eloquent models, they should be injected and mocked:
+
+```php
+// Track values set by the action
+$savedValues = [];
+$modelInstance = Mockery::mock(Model::class);
+$modelInstance->allows('setAttribute')->andReturnUsing(function ($key, $value) use (&$savedValues): void {
+    $savedValues[$key] = $value;
+});
+$modelInstance->allows('getAttribute')->andReturnUsing(function ($key) use (&$savedValues): mixed {
+    return $savedValues[$key] ?? null;
+});
 $modelInstance->shouldReceive('save')->once();
 
 // The injected model mock returns the instance
@@ -157,7 +209,7 @@ $action = new SomeAction($model);
 $action->execute($data);
 
 // Assert properties were set correctly
-expect($modelInstance->name)->toBe('expected value');
+expect($savedValues['name'])->toBe('expected value');
 ```
 
 ### For Services with HTTP Calls
@@ -229,8 +281,15 @@ $queryBuilder = Mockery::mock(Builder::class);
 $queryBuilder->shouldReceive('where')->andReturnSelf();
 $queryBuilder->shouldReceive('first')->andReturn(null);
 
-// New instance will be created
-$newInstance = Mockery::mock(Model::class)->makePartial();
+// New instance will be created - track values set by the service
+$savedValues = [];
+$newInstance = Mockery::mock(Model::class);
+$newInstance->allows('setAttribute')->andReturnUsing(function ($key, $value) use (&$savedValues): void {
+    $savedValues[$key] = $value;
+});
+$newInstance->allows('getAttribute')->andReturnUsing(function ($key) use (&$savedValues): mixed {
+    return $savedValues[$key] ?? null;
+});
 $newInstance->shouldReceive('save')->once();
 
 $model = Mockery::mock(Model::class);

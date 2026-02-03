@@ -12,9 +12,9 @@ use Illuminate\Database\Eloquent\Builder;
 describe('GetSetAction', function (): void {
     it('should return existing set from database without calling API', function (): void {
         // arrange
-        $existingSet = Mockery::mock(Set::class)->makePartial();
-        $existingSet->id = 1;
-        $existingSet->set_num = '75192-1';
+        $existingSet = Mockery::mock(Set::class);
+        $existingSet->allows('getAttribute')->with('id')->andReturn(1);
+        $existingSet->allows('getAttribute')->with('set_num')->andReturn('75192-1');
 
         $queryBuilder = Mockery::mock(Builder::class);
         $queryBuilder->shouldReceive('where')

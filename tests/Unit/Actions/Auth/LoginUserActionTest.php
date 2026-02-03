@@ -12,8 +12,8 @@ use Illuminate\Validation\ValidationException;
 describe('LoginUserAction', function (): void {
     it('should return user when credentials are valid', function (): void {
         // arrange
-        $userInstance = Mockery::mock(User::class)->makePartial();
-        $userInstance->password = 'hashed_password';
+        $userInstance = Mockery::mock(User::class);
+        $userInstance->allows('getAttribute')->with('password')->andReturn('hashed_password');
 
         $builder = Mockery::mock(Builder::class);
         $builder->shouldReceive('where')
@@ -52,8 +52,8 @@ describe('LoginUserAction', function (): void {
 
     it('should throw validation exception when password is incorrect', function (): void {
         // arrange
-        $userInstance = Mockery::mock(User::class)->makePartial();
-        $userInstance->password = 'hashed_password';
+        $userInstance = Mockery::mock(User::class);
+        $userInstance->allows('getAttribute')->with('password')->andReturn('hashed_password');
 
         $builder = Mockery::mock(Builder::class);
         $builder->shouldReceive('where')

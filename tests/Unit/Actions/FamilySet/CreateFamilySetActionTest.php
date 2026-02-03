@@ -16,8 +16,8 @@ use Illuminate\Support\Facades\Date;
 describe('CreateFamilySetAction', function (): void {
     it('should fetch set using GetSetAction', function (): void {
         // arrange
-        $set = Mockery::mock(Set::class)->makePartial();
-        $set->id = 1;
+        $set = Mockery::mock(Set::class);
+        $set->allows('getAttribute')->with('id')->andReturn(1);
 
         $getSetAction = Mockery::mock(GetSetAction::class);
         $getSetAction->shouldReceive('execute')
@@ -25,7 +25,14 @@ describe('CreateFamilySetAction', function (): void {
             ->once()
             ->andReturn($set);
 
-        $familySet = Mockery::mock(FamilySet::class)->makePartial();
+        $familySetSavedValues = [];
+        $familySet = Mockery::mock(FamilySet::class);
+        $familySet->allows('setAttribute')->andReturnUsing(function ($key, $value) use (&$familySetSavedValues): void {
+            $familySetSavedValues[$key] = $value;
+        });
+        $familySet->allows('getAttribute')->andReturnUsing(function ($key) use (&$familySetSavedValues): mixed {
+            return $familySetSavedValues[$key] ?? null;
+        });
         $familySet->shouldReceive('save')->once();
 
         $familySetModel = Mockery::mock(FamilySet::class);
@@ -33,8 +40,8 @@ describe('CreateFamilySetAction', function (): void {
             ->once()
             ->andReturn($familySet);
 
-        $family = Mockery::mock(Family::class)->makePartial();
-        $family->id = 10;
+        $family = Mockery::mock(Family::class);
+        $family->allows('getAttribute')->with('id')->andReturn(10);
 
         $updateAction = Mockery::mock(UpdateFamilySetAction::class);
         $updateAction->shouldReceive('execute')
@@ -63,13 +70,20 @@ describe('CreateFamilySetAction', function (): void {
 
     it('should create family set with correct family_id and set_id', function (): void {
         // arrange
-        $set = Mockery::mock(Set::class)->makePartial();
-        $set->id = 42;
+        $set = Mockery::mock(Set::class);
+        $set->allows('getAttribute')->with('id')->andReturn(42);
 
         $getSetAction = Mockery::mock(GetSetAction::class);
         $getSetAction->shouldReceive('execute')->andReturn($set);
 
-        $familySet = Mockery::mock(FamilySet::class)->makePartial();
+        $familySetSavedValues = [];
+        $familySet = Mockery::mock(FamilySet::class);
+        $familySet->allows('setAttribute')->andReturnUsing(function ($key, $value) use (&$familySetSavedValues): void {
+            $familySetSavedValues[$key] = $value;
+        });
+        $familySet->allows('getAttribute')->andReturnUsing(function ($key) use (&$familySetSavedValues): mixed {
+            return $familySetSavedValues[$key] ?? null;
+        });
         $familySet->shouldReceive('save')->once();
 
         $familySetModel = Mockery::mock(FamilySet::class);
@@ -77,8 +91,8 @@ describe('CreateFamilySetAction', function (): void {
             ->once()
             ->andReturn($familySet);
 
-        $family = Mockery::mock(Family::class)->makePartial();
-        $family->id = 99;
+        $family = Mockery::mock(Family::class);
+        $family->allows('getAttribute')->with('id')->andReturn(99);
 
         $updateAction = Mockery::mock(UpdateFamilySetAction::class);
         $updateAction->shouldReceive('execute')->andReturn($familySet);
@@ -101,26 +115,28 @@ describe('CreateFamilySetAction', function (): void {
         $action->execute($family, $data);
 
         // assert
-        expect($familySet->family_id)->toBe(99);
-        expect($familySet->set_id)->toBe(42);
+        expect($familySetSavedValues['family_id'])->toBe(99);
+        expect($familySetSavedValues['set_id'])->toBe(42);
     });
 
     it('should delegate to update action with correct data', function (): void {
         // arrange
-        $set = Mockery::mock(Set::class)->makePartial();
-        $set->id = 1;
+        $set = Mockery::mock(Set::class);
+        $set->allows('getAttribute')->with('id')->andReturn(1);
 
         $getSetAction = Mockery::mock(GetSetAction::class);
         $getSetAction->shouldReceive('execute')->andReturn($set);
 
-        $familySet = Mockery::mock(FamilySet::class)->makePartial();
+        $familySet = Mockery::mock(FamilySet::class);
+        $familySet->allows('setAttribute');
+        $familySet->allows('getAttribute');
         $familySet->shouldReceive('save');
 
         $familySetModel = Mockery::mock(FamilySet::class);
         $familySetModel->shouldReceive('newInstance')->andReturn($familySet);
 
-        $family = Mockery::mock(Family::class)->makePartial();
-        $family->id = 10;
+        $family = Mockery::mock(Family::class);
+        $family->allows('getAttribute')->with('id')->andReturn(10);
 
         $purchaseDate = Date::parse('2024-01-15');
 
@@ -158,20 +174,22 @@ describe('CreateFamilySetAction', function (): void {
 
     it('should return the family set from update action', function (): void {
         // arrange
-        $set = Mockery::mock(Set::class)->makePartial();
-        $set->id = 1;
+        $set = Mockery::mock(Set::class);
+        $set->allows('getAttribute')->with('id')->andReturn(1);
 
         $getSetAction = Mockery::mock(GetSetAction::class);
         $getSetAction->shouldReceive('execute')->andReturn($set);
 
-        $familySet = Mockery::mock(FamilySet::class)->makePartial();
+        $familySet = Mockery::mock(FamilySet::class);
+        $familySet->allows('setAttribute');
+        $familySet->allows('getAttribute');
         $familySet->shouldReceive('save');
 
         $familySetModel = Mockery::mock(FamilySet::class);
         $familySetModel->shouldReceive('newInstance')->andReturn($familySet);
 
-        $family = Mockery::mock(Family::class)->makePartial();
-        $family->id = 10;
+        $family = Mockery::mock(Family::class);
+        $family->allows('getAttribute')->with('id')->andReturn(10);
 
         $updateAction = Mockery::mock(UpdateFamilySetAction::class);
         $updateAction->shouldReceive('execute')->andReturn($familySet);
