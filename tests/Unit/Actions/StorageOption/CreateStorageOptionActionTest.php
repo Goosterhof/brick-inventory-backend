@@ -10,7 +10,14 @@ use App\Models\User;
 describe('CreateStorageOptionAction', function (): void {
     it('should create a storage option with the provided data', function (): void {
         // arrange
-        $storageOptionInstance = Mockery::mock(StorageOption::class)->makePartial();
+        $savedValues = [];
+        $storageOptionInstance = Mockery::mock(StorageOption::class);
+        $storageOptionInstance->allows('setAttribute')->andReturnUsing(function ($key, $value) use (&$savedValues): void {
+            $savedValues[$key] = $value;
+        });
+        $storageOptionInstance->allows('getAttribute')->andReturnUsing(function ($key) use (&$savedValues): mixed {
+            return $savedValues[$key] ?? null;
+        });
         $storageOptionInstance->shouldReceive('save')->once();
 
         $storageOption = Mockery::mock(StorageOption::class);
@@ -19,8 +26,8 @@ describe('CreateStorageOptionAction', function (): void {
             ->once()
             ->andReturn($storageOptionInstance);
 
-        $user = Mockery::mock(User::class)->makePartial();
-        $user->family_id = 1;
+        $user = Mockery::mock(User::class);
+        $user->allows('getAttribute')->with('family_id')->andReturn(1);
 
         $action = new CreateStorageOptionAction($storageOption, $user);
         $data = new class implements StorageOptionDataInterface
@@ -41,14 +48,21 @@ describe('CreateStorageOptionAction', function (): void {
 
         // assert
         expect($result)->toBe($storageOptionInstance)
-            ->and($storageOptionInstance->family_id)->toBe(1)
-            ->and($storageOptionInstance->name)->toBe('Cabinet 1')
-            ->and($storageOptionInstance->description)->toBe('Main storage cabinet');
+            ->and($savedValues['family_id'])->toBe(1)
+            ->and($savedValues['name'])->toBe('Cabinet 1')
+            ->and($savedValues['description'])->toBe('Main storage cabinet');
     });
 
     it('should set parent_id, row, and column when provided', function (): void {
         // arrange
-        $storageOptionInstance = Mockery::mock(StorageOption::class)->makePartial();
+        $savedValues = [];
+        $storageOptionInstance = Mockery::mock(StorageOption::class);
+        $storageOptionInstance->allows('setAttribute')->andReturnUsing(function ($key, $value) use (&$savedValues): void {
+            $savedValues[$key] = $value;
+        });
+        $storageOptionInstance->allows('getAttribute')->andReturnUsing(function ($key) use (&$savedValues): mixed {
+            return $savedValues[$key] ?? null;
+        });
         $storageOptionInstance->shouldReceive('save')->once();
 
         $storageOption = Mockery::mock(StorageOption::class);
@@ -57,8 +71,8 @@ describe('CreateStorageOptionAction', function (): void {
             ->once()
             ->andReturn($storageOptionInstance);
 
-        $user = Mockery::mock(User::class)->makePartial();
-        $user->family_id = 1;
+        $user = Mockery::mock(User::class);
+        $user->allows('getAttribute')->with('family_id')->andReturn(1);
 
         $action = new CreateStorageOptionAction($storageOption, $user);
         $data = new class implements StorageOptionDataInterface
@@ -78,14 +92,16 @@ describe('CreateStorageOptionAction', function (): void {
         $action->execute($data);
 
         // assert
-        expect($storageOptionInstance->parent_id)->toBe(5)
-            ->and($storageOptionInstance->row)->toBe(1)
-            ->and($storageOptionInstance->column)->toBe(2);
+        expect($savedValues['parent_id'])->toBe(5)
+            ->and($savedValues['row'])->toBe(1)
+            ->and($savedValues['column'])->toBe(2);
     });
 
     it('should call save on the storage option', function (): void {
         // arrange
-        $storageOptionInstance = Mockery::mock(StorageOption::class)->makePartial();
+        $storageOptionInstance = Mockery::mock(StorageOption::class);
+        $storageOptionInstance->allows('setAttribute');
+        $storageOptionInstance->allows('getAttribute');
         $storageOptionInstance->shouldReceive('save')->once();
 
         $storageOption = Mockery::mock(StorageOption::class);
@@ -93,8 +109,8 @@ describe('CreateStorageOptionAction', function (): void {
             ->withNoArgs()
             ->andReturn($storageOptionInstance);
 
-        $user = Mockery::mock(User::class)->makePartial();
-        $user->family_id = 1;
+        $user = Mockery::mock(User::class);
+        $user->allows('getAttribute')->with('family_id')->andReturn(1);
 
         $action = new CreateStorageOptionAction($storageOption, $user);
         $data = new class implements StorageOptionDataInterface

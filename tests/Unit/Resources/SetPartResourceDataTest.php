@@ -8,13 +8,13 @@ use App\Models\SetPart;
 describe('SetPartResourceData', function (): void {
     it('should convert set part model to resource data', function (): void {
         // arrange
-        $setPart = Mockery::mock(SetPart::class)->makePartial();
-        $setPart->id = 1;
-        $setPart->part_id = 10;
-        $setPart->color_id = 5;
-        $setPart->quantity = 10;
-        $setPart->is_spare = false;
-        $setPart->element_id = '300101';
+        $setPart = Mockery::mock(SetPart::class);
+        $setPart->allows('getAttribute')->with('id')->andReturn(1);
+        $setPart->allows('getAttribute')->with('part_id')->andReturn(10);
+        $setPart->allows('getAttribute')->with('color_id')->andReturn(5);
+        $setPart->allows('getAttribute')->with('quantity')->andReturn(10);
+        $setPart->allows('getAttribute')->with('is_spare')->andReturn(false);
+        $setPart->allows('getAttribute')->with('element_id')->andReturn('300101');
 
         // act
         $resource = SetPartResourceData::from($setPart);
@@ -31,13 +31,13 @@ describe('SetPartResourceData', function (): void {
 
     it('should handle spare parts', function (): void {
         // arrange
-        $setPart = Mockery::mock(SetPart::class)->makePartial();
-        $setPart->id = 2;
-        $setPart->part_id = 20;
-        $setPart->color_id = 15;
-        $setPart->quantity = 3;
-        $setPart->is_spare = true;
-        $setPart->element_id = null;
+        $setPart = Mockery::mock(SetPart::class);
+        $setPart->allows('getAttribute')->with('id')->andReturn(2);
+        $setPart->allows('getAttribute')->with('part_id')->andReturn(20);
+        $setPart->allows('getAttribute')->with('color_id')->andReturn(15);
+        $setPart->allows('getAttribute')->with('quantity')->andReturn(3);
+        $setPart->allows('getAttribute')->with('is_spare')->andReturn(true);
+        $setPart->allows('getAttribute')->with('element_id')->andReturn(null);
 
         // act
         $resource = SetPartResourceData::from($setPart);
@@ -49,13 +49,13 @@ describe('SetPartResourceData', function (): void {
 
     it('should convert to array format', function (): void {
         // arrange
-        $setPart = Mockery::mock(SetPart::class)->makePartial();
-        $setPart->id = 1;
-        $setPart->part_id = 10;
-        $setPart->color_id = 5;
-        $setPart->quantity = 10;
-        $setPart->is_spare = false;
-        $setPart->element_id = '300101';
+        $setPart = Mockery::mock(SetPart::class);
+        $setPart->allows('getAttribute')->with('id')->andReturn(1);
+        $setPart->allows('getAttribute')->with('part_id')->andReturn(10);
+        $setPart->allows('getAttribute')->with('color_id')->andReturn(5);
+        $setPart->allows('getAttribute')->with('quantity')->andReturn(10);
+        $setPart->allows('getAttribute')->with('is_spare')->andReturn(false);
+        $setPart->allows('getAttribute')->with('element_id')->andReturn('300101');
 
         // act
         $resource = SetPartResourceData::from($setPart);

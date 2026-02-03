@@ -14,7 +14,14 @@ describe('UpsertColorAction', function (): void {
         $queryBuilder->shouldReceive('where')->with('rebrickable_id', 1)->once()->andReturnSelf();
         $queryBuilder->shouldReceive('first')->once()->andReturn(null);
 
-        $newColor = Mockery::mock(Color::class)->makePartial();
+        $newColorSavedValues = [];
+        $newColor = Mockery::mock(Color::class);
+        $newColor->allows('setAttribute')->andReturnUsing(function ($key, $value) use (&$newColorSavedValues): void {
+            $newColorSavedValues[$key] = $value;
+        });
+        $newColor->allows('getAttribute')->andReturnUsing(function ($key) use (&$newColorSavedValues): mixed {
+            return $newColorSavedValues[$key] ?? null;
+        });
         $newColor->shouldReceive('save')->once();
 
         $color = Mockery::mock(Color::class);
@@ -35,17 +42,22 @@ describe('UpsertColorAction', function (): void {
 
         // assert
         expect($result)->toBe($newColor);
-        expect($result->rebrickable_id)->toBe(1);
-        expect($result->name)->toBe('White');
-        expect($result->rgb)->toBe('FFFFFF');
-        expect($result->is_transparent)->toBeFalse();
+        expect($newColorSavedValues['rebrickable_id'])->toBe(1);
+        expect($newColorSavedValues['name'])->toBe('White');
+        expect($newColorSavedValues['rgb'])->toBe('FFFFFF');
+        expect($newColorSavedValues['is_transparent'])->toBeFalse();
     });
 
     it('should update an existing color when it exists', function (): void {
         // arrange
-        $existingColor = Mockery::mock(Color::class)->makePartial();
-        $existingColor->id = 1;
-        $existingColor->rebrickable_id = 1;
+        $existingSavedValues = ['id' => 1, 'rebrickable_id' => 1];
+        $existingColor = Mockery::mock(Color::class);
+        $existingColor->allows('setAttribute')->andReturnUsing(function ($key, $value) use (&$existingSavedValues): void {
+            $existingSavedValues[$key] = $value;
+        });
+        $existingColor->allows('getAttribute')->andReturnUsing(function ($key) use (&$existingSavedValues): mixed {
+            return $existingSavedValues[$key] ?? null;
+        });
         $existingColor->shouldReceive('save')->once();
 
         $queryBuilder = Mockery::mock(Builder::class);
@@ -69,8 +81,8 @@ describe('UpsertColorAction', function (): void {
 
         // assert
         expect($result)->toBe($existingColor);
-        expect($result->name)->toBe('Updated White');
-        expect($result->rgb)->toBe('FFFFF0');
+        expect($existingSavedValues['name'])->toBe('Updated White');
+        expect($existingSavedValues['rgb'])->toBe('FFFFF0');
     });
 
     it('should handle transparent colors', function (): void {
@@ -79,7 +91,14 @@ describe('UpsertColorAction', function (): void {
         $queryBuilder->shouldReceive('where')->andReturnSelf();
         $queryBuilder->shouldReceive('first')->andReturn(null);
 
-        $newColor = Mockery::mock(Color::class)->makePartial();
+        $newColorSavedValues = [];
+        $newColor = Mockery::mock(Color::class);
+        $newColor->allows('setAttribute')->andReturnUsing(function ($key, $value) use (&$newColorSavedValues): void {
+            $newColorSavedValues[$key] = $value;
+        });
+        $newColor->allows('getAttribute')->andReturnUsing(function ($key) use (&$newColorSavedValues): mixed {
+            return $newColorSavedValues[$key] ?? null;
+        });
         $newColor->shouldReceive('save')->once();
 
         $color = Mockery::mock(Color::class);
@@ -99,7 +118,7 @@ describe('UpsertColorAction', function (): void {
         $result = $action->execute($data);
 
         // assert
-        expect($result->name)->toBe('Trans-Red');
-        expect($result->is_transparent)->toBeTrue();
+        expect($newColorSavedValues['name'])->toBe('Trans-Red');
+        expect($newColorSavedValues['is_transparent'])->toBeTrue();
     });
 });

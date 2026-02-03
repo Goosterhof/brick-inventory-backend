@@ -17,14 +17,14 @@ use Illuminate\Database\Eloquent\Builder;
 describe('StoreSetPartsAction', function (): void {
     it('should create set parts when they do not exist', function (): void {
         // arrange
-        $set = Mockery::mock(Set::class)->makePartial();
-        $set->id = 1;
+        $set = Mockery::mock(Set::class);
+        $set->allows('getAttribute')->with('id')->andReturn(1);
 
-        $color = Mockery::mock(Color::class)->makePartial();
-        $color->id = 1;
+        $color = Mockery::mock(Color::class);
+        $color->allows('getAttribute')->with('id')->andReturn(1);
 
-        $part = Mockery::mock(Part::class)->makePartial();
-        $part->id = 1;
+        $part = Mockery::mock(Part::class);
+        $part->allows('getAttribute')->with('id')->andReturn(1);
 
         $colorData = new LegoColorData(id: 1, name: 'White', rgb: 'FFFFFF', isTransparent: false);
         $partData = new LegoPartData(partNum: '3001', name: 'Brick 2 x 4', categoryId: 11, imageUrl: null);
@@ -45,7 +45,14 @@ describe('StoreSetPartsAction', function (): void {
         $setPartQueryBuilder->shouldReceive('where')->andReturnSelf();
         $setPartQueryBuilder->shouldReceive('first')->andReturn(null);
 
-        $newSetPart = Mockery::mock(SetPart::class)->makePartial();
+        $newSetPartSavedValues = [];
+        $newSetPart = Mockery::mock(SetPart::class);
+        $newSetPart->allows('setAttribute')->andReturnUsing(function ($key, $value) use (&$newSetPartSavedValues): void {
+            $newSetPartSavedValues[$key] = $value;
+        });
+        $newSetPart->allows('getAttribute')->andReturnUsing(function ($key) use (&$newSetPartSavedValues): mixed {
+            return $newSetPartSavedValues[$key] ?? null;
+        });
         $newSetPart->shouldReceive('save')->once();
 
         $setPart = Mockery::mock(SetPart::class);
@@ -68,24 +75,24 @@ describe('StoreSetPartsAction', function (): void {
         $action->execute($set, $partsData);
 
         // assert
-        expect($newSetPart->set_id)->toBe(1);
-        expect($newSetPart->part_id)->toBe(1);
-        expect($newSetPart->color_id)->toBe(1);
-        expect($newSetPart->quantity)->toBe(10);
-        expect($newSetPart->is_spare)->toBeFalse();
-        expect($newSetPart->element_id)->toBe('300101');
+        expect($newSetPartSavedValues['set_id'])->toBe(1);
+        expect($newSetPartSavedValues['part_id'])->toBe(1);
+        expect($newSetPartSavedValues['color_id'])->toBe(1);
+        expect($newSetPartSavedValues['quantity'])->toBe(10);
+        expect($newSetPartSavedValues['is_spare'])->toBeFalse();
+        expect($newSetPartSavedValues['element_id'])->toBe('300101');
     });
 
     it('should update existing set parts', function (): void {
         // arrange
-        $set = Mockery::mock(Set::class)->makePartial();
-        $set->id = 1;
+        $set = Mockery::mock(Set::class);
+        $set->allows('getAttribute')->with('id')->andReturn(1);
 
-        $color = Mockery::mock(Color::class)->makePartial();
-        $color->id = 1;
+        $color = Mockery::mock(Color::class);
+        $color->allows('getAttribute')->with('id')->andReturn(1);
 
-        $part = Mockery::mock(Part::class)->makePartial();
-        $part->id = 1;
+        $part = Mockery::mock(Part::class);
+        $part->allows('getAttribute')->with('id')->andReturn(1);
 
         $upsertColorAction = Mockery::mock(UpsertColorAction::class);
         $upsertColorAction->shouldReceive('execute')->once()->andReturn($color);
@@ -93,12 +100,20 @@ describe('StoreSetPartsAction', function (): void {
         $upsertPartAction = Mockery::mock(UpsertPartAction::class);
         $upsertPartAction->shouldReceive('execute')->once()->andReturn($part);
 
-        $existingSetPart = Mockery::mock(SetPart::class)->makePartial();
-        $existingSetPart->set_id = 1;
-        $existingSetPart->part_id = 1;
-        $existingSetPart->color_id = 1;
-        $existingSetPart->is_spare = false;
-        $existingSetPart->quantity = 5;
+        $existingSavedValues = [
+            'set_id' => 1,
+            'part_id' => 1,
+            'color_id' => 1,
+            'is_spare' => false,
+            'quantity' => 5,
+        ];
+        $existingSetPart = Mockery::mock(SetPart::class);
+        $existingSetPart->allows('setAttribute')->andReturnUsing(function ($key, $value) use (&$existingSavedValues): void {
+            $existingSavedValues[$key] = $value;
+        });
+        $existingSetPart->allows('getAttribute')->andReturnUsing(function ($key) use (&$existingSavedValues): mixed {
+            return $existingSavedValues[$key] ?? null;
+        });
         $existingSetPart->shouldReceive('save')->once();
 
         $setPartQueryBuilder = Mockery::mock(Builder::class);
@@ -124,26 +139,26 @@ describe('StoreSetPartsAction', function (): void {
         $action->execute($set, $partsData);
 
         // assert
-        expect($existingSetPart->quantity)->toBe(15);
-        expect($existingSetPart->element_id)->toBe('NEW123');
+        expect($existingSavedValues['quantity'])->toBe(15);
+        expect($existingSavedValues['element_id'])->toBe('NEW123');
     });
 
     it('should process multiple parts', function (): void {
         // arrange
-        $set = Mockery::mock(Set::class)->makePartial();
-        $set->id = 1;
+        $set = Mockery::mock(Set::class);
+        $set->allows('getAttribute')->with('id')->andReturn(1);
 
-        $color1 = Mockery::mock(Color::class)->makePartial();
-        $color1->id = 1;
+        $color1 = Mockery::mock(Color::class);
+        $color1->allows('getAttribute')->with('id')->andReturn(1);
 
-        $color2 = Mockery::mock(Color::class)->makePartial();
-        $color2->id = 2;
+        $color2 = Mockery::mock(Color::class);
+        $color2->allows('getAttribute')->with('id')->andReturn(2);
 
-        $part1 = Mockery::mock(Part::class)->makePartial();
-        $part1->id = 1;
+        $part1 = Mockery::mock(Part::class);
+        $part1->allows('getAttribute')->with('id')->andReturn(1);
 
-        $part2 = Mockery::mock(Part::class)->makePartial();
-        $part2->id = 2;
+        $part2 = Mockery::mock(Part::class);
+        $part2->allows('getAttribute')->with('id')->andReturn(2);
 
         $upsertColorAction = Mockery::mock(UpsertColorAction::class);
         $upsertColorAction->shouldReceive('execute')->twice()->andReturn($color1, $color2);
@@ -155,10 +170,24 @@ describe('StoreSetPartsAction', function (): void {
         $setPartQueryBuilder->shouldReceive('where')->andReturnSelf();
         $setPartQueryBuilder->shouldReceive('first')->andReturn(null);
 
-        $newSetPart1 = Mockery::mock(SetPart::class)->makePartial();
+        $newSetPart1SavedValues = [];
+        $newSetPart1 = Mockery::mock(SetPart::class);
+        $newSetPart1->allows('setAttribute')->andReturnUsing(function ($key, $value) use (&$newSetPart1SavedValues): void {
+            $newSetPart1SavedValues[$key] = $value;
+        });
+        $newSetPart1->allows('getAttribute')->andReturnUsing(function ($key) use (&$newSetPart1SavedValues): mixed {
+            return $newSetPart1SavedValues[$key] ?? null;
+        });
         $newSetPart1->shouldReceive('save')->once();
 
-        $newSetPart2 = Mockery::mock(SetPart::class)->makePartial();
+        $newSetPart2SavedValues = [];
+        $newSetPart2 = Mockery::mock(SetPart::class);
+        $newSetPart2->allows('setAttribute')->andReturnUsing(function ($key, $value) use (&$newSetPart2SavedValues): void {
+            $newSetPart2SavedValues[$key] = $value;
+        });
+        $newSetPart2->allows('getAttribute')->andReturnUsing(function ($key) use (&$newSetPart2SavedValues): mixed {
+            return $newSetPart2SavedValues[$key] ?? null;
+        });
         $newSetPart2->shouldReceive('save')->once();
 
         $setPart = Mockery::mock(SetPart::class);
@@ -188,16 +217,16 @@ describe('StoreSetPartsAction', function (): void {
         $action->execute($set, $partsData);
 
         // assert
-        expect($newSetPart1->quantity)->toBe(5);
-        expect($newSetPart1->is_spare)->toBeFalse();
-        expect($newSetPart2->quantity)->toBe(3);
-        expect($newSetPart2->is_spare)->toBeTrue();
+        expect($newSetPart1SavedValues['quantity'])->toBe(5);
+        expect($newSetPart1SavedValues['is_spare'])->toBeFalse();
+        expect($newSetPart2SavedValues['quantity'])->toBe(3);
+        expect($newSetPart2SavedValues['is_spare'])->toBeTrue();
     });
 
     it('should handle empty parts data', function (): void {
         // arrange
-        $set = Mockery::mock(Set::class)->makePartial();
-        $set->id = 1;
+        $set = Mockery::mock(Set::class);
+        $set->allows('getAttribute')->with('id')->andReturn(1);
 
         $upsertColorAction = Mockery::mock(UpsertColorAction::class);
         $upsertColorAction->shouldReceive('execute')->never();

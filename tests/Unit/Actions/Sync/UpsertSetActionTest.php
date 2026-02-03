@@ -14,7 +14,14 @@ describe('UpsertSetAction', function (): void {
         $queryBuilder->shouldReceive('where')->with('set_num', '75192-1')->once()->andReturnSelf();
         $queryBuilder->shouldReceive('first')->once()->andReturn(null);
 
-        $newSet = Mockery::mock(Set::class)->makePartial();
+        $newSetSavedValues = [];
+        $newSet = Mockery::mock(Set::class);
+        $newSet->allows('setAttribute')->andReturnUsing(function ($key, $value) use (&$newSetSavedValues): void {
+            $newSetSavedValues[$key] = $value;
+        });
+        $newSet->allows('getAttribute')->andReturnUsing(function ($key) use (&$newSetSavedValues): mixed {
+            return $newSetSavedValues[$key] ?? null;
+        });
         $newSet->shouldReceive('save')->once();
 
         $set = Mockery::mock(Set::class);
@@ -37,19 +44,24 @@ describe('UpsertSetAction', function (): void {
 
         // assert
         expect($result)->toBe($newSet);
-        expect($result->set_num)->toBe('75192-1');
-        expect($result->name)->toBe('Millennium Falcon');
-        expect($result->year)->toBe(2017);
-        expect($result->theme)->toBe('158');
-        expect($result->num_parts)->toBe(7541);
-        expect($result->image_url)->toBe('https://example.com/75192.jpg');
+        expect($newSetSavedValues['set_num'])->toBe('75192-1');
+        expect($newSetSavedValues['name'])->toBe('Millennium Falcon');
+        expect($newSetSavedValues['year'])->toBe(2017);
+        expect($newSetSavedValues['theme'])->toBe('158');
+        expect($newSetSavedValues['num_parts'])->toBe(7541);
+        expect($newSetSavedValues['image_url'])->toBe('https://example.com/75192.jpg');
     });
 
     it('should update an existing set when it exists', function (): void {
         // arrange
-        $existingSet = Mockery::mock(Set::class)->makePartial();
-        $existingSet->id = 1;
-        $existingSet->set_num = '75192-1';
+        $existingSavedValues = ['id' => 1, 'set_num' => '75192-1'];
+        $existingSet = Mockery::mock(Set::class);
+        $existingSet->allows('setAttribute')->andReturnUsing(function ($key, $value) use (&$existingSavedValues): void {
+            $existingSavedValues[$key] = $value;
+        });
+        $existingSet->allows('getAttribute')->andReturnUsing(function ($key) use (&$existingSavedValues): mixed {
+            return $existingSavedValues[$key] ?? null;
+        });
         $existingSet->shouldReceive('save')->once();
 
         $queryBuilder = Mockery::mock(Builder::class);
@@ -75,11 +87,11 @@ describe('UpsertSetAction', function (): void {
 
         // assert
         expect($result)->toBe($existingSet);
-        expect($result->name)->toBe('Updated Millennium Falcon');
-        expect($result->year)->toBe(2018);
-        expect($result->theme)->toBe('159');
-        expect($result->num_parts)->toBe(7600);
-        expect($result->image_url)->toBe('https://example.com/updated.jpg');
+        expect($existingSavedValues['name'])->toBe('Updated Millennium Falcon');
+        expect($existingSavedValues['year'])->toBe(2018);
+        expect($existingSavedValues['theme'])->toBe('159');
+        expect($existingSavedValues['num_parts'])->toBe(7600);
+        expect($existingSavedValues['image_url'])->toBe('https://example.com/updated.jpg');
     });
 
     it('should handle null theme_id and set_img_url', function (): void {
@@ -88,7 +100,14 @@ describe('UpsertSetAction', function (): void {
         $queryBuilder->shouldReceive('where')->andReturnSelf();
         $queryBuilder->shouldReceive('first')->andReturn(null);
 
-        $newSet = Mockery::mock(Set::class)->makePartial();
+        $newSetSavedValues = [];
+        $newSet = Mockery::mock(Set::class);
+        $newSet->allows('setAttribute')->andReturnUsing(function ($key, $value) use (&$newSetSavedValues): void {
+            $newSetSavedValues[$key] = $value;
+        });
+        $newSet->allows('getAttribute')->andReturnUsing(function ($key) use (&$newSetSavedValues): mixed {
+            return $newSetSavedValues[$key] ?? null;
+        });
         $newSet->shouldReceive('save')->once();
 
         $set = Mockery::mock(Set::class);
@@ -110,7 +129,7 @@ describe('UpsertSetAction', function (): void {
         $result = $action->execute($data);
 
         // assert
-        expect($result->theme)->toBeNull();
-        expect($result->image_url)->toBeNull();
+        expect($newSetSavedValues['theme'])->toBeNull();
+        expect($newSetSavedValues['image_url'])->toBeNull();
     });
 });

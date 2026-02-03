@@ -14,7 +14,14 @@ describe('UpsertPartAction', function (): void {
         $queryBuilder->shouldReceive('where')->with('part_num', '3001')->once()->andReturnSelf();
         $queryBuilder->shouldReceive('first')->once()->andReturn(null);
 
-        $newPart = Mockery::mock(Part::class)->makePartial();
+        $newPartSavedValues = [];
+        $newPart = Mockery::mock(Part::class);
+        $newPart->allows('setAttribute')->andReturnUsing(function ($key, $value) use (&$newPartSavedValues): void {
+            $newPartSavedValues[$key] = $value;
+        });
+        $newPart->allows('getAttribute')->andReturnUsing(function ($key) use (&$newPartSavedValues): mixed {
+            return $newPartSavedValues[$key] ?? null;
+        });
         $newPart->shouldReceive('save')->once();
 
         $part = Mockery::mock(Part::class);
@@ -35,17 +42,22 @@ describe('UpsertPartAction', function (): void {
 
         // assert
         expect($result)->toBe($newPart);
-        expect($result->part_num)->toBe('3001');
-        expect($result->name)->toBe('Brick 2 x 4');
-        expect($result->category)->toBe('11');
-        expect($result->image_url)->toBe('https://example.com/3001.jpg');
+        expect($newPartSavedValues['part_num'])->toBe('3001');
+        expect($newPartSavedValues['name'])->toBe('Brick 2 x 4');
+        expect($newPartSavedValues['category'])->toBe('11');
+        expect($newPartSavedValues['image_url'])->toBe('https://example.com/3001.jpg');
     });
 
     it('should update an existing part when it exists', function (): void {
         // arrange
-        $existingPart = Mockery::mock(Part::class)->makePartial();
-        $existingPart->id = 1;
-        $existingPart->part_num = '3001';
+        $existingSavedValues = ['id' => 1, 'part_num' => '3001'];
+        $existingPart = Mockery::mock(Part::class);
+        $existingPart->allows('setAttribute')->andReturnUsing(function ($key, $value) use (&$existingSavedValues): void {
+            $existingSavedValues[$key] = $value;
+        });
+        $existingPart->allows('getAttribute')->andReturnUsing(function ($key) use (&$existingSavedValues): mixed {
+            return $existingSavedValues[$key] ?? null;
+        });
         $existingPart->shouldReceive('save')->once();
 
         $queryBuilder = Mockery::mock(Builder::class);
@@ -69,9 +81,9 @@ describe('UpsertPartAction', function (): void {
 
         // assert
         expect($result)->toBe($existingPart);
-        expect($result->name)->toBe('Updated Brick 2 x 4');
-        expect($result->category)->toBe('12');
-        expect($result->image_url)->toBe('https://example.com/updated.jpg');
+        expect($existingSavedValues['name'])->toBe('Updated Brick 2 x 4');
+        expect($existingSavedValues['category'])->toBe('12');
+        expect($existingSavedValues['image_url'])->toBe('https://example.com/updated.jpg');
     });
 
     it('should handle null part_cat_id and part_img_url', function (): void {
@@ -80,7 +92,14 @@ describe('UpsertPartAction', function (): void {
         $queryBuilder->shouldReceive('where')->andReturnSelf();
         $queryBuilder->shouldReceive('first')->andReturn(null);
 
-        $newPart = Mockery::mock(Part::class)->makePartial();
+        $newPartSavedValues = [];
+        $newPart = Mockery::mock(Part::class);
+        $newPart->allows('setAttribute')->andReturnUsing(function ($key, $value) use (&$newPartSavedValues): void {
+            $newPartSavedValues[$key] = $value;
+        });
+        $newPart->allows('getAttribute')->andReturnUsing(function ($key) use (&$newPartSavedValues): mixed {
+            return $newPartSavedValues[$key] ?? null;
+        });
         $newPart->shouldReceive('save')->once();
 
         $part = Mockery::mock(Part::class);
@@ -100,7 +119,7 @@ describe('UpsertPartAction', function (): void {
         $result = $action->execute($data);
 
         // assert
-        expect($result->category)->toBeNull();
-        expect($result->image_url)->toBeNull();
+        expect($newPartSavedValues['category'])->toBeNull();
+        expect($newPartSavedValues['image_url'])->toBeNull();
     });
 });

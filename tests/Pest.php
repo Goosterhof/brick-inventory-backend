@@ -2,7 +2,22 @@
 
 declare(strict_types=1);
 
+use DG\BypassFinals;
 use Tests\TestCase;
+
+/*
+|--------------------------------------------------------------------------
+| Bypass Finals
+|--------------------------------------------------------------------------
+|
+| Enable BypassFinals to allow Mockery to mock final classes.
+| Only enabled for Unit and Feature tests, not Architecture tests
+| which need to verify that classes are properly marked as final.
+|
+*/
+
+BypassFinals::setWhitelist(['*/tests/Unit/*', '*/tests/Feature/*']);
+BypassFinals::enable();
 
 /*
 |--------------------------------------------------------------------------

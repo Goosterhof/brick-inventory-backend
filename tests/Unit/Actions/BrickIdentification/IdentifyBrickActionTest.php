@@ -47,10 +47,10 @@ describe('IdentifyBrickAction', function (): void {
             ->once()
             ->andReturn($predictions);
 
-        $resultPart = Mockery::mock(Part::class)->makePartial();
-        $resultPart->id = 1;
-        $resultPart->part_num = '3001';
-        $resultPart->name = 'Brick 2 x 4';
+        $resultPart = Mockery::mock(Part::class);
+        $resultPart->allows('getAttribute')->with('id')->andReturn(1);
+        $resultPart->allows('getAttribute')->with('part_num')->andReturn('3001');
+        $resultPart->allows('getAttribute')->with('name')->andReturn('Brick 2 x 4');
 
         $upsertPartAction = Mockery::mock(UpsertPartAction::class);
         $upsertPartAction->shouldReceive('execute')
@@ -105,9 +105,9 @@ describe('IdentifyBrickAction', function (): void {
             ->once()
             ->andReturn($predictions);
 
-        $resultPart = Mockery::mock(Part::class)->makePartial();
-        $resultPart->id = 1;
-        $resultPart->part_num = '3001';
+        $resultPart = Mockery::mock(Part::class);
+        $resultPart->allows('getAttribute')->with('id')->andReturn(1);
+        $resultPart->allows('getAttribute')->with('part_num')->andReturn('3001');
 
         $upsertPartAction = Mockery::mock(UpsertPartAction::class);
         $upsertPartAction->shouldReceive('execute')
@@ -155,9 +155,9 @@ describe('IdentifyBrickAction', function (): void {
             ->once()
             ->andReturn($predictions);
 
-        $resultPart = Mockery::mock(Part::class)->makePartial();
-        $resultPart->id = 1;
-        $resultPart->part_num = '3001';
+        $resultPart = Mockery::mock(Part::class);
+        $resultPart->allows('getAttribute')->with('id')->andReturn(1);
+        $resultPart->allows('getAttribute')->with('part_num')->andReturn('3001');
 
         $upsertPartAction = Mockery::mock(UpsertPartAction::class);
         $upsertPartAction->shouldReceive('execute')
@@ -247,7 +247,7 @@ describe('IdentifyBrickAction', function (): void {
             ->once()
             ->andReturn($predictions);
 
-        $resultPart = Mockery::mock(Part::class)->makePartial();
+        $resultPart = Mockery::mock(Part::class);
 
         $upsertPartAction = Mockery::mock(UpsertPartAction::class);
         $upsertPartAction->shouldReceive('execute')

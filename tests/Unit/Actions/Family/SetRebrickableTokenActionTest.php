@@ -11,11 +11,22 @@ use App\Models\User;
 describe('SetRebrickableTokenAction', function (): void {
     it('should set the rebrickable user token on the family', function (): void {
         // arrange
-        $user = Mockery::mock(User::class)->makePartial();
-        $user->id = 1;
+        $user = Mockery::mock(User::class);
+        $user->allows('getAttribute')->with('id')->andReturn(1);
 
-        $family = Mockery::mock(Family::class)->makePartial();
-        $family->head_id = 1;
+        $savedValues = [];
+        $family = Mockery::mock(Family::class);
+        $family->allows('getAttribute')->with('head_id')->andReturn(1);
+        $family->allows('setAttribute')->andReturnUsing(function ($key, $value) use (&$savedValues): void {
+            $savedValues[$key] = $value;
+        });
+        $family->allows('getAttribute')->andReturnUsing(function ($key) use (&$savedValues): mixed {
+            if ($key === 'head_id') {
+                return 1;
+            }
+
+            return $savedValues[$key] ?? null;
+        });
         $family->shouldReceive('save')->once();
 
         $data = new class implements SetRebrickableTokenInterface
@@ -29,16 +40,17 @@ describe('SetRebrickableTokenAction', function (): void {
         $action->execute($family, $data, $user);
 
         // assert
-        expect($family->rebrickable_user_token)->toBe('my-secret-token');
+        expect($savedValues['rebrickable_user_token'])->toBe('my-secret-token');
     });
 
     it('should return the updated family', function (): void {
         // arrange
-        $user = Mockery::mock(User::class)->makePartial();
-        $user->id = 1;
+        $user = Mockery::mock(User::class);
+        $user->allows('getAttribute')->with('id')->andReturn(1);
 
-        $family = Mockery::mock(Family::class)->makePartial();
-        $family->head_id = 1;
+        $family = Mockery::mock(Family::class);
+        $family->allows('getAttribute')->with('head_id')->andReturn(1);
+        $family->allows('setAttribute');
         $family->shouldReceive('save');
 
         $data = new class implements SetRebrickableTokenInterface
@@ -57,12 +69,22 @@ describe('SetRebrickableTokenAction', function (): void {
 
     it('should overwrite existing token', function (): void {
         // arrange
-        $user = Mockery::mock(User::class)->makePartial();
-        $user->id = 1;
+        $user = Mockery::mock(User::class);
+        $user->allows('getAttribute')->with('id')->andReturn(1);
 
-        $family = Mockery::mock(Family::class)->makePartial();
-        $family->head_id = 1;
-        $family->rebrickable_user_token = 'old-token';
+        $savedValues = ['rebrickable_user_token' => 'old-token'];
+        $family = Mockery::mock(Family::class);
+        $family->allows('getAttribute')->with('head_id')->andReturn(1);
+        $family->allows('setAttribute')->andReturnUsing(function ($key, $value) use (&$savedValues): void {
+            $savedValues[$key] = $value;
+        });
+        $family->allows('getAttribute')->andReturnUsing(function ($key) use (&$savedValues): mixed {
+            if ($key === 'head_id') {
+                return 1;
+            }
+
+            return $savedValues[$key] ?? null;
+        });
         $family->shouldReceive('save')->once();
 
         $data = new class implements SetRebrickableTokenInterface
@@ -76,16 +98,16 @@ describe('SetRebrickableTokenAction', function (): void {
         $action->execute($family, $data, $user);
 
         // assert
-        expect($family->rebrickable_user_token)->toBe('new-token');
+        expect($savedValues['rebrickable_user_token'])->toBe('new-token');
     });
 
     it('should throw NotFamilyHeadException when user is not the family head', function (): void {
         // arrange
-        $user = Mockery::mock(User::class)->makePartial();
-        $user->id = 2;
+        $user = Mockery::mock(User::class);
+        $user->allows('getAttribute')->with('id')->andReturn(2);
 
-        $family = Mockery::mock(Family::class)->makePartial();
-        $family->head_id = 1;
+        $family = Mockery::mock(Family::class);
+        $family->allows('getAttribute')->with('head_id')->andReturn(1);
         $family->shouldReceive('save')->never();
 
         $data = new class implements SetRebrickableTokenInterface
@@ -102,11 +124,22 @@ describe('SetRebrickableTokenAction', function (): void {
 
     it('should allow action when user is the family head', function (): void {
         // arrange
-        $user = Mockery::mock(User::class)->makePartial();
-        $user->id = 5;
+        $user = Mockery::mock(User::class);
+        $user->allows('getAttribute')->with('id')->andReturn(5);
 
-        $family = Mockery::mock(Family::class)->makePartial();
-        $family->head_id = 5;
+        $savedValues = [];
+        $family = Mockery::mock(Family::class);
+        $family->allows('getAttribute')->with('head_id')->andReturn(5);
+        $family->allows('setAttribute')->andReturnUsing(function ($key, $value) use (&$savedValues): void {
+            $savedValues[$key] = $value;
+        });
+        $family->allows('getAttribute')->andReturnUsing(function ($key) use (&$savedValues): mixed {
+            if ($key === 'head_id') {
+                return 5;
+            }
+
+            return $savedValues[$key] ?? null;
+        });
         $family->shouldReceive('save')->once();
 
         $data = new class implements SetRebrickableTokenInterface
@@ -121,6 +154,6 @@ describe('SetRebrickableTokenAction', function (): void {
 
         // assert
         expect($result)->toBe($family)
-            ->and($family->rebrickable_user_token)->toBe('valid-token');
+            ->and($savedValues['rebrickable_user_token'])->toBe('valid-token');
     });
 });

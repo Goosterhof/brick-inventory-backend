@@ -11,8 +11,8 @@ use Illuminate\Database\Eloquent\Collection;
 describe('GetStorageOptionsAction', function (): void {
     it('should query storage options by user family_id', function (): void {
         // arrange
-        $user = Mockery::mock(User::class)->makePartial();
-        $user->family_id = 5;
+        $user = Mockery::mock(User::class);
+        $user->allows('getAttribute')->with('family_id')->andReturn(5);
 
         $collection = new Collection;
 
@@ -40,8 +40,8 @@ describe('GetStorageOptionsAction', function (): void {
 
     it('should filter to only root storage options', function (): void {
         // arrange
-        $user = Mockery::mock(User::class)->makePartial();
-        $user->family_id = 1;
+        $user = Mockery::mock(User::class);
+        $user->allows('getAttribute')->with('family_id')->andReturn(1);
 
         $collection = new Collection;
 
