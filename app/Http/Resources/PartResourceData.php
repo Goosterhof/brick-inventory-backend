@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Http\Resources;
 
 use App\Models\Part;
-use Illuminate\Database\Eloquent\Model;
 
 /**
  * @extends ResourceData<Part>
@@ -20,7 +19,10 @@ final readonly class PartResourceData extends ResourceData
         public ?string $image_url,
     ) {}
 
-    public static function from(Model $model): static
+    /**
+     * @param Part $model
+     */
+    public static function from($model): static
     {
         return new self(
             id: $model->id,

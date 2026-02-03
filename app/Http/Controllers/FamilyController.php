@@ -22,8 +22,6 @@ class FamilyController extends Controller
     ): JsonResponse {
         $this->setRebrickableTokenAction->execute($user->family, $setRebrickableTokenRequest, $user);
 
-        return response()->json([
-            'message' => 'Rebrickable user token configured successfully',
-        ]);
+        return response()->json(status: 204);
     }
 }

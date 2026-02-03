@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace App\Http\Resources;
 
 use App\Models\Color;
-use Illuminate\Database\Eloquent\Model;
 
 /**
  * @extends ResourceData<Color>
@@ -20,7 +19,10 @@ final readonly class ColorResourceData extends ResourceData
         public bool $is_transparent,
     ) {}
 
-    public static function from(Model $model): static
+    /**
+     * @param Color $model
+     */
+    public static function from($model): static
     {
         return new self(
             id: $model->id,

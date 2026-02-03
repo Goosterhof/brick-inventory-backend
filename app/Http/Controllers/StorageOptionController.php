@@ -12,8 +12,7 @@ use App\Actions\StorageOption\GetStorageOptionPartsAction;
 use App\Actions\StorageOption\GetStorageOptionsAction;
 use App\Actions\StorageOption\UpdateStorageOptionAction;
 use App\Http\Requests\StorageOption\AssignPartRequest;
-use App\Http\Requests\StorageOption\StoreStorageOptionRequest;
-use App\Http\Requests\StorageOption\UpdateStorageOptionRequest;
+use App\Http\Requests\StorageOption\StorageOptionRequest;
 use App\Http\Resources\StorageOptionPartResourceData;
 use App\Http\Resources\StorageOptionResourceData;
 use App\Models\StorageOption;
@@ -44,9 +43,9 @@ class StorageOptionController extends Controller
         return StorageOptionResourceData::collection($storageOptions);
     }
 
-    public function store(StoreStorageOptionRequest $storeStorageOptionRequest): JsonResponse
+    public function store(StorageOptionRequest $storageOptionRequest): JsonResponse
     {
-        $storageOption = $this->createStorageOptionAction->execute($storeStorageOptionRequest);
+        $storageOption = $this->createStorageOptionAction->execute($storageOptionRequest);
 
         return StorageOptionResourceData::from($storageOption)->toResponseWithStatus(201);
     }
@@ -56,9 +55,9 @@ class StorageOptionController extends Controller
         return StorageOptionResourceData::from($storageOption)->toResponse();
     }
 
-    public function update(UpdateStorageOptionRequest $updateStorageOptionRequest, StorageOption $storageOption): JsonResponse
+    public function update(StorageOptionRequest $storageOptionRequest, StorageOption $storageOption): JsonResponse
     {
-        $storageOption = $this->updateStorageOptionAction->execute($storageOption, $updateStorageOptionRequest);
+        $storageOption = $this->updateStorageOptionAction->execute($storageOption, $storageOptionRequest);
 
         return StorageOptionResourceData::from($storageOption)->toResponse();
     }

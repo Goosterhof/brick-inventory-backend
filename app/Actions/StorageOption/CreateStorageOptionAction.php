@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\StorageOption;
 
-use App\Contracts\StorageOption\CreateStorageOptionInterface;
+use App\Contracts\StorageOption\StorageOptionDataInterface;
 use App\Models\StorageOption;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
@@ -17,15 +17,15 @@ class CreateStorageOptionAction
         private readonly User $user,
     ) {}
 
-    public function execute(CreateStorageOptionInterface $createStorageOption): StorageOption
+    public function execute(StorageOptionDataInterface $storageOptionData): StorageOption
     {
         $storageOption = $this->storageOption->newInstance();
         $storageOption->family_id = $this->user->family_id;
-        $storageOption->name = $createStorageOption->name;
-        $storageOption->description = $createStorageOption->description;
-        $storageOption->parent_id = $createStorageOption->parentId;
-        $storageOption->row = $createStorageOption->row;
-        $storageOption->column = $createStorageOption->column;
+        $storageOption->name = $storageOptionData->name;
+        $storageOption->description = $storageOptionData->description;
+        $storageOption->parent_id = $storageOptionData->parentId;
+        $storageOption->row = $storageOptionData->row;
+        $storageOption->column = $storageOptionData->column;
         $storageOption->save();
 
         return $storageOption;

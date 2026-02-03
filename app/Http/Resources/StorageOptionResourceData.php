@@ -5,8 +5,6 @@ declare(strict_types=1);
 namespace App\Http\Resources;
 
 use App\Models\StorageOption;
-use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Model;
 
 /**
  * @extends ResourceData<StorageOption>
@@ -14,7 +12,7 @@ use Illuminate\Database\Eloquent\Model;
 final readonly class StorageOptionResourceData extends ResourceData
 {
     /**
-     * @param array<int, StorageOptionResourceData> $children
+     * @param array<int, int> $child_ids
      */
     public function __construct(
         public int $id,
@@ -23,14 +21,19 @@ final readonly class StorageOptionResourceData extends ResourceData
         public ?int $parent_id,
         public ?int $row,
         public ?int $column,
-        public array $children,
-        public ?Carbon $created_at,
-        public ?Carbon $updated_at,
+        public array $child_ids,
     ) {}
 
-    public static function from(Model $model): static
+    /**
+     * @param StorageOption $model
+     */
+    public static function from($model): static
     {
         $model->loadMissing(self::requiredRelations());
+        self::validateRelationsLoaded($model);
+
+        /** @var array<int, int> $childIds */
+        $childIds = $model->children->pluck('id')->all();
 
         return new self(
             id: $model->id,
@@ -39,12 +42,7 @@ final readonly class StorageOptionResourceData extends ResourceData
             parent_id: $model->parent_id,
             row: $model->row,
             column: $model->column,
-            children: array_map(
-                self::from(...),
-                $model->children->all(),
-            ),
-            created_at: $model->created_at,
-            updated_at: $model->updated_at,
+            child_ids: $childIds,
         );
     }
 

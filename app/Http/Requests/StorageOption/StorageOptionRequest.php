@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\StorageOption;
 
-use App\Contracts\StorageOption\CreateStorageOptionInterface;
+use App\Contracts\StorageOption\StorageOptionDataInterface;
 use App\Http\Requests\DTOFormRequest;
 use Illuminate\Http\Request;
 
-final readonly class StoreStorageOptionRequest extends DTOFormRequest implements CreateStorageOptionInterface
+final readonly class StorageOptionRequest extends DTOFormRequest implements StorageOptionDataInterface
 {
     public const string NAME = 'name';
 
@@ -32,7 +32,7 @@ final readonly class StoreStorageOptionRequest extends DTOFormRequest implements
     {
         return [
             self::NAME => ['required', 'string', 'max:255'],
-            self::DESCRIPTION => ['nullable', 'string'],
+            self::DESCRIPTION => ['nullable', 'string', 'max:65535'],
             self::PARENT_ID => ['nullable', 'integer', 'exists:storage_options,id'],
             self::ROW => ['nullable', 'integer', 'min:0'],
             self::COLUMN => ['nullable', 'integer', 'min:0'],
