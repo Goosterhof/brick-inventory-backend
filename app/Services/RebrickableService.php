@@ -44,7 +44,7 @@ final readonly class RebrickableService implements LegoDataServiceInterface
     {
         $response = $this->httpClient()->get(sprintf('/lego/sets/%s/', $setNum));
 
-        $this->handleErrorResponse($response, $setNum);
+        $this->handleSetFetchError($response, $setNum);
 
         $data = $response->json();
 
@@ -85,9 +85,7 @@ final readonly class RebrickableService implements LegoDataServiceInterface
         while ($nextUrl !== null) {
             $response = $this->httpClient()->get($nextUrl);
 
-            if ($response->failed()) {
-                throw RebrickableApiException::fromResponse($response, sprintf("Failed to fetch parts for set '%s'", $setNum));
-            }
+            $this->throwOnApiError($response, sprintf("Failed to fetch parts for set '%s'", $setNum));
 
             /** @var array{results: list<array{part: array{part_num: string, name: string, part_cat_id: int|null, part_img_url: string|null}, color: array{id: int, name: string, rgb: string, is_trans: bool}, quantity: int, is_spare: bool, element_id: string|null}>, next: string|null} $data */
             $data = $response->json();
@@ -136,9 +134,7 @@ final readonly class RebrickableService implements LegoDataServiceInterface
         while ($nextUrl !== null) {
             $response = $this->httpClient()->get($nextUrl);
 
-            if ($response->failed()) {
-                throw RebrickableApiException::fromResponse($response, 'Failed to fetch user sets');
-            }
+            $this->throwOnApiError($response, 'Failed to fetch user sets');
 
             $data = $response->json();
 
@@ -171,15 +167,26 @@ final readonly class RebrickableService implements LegoDataServiceInterface
     {
         return Http::baseUrl($this->baseUrl)
             ->withHeaders(['Authorization' => 'key ' . $this->apiKey])
+            ->acceptJson()
             ->timeout(30)
             ->retry(3, 100, throw: false);
+    }
+
+    /**
+     * @throws RebrickableApiException
+     */
+    private function throwOnApiError(Response $response, string $context): void
+    {
+        if ($response->failed()) {
+            throw RebrickableApiException::fromResponse($response, $context);
+        }
     }
 
     /**
      * @throws SetNotFoundException
      * @throws RebrickableApiException
      */
-    private function handleErrorResponse(Response $response, string $setNum): void
+    private function handleSetFetchError(Response $response, string $setNum): void
     {
         if ($response->successful()) {
             return;
