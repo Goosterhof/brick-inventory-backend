@@ -67,18 +67,6 @@ class FamilySetController extends Controller
     {
         $importOwnedSetsResultData = $this->importOwnedSetsAction->execute($user->family);
 
-        $response = [
-            'message' => 'Import completed successfully',
-            'created' => $importOwnedSetsResultData->created,
-            'updated' => $importOwnedSetsResultData->updated,
-            'skipped' => $importOwnedSetsResultData->skipped,
-            'total' => $importOwnedSetsResultData->total,
-        ];
-
-        if ($importOwnedSetsResultData->skippedSetNums !== []) {
-            $response['skipped_set_nums'] = $importOwnedSetsResultData->skippedSetNums;
-        }
-
-        return response()->json($response);
+        return response()->json($importOwnedSetsResultData);
     }
 }

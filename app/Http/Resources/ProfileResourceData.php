@@ -19,8 +19,6 @@ final readonly class ProfileResourceData extends ResourceData
         public string $name,
         public string $email,
         public ?DateTimeInterface $email_verified_at,
-        public DateTimeInterface $created_at,
-        public DateTimeInterface $updated_at,
     ) {}
 
     public static function from(Model $model): static
@@ -31,8 +29,6 @@ final readonly class ProfileResourceData extends ResourceData
             name: $model->name,
             email: $model->email,
             email_verified_at: $model->email_verified_at,
-            created_at: $model->created_at,
-            updated_at: $model->updated_at,
         );
     }
 }
