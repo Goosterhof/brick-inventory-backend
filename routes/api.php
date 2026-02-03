@@ -2,6 +2,9 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Auth\LoginController;
+use App\Http\Controllers\Auth\LogoutController;
+use App\Http\Controllers\Auth\MeController;
 use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\BrickIdentificationController;
 use App\Http\Controllers\FamilyController;
@@ -20,6 +23,9 @@ Route::get('/health', fn () => response()->json([
 ]));
 
 Route::post('/register', RegisterController::class);
+Route::post('/login', LoginController::class);
+Route::post('/logout', LogoutController::class)->middleware('auth:sanctum');
+Route::get('/me', MeController::class)->middleware('auth:sanctum');
 
 Route::get('/sets/{setNum}/parts', [SetController::class, 'parts']);
 
