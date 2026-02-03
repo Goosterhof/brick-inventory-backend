@@ -32,7 +32,7 @@ final readonly class StorageOptionRequest extends DTOFormRequest implements Stor
     {
         return [
             self::NAME => ['required', 'string', 'max:255'],
-            self::DESCRIPTION => ['nullable', 'string'],
+            self::DESCRIPTION => ['nullable', 'string', 'max:65535'],
             self::PARENT_ID => ['nullable', 'integer', 'exists:storage_options,id'],
             self::ROW => ['nullable', 'integer', 'min:0'],
             self::COLUMN => ['nullable', 'integer', 'min:0'],
