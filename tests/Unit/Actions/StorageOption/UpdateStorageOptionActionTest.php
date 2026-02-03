@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\StorageOption\UpdateStorageOptionAction;
-use App\Contracts\StorageOption\UpdateStorageOptionInterface;
+use App\Contracts\StorageOption\StorageOptionDataInterface;
 use App\Models\StorageOption;
 
 describe('UpdateStorageOptionAction', function (): void {
@@ -13,7 +13,7 @@ describe('UpdateStorageOptionAction', function (): void {
         $storageOption->shouldReceive('save')->once();
 
         $action = new UpdateStorageOptionAction;
-        $data = new class implements UpdateStorageOptionInterface
+        $data = new class implements StorageOptionDataInterface
         {
             public string $name = 'New Name';
 
@@ -41,7 +41,7 @@ describe('UpdateStorageOptionAction', function (): void {
         $storageOption->shouldReceive('save')->once();
 
         $action = new UpdateStorageOptionAction;
-        $data = new class implements UpdateStorageOptionInterface
+        $data = new class implements StorageOptionDataInterface
         {
             public string $name = 'Drawer';
 
@@ -68,7 +68,7 @@ describe('UpdateStorageOptionAction', function (): void {
         $storageOption->shouldReceive('save')->once();
 
         $action = new UpdateStorageOptionAction;
-        $data = new class implements UpdateStorageOptionInterface
+        $data = new class implements StorageOptionDataInterface
         {
             public string $name = 'Drawer';
 
@@ -94,7 +94,7 @@ describe('UpdateStorageOptionAction', function (): void {
         $storageOption->shouldReceive('save')->once();
 
         $action = new UpdateStorageOptionAction;
-        $data = new class implements UpdateStorageOptionInterface
+        $data = new class implements StorageOptionDataInterface
         {
             public string $name = 'Updated';
 

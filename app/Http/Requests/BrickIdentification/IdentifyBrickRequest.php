@@ -26,8 +26,8 @@ final readonly class IdentifyBrickRequest extends DTOFormRequest implements Iden
 
     protected static function toDTO(Request $request): static
     {
-        /** @var UploadedFile $image */
         $image = $request->file(self::IMAGE);
+        assert($image instanceof UploadedFile);
 
         return new self(image: $image);
     }
