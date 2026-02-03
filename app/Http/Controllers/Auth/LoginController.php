@@ -7,6 +7,7 @@ namespace App\Http\Controllers\Auth;
 use App\Actions\Auth\LoginUserAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Resources\ProfileResourceData;
 use Illuminate\Http\JsonResponse;
 
 class LoginController extends Controller
@@ -22,7 +23,7 @@ class LoginController extends Controller
         $token = $user->createToken('auth_token')->plainTextToken;
 
         return response()->json([
-            'user' => $user,
+            'user' => ProfileResourceData::from($user),
             'token' => $token,
         ]);
     }
