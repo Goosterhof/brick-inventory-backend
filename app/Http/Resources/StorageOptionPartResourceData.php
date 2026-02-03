@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Resources;
 
-use App\Exceptions\MissingRelationException;
 use App\Models\StorageOptionPart;
 use Carbon\Carbon;
 
@@ -19,8 +18,6 @@ final readonly class StorageOptionPartResourceData extends ResourceData
         public int $part_id,
         public ?int $color_id,
         public int $quantity,
-        public PartResourceData $part,
-        public ?ColorResourceData $color,
         public ?Carbon $created_at,
         public ?Carbon $updated_at,
     ) {}
@@ -30,31 +27,14 @@ final readonly class StorageOptionPartResourceData extends ResourceData
      */
     public static function from($model): static
     {
-        $model->loadMissing(self::requiredRelations());
-
-        $part = $model->part;
-
-        if ($part === null) {
-            throw MissingRelationException::forRelation(self::class, 'part');
-        }
-
         return new self(
             id: $model->id,
             storage_option_id: $model->storage_option_id,
             part_id: $model->part_id,
             color_id: $model->color_id,
             quantity: $model->quantity,
-            part: PartResourceData::from($part),
-            color: $model->color !== null
-                ? ColorResourceData::from($model->color)
-                : null,
             created_at: $model->created_at,
             updated_at: $model->updated_at,
         );
-    }
-
-    protected static function requiredRelations(): array
-    {
-        return ['part', 'color'];
     }
 }

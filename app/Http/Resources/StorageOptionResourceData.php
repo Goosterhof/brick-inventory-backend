@@ -13,7 +13,7 @@ use Carbon\Carbon;
 final readonly class StorageOptionResourceData extends ResourceData
 {
     /**
-     * @param array<int, StorageOptionResourceData> $children
+     * @param array<int, int> $child_ids
      */
     public function __construct(
         public int $id,
@@ -22,7 +22,7 @@ final readonly class StorageOptionResourceData extends ResourceData
         public ?int $parent_id,
         public ?int $row,
         public ?int $column,
-        public array $children,
+        public array $child_ids,
         public ?Carbon $created_at,
         public ?Carbon $updated_at,
     ) {}
@@ -34,6 +34,9 @@ final readonly class StorageOptionResourceData extends ResourceData
     {
         $model->loadMissing(self::requiredRelations());
 
+        /** @var array<int, int> $childIds */
+        $childIds = $model->children->pluck('id')->all();
+
         return new self(
             id: $model->id,
             name: $model->name,
@@ -41,10 +44,7 @@ final readonly class StorageOptionResourceData extends ResourceData
             parent_id: $model->parent_id,
             row: $model->row,
             column: $model->column,
-            children: array_map(
-                self::from(...),
-                $model->children->all(),
-            ),
+            child_ids: $childIds,
             created_at: $model->created_at,
             updated_at: $model->updated_at,
         );

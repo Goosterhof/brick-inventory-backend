@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 namespace App\Http\Resources;
 
-use App\Exceptions\MissingRelationException;
 use App\Models\SetPart;
 
 /**
@@ -14,11 +13,11 @@ final readonly class SetPartResourceData extends ResourceData
 {
     public function __construct(
         public int $id,
+        public int $part_id,
+        public int $color_id,
         public int $quantity,
         public bool $is_spare,
         public ?string $element_id,
-        public PartResourceData $part,
-        public ColorResourceData $color,
     ) {}
 
     /**
@@ -26,29 +25,13 @@ final readonly class SetPartResourceData extends ResourceData
      */
     public static function from($model): static
     {
-        $model->loadMissing(self::requiredRelations());
-
-        $part = $model->part;
-        $color = $model->color;
-
-        if ($part === null || $color === null) {
-            $missing = array_filter(['part' => $part, 'color' => $color], fn ($v): bool => $v === null);
-
-            throw MissingRelationException::forRelations(self::class, array_keys($missing));
-        }
-
         return new self(
             id: $model->id,
+            part_id: $model->part_id,
+            color_id: $model->color_id,
             quantity: $model->quantity,
             is_spare: $model->is_spare,
             element_id: $model->element_id,
-            part: PartResourceData::from($part),
-            color: ColorResourceData::from($color),
         );
-    }
-
-    protected static function requiredRelations(): array
-    {
-        return ['part', 'color'];
     }
 }

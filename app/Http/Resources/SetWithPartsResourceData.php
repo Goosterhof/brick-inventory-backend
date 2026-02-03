@@ -15,7 +15,13 @@ final readonly class SetWithPartsResourceData extends ResourceData
      * @param array<int, SetPartResourceData> $parts
      */
     public function __construct(
-        public SetResourceData $set,
+        public int $id,
+        public string $set_num,
+        public string $name,
+        public ?int $year,
+        public ?string $theme,
+        public int $num_parts,
+        public ?string $image_url,
         public array $parts,
     ) {}
 
@@ -27,7 +33,13 @@ final readonly class SetWithPartsResourceData extends ResourceData
         $model->loadMissing(self::requiredRelations());
 
         return new self(
-            set: SetResourceData::from($model),
+            id: $model->id,
+            set_num: $model->set_num,
+            name: $model->name,
+            year: $model->year,
+            theme: $model->theme,
+            num_parts: $model->num_parts,
+            image_url: $model->image_url,
             parts: array_map(
                 SetPartResourceData::from(...),
                 $model->setParts->all(),
@@ -37,6 +49,6 @@ final readonly class SetWithPartsResourceData extends ResourceData
 
     protected static function requiredRelations(): array
     {
-        return ['setParts.part', 'setParts.color'];
+        return ['setParts'];
     }
 }

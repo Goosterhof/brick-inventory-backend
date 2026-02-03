@@ -42,13 +42,13 @@ describe('StorageOptionController', function (): void {
             $response->assertStatus(401);
         });
 
-        it('should return nested children', function (): void {
+        it('should return child_ids for nested children', function (): void {
             $user = User::factory()->create();
             $cabinet = StorageOption::factory()->create([
                 'family_id' => $user->family_id,
                 'name' => 'Cabinet 1',
             ]);
-            StorageOption::factory()->create([
+            $drawer = StorageOption::factory()->create([
                 'family_id' => $user->family_id,
                 'parent_id' => $cabinet->id,
                 'name' => 'Drawer A1',
@@ -58,7 +58,7 @@ describe('StorageOptionController', function (): void {
 
             $response->assertStatus(200)
                 ->assertJsonCount(1)
-                ->assertJsonPath('0.children.0.name', 'Drawer A1');
+                ->assertJsonPath('0.child_ids.0', $drawer->id);
         });
     });
 
