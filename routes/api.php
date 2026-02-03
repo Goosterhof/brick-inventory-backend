@@ -21,7 +21,8 @@ Route::get('/health', fn () => response()->json([
 
 Route::post('/register', RegisterController::class);
 
-Route::get('/sets/{setNum}/parts', [SetController::class, 'parts']);
+Route::get('/sets/{setNum}/parts', [SetController::class, 'parts'])
+    ->where('setNum', '\d+-\d+');
 
 Route::middleware(['auth:sanctum', 'family.ownership'])->group(function (): void {
     Route::apiResource('storage-options', StorageOptionController::class);
