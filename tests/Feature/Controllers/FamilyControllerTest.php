@@ -16,8 +16,7 @@ describe('FamilyController', function (): void {
                 'rebrickable_user_token' => 'my-secret-token',
             ]);
 
-            $response->assertStatus(200)
-                ->assertJson(['message' => 'Rebrickable user token configured successfully']);
+            $response->assertStatus(204);
 
             $user->family->refresh();
             expect($user->family->rebrickable_user_token)->toBe('my-secret-token');
@@ -32,7 +31,7 @@ describe('FamilyController', function (): void {
                 'rebrickable_user_token' => 'new-token',
             ]);
 
-            $response->assertStatus(200);
+            $response->assertStatus(204);
 
             $user->family->refresh();
             expect($user->family->rebrickable_user_token)->toBe('new-token');
@@ -103,8 +102,7 @@ describe('FamilyController', function (): void {
                 'rebrickable_user_token' => 'head-token',
             ]);
 
-            $response->assertStatus(200)
-                ->assertJson(['message' => 'Rebrickable user token configured successfully']);
+            $response->assertStatus(204);
 
             $headUser->family->refresh();
             expect($headUser->family->rebrickable_user_token)->toBe('head-token');
