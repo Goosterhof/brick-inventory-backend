@@ -11,9 +11,13 @@ use Illuminate\Validation\ValidationException;
 
 final readonly class LoginUserAction
 {
+    public function __construct(
+        private User $user,
+    ) {}
+
     public function execute(LoginUserInterface $loginUser): User
     {
-        $user = User::query()->where('email', $loginUser->email)->first();
+        $user = $this->user->newQuery()->where('email', $loginUser->email)->first();
 
         if (!$user || !Hash::check($loginUser->password, $user->password)) {
             throw ValidationException::withMessages([
