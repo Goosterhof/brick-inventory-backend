@@ -173,7 +173,8 @@ composer test:arch
 **Tests**:
 - Must use `describe()` blocks and `it('should ...')` syntax
 - Must NOT use placeholder assertions
-- Unit tests must NOT use `shouldHaveReceived()`
+- Unit tests must NOT use `shouldHaveReceived()` (define expectations in arrange block)
+- Unit tests must NOT use `makePartial()` (use pure mocks with `getAttribute`/`setAttribute`)
 
 For the complete list, see `tests/Architecture/*.php`.
 
