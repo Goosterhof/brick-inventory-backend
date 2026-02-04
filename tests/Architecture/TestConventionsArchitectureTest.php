@@ -117,3 +117,31 @@ it('should use shouldReceive instead of shouldHaveReceived in unit tests', funct
             ->toBe(0, sprintf('Unit test %s should use shouldReceive()->never() instead of shouldNotHaveReceived() - define expectations in arrange block', $relativePath));
     }
 });
+
+it('should not use makePartial in unit tests', function (): void {
+    $unitDir = dirname(__DIR__) . '/Unit';
+    if (!is_dir($unitDir)) {
+        return;
+    }
+
+    $iterator = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($unitDir, RecursiveDirectoryIterator::SKIP_DOTS),
+    );
+
+    foreach ($iterator as $file) {
+        if (!$file->isFile()) {
+            continue;
+        }
+
+        if ($file->getExtension() !== 'php') {
+            continue;
+        }
+
+        $content = file_get_contents($file->getPathname());
+        $relativePath = str_replace(dirname(__DIR__) . '/', '', $file->getPathname());
+
+        // Check for makePartial() which instantiates real Eloquent models with boot logic
+        expect(preg_match('/->makePartial\s*\(/', $content))
+            ->toBe(0, sprintf('Unit test %s should not use makePartial() - use pure mocks with getAttribute/setAttribute instead for speed', $relativePath));
+    }
+});
