@@ -20,12 +20,9 @@ describe('LoginController', function (): void {
         ]);
 
         $response->assertStatus(200)
-            ->assertJsonStructure([
-                'user' => ['id', 'name', 'email', 'family_id'],
-                'token',
-            ]);
+            ->assertJsonStructure(['id', 'name', 'email', 'family_id']);
 
-        expect($response->json('user.id'))->toBe($user->id);
+        expect($response->json('id'))->toBe($user->id);
     });
 
     it('should return 422 for invalid credentials', function (): void {
