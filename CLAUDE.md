@@ -9,7 +9,23 @@ LEGO inventory management system. The goal is to provide a list of parts needed 
 - Laravel 12 (API-only, no frontend)
 - PHP 8.4+
 - SQLite for local development
-- Laravel Sanctum for authentication
+- Laravel Sanctum for authentication (session-based SPA auth, NOT API tokens)
+
+## Authentication
+
+Uses **session-based SPA authentication** with Laravel Sanctum's stateful middleware:
+
+- Login/Register use `Auth::login($user)` to create a session (no token creation)
+- Logout uses `Auth::guard('web')->logout()` + session invalidation
+- Controllers return `ProfileResourceData` directly (not wrapped in `{user, token}`)
+- CSRF is excluded for `api/*` routes since the frontend doesn't fetch CSRF cookies
+- `SANCTUM_STATEFUL_DOMAINS` must include the frontend's `host:port` (e.g., `localhost:5173`)
+- Feature tests use `$this->actingAs($user)` (not `Sanctum::actingAs()`)
+
+### Gotchas
+- `$request->session()` throws if no session middleware is active; guard with `$request->hasSession()`
+- `public/frankenphp-worker.php` runs BEFORE the autoloader — never use Laravel classes in it
+- `composer lint` (Rector) may incorrectly modify `frankenphp-worker.php` — always revert changes to it
 
 ## Deployment
 

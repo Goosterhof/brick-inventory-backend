@@ -19,10 +19,7 @@ describe('RegisterController', function (): void {
         ]);
 
         $response->assertStatus(201)
-            ->assertJsonStructure([
-                'user' => ['id', 'name', 'email', 'family_id'],
-                'token',
-            ]);
+            ->assertJsonStructure(['id', 'name', 'email', 'family_id']);
 
         $this->assertDatabaseHas('families', ['name' => 'Smith Family']);
         $this->assertDatabaseHas('users', [

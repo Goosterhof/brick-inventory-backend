@@ -9,6 +9,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Resources\ProfileResourceData;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Auth;
 
 class RegisterController extends Controller
 {
@@ -20,11 +21,8 @@ class RegisterController extends Controller
     {
         $user = $this->createUserWithFamilyAction->execute($registerRequest);
 
-        $token = $user->createToken('auth_token')->plainTextToken;
+        Auth::login($user);
 
-        return response()->json([
-            'user' => ProfileResourceData::from($user),
-            'token' => $token,
-        ], 201);
+        return response()->json(ProfileResourceData::from($user), 201);
     }
 }
