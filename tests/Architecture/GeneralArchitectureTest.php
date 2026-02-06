@@ -2,9 +2,6 @@
 
 declare(strict_types=1);
 
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
-
 arch('no debugging statements')
     ->expect('App')
     ->not->toUse(['dd', 'dump', 'var_dump', 'ray']);
@@ -25,11 +22,8 @@ arch('no Laravel if helpers - use explicit if statements instead')
     ->expect('App')
     ->not->toUse(['throw_if', 'throw_unless', 'abort_if', 'abort_unless']);
 
-arch('no Auth facade - use dependency injection instead')
+arch('no facades - use dependency injection instead')
     ->expect('App')
-    ->not->toUse(Auth::class)
-    ->ignoring('App\Providers');
-
-arch('no Hash facade - use dependency injection instead')
-    ->expect('App')
-    ->not->toUse(Hash::class);
+    ->not->toUse('Illuminate\Support\Facades')
+    ->ignoring('App\Providers')
+    ->ignoring('App\Services');

@@ -12,11 +12,11 @@ use App\Data\Lego\LegoPartData;
 use App\Exceptions\BrickognizeApiException;
 use App\Models\Part;
 
-class IdentifyBrickAction
+final readonly class IdentifyBrickAction
 {
     public function __construct(
-        private readonly BrickIdentificationServiceInterface $brickIdentificationService,
-        private readonly UpsertPartAction $upsertPartAction,
+        private BrickIdentificationServiceInterface $brickIdentificationService,
+        private UpsertPartAction $upsertPartAction,
     ) {}
 
     /**

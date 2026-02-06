@@ -7,10 +7,10 @@ namespace App\Actions\Sync;
 use App\Data\Lego\LegoSetData;
 use App\Models\Set;
 
-class UpsertSetAction
+final readonly class UpsertSetAction
 {
     public function __construct(
-        private readonly Set $set,
+        private Set $set,
     ) {}
 
     public function execute(LegoSetData $legoSetData): Set

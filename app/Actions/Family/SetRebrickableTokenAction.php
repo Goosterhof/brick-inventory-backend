@@ -9,7 +9,7 @@ use App\Exceptions\NotFamilyHeadException;
 use App\Models\Family;
 use App\Models\User;
 
-class SetRebrickableTokenAction
+final readonly class SetRebrickableTokenAction
 {
     public function execute(Family $family, SetRebrickableTokenInterface $setRebrickableToken, User $user): Family
     {

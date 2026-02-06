@@ -8,12 +8,12 @@ use App\Data\Lego\LegoSetPartData;
 use App\Models\Set;
 use App\Models\SetPart;
 
-class StoreSetPartsAction
+final readonly class StoreSetPartsAction
 {
     public function __construct(
-        private readonly UpsertColorAction $upsertColorAction,
-        private readonly UpsertPartAction $upsertPartAction,
-        private readonly SetPart $setPart,
+        private UpsertColorAction $upsertColorAction,
+        private UpsertPartAction $upsertPartAction,
+        private SetPart $setPart,
     ) {}
 
     /**

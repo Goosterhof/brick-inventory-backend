@@ -10,13 +10,13 @@ use Tests\TestCase;
 | Bypass Finals
 |--------------------------------------------------------------------------
 |
-| Enable BypassFinals to allow Mockery to mock final classes.
-| Only enabled for Unit and Feature tests, not Architecture tests
-| which need to verify that classes are properly marked as final.
+| Enable BypassFinals to allow Mockery to mock final Action classes.
+| Only Actions need bypassing since they're the only final classes mocked
+| as dependencies. Services are mocked via interfaces instead.
 |
 */
 
-BypassFinals::setWhitelist(['*/tests/Unit/*', '*/tests/Feature/*']);
+BypassFinals::setWhitelist(['*/app/Actions/*']);
 BypassFinals::enable();
 
 /*

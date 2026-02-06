@@ -9,12 +9,12 @@ use App\Contracts\FamilySet\CreateFamilySetInterface;
 use App\Models\Family;
 use App\Models\FamilySet;
 
-class CreateFamilySetAction
+final readonly class CreateFamilySetAction
 {
     public function __construct(
-        private readonly GetSetAction $getSetAction,
-        private readonly UpdateFamilySetAction $updateFamilySetAction,
-        private readonly FamilySet $familySet,
+        private GetSetAction $getSetAction,
+        private UpdateFamilySetAction $updateFamilySetAction,
+        private FamilySet $familySet,
     ) {}
 
     public function execute(Family $family, CreateFamilySetInterface $createFamilySet): FamilySet

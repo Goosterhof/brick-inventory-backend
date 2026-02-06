@@ -6,9 +6,18 @@ use App\Actions\FamilySet\UpdateFamilySetAction;
 use App\Contracts\FamilySet\UpdateFamilySetInterface;
 use App\Enums\FamilySetStatus;
 use App\Models\FamilySet;
+use Carbon\CarbonImmutable;
+use Illuminate\Support\DateFactory;
 use Illuminate\Support\Facades\Date;
 
 describe('UpdateFamilySetAction', function (): void {
+    beforeEach(function (): void {
+        $this->dateFactory = Mockery::mock(DateFactory::class);
+        $this->dateFactory->allows('instance')->andReturnUsing(
+            fn (DateTimeInterface $date): CarbonImmutable => CarbonImmutable::instance($date),
+        );
+    });
+
     it('should update all fields on the family set', function (): void {
         // arrange
         $savedValues = [];
@@ -23,7 +32,7 @@ describe('UpdateFamilySetAction', function (): void {
 
         $purchaseDate = Date::parse('2024-06-15');
 
-        $action = new UpdateFamilySetAction;
+        $action = new UpdateFamilySetAction($this->dateFactory);
         $data = new class($purchaseDate) implements UpdateFamilySetInterface
         {
             public int $quantity = 5;
@@ -60,7 +69,7 @@ describe('UpdateFamilySetAction', function (): void {
         });
         $familySet->shouldReceive('save')->once();
 
-        $action = new UpdateFamilySetAction;
+        $action = new UpdateFamilySetAction($this->dateFactory);
         $data = new class implements UpdateFamilySetInterface
         {
             public int $quantity = 3;
@@ -89,7 +98,7 @@ describe('UpdateFamilySetAction', function (): void {
         $familySet->allows('getAttribute');
         $familySet->shouldReceive('save')->once();
 
-        $action = new UpdateFamilySetAction;
+        $action = new UpdateFamilySetAction($this->dateFactory);
         $data = new class implements UpdateFamilySetInterface
         {
             public int $quantity = 1;
@@ -114,7 +123,7 @@ describe('UpdateFamilySetAction', function (): void {
         $familySet->allows('getAttribute');
         $familySet->shouldReceive('save')->once();
 
-        $action = new UpdateFamilySetAction;
+        $action = new UpdateFamilySetAction($this->dateFactory);
         $data = new class implements UpdateFamilySetInterface
         {
             public int $quantity = 3;

@@ -6,7 +6,7 @@ namespace App\Actions\FamilySet;
 
 use App\Models\FamilySet;
 
-class DeleteFamilySetAction
+final readonly class DeleteFamilySetAction
 {
     public function execute(FamilySet $familySet): void
     {

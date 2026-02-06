@@ -7,10 +7,10 @@ namespace App\Actions\Sync;
 use App\Data\Lego\LegoColorData;
 use App\Models\Color;
 
-class UpsertColorAction
+final readonly class UpsertColorAction
 {
     public function __construct(
-        private readonly Color $color,
+        private Color $color,
     ) {}
 
     public function execute(LegoColorData $legoColorData): Color
