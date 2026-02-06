@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 
 arch('no debugging statements')
     ->expect('App')
@@ -28,3 +29,7 @@ arch('no Auth facade - use dependency injection instead')
     ->expect('App')
     ->not->toUse(Auth::class)
     ->ignoring('App\Providers');
+
+arch('no Hash facade - use dependency injection instead')
+    ->expect('App')
+    ->not->toUse(Hash::class);
