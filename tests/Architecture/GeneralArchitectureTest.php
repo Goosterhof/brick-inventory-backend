@@ -2,6 +2,8 @@
 
 declare(strict_types=1);
 
+use Illuminate\Support\Facades\Auth;
+
 arch('no debugging statements')
     ->expect('App')
     ->not->toUse(['dd', 'dump', 'var_dump', 'ray']);
@@ -21,3 +23,8 @@ arch('no sleep calls in application code')
 arch('no Laravel if helpers - use explicit if statements instead')
     ->expect('App')
     ->not->toUse(['throw_if', 'throw_unless', 'abort_if', 'abort_unless']);
+
+arch('no Auth facade - use dependency injection instead')
+    ->expect('App')
+    ->not->toUse(Auth::class)
+    ->ignoring('App\Providers');
