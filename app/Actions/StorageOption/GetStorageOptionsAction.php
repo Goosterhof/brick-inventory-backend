@@ -8,10 +8,10 @@ use App\Models\StorageOption;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 
-class GetStorageOptionsAction
+final readonly class GetStorageOptionsAction
 {
     public function __construct(
-        private readonly StorageOption $storageOption,
+        private StorageOption $storageOption,
     ) {}
 
     /**

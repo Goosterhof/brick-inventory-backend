@@ -8,10 +8,10 @@ use App\Models\FamilySet;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 
-class GetFamilySetsAction
+final readonly class GetFamilySetsAction
 {
     public function __construct(
-        private readonly FamilySet $familySet,
+        private FamilySet $familySet,
     ) {}
 
     /**

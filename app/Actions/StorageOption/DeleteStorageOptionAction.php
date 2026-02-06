@@ -6,7 +6,7 @@ namespace App\Actions\StorageOption;
 
 use App\Models\StorageOption;
 
-class DeleteStorageOptionAction
+final readonly class DeleteStorageOptionAction
 {
     public function execute(StorageOption $storageOption): void
     {

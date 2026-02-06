@@ -7,10 +7,10 @@ namespace App\Actions\Sync;
 use App\Data\Lego\LegoPartData;
 use App\Models\Part;
 
-class UpsertPartAction
+final readonly class UpsertPartAction
 {
     public function __construct(
-        private readonly Part $part,
+        private Part $part,
     ) {}
 
     public function execute(LegoPartData $legoPartData): Part

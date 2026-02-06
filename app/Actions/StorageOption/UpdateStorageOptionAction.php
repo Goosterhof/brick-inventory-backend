@@ -7,7 +7,7 @@ namespace App\Actions\StorageOption;
 use App\Contracts\StorageOption\StorageOptionDataInterface;
 use App\Models\StorageOption;
 
-class UpdateStorageOptionAction
+final readonly class UpdateStorageOptionAction
 {
     public function execute(StorageOption $storageOption, StorageOptionDataInterface $storageOptionData): StorageOption
     {

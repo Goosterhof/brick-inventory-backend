@@ -9,12 +9,12 @@ use App\Models\Family;
 use App\Models\User;
 use Illuminate\Database\ConnectionInterface;
 
-class CreateUserWithFamilyAction
+final readonly class CreateUserWithFamilyAction
 {
     public function __construct(
-        private readonly User $user,
-        private readonly Family $family,
-        private readonly ConnectionInterface $connection,
+        private User $user,
+        private Family $family,
+        private ConnectionInterface $connection,
     ) {}
 
     public function execute(RegisterUserInterface $registerUser): User

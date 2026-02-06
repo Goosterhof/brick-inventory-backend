@@ -15,13 +15,13 @@ use App\Models\FamilySet;
 use App\Models\Set;
 use Illuminate\Database\ConnectionInterface;
 
-class ImportOwnedSetsAction
+final readonly class ImportOwnedSetsAction
 {
     public function __construct(
-        private readonly LegoDataServiceInterface $legoDataService,
-        private readonly UpsertSetAction $upsertSetAction,
-        private readonly FamilySet $familySet,
-        private readonly ConnectionInterface $connection,
+        private LegoDataServiceInterface $legoDataService,
+        private UpsertSetAction $upsertSetAction,
+        private FamilySet $familySet,
+        private ConnectionInterface $connection,
     ) {}
 
     /**

@@ -9,10 +9,10 @@ use App\Models\FamilySet;
 use DateTimeInterface;
 use Illuminate\Support\DateFactory;
 
-class UpdateFamilySetAction
+final readonly class UpdateFamilySetAction
 {
     public function __construct(
-        private readonly DateFactory $dateFactory,
+        private DateFactory $dateFactory,
     ) {}
 
     public function execute(FamilySet $familySet, UpdateFamilySetInterface $updateFamilySet): FamilySet

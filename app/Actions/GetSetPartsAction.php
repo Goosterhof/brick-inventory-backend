@@ -9,13 +9,13 @@ use App\Actions\Sync\UpsertSetAction;
 use App\Contracts\LegoDataServiceInterface;
 use App\Models\Set;
 
-class GetSetPartsAction
+final readonly class GetSetPartsAction
 {
     public function __construct(
-        private readonly LegoDataServiceInterface $legoDataService,
-        private readonly UpsertSetAction $upsertSetAction,
-        private readonly StoreSetPartsAction $storeSetPartsAction,
-        private readonly Set $set,
+        private LegoDataServiceInterface $legoDataService,
+        private UpsertSetAction $upsertSetAction,
+        private StoreSetPartsAction $storeSetPartsAction,
+        private Set $set,
     ) {}
 
     public function execute(string $setNum): Set

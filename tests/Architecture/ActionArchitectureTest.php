@@ -8,6 +8,25 @@ arch('actions should end with Action')
     ->expect('App\Actions')
     ->toHaveSuffix('Action');
 
+// Custom test: BypassFinals strips `final` and `readonly` via a stream wrapper,
+// so we read raw file content via subprocess to bypass it.
+it('should have all action classes as final readonly', function (): void {
+    $nonFinalReadonly = [];
+
+    foreach (getClassesInDirectory(dirname(__DIR__, 2) . '/app/Actions', 'App\\Actions\\') as $className) {
+        $file = new ReflectionClass($className)->getFileName();
+        $content = (string) shell_exec('cat ' . escapeshellarg($file));
+
+        if (!str_contains($content, 'final readonly class')) {
+            $nonFinalReadonly[] = $className;
+        }
+    }
+
+    expect($nonFinalReadonly)->toBeEmpty(
+        'These actions are not final readonly: ' . implode(', ', $nonFinalReadonly),
+    );
+});
+
 arch('actions should have execute method')
     ->expect('App\Actions')
     ->toHaveMethod('execute');

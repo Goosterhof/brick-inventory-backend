@@ -9,12 +9,12 @@ use App\Models\StorageOption;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
 
-class CreateStorageOptionAction
+final readonly class CreateStorageOptionAction
 {
     public function __construct(
-        private readonly StorageOption $storageOption,
+        private StorageOption $storageOption,
         #[CurrentUser]
-        private readonly User $user,
+        private User $user,
     ) {}
 
     public function execute(StorageOptionDataInterface $storageOptionData): StorageOption

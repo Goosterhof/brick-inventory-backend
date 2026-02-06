@@ -8,7 +8,7 @@ use App\Models\StorageOption;
 use App\Models\StorageOptionPart;
 use Illuminate\Database\Eloquent\Collection;
 
-class GetStorageOptionPartsAction
+final readonly class GetStorageOptionPartsAction
 {
     /**
      * @return Collection<int, StorageOptionPart>

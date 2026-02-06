@@ -8,12 +8,12 @@ use App\Actions\Sync\UpsertSetAction;
 use App\Contracts\LegoDataServiceInterface;
 use App\Models\Set;
 
-class GetSetAction
+final readonly class GetSetAction
 {
     public function __construct(
-        private readonly LegoDataServiceInterface $legoDataService,
-        private readonly UpsertSetAction $upsertSetAction,
-        private readonly Set $set,
+        private LegoDataServiceInterface $legoDataService,
+        private UpsertSetAction $upsertSetAction,
+        private Set $set,
     ) {}
 
     public function execute(string $setNum): Set
