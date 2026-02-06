@@ -13,10 +13,16 @@ use App\Exceptions\MissingRebrickableTokenException;
 use App\Models\Family;
 use App\Models\FamilySet;
 use App\Models\Set;
+use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
 describe('ImportOwnedSetsAction', function (): void {
+    beforeEach(function (): void {
+        $this->db = Mockery::mock(ConnectionInterface::class);
+        $this->db->allows('transaction')->andReturnUsing(fn (Closure $callback) => $callback());
+    });
+
     it('should throw MissingRebrickableTokenException when family has no token', function (): void {
         // arrange
         $legoDataService = Mockery::mock(LegoDataServiceInterface::class);
@@ -27,7 +33,7 @@ describe('ImportOwnedSetsAction', function (): void {
         $family->allows('getAttribute')->with('id')->andReturn(1);
         $family->allows('getAttribute')->with('rebrickable_user_token')->andReturn(null);
 
-        $action = new ImportOwnedSetsAction($legoDataService, $upsertSetAction, $familySetModel);
+        $action = new ImportOwnedSetsAction($legoDataService, $upsertSetAction, $familySetModel, $this->db);
 
         // act & assert
         expect(fn (): ImportOwnedSetsResultData => $action->execute($family))
@@ -49,7 +55,7 @@ describe('ImportOwnedSetsAction', function (): void {
         $family->allows('getAttribute')->with('id')->andReturn(1);
         $family->allows('getAttribute')->with('rebrickable_user_token')->andReturn('user-token-123');
 
-        $action = new ImportOwnedSetsAction($legoDataService, $upsertSetAction, $familySetModel);
+        $action = new ImportOwnedSetsAction($legoDataService, $upsertSetAction, $familySetModel, $this->db);
 
         // act
         $action->execute($family);
@@ -105,7 +111,7 @@ describe('ImportOwnedSetsAction', function (): void {
         $family->allows('getAttribute')->with('id')->andReturn(1);
         $family->allows('getAttribute')->with('rebrickable_user_token')->andReturn('user-token-123');
 
-        $action = new ImportOwnedSetsAction($legoDataService, $upsertSetAction, $familySetModel);
+        $action = new ImportOwnedSetsAction($legoDataService, $upsertSetAction, $familySetModel, $this->db);
 
         // act
         $action->execute($family);
@@ -162,7 +168,7 @@ describe('ImportOwnedSetsAction', function (): void {
         $family->allows('getAttribute')->with('id')->andReturn(1);
         $family->allows('getAttribute')->with('rebrickable_user_token')->andReturn('user-token-123');
 
-        $action = new ImportOwnedSetsAction($legoDataService, $upsertSetAction, $familySetModel);
+        $action = new ImportOwnedSetsAction($legoDataService, $upsertSetAction, $familySetModel, $this->db);
 
         // act
         $action->execute($family);
@@ -230,7 +236,7 @@ describe('ImportOwnedSetsAction', function (): void {
         $family->allows('getAttribute')->with('id')->andReturn(1);
         $family->allows('getAttribute')->with('rebrickable_user_token')->andReturn('user-token-123');
 
-        $action = new ImportOwnedSetsAction($legoDataService, $upsertSetAction, $familySetModel);
+        $action = new ImportOwnedSetsAction($legoDataService, $upsertSetAction, $familySetModel, $this->db);
 
         // act
         $result = $action->execute($family);
@@ -255,7 +261,7 @@ describe('ImportOwnedSetsAction', function (): void {
         $family->allows('getAttribute')->with('id')->andReturn(1);
         $family->allows('getAttribute')->with('rebrickable_user_token')->andReturn('user-token-123');
 
-        $action = new ImportOwnedSetsAction($legoDataService, $upsertSetAction, $familySetModel);
+        $action = new ImportOwnedSetsAction($legoDataService, $upsertSetAction, $familySetModel, $this->db);
 
         // act
         $result = $action->execute($family);
@@ -313,7 +319,7 @@ describe('ImportOwnedSetsAction', function (): void {
         $family->allows('getAttribute')->with('id')->andReturn(1);
         $family->allows('getAttribute')->with('rebrickable_user_token')->andReturn('user-token-123');
 
-        $action = new ImportOwnedSetsAction($legoDataService, $upsertSetAction, $familySetModel);
+        $action = new ImportOwnedSetsAction($legoDataService, $upsertSetAction, $familySetModel, $this->db);
 
         // act
         $result = $action->execute($family);
@@ -404,7 +410,7 @@ describe('ImportOwnedSetsAction', function (): void {
         $family->allows('getAttribute')->with('id')->andReturn(1);
         $family->allows('getAttribute')->with('rebrickable_user_token')->andReturn('user-token-123');
 
-        $action = new ImportOwnedSetsAction($legoDataService, $upsertSetAction, $familySetModel);
+        $action = new ImportOwnedSetsAction($legoDataService, $upsertSetAction, $familySetModel, $this->db);
 
         // act
         $result = $action->execute($family);

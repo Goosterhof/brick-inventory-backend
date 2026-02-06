@@ -13,7 +13,7 @@ use App\Exceptions\MissingRebrickableTokenException;
 use App\Models\Family;
 use App\Models\FamilySet;
 use App\Models\Set;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Database\ConnectionInterface;
 
 class ImportOwnedSetsAction
 {
@@ -21,6 +21,7 @@ class ImportOwnedSetsAction
         private readonly LegoDataServiceInterface $legoDataService,
         private readonly UpsertSetAction $upsertSetAction,
         private readonly FamilySet $familySet,
+        private readonly ConnectionInterface $connection,
     ) {}
 
     /**
@@ -43,7 +44,8 @@ class ImportOwnedSetsAction
             );
         }
 
-        return DB::transaction(fn (): ImportOwnedSetsResultData => $this->importSets($family, $userSets));
+        /** @var ImportOwnedSetsResultData */
+        return $this->connection->transaction(fn (): ImportOwnedSetsResultData => $this->importSets($family, $userSets));
     }
 
     /**

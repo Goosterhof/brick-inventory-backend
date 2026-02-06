@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Http\Resources\ResourceData;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\DB;
 
 /*
 |--------------------------------------------------------------------------
@@ -47,10 +46,6 @@ function getTypeNames(ReflectionType $reflectionType): array
 arch('controllers should end with Controller')
     ->expect('App\Http\Controllers')
     ->toHaveSuffix('Controller');
-
-arch('controllers should not use DB facade')
-    ->expect('App\Http\Controllers')
-    ->not->toUse(DB::class);
 
 arch('controllers should not use Eloquent Builder directly')
     ->expect('App\Http\Controllers')

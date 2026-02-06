@@ -6,9 +6,15 @@ use App\Actions\Auth\CreateUserWithFamilyAction;
 use App\Contracts\Auth\RegisterUserInterface;
 use App\Models\Family;
 use App\Models\User;
+use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 describe('CreateUserWithFamilyAction', function (): void {
+    beforeEach(function (): void {
+        $this->db = Mockery::mock(ConnectionInterface::class);
+        $this->db->allows('transaction')->andReturnUsing(fn (Closure $callback) => $callback());
+    });
+
     it('should create a family with the provided name', function (): void {
         // arrange
         $familySavedValues = [];
@@ -43,7 +49,7 @@ describe('CreateUserWithFamilyAction', function (): void {
             ->once()
             ->andReturn($userInstance);
 
-        $action = new CreateUserWithFamilyAction($user, $family);
+        $action = new CreateUserWithFamilyAction($user, $family, $this->db);
         $data = new class implements RegisterUserInterface
         {
             public string $familyName = 'Test Family';
@@ -95,7 +101,7 @@ describe('CreateUserWithFamilyAction', function (): void {
         $user = Mockery::mock(User::class);
         $user->shouldReceive('newInstance')->withNoArgs()->andReturn($userInstance);
 
-        $action = new CreateUserWithFamilyAction($user, $family);
+        $action = new CreateUserWithFamilyAction($user, $family, $this->db);
         $data = new class implements RegisterUserInterface
         {
             public string $familyName = 'Test Family';
@@ -138,7 +144,7 @@ describe('CreateUserWithFamilyAction', function (): void {
         $user = Mockery::mock(User::class);
         $user->shouldReceive('newInstance')->withNoArgs()->andReturn($userInstance);
 
-        $action = new CreateUserWithFamilyAction($user, $family);
+        $action = new CreateUserWithFamilyAction($user, $family, $this->db);
         $data = new class implements RegisterUserInterface
         {
             public string $familyName = 'Test Family';
@@ -182,7 +188,7 @@ describe('CreateUserWithFamilyAction', function (): void {
             ->once()
             ->andReturn($userInstance);
 
-        $action = new CreateUserWithFamilyAction($user, $family);
+        $action = new CreateUserWithFamilyAction($user, $family, $this->db);
         $data = new class implements RegisterUserInterface
         {
             public string $familyName = 'Test Family';
@@ -232,7 +238,7 @@ describe('CreateUserWithFamilyAction', function (): void {
         $user = Mockery::mock(User::class);
         $user->shouldReceive('newInstance')->withNoArgs()->andReturn($userInstance);
 
-        $action = new CreateUserWithFamilyAction($user, $family);
+        $action = new CreateUserWithFamilyAction($user, $family, $this->db);
         $data = new class implements RegisterUserInterface
         {
             public string $familyName = 'Test Family';
