@@ -8,20 +8,21 @@ use App\Actions\Auth\CreateUserWithFamilyAction;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\RegisterRequest;
 use App\Http\Resources\ProfileResourceData;
+use Illuminate\Contracts\Auth\StatefulGuard;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\Auth;
 
 class RegisterController extends Controller
 {
     public function __construct(
         private readonly CreateUserWithFamilyAction $createUserWithFamilyAction,
+        private readonly StatefulGuard $statefulGuard,
     ) {}
 
     public function __invoke(RegisterRequest $registerRequest): JsonResponse
     {
         $user = $this->createUserWithFamilyAction->execute($registerRequest);
 
-        Auth::login($user);
+        $this->statefulGuard->login($user);
 
         return response()->json(ProfileResourceData::from($user), 201);
     }
