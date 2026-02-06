@@ -5,8 +5,8 @@ declare(strict_types=1);
 use App\Actions\Auth\LoginUserAction;
 use App\Contracts\Auth\LoginUserInterface;
 use App\Models\User;
+use Illuminate\Contracts\Hashing\Hasher;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
 
 describe('LoginUserAction', function (): void {
@@ -29,7 +29,8 @@ describe('LoginUserAction', function (): void {
             ->once()
             ->andReturn($builder);
 
-        Hash::shouldReceive('check')
+        $hasher = Mockery::mock(Hasher::class);
+        $hasher->shouldReceive('check')
             ->with('password123', 'hashed_password')
             ->once()
             ->andReturn(true);
@@ -41,7 +42,7 @@ describe('LoginUserAction', function (): void {
             public string $password { get => 'password123'; }
         };
 
-        $action = new LoginUserAction($user);
+        $action = new LoginUserAction($user, $hasher);
 
         // act
         $result = $action->execute($loginData);
@@ -69,7 +70,8 @@ describe('LoginUserAction', function (): void {
             ->once()
             ->andReturn($builder);
 
-        Hash::shouldReceive('check')
+        $hasher = Mockery::mock(Hasher::class);
+        $hasher->shouldReceive('check')
             ->with('wrongpassword', 'hashed_password')
             ->once()
             ->andReturn(false);
@@ -81,7 +83,7 @@ describe('LoginUserAction', function (): void {
             public string $password { get => 'wrongpassword'; }
         };
 
-        $action = new LoginUserAction($user);
+        $action = new LoginUserAction($user, $hasher);
 
         // act & assert
         $action->execute($loginData);
@@ -103,6 +105,8 @@ describe('LoginUserAction', function (): void {
             ->once()
             ->andReturn($builder);
 
+        $hasher = Mockery::mock(Hasher::class);
+
         $loginData = new class implements LoginUserInterface
         {
             public string $email { get => 'nonexistent@example.com'; }
@@ -110,7 +114,7 @@ describe('LoginUserAction', function (): void {
             public string $password { get => 'password123'; }
         };
 
-        $action = new LoginUserAction($user);
+        $action = new LoginUserAction($user, $hasher);
 
         // act & assert
         $action->execute($loginData);
