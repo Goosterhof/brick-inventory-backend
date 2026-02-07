@@ -1,5 +1,7 @@
 includes:
     - vendor/larastan/larastan/extension.neon
+    - vendor/phpstan/phpstan-strict-rules/rules.neon
+    - vendor/phpstan/phpstan-deprecation-rules/rules.neon
     - phar://phpstan.phar/conf/bleedingEdge.neon
 
 parameters:
@@ -31,3 +33,7 @@ parameters:
         - '#Parameter \#1 \$string of function mb_rtrim expects string, .* given#'
         # Factory definition return types are compatible by convention
         - '#Return type .* of method Database\\Factories\\.*::definition\(\) should be compatible#'
+        # Eloquent Builder methods are designed to be called dynamically via fluent chaining
+        -
+            identifier: staticMethod.dynamicCall
+            path: app/*
