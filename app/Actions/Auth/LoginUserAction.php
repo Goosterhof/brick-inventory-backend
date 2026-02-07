@@ -20,7 +20,7 @@ final readonly class LoginUserAction
     {
         $user = $this->user->newQuery()->where('email', $loginUser->email)->first();
 
-        if (!$user || !$this->hasher->check($loginUser->password, $user->password)) {
+        if ($user === null || !$this->hasher->check($loginUser->password, $user->password)) {
             throw ValidationException::withMessages([
                 'email' => ['The provided credentials are incorrect.'],
             ]);

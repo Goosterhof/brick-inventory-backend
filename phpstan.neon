@@ -1,6 +1,8 @@
 includes:
     - vendor/larastan/larastan/extension.neon
     - phar://phpstan.phar/conf/bleedingEdge.neon
+    - vendor/phpstan/phpstan-strict-rules/rules.neon
+    - vendor/phpstan/phpstan-deprecation-rules/rules.neon
 
 parameters:
     level: max
@@ -31,3 +33,11 @@ parameters:
         - '#Parameter \#1 \$string of function mb_rtrim expects string, .* given#'
         # Factory definition return types are compatible by convention
         - '#Return type .* of method Database\\Factories\\.*::definition\(\) should be compatible#'
+        # Eloquent dynamic calls to static query builder methods are standard Laravel usage
+        -
+            identifier: staticMethod.dynamicCall
+            path: app/*
+        # Laravel config files use array_filter without callback by design
+        -
+            identifier: arrayFilter.strict
+            path: config/*
