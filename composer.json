@@ -15,6 +15,8 @@
         "laravel/tinker": "^2.10.1"
     },
     "require-dev": {
+        "captainhook/captainhook": "*",
+        "captainhook/hook-installer": "*",
         "dg/bypass-finals": "^1.9",
         "driftingly/rector-laravel": "^2.1",
         "fakerphp/faker": "^1.23",
@@ -101,7 +103,8 @@
         "sort-packages": true,
         "allow-plugins": {
             "pestphp/pest-plugin": true,
-            "php-http/discovery": true
+            "php-http/discovery": true,
+            "captainhook/hook-installer": true
         },
         "platform": {
             "php": "8.4"
