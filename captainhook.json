@@ -34,6 +34,16 @@
                 ]
             },
             {
+                "action": "composer deptrac",
+                "options": [],
+                "conditions": [
+                    {
+                        "exec": "\\CaptainHook\\App\\Hook\\Condition\\FileChanged\\Any",
+                        "args": ["*.php"]
+                    }
+                ]
+            },
+            {
                 "action": "composer test:arch",
                 "options": [],
                 "conditions": [

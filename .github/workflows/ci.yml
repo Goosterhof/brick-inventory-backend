@@ -46,6 +46,9 @@ jobs:
       - name: Run PHPStan
         run: composer phpstan
 
+      - name: Run Deptrac
+        run: composer deptrac
+
   test:
     runs-on: ubuntu-latest
 
