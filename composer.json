@@ -77,7 +77,7 @@
         "pint:test": "./vendor/bin/pint --test",
         "phpstan": "./vendor/bin/phpstan analyse",
         "deptrac": "./vendor/bin/deptrac analyse",
-        "mutation": "php -d pcov.enabled=1 ./vendor/bin/pest --mutate --path=app/Actions,app/Services --testsuite=Unit --parallel",
+        "mutation": "php -d pcov.enabled=1 ./vendor/bin/pest --mutate --path=app/Actions,app/Services --testsuite=Unit --parallel --min=75",
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi"
