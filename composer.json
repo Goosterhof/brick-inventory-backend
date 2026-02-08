@@ -78,7 +78,10 @@
         "pint:test": "./vendor/bin/pint --test",
         "phpstan": "./vendor/bin/phpstan analyse",
         "deptrac": "./vendor/bin/deptrac analyse",
-        "infection": "php -d pcov.enabled=1 ./vendor/bin/infection --threads=max --show-mutations --no-progress",
+        "infection": [
+            "php -d pcov.enabled=1 ./vendor/bin/pest tests/Unit --coverage-xml=storage/infection/coverage-xml --log-junit=storage/infection/junit.xml",
+            "./vendor/bin/infection --coverage=storage/infection --skip-initial-tests --threads=max --show-mutations --no-progress"
+        ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi"
