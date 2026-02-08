@@ -21,6 +21,7 @@
         "dg/bypass-finals": "^1.9",
         "driftingly/rector-laravel": "^2.1",
         "fakerphp/faker": "^1.23",
+        "infection/infection": "^0.32.3",
         "larastan/larastan": "^3.9",
         "laravel/pail": "^1.2.2",
         "laravel/pint": "^1.24",
@@ -77,6 +78,7 @@
         "pint:test": "./vendor/bin/pint --test",
         "phpstan": "./vendor/bin/phpstan analyse",
         "deptrac": "./vendor/bin/deptrac analyse",
+        "infection": "php -d pcov.enabled=1 ./vendor/bin/infection --threads=max --show-mutations --no-progress",
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi"
@@ -108,7 +110,8 @@
         "allow-plugins": {
             "pestphp/pest-plugin": true,
             "php-http/discovery": true,
-            "captainhook/hook-installer": true
+            "captainhook/hook-installer": true,
+            "infection/extension-installer": true
         },
         "platform": {
             "php": "8.4"
