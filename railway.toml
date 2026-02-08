@@ -1,6 +1,4 @@
 [build]
-# Override default composer install to exclude dev dependencies
-installCommand = "composer install --optimize-autoloader --no-dev --no-scripts --no-interaction"
 # Run Laravel setup commands after composer install (since --no-scripts is used)
 buildCommand = "php artisan package:discover --ansi && php artisan config:cache && php artisan route:cache && php artisan view:cache"
 

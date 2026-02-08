@@ -82,6 +82,9 @@
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi"
         ],
+        "post-install-cmd": [
+            "@php -r \"if (is_dir('.git') && file_exists('vendor/bin/captainhook')) { passthru('vendor/bin/captainhook install --force --skip-existing'); }\""
+        ],
         "post-update-cmd": [
             "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
         ],
@@ -109,7 +112,7 @@
         "allow-plugins": {
             "pestphp/pest-plugin": true,
             "php-http/discovery": true,
-            "captainhook/hook-installer": true
+            "captainhook/hook-installer": false
         },
         "platform": {
             "php": "8.4"

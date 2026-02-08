@@ -8,6 +8,6 @@ NIXPACKS_PHP_VERSION = "8.4"
 nixPkgs = ["php84", "php84Extensions.pdo_pgsql", "php84Extensions.pgsql"]
 
 [phases.install]
-cmds = ["composer install --optimize-autoloader --no-dev --no-interaction"]
+cmds = ["composer install --optimize-autoloader --no-dev --no-scripts --no-interaction"]
 
 # Start command removed - uses Procfile instead (requires Railpack builder for FrankenPHP)
