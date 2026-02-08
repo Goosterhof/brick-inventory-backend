@@ -1,0 +1,116 @@
+deptrac:
+  paths:
+    - ./app
+  exclude_files:
+    - '#.*test.*#'
+  layers:
+    # --- Leaf layers (no App\ dependencies allowed) ---
+    - name: Model
+      collectors:
+        - type: classLike
+          value: App\\Models\\.*
+    - name: Data
+      collectors:
+        - type: classLike
+          value: App\\Data\\.*
+    - name: Enum
+      collectors:
+        - type: classLike
+          value: App\\Enums\\.*
+    - name: Exception
+      collectors:
+        - type: classLike
+          value: App\\Exceptions\\.*
+
+    # --- Interface layer ---
+    - name: Contract
+      collectors:
+        - type: classLike
+          value: App\\Contracts\\.*
+
+    # --- Infrastructure layers ---
+    - name: Service
+      collectors:
+        - type: classLike
+          value: App\\Services\\.*
+    - name: FormRequest
+      collectors:
+        - type: classLike
+          value: App\\Http\\Requests\\.*
+    - name: ResourceData
+      collectors:
+        - type: classLike
+          value: App\\Http\\Resources\\.*
+
+    # --- Orchestration layer ---
+    - name: Action
+      collectors:
+        - type: classLike
+          value: App\\Actions\\.*
+
+    # --- Entry point layer ---
+    - name: Controller
+      collectors:
+        - type: classLike
+          value: App\\Http\\Controllers\\.*
+
+    # --- Wiring layer ---
+    - name: Provider
+      collectors:
+        - type: classLike
+          value: App\\Providers\\.*
+
+  ruleset:
+    # Leaf layers: no dependencies on other App\ layers
+    Model:
+      - Enum
+      - Contract
+    Data: []
+    Enum: []
+    Exception: []
+
+    # Contracts define interfaces using DTOs, exceptions, and enums
+    Contract:
+      - Data
+      - Enum
+      - Exception
+
+    # Services implement contracts, use DTOs and throw exceptions
+    Service:
+      - Contract
+      - Data
+      - Exception
+
+    # Form requests validate input, reference contracts and enums
+    FormRequest:
+      - Contract
+      - Enum
+
+    # Resource data transforms models into API responses
+    ResourceData:
+      - Model
+      - Enum
+      - Data
+      - Exception
+
+    # Actions orchestrate business logic across all lower layers
+    Action:
+      - Action
+      - Contract
+      - Model
+      - Data
+      - Enum
+      - Exception
+
+    # Controllers are thin HTTP handlers delegating to actions
+    Controller:
+      - Action
+      - FormRequest
+      - ResourceData
+      - Model
+
+    # Providers wire interfaces to implementations
+    Provider:
+      - Contract
+      - Service
+      - FormRequest

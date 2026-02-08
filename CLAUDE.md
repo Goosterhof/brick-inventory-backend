@@ -61,6 +61,7 @@ Use `/conventions` skill for detailed patterns on Action vs Service responsibili
 | `composer lint` | Run Rector + Pint (fix mode) |
 | `composer lint:test` | Run Rector + Pint (dry-run) |
 | `composer phpstan` | Run static analysis |
+| `composer deptrac` | Run layer dependency analysis |
 
 ## Code Quality
 

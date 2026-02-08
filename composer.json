@@ -17,6 +17,7 @@
     "require-dev": {
         "captainhook/captainhook": "*",
         "captainhook/hook-installer": "*",
+        "deptrac/deptrac": "^4.6",
         "dg/bypass-finals": "^1.9",
         "driftingly/rector-laravel": "^2.1",
         "fakerphp/faker": "^1.23",
@@ -75,6 +76,7 @@
         "pint": "./vendor/bin/pint",
         "pint:test": "./vendor/bin/pint --test",
         "phpstan": "./vendor/bin/phpstan analyse",
+        "deptrac": "./vendor/bin/deptrac analyse",
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi"
