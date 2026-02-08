@@ -62,7 +62,7 @@ Use `/conventions` skill for detailed patterns on Action vs Service responsibili
 | `composer lint:test` | Run Rector + Pint (dry-run) |
 | `composer phpstan` | Run static analysis |
 | `composer deptrac` | Run layer dependency analysis |
-| `composer infection` | Run mutation testing (requires pcov) |
+| `composer mutation` | Run mutation testing (requires pcov) |
 
 ## Code Quality
 

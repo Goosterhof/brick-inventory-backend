@@ -194,7 +194,7 @@ jobs:
         run: php artisan key:generate
 
       - name: Run mutation testing
-        run: composer infection
+        run: composer mutation
 
   seed:
     runs-on: ubuntu-latest
