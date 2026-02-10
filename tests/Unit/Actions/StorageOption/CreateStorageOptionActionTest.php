@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\StorageOption\CreateStorageOptionAction;
-use App\Contracts\StorageOption\StorageOptionDataInterface;
+use App\DataTransferObjects\StorageOption\StorageOptionData;
 use App\Models\StorageOption;
 use App\Models\User;
 
@@ -30,18 +30,10 @@ describe('CreateStorageOptionAction', function (): void {
         $user->allows('getAttribute')->with('family_id')->andReturn(1);
 
         $action = new CreateStorageOptionAction($storageOption, $user);
-        $data = new class implements StorageOptionDataInterface
-        {
-            public string $name = 'Cabinet 1';
-
-            public ?string $description = 'Main storage cabinet';
-
-            public ?int $parentId = null;
-
-            public ?int $row = null;
-
-            public ?int $column = null;
-        };
+        $data = new StorageOptionData(
+            name: 'Cabinet 1',
+            description: 'Main storage cabinet',
+        );
 
         // act
         $result = $action->execute($data);
@@ -75,18 +67,12 @@ describe('CreateStorageOptionAction', function (): void {
         $user->allows('getAttribute')->with('family_id')->andReturn(1);
 
         $action = new CreateStorageOptionAction($storageOption, $user);
-        $data = new class implements StorageOptionDataInterface
-        {
-            public string $name = 'Drawer A1';
-
-            public ?string $description = null;
-
-            public ?int $parentId = 5;
-
-            public ?int $row = 1;
-
-            public ?int $column = 2;
-        };
+        $data = new StorageOptionData(
+            name: 'Drawer A1',
+            parentId: 5,
+            row: 1,
+            column: 2,
+        );
 
         // act
         $action->execute($data);
@@ -113,18 +99,9 @@ describe('CreateStorageOptionAction', function (): void {
         $user->allows('getAttribute')->with('family_id')->andReturn(1);
 
         $action = new CreateStorageOptionAction($storageOption, $user);
-        $data = new class implements StorageOptionDataInterface
-        {
-            public string $name = 'Test Cabinet';
-
-            public ?string $description = null;
-
-            public ?int $parentId = null;
-
-            public ?int $row = null;
-
-            public ?int $column = null;
-        };
+        $data = new StorageOptionData(
+            name: 'Test Cabinet',
+        );
 
         // act
         $action->execute($data);

@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\StorageOption\AssignPartToStorageAction;
-use App\Contracts\StorageOption\AssignPartToStorageInterface;
+use App\DataTransferObjects\StorageOption\AssignPartToStorageData;
 use App\Models\StorageOption;
 use App\Models\StorageOptionPart;
 use Illuminate\Database\Eloquent\Builder;
@@ -35,14 +35,11 @@ describe('AssignPartToStorageAction', function (): void {
         $storageOption->allows('getAttribute')->with('id')->andReturn(1);
 
         $action = new AssignPartToStorageAction($storageOptionPart);
-        $data = new class implements AssignPartToStorageInterface
-        {
-            public int $partId = 2;
-
-            public ?int $colorId = null;
-
-            public int $quantity = 50;
-        };
+        $data = new AssignPartToStorageData(
+            partId: 2,
+            colorId: null,
+            quantity: 50,
+        );
 
         // act
         $result = $action->execute($storageOption, $data);
@@ -80,14 +77,11 @@ describe('AssignPartToStorageAction', function (): void {
         $storageOption->allows('getAttribute')->with('id')->andReturn(1);
 
         $action = new AssignPartToStorageAction($storageOptionPart);
-        $data = new class implements AssignPartToStorageInterface
-        {
-            public int $partId = 2;
-
-            public ?int $colorId = 3;
-
-            public int $quantity = 100;
-        };
+        $data = new AssignPartToStorageData(
+            partId: 2,
+            colorId: 3,
+            quantity: 100,
+        );
 
         // act
         $result = $action->execute($storageOption, $data);
@@ -116,14 +110,11 @@ describe('AssignPartToStorageAction', function (): void {
         $storageOption->allows('getAttribute')->with('id')->andReturn(1);
 
         $action = new AssignPartToStorageAction($storageOptionPart);
-        $data = new class implements AssignPartToStorageInterface
-        {
-            public int $partId = 2;
-
-            public ?int $colorId = null;
-
-            public int $quantity = 100;
-        };
+        $data = new AssignPartToStorageData(
+            partId: 2,
+            colorId: null,
+            quantity: 100,
+        );
 
         // act
         $action->execute($storageOption, $data);

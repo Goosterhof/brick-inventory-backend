@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Family\SetRebrickableTokenAction;
-use App\Contracts\Family\SetRebrickableTokenInterface;
+use App\DataTransferObjects\Family\SetRebrickableTokenData;
 use App\Exceptions\NotFamilyHeadException;
 use App\Models\Family;
 use App\Models\User;
@@ -29,10 +29,9 @@ describe('SetRebrickableTokenAction', function (): void {
         });
         $family->shouldReceive('save')->once();
 
-        $data = new class implements SetRebrickableTokenInterface
-        {
-            public string $rebrickableUserToken = 'my-secret-token';
-        };
+        $data = new SetRebrickableTokenData(
+            rebrickableUserToken: 'my-secret-token',
+        );
 
         $action = new SetRebrickableTokenAction;
 
@@ -53,10 +52,9 @@ describe('SetRebrickableTokenAction', function (): void {
         $family->allows('setAttribute');
         $family->shouldReceive('save');
 
-        $data = new class implements SetRebrickableTokenInterface
-        {
-            public string $rebrickableUserToken = 'another-token';
-        };
+        $data = new SetRebrickableTokenData(
+            rebrickableUserToken: 'another-token',
+        );
 
         $action = new SetRebrickableTokenAction;
 
@@ -87,10 +85,9 @@ describe('SetRebrickableTokenAction', function (): void {
         });
         $family->shouldReceive('save')->once();
 
-        $data = new class implements SetRebrickableTokenInterface
-        {
-            public string $rebrickableUserToken = 'new-token';
-        };
+        $data = new SetRebrickableTokenData(
+            rebrickableUserToken: 'new-token',
+        );
 
         $action = new SetRebrickableTokenAction;
 
@@ -110,10 +107,9 @@ describe('SetRebrickableTokenAction', function (): void {
         $family->allows('getAttribute')->with('head_id')->andReturn(1);
         $family->shouldReceive('save')->never();
 
-        $data = new class implements SetRebrickableTokenInterface
-        {
-            public string $rebrickableUserToken = 'my-token';
-        };
+        $data = new SetRebrickableTokenData(
+            rebrickableUserToken: 'my-token',
+        );
 
         $action = new SetRebrickableTokenAction;
 
@@ -142,10 +138,9 @@ describe('SetRebrickableTokenAction', function (): void {
         });
         $family->shouldReceive('save')->once();
 
-        $data = new class implements SetRebrickableTokenInterface
-        {
-            public string $rebrickableUserToken = 'valid-token';
-        };
+        $data = new SetRebrickableTokenData(
+            rebrickableUserToken: 'valid-token',
+        );
 
         $action = new SetRebrickableTokenAction;
 

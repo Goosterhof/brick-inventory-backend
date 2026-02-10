@@ -5,8 +5,8 @@ declare(strict_types=1);
 use App\Actions\FamilySet\CreateFamilySetAction;
 use App\Actions\FamilySet\UpdateFamilySetAction;
 use App\Actions\GetSetAction;
-use App\Contracts\FamilySet\CreateFamilySetInterface;
-use App\Contracts\FamilySet\UpdateFamilySetInterface;
+use App\DataTransferObjects\FamilySet\CreateFamilySetData;
+use App\DataTransferObjects\FamilySet\UpdateFamilySetData;
 use App\Enums\FamilySetStatus;
 use App\Models\Family;
 use App\Models\FamilySet;
@@ -49,18 +49,11 @@ describe('CreateFamilySetAction', function (): void {
             ->andReturn($familySet);
 
         $action = new CreateFamilySetAction($getSetAction, $updateAction, $familySetModel);
-        $data = new class implements CreateFamilySetInterface
-        {
-            public string $setNum = '75192-1';
-
-            public int $quantity = 2;
-
-            public FamilySetStatus $status = FamilySetStatus::Built;
-
-            public ?DateTimeInterface $purchaseDate = null;
-
-            public ?string $notes = null;
-        };
+        $data = new CreateFamilySetData(
+            setNum: '75192-1',
+            quantity: 2,
+            status: FamilySetStatus::Built,
+        );
 
         // act
         $action->execute($family, $data);
@@ -98,18 +91,11 @@ describe('CreateFamilySetAction', function (): void {
         $updateAction->shouldReceive('execute')->andReturn($familySet);
 
         $action = new CreateFamilySetAction($getSetAction, $updateAction, $familySetModel);
-        $data = new class implements CreateFamilySetInterface
-        {
-            public string $setNum = '75192-1';
-
-            public int $quantity = 1;
-
-            public FamilySetStatus $status = FamilySetStatus::Sealed;
-
-            public ?DateTimeInterface $purchaseDate = null;
-
-            public ?string $notes = null;
-        };
+        $data = new CreateFamilySetData(
+            setNum: '75192-1',
+            quantity: 1,
+            status: FamilySetStatus::Sealed,
+        );
 
         // act
         $action->execute($family, $data);
@@ -142,29 +128,22 @@ describe('CreateFamilySetAction', function (): void {
 
         $updateAction = Mockery::mock(UpdateFamilySetAction::class);
         $updateAction->shouldReceive('execute')
-            ->withArgs(fn (FamilySet $fs, UpdateFamilySetInterface $updateFamilySet): bool => $fs === $familySet
-                && $updateFamilySet->quantity === 2
-                && $updateFamilySet->status === FamilySetStatus::Built
-                && $updateFamilySet->purchaseDate === $purchaseDate
-                && $updateFamilySet->notes === 'Test notes')
+            ->withArgs(fn (FamilySet $fs, UpdateFamilySetData $updateFamilySetData): bool => $fs === $familySet
+                && $updateFamilySetData->quantity === 2
+                && $updateFamilySetData->status === FamilySetStatus::Built
+                && $updateFamilySetData->purchaseDate === $purchaseDate
+                && $updateFamilySetData->notes === 'Test notes')
             ->once()
             ->andReturn($familySet);
 
         $action = new CreateFamilySetAction($getSetAction, $updateAction, $familySetModel);
-        $data = new class($purchaseDate) implements CreateFamilySetInterface
-        {
-            public string $setNum = '75192-1';
-
-            public int $quantity = 2;
-
-            public FamilySetStatus $status = FamilySetStatus::Built;
-
-            public ?string $notes = 'Test notes';
-
-            public function __construct(
-                public ?DateTimeInterface $purchaseDate,
-            ) {}
-        };
+        $data = new CreateFamilySetData(
+            setNum: '75192-1',
+            quantity: 2,
+            status: FamilySetStatus::Built,
+            purchaseDate: $purchaseDate,
+            notes: 'Test notes',
+        );
 
         // act
         $action->execute($family, $data);
@@ -195,18 +174,11 @@ describe('CreateFamilySetAction', function (): void {
         $updateAction->shouldReceive('execute')->andReturn($familySet);
 
         $action = new CreateFamilySetAction($getSetAction, $updateAction, $familySetModel);
-        $data = new class implements CreateFamilySetInterface
-        {
-            public string $setNum = '75192-1';
-
-            public int $quantity = 1;
-
-            public FamilySetStatus $status = FamilySetStatus::Sealed;
-
-            public ?DateTimeInterface $purchaseDate = null;
-
-            public ?string $notes = null;
-        };
+        $data = new CreateFamilySetData(
+            setNum: '75192-1',
+            quantity: 1,
+            status: FamilySetStatus::Sealed,
+        );
 
         // act
         $result = $action->execute($family, $data);
