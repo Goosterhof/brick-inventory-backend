@@ -4,15 +4,14 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\FamilySet;
 
-use App\Contracts\FamilySet\CreateFamilySetInterface;
+use App\DataTransferObjects\FamilySet\CreateFamilySetData;
 use App\Enums\FamilySetStatus;
-use App\Http\Requests\DTOFormRequest;
 use Carbon\CarbonImmutable;
-use DateTimeInterface;
-use Illuminate\Http\Request;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Enum;
 
-final readonly class StoreFamilySetRequest extends DTOFormRequest implements CreateFamilySetInterface
+final class StoreFamilySetRequest extends FormRequest
 {
     public const string SET_NUM = 'set_num';
 
@@ -24,15 +23,10 @@ final readonly class StoreFamilySetRequest extends DTOFormRequest implements Cre
 
     public const string NOTES = 'notes';
 
-    public function __construct(
-        public string $setNum,
-        public int $quantity,
-        public FamilySetStatus $status,
-        public ?DateTimeInterface $purchaseDate = null,
-        public ?string $notes = null,
-    ) {}
-
-    public static function rules(Request $request): array
+    /**
+     * @return array<string, array<int, string|Enum>>
+     */
+    public function rules(): array
     {
         return [
             self::SET_NUM => ['required', 'string', 'max:255'],
@@ -43,18 +37,18 @@ final readonly class StoreFamilySetRequest extends DTOFormRequest implements Cre
         ];
     }
 
-    protected static function toDTO(Request $request): static
+    public function toDto(): CreateFamilySetData
     {
-        return new self(
-            setNum: $request->string(self::SET_NUM)->toString(),
-            quantity: $request->isNotFilled(self::QUANTITY) ? 1 : $request->integer(self::QUANTITY),
-            status: $request->isNotFilled(self::STATUS)
+        return new CreateFamilySetData(
+            setNum: $this->safe()->string(self::SET_NUM)->toString(),
+            quantity: $this->isNotFilled(self::QUANTITY) ? 1 : $this->safe()->integer(self::QUANTITY),
+            status: $this->isNotFilled(self::STATUS)
                 ? FamilySetStatus::Sealed
-                : FamilySetStatus::from($request->string(self::STATUS)->toString()),
-            purchaseDate: $request->isNotFilled(self::PURCHASE_DATE)
+                : FamilySetStatus::from($this->safe()->string(self::STATUS)->toString()),
+            purchaseDate: $this->isNotFilled(self::PURCHASE_DATE)
                 ? null
-                : CarbonImmutable::parse($request->string(self::PURCHASE_DATE)->toString()),
-            notes: $request->isNotFilled(self::NOTES) ? null : $request->string(self::NOTES)->toString(),
+                : CarbonImmutable::parse($this->safe()->string(self::PURCHASE_DATE)->toString()),
+            notes: $this->isNotFilled(self::NOTES) ? null : $this->safe()->string(self::NOTES)->toString(),
         );
     }
 }

@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Auth;
 
-use App\Contracts\Auth\RegisterUserInterface;
-use App\Http\Requests\DTOFormRequest;
-use Illuminate\Http\Request;
+use App\DataTransferObjects\Auth\RegisterUserData;
+use Illuminate\Foundation\Http\FormRequest;
 
-final readonly class RegisterRequest extends DTOFormRequest implements RegisterUserInterface
+final class RegisterRequest extends FormRequest
 {
     public const string FAMILY_NAME = 'family_name';
 
@@ -18,14 +17,10 @@ final readonly class RegisterRequest extends DTOFormRequest implements RegisterU
 
     public const string PASSWORD = 'password';
 
-    public function __construct(
-        public string $familyName,
-        public string $name,
-        public string $email,
-        public string $password,
-    ) {}
-
-    public static function rules(Request $request): array
+    /**
+     * @return array<string, array<int, string>>
+     */
+    public function rules(): array
     {
         return [
             self::FAMILY_NAME => ['required', 'string', 'max:255'],
@@ -35,13 +30,13 @@ final readonly class RegisterRequest extends DTOFormRequest implements RegisterU
         ];
     }
 
-    protected static function toDTO(Request $request): static
+    public function toDto(): RegisterUserData
     {
-        return new self(
-            familyName: $request->string(self::FAMILY_NAME)->toString(),
-            name: $request->string(self::NAME)->toString(),
-            email: $request->string(self::EMAIL)->toString(),
-            password: $request->string(self::PASSWORD)->toString(),
+        return new RegisterUserData(
+            familyName: $this->safe()->string(self::FAMILY_NAME)->toString(),
+            name: $this->safe()->string(self::NAME)->toString(),
+            email: $this->safe()->string(self::EMAIL)->toString(),
+            password: $this->safe()->string(self::PASSWORD)->toString(),
         );
     }
 }

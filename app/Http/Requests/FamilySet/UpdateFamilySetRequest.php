@@ -4,15 +4,14 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\FamilySet;
 
-use App\Contracts\FamilySet\UpdateFamilySetInterface;
+use App\DataTransferObjects\FamilySet\UpdateFamilySetData;
 use App\Enums\FamilySetStatus;
-use App\Http\Requests\DTOFormRequest;
 use Carbon\CarbonImmutable;
-use DateTimeInterface;
-use Illuminate\Http\Request;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use Illuminate\Validation\Rules\Enum;
 
-final readonly class UpdateFamilySetRequest extends DTOFormRequest implements UpdateFamilySetInterface
+final class UpdateFamilySetRequest extends FormRequest
 {
     public const string QUANTITY = 'quantity';
 
@@ -22,14 +21,10 @@ final readonly class UpdateFamilySetRequest extends DTOFormRequest implements Up
 
     public const string NOTES = 'notes';
 
-    public function __construct(
-        public int $quantity,
-        public FamilySetStatus $status,
-        public ?DateTimeInterface $purchaseDate = null,
-        public ?string $notes = null,
-    ) {}
-
-    public static function rules(Request $request): array
+    /**
+     * @return array<string, array<int, string|Enum>>
+     */
+    public function rules(): array
     {
         return [
             self::QUANTITY => ['required', 'integer', 'min:1'],
@@ -39,15 +34,15 @@ final readonly class UpdateFamilySetRequest extends DTOFormRequest implements Up
         ];
     }
 
-    protected static function toDTO(Request $request): static
+    public function toDto(): UpdateFamilySetData
     {
-        return new self(
-            quantity: $request->integer(self::QUANTITY),
-            status: FamilySetStatus::from($request->string(self::STATUS)->toString()),
-            purchaseDate: $request->isNotFilled(self::PURCHASE_DATE)
+        return new UpdateFamilySetData(
+            quantity: $this->safe()->integer(self::QUANTITY),
+            status: FamilySetStatus::from($this->safe()->string(self::STATUS)->toString()),
+            purchaseDate: $this->isNotFilled(self::PURCHASE_DATE)
                 ? null
-                : CarbonImmutable::parse($request->string(self::PURCHASE_DATE)->toString()),
-            notes: $request->isNotFilled(self::NOTES) ? null : $request->string(self::NOTES)->toString(),
+                : CarbonImmutable::parse($this->safe()->string(self::PURCHASE_DATE)->toString()),
+            notes: $this->isNotFilled(self::NOTES) ? null : $this->safe()->string(self::NOTES)->toString(),
         );
     }
 }
