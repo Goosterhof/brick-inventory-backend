@@ -20,7 +20,7 @@ class RegisterController extends Controller
 
     public function __invoke(RegisterRequest $registerRequest): JsonResponse
     {
-        $user = $this->createUserWithFamilyAction->execute($registerRequest);
+        $user = $this->createUserWithFamilyAction->execute($registerRequest->toDto());
 
         $this->statefulGuard->login($user);
 

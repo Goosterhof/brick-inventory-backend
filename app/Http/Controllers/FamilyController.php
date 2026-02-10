@@ -20,7 +20,7 @@ class FamilyController extends Controller
         SetRebrickableTokenRequest $setRebrickableTokenRequest,
         #[CurrentUser] User $user,
     ): JsonResponse {
-        $this->setRebrickableTokenAction->execute($user->family, $setRebrickableTokenRequest, $user);
+        $this->setRebrickableTokenAction->execute($user->family, $setRebrickableTokenRequest->toDto(), $user);
 
         return response()->json(status: 204);
     }

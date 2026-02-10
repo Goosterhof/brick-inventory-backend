@@ -45,7 +45,7 @@ class StorageOptionController extends Controller
 
     public function store(StorageOptionRequest $storageOptionRequest): JsonResponse
     {
-        $storageOption = $this->createStorageOptionAction->execute($storageOptionRequest);
+        $storageOption = $this->createStorageOptionAction->execute($storageOptionRequest->toDto());
 
         return StorageOptionResourceData::from($storageOption)->toResponseWithStatus(201);
     }
@@ -57,7 +57,7 @@ class StorageOptionController extends Controller
 
     public function update(StorageOptionRequest $storageOptionRequest, StorageOption $storageOption): JsonResponse
     {
-        $storageOption = $this->updateStorageOptionAction->execute($storageOption, $storageOptionRequest);
+        $storageOption = $this->updateStorageOptionAction->execute($storageOption, $storageOptionRequest->toDto());
 
         return StorageOptionResourceData::from($storageOption)->toResponse();
     }
@@ -81,7 +81,7 @@ class StorageOptionController extends Controller
 
     public function assignPart(AssignPartRequest $assignPartRequest, StorageOption $storageOption): JsonResponse
     {
-        $storageOptionPart = $this->assignPartToStorageAction->execute($storageOption, $assignPartRequest);
+        $storageOptionPart = $this->assignPartToStorageAction->execute($storageOption, $assignPartRequest->toDto());
         $statusCode = $storageOptionPart->wasRecentlyCreated ? 201 : 200;
 
         return StorageOptionPartResourceData::from($storageOptionPart)->toResponseWithStatus($statusCode);
