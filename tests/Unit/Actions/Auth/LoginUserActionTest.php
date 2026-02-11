@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Auth\LoginUserAction;
-use App\Contracts\Auth\LoginUserInterface;
+use App\DataTransferObjects\Auth\LoginUserData;
 use App\Models\User;
 use Illuminate\Contracts\Hashing\Hasher;
 use Illuminate\Database\Eloquent\Builder;
@@ -35,12 +35,10 @@ describe('LoginUserAction', function (): void {
             ->once()
             ->andReturn(true);
 
-        $loginData = new class implements LoginUserInterface
-        {
-            public string $email { get => 'john@example.com'; }
-
-            public string $password { get => 'password123'; }
-        };
+        $loginData = new LoginUserData(
+            email: 'john@example.com',
+            password: 'password123',
+        );
 
         $action = new LoginUserAction($user, $hasher);
 
@@ -76,12 +74,10 @@ describe('LoginUserAction', function (): void {
             ->once()
             ->andReturn(false);
 
-        $loginData = new class implements LoginUserInterface
-        {
-            public string $email { get => 'john@example.com'; }
-
-            public string $password { get => 'wrongpassword'; }
-        };
+        $loginData = new LoginUserData(
+            email: 'john@example.com',
+            password: 'wrongpassword',
+        );
 
         $action = new LoginUserAction($user, $hasher);
 
@@ -107,12 +103,10 @@ describe('LoginUserAction', function (): void {
 
         $hasher = Mockery::mock(Hasher::class);
 
-        $loginData = new class implements LoginUserInterface
-        {
-            public string $email { get => 'nonexistent@example.com'; }
-
-            public string $password { get => 'password123'; }
-        };
+        $loginData = new LoginUserData(
+            email: 'nonexistent@example.com',
+            password: 'password123',
+        );
 
         $action = new LoginUserAction($user, $hasher);
 

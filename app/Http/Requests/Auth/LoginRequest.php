@@ -4,22 +4,19 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Auth;
 
-use App\Contracts\Auth\LoginUserInterface;
-use App\Http\Requests\DTOFormRequest;
-use Illuminate\Http\Request;
+use App\DataTransferObjects\Auth\LoginUserData;
+use Illuminate\Foundation\Http\FormRequest;
 
-final readonly class LoginRequest extends DTOFormRequest implements LoginUserInterface
+final class LoginRequest extends FormRequest
 {
     public const string EMAIL = 'email';
 
     public const string PASSWORD = 'password';
 
-    public function __construct(
-        public string $email,
-        public string $password,
-    ) {}
-
-    public static function rules(Request $request): array
+    /**
+     * @return array<string, array<int, string>>
+     */
+    public function rules(): array
     {
         return [
             self::EMAIL => ['required', 'string', 'email'],
@@ -27,11 +24,11 @@ final readonly class LoginRequest extends DTOFormRequest implements LoginUserInt
         ];
     }
 
-    protected static function toDTO(Request $request): static
+    public function toDto(): LoginUserData
     {
-        return new self(
-            email: $request->string(self::EMAIL)->toString(),
-            password: $request->string(self::PASSWORD)->toString(),
+        return new LoginUserData(
+            email: $this->safe()->string(self::EMAIL)->toString(),
+            password: $this->safe()->string(self::PASSWORD)->toString(),
         );
     }
 }

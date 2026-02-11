@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Auth\CreateUserWithFamilyAction;
-use App\Contracts\Auth\RegisterUserInterface;
+use App\DataTransferObjects\Auth\RegisterUserData;
 use App\Models\Family;
 use App\Models\User;
 use Illuminate\Database\ConnectionInterface;
@@ -50,16 +50,12 @@ describe('CreateUserWithFamilyAction', function (): void {
             ->andReturn($userInstance);
 
         $action = new CreateUserWithFamilyAction($user, $family, $this->db);
-        $data = new class implements RegisterUserInterface
-        {
-            public string $familyName = 'Test Family';
-
-            public string $name = 'Test User';
-
-            public string $email = 'test@example.com';
-
-            public string $password = 'password123';
-        };
+        $data = new RegisterUserData(
+            familyName: 'Test Family',
+            name: 'Test User',
+            email: 'test@example.com',
+            password: 'password123',
+        );
 
         // act
         $result = $action->execute($data);
@@ -102,16 +98,12 @@ describe('CreateUserWithFamilyAction', function (): void {
         $user->shouldReceive('newInstance')->withNoArgs()->andReturn($userInstance);
 
         $action = new CreateUserWithFamilyAction($user, $family, $this->db);
-        $data = new class implements RegisterUserInterface
-        {
-            public string $familyName = 'Test Family';
-
-            public string $name = 'Test User';
-
-            public string $email = 'test@example.com';
-
-            public string $password = 'password123';
-        };
+        $data = new RegisterUserData(
+            familyName: 'Test Family',
+            name: 'Test User',
+            email: 'test@example.com',
+            password: 'password123',
+        );
 
         // act
         $action->execute($data);
@@ -145,16 +137,12 @@ describe('CreateUserWithFamilyAction', function (): void {
         $user->shouldReceive('newInstance')->withNoArgs()->andReturn($userInstance);
 
         $action = new CreateUserWithFamilyAction($user, $family, $this->db);
-        $data = new class implements RegisterUserInterface
-        {
-            public string $familyName = 'Test Family';
-
-            public string $name = 'Test User';
-
-            public string $email = 'test@example.com';
-
-            public string $password = 'password123';
-        };
+        $data = new RegisterUserData(
+            familyName: 'Test Family',
+            name: 'Test User',
+            email: 'test@example.com',
+            password: 'password123',
+        );
 
         // act
         $action->execute($data);
@@ -189,16 +177,12 @@ describe('CreateUserWithFamilyAction', function (): void {
             ->andReturn($userInstance);
 
         $action = new CreateUserWithFamilyAction($user, $family, $this->db);
-        $data = new class implements RegisterUserInterface
-        {
-            public string $familyName = 'Test Family';
-
-            public string $name = 'John Doe';
-
-            public string $email = 'john@example.com';
-
-            public string $password = 'secret123';
-        };
+        $data = new RegisterUserData(
+            familyName: 'Test Family',
+            name: 'John Doe',
+            email: 'john@example.com',
+            password: 'secret123',
+        );
 
         // act
         $action->execute($data);
@@ -239,16 +223,12 @@ describe('CreateUserWithFamilyAction', function (): void {
         $user->shouldReceive('newInstance')->withNoArgs()->andReturn($userInstance);
 
         $action = new CreateUserWithFamilyAction($user, $family, $this->db);
-        $data = new class implements RegisterUserInterface
-        {
-            public string $familyName = 'Test Family';
-
-            public string $name = 'Test User';
-
-            public string $email = 'test@example.com';
-
-            public string $password = 'password123';
-        };
+        $data = new RegisterUserData(
+            familyName: 'Test Family',
+            name: 'Test User',
+            email: 'test@example.com',
+            password: 'password123',
+        );
 
         // act
         $action->execute($data);

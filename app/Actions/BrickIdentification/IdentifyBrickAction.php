@@ -5,10 +5,10 @@ declare(strict_types=1);
 namespace App\Actions\BrickIdentification;
 
 use App\Actions\Sync\UpsertPartAction;
-use App\Contracts\BrickIdentification\IdentifyBrickInterface;
 use App\Contracts\BrickIdentificationServiceInterface;
 use App\Data\Brickognize\BrickognizePredictionData;
 use App\Data\Lego\LegoPartData;
+use App\DataTransferObjects\BrickIdentification\IdentifyBrickData;
 use App\Exceptions\BrickognizeApiException;
 use App\Models\Part;
 
@@ -25,9 +25,9 @@ final readonly class IdentifyBrickAction
      *
      * @throws BrickognizeApiException
      */
-    public function execute(IdentifyBrickInterface $identifyBrick): Part
+    public function execute(IdentifyBrickData $identifyBrickData): Part
     {
-        $predictions = $this->brickIdentificationService->identifyBrick($identifyBrick->image);
+        $predictions = $this->brickIdentificationService->identifyBrick($identifyBrickData->image);
 
         // Filter for part predictions only (exclude minifigs, sets, etc.)
         $partPredictions = array_filter(
