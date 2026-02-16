@@ -3,7 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\FamilySet\UpdateFamilySetAction;
-use App\Contracts\FamilySet\UpdateFamilySetInterface;
+use App\DataTransferObjects\FamilySet\UpdateFamilySetData;
 use App\Enums\FamilySetStatus;
 use App\Models\FamilySet;
 use Carbon\CarbonImmutable;
@@ -33,18 +33,12 @@ describe('UpdateFamilySetAction', function (): void {
         $purchaseDate = Date::parse('2024-06-15');
 
         $action = new UpdateFamilySetAction($this->dateFactory);
-        $data = new class($purchaseDate) implements UpdateFamilySetInterface
-        {
-            public int $quantity = 5;
-
-            public FamilySetStatus $status = FamilySetStatus::Built;
-
-            public ?string $notes = 'Updated notes';
-
-            public function __construct(
-                public ?DateTimeInterface $purchaseDate,
-            ) {}
-        };
+        $data = new UpdateFamilySetData(
+            quantity: 5,
+            status: FamilySetStatus::Built,
+            purchaseDate: $purchaseDate,
+            notes: 'Updated notes',
+        );
 
         // act
         $result = $action->execute($familySet, $data);
@@ -70,16 +64,10 @@ describe('UpdateFamilySetAction', function (): void {
         $familySet->shouldReceive('save')->once();
 
         $action = new UpdateFamilySetAction($this->dateFactory);
-        $data = new class implements UpdateFamilySetInterface
-        {
-            public int $quantity = 3;
-
-            public FamilySetStatus $status = FamilySetStatus::InProgress;
-
-            public ?DateTimeInterface $purchaseDate = null;
-
-            public ?string $notes = null;
-        };
+        $data = new UpdateFamilySetData(
+            quantity: 3,
+            status: FamilySetStatus::InProgress,
+        );
 
         // act
         $action->execute($familySet, $data);
@@ -99,16 +87,10 @@ describe('UpdateFamilySetAction', function (): void {
         $familySet->shouldReceive('save')->once();
 
         $action = new UpdateFamilySetAction($this->dateFactory);
-        $data = new class implements UpdateFamilySetInterface
-        {
-            public int $quantity = 1;
-
-            public FamilySetStatus $status = FamilySetStatus::Sealed;
-
-            public ?DateTimeInterface $purchaseDate = null;
-
-            public ?string $notes = null;
-        };
+        $data = new UpdateFamilySetData(
+            quantity: 1,
+            status: FamilySetStatus::Sealed,
+        );
 
         // act
         $action->execute($familySet, $data);
@@ -124,16 +106,10 @@ describe('UpdateFamilySetAction', function (): void {
         $familySet->shouldReceive('save')->once();
 
         $action = new UpdateFamilySetAction($this->dateFactory);
-        $data = new class implements UpdateFamilySetInterface
-        {
-            public int $quantity = 3;
-
-            public FamilySetStatus $status = FamilySetStatus::Sealed;
-
-            public ?DateTimeInterface $purchaseDate = null;
-
-            public ?string $notes = null;
-        };
+        $data = new UpdateFamilySetData(
+            quantity: 3,
+            status: FamilySetStatus::Sealed,
+        );
 
         // act
         $result = $action->execute($familySet, $data);

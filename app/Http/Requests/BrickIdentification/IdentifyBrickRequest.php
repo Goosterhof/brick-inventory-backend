@@ -4,31 +4,29 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\BrickIdentification;
 
-use App\Contracts\BrickIdentification\IdentifyBrickInterface;
-use App\Http\Requests\DTOFormRequest;
-use Illuminate\Http\Request;
+use App\DataTransferObjects\BrickIdentification\IdentifyBrickData;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\UploadedFile;
 
-final readonly class IdentifyBrickRequest extends DTOFormRequest implements IdentifyBrickInterface
+final class IdentifyBrickRequest extends FormRequest
 {
     public const string IMAGE = 'image';
 
-    public function __construct(
-        public UploadedFile $image,
-    ) {}
-
-    public static function rules(Request $request): array
+    /**
+     * @return array<string, array<int, string>>
+     */
+    public function rules(): array
     {
         return [
             self::IMAGE => ['required', 'image', 'max:10240'], // Max 10MB
         ];
     }
 
-    protected static function toDTO(Request $request): static
+    public function toDto(): IdentifyBrickData
     {
-        $image = $request->file(self::IMAGE);
+        $image = $this->file(self::IMAGE);
         assert($image instanceof UploadedFile);
 
-        return new self(image: $image);
+        return new IdentifyBrickData(image: $image);
     }
 }

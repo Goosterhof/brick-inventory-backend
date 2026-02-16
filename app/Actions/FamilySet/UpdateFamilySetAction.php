@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\FamilySet;
 
-use App\Contracts\FamilySet\UpdateFamilySetInterface;
+use App\DataTransferObjects\FamilySet\UpdateFamilySetData;
 use App\Models\FamilySet;
 use DateTimeInterface;
 use Illuminate\Support\DateFactory;
@@ -15,14 +15,14 @@ final readonly class UpdateFamilySetAction
         private DateFactory $dateFactory,
     ) {}
 
-    public function execute(FamilySet $familySet, UpdateFamilySetInterface $updateFamilySet): FamilySet
+    public function execute(FamilySet $familySet, UpdateFamilySetData $updateFamilySetData): FamilySet
     {
-        $familySet->quantity = $updateFamilySet->quantity;
-        $familySet->status = $updateFamilySet->status;
-        $familySet->purchase_date = $updateFamilySet->purchaseDate instanceof DateTimeInterface
-            ? $this->dateFactory->instance($updateFamilySet->purchaseDate)
+        $familySet->quantity = $updateFamilySetData->quantity;
+        $familySet->status = $updateFamilySetData->status;
+        $familySet->purchase_date = $updateFamilySetData->purchaseDate instanceof DateTimeInterface
+            ? $this->dateFactory->instance($updateFamilySetData->purchaseDate)
             : null;
-        $familySet->notes = $updateFamilySet->notes;
+        $familySet->notes = $updateFamilySetData->notes;
         $familySet->save();
 
         return $familySet;

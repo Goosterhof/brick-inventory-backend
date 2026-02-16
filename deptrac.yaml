@@ -13,6 +13,10 @@ deptrac:
       collectors:
         - type: classLike
           value: App\\Data\\.*
+    - name: DataTransferObject
+      collectors:
+        - type: classLike
+          value: App\\DataTransferObjects\\.*
     - name: Enum
       collectors:
         - type: classLike
@@ -66,6 +70,8 @@ deptrac:
       - Enum
       - Contract
     Data: []
+    DataTransferObject:
+      - Enum
     Enum: []
     Exception: []
 
@@ -81,9 +87,9 @@ deptrac:
       - Data
       - Exception
 
-    # Form requests validate input, reference contracts and enums
+    # Form requests validate input, produce DTOs, reference enums
     FormRequest:
-      - Contract
+      - DataTransferObject
       - Enum
 
     # Resource data transforms models into API responses
@@ -99,6 +105,7 @@ deptrac:
       - Contract
       - Model
       - Data
+      - DataTransferObject
       - Enum
       - Exception
 
@@ -113,4 +120,3 @@ deptrac:
     Provider:
       - Contract
       - Service
-      - FormRequest

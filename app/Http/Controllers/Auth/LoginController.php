@@ -20,7 +20,7 @@ class LoginController extends Controller
 
     public function __invoke(LoginRequest $loginRequest): JsonResponse
     {
-        $user = $this->loginUserAction->execute($loginRequest);
+        $user = $this->loginUserAction->execute($loginRequest->toDto());
 
         $this->statefulGuard->login($user);
 
