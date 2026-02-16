@@ -5,7 +5,6 @@ declare(strict_types=1);
 use App\Exceptions\BrickognizeApiException;
 use App\Exceptions\MissingRebrickableTokenException;
 use App\Exceptions\NotFamilyHeadException;
-use App\Exceptions\PartNotFoundException;
 use App\Exceptions\RebrickableApiException;
 use App\Exceptions\SetNotFoundException;
 use App\Http\Middleware\EnsureFamilyOwnership;
@@ -32,8 +31,6 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         $exceptions->render(fn (SetNotFoundException $setNotFoundException, Request $request): JsonResponse => response()->json(['error' => 'Set not found'], 404));
-
-        $exceptions->render(fn (PartNotFoundException $partNotFoundException, Request $request): JsonResponse => response()->json(['error' => 'Part not found'], 404));
 
         $exceptions->render(fn (MissingRebrickableTokenException $missingRebrickableTokenException, Request $request): JsonResponse => response()->json(['error' => 'Rebrickable user token not configured'], 400));
 

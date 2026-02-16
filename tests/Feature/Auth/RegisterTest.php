@@ -92,4 +92,32 @@ describe('RegisterController', function (): void {
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['password']);
     });
+
+    it('should rate limit registration attempts', function (): void {
+        $this->freezeTime();
+
+        for ($i = 1; $i <= 5; $i++) {
+            $this->postJson('/api/register', [
+                'family_name' => 'Family ' . $i,
+                'name' => 'User ' . $i,
+                'email' => sprintf('user%d@example.com', $i),
+                'password' => 'password123',
+                'password_confirmation' => 'password123',
+            ])->assertStatus(201);
+
+            // Reset auth state so next request is unauthenticated (same rate limiter key)
+            auth()->guard('web')->logout();
+            resolve('auth')->forgetGuards();
+        }
+
+        $response = $this->postJson('/api/register', [
+            'family_name' => 'Family 6',
+            'name' => 'User 6',
+            'email' => 'user6@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+        ]);
+
+        $response->assertStatus(429);
+    });
 });

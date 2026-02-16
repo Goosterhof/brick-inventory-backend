@@ -4,7 +4,6 @@ declare(strict_types=1);
 
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Laravel\Sanctum\Sanctum;
 
 uses(RefreshDatabase::class);
 
@@ -14,7 +13,7 @@ describe('MeController', function (): void {
             'name' => 'John Smith',
             'email' => 'john@example.com',
         ]);
-        Sanctum::actingAs($user);
+        $this->actingAs($user);
 
         $response = $this->getJson('/api/me');
 
