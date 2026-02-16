@@ -44,7 +44,9 @@ final readonly class ImportOwnedSetsAction
             );
         }
 
-        return $this->connection->transaction(fn (): ImportOwnedSetsResultData => $this->importSets($family, $userSets));
+        return $this->connection->transaction(function () use ($family, $userSets): ImportOwnedSetsResultData {
+            return $this->importSets($family, $userSets);
+        });
     }
 
     /**

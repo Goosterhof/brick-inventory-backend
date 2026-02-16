@@ -6,6 +6,7 @@ use Rector\Config\RectorConfig;
 use Rector\Naming\Rector\Assign\RenameVariableToMatchMethodCallReturnTypeRector;
 use Rector\Naming\Rector\ClassMethod\RenameParamToMatchTypeRector;
 use Rector\Naming\Rector\ClassMethod\RenameVariableToMatchNewTypeRector;
+use Rector\Php74\Rector\Closure\ClosureToArrowFunctionRector;
 use Rector\Php83\Rector\ClassMethod\AddOverrideAttributeToOverriddenMethodsRector;
 use RectorLaravel\Set\LaravelSetList;
 
@@ -28,6 +29,10 @@ return RectorConfig::configure()
         // Skip aggressive naming rules for migrations (keeps Laravel convention of $table)
         RenameParamToMatchTypeRector::class => [
             __DIR__ . '/database/migrations',
+        ],
+        // Skip arrow function conversion in Actions (arch test requires full closure in transactions)
+        ClosureToArrowFunctionRector::class => [
+            __DIR__ . '/app/Actions',
         ],
         // Skip variable renaming in tests (keeps meaningful mock variable names)
         RenameVariableToMatchMethodCallReturnTypeRector::class => [
