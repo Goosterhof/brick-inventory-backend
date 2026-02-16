@@ -19,7 +19,6 @@ final readonly class CreateUserWithFamilyAction
 
     public function execute(RegisterUserData $registerUserData): User
     {
-        /** @var User */
         return $this->connection->transaction(function () use ($registerUserData): User {
             $family = $this->family->newInstance();
             $family->name = $registerUserData->familyName;
