@@ -11,9 +11,15 @@ use App\Enums\FamilySetStatus;
 use App\Models\Family;
 use App\Models\FamilySet;
 use App\Models\Set;
+use Illuminate\Database\ConnectionInterface;
 use Illuminate\Support\Facades\Date;
 
 describe('CreateFamilySetAction', function (): void {
+    beforeEach(function (): void {
+        $this->db = Mockery::mock(ConnectionInterface::class);
+        $this->db->allows('transaction')->andReturnUsing(fn (Closure $callback) => $callback());
+    });
+
     it('should fetch set using GetSetAction', function (): void {
         // arrange
         $set = Mockery::mock(Set::class);
@@ -48,7 +54,7 @@ describe('CreateFamilySetAction', function (): void {
             ->once()
             ->andReturn($familySet);
 
-        $action = new CreateFamilySetAction($getSetAction, $updateAction, $familySetModel);
+        $action = new CreateFamilySetAction($getSetAction, $updateAction, $familySetModel, $this->db);
         $data = new CreateFamilySetData(
             setNum: '75192-1',
             quantity: 2,
@@ -90,7 +96,7 @@ describe('CreateFamilySetAction', function (): void {
         $updateAction = Mockery::mock(UpdateFamilySetAction::class);
         $updateAction->shouldReceive('execute')->andReturn($familySet);
 
-        $action = new CreateFamilySetAction($getSetAction, $updateAction, $familySetModel);
+        $action = new CreateFamilySetAction($getSetAction, $updateAction, $familySetModel, $this->db);
         $data = new CreateFamilySetData(
             setNum: '75192-1',
             quantity: 1,
@@ -136,7 +142,7 @@ describe('CreateFamilySetAction', function (): void {
             ->once()
             ->andReturn($familySet);
 
-        $action = new CreateFamilySetAction($getSetAction, $updateAction, $familySetModel);
+        $action = new CreateFamilySetAction($getSetAction, $updateAction, $familySetModel, $this->db);
         $data = new CreateFamilySetData(
             setNum: '75192-1',
             quantity: 2,
@@ -173,7 +179,7 @@ describe('CreateFamilySetAction', function (): void {
         $updateAction = Mockery::mock(UpdateFamilySetAction::class);
         $updateAction->shouldReceive('execute')->andReturn($familySet);
 
-        $action = new CreateFamilySetAction($getSetAction, $updateAction, $familySetModel);
+        $action = new CreateFamilySetAction($getSetAction, $updateAction, $familySetModel, $this->db);
         $data = new CreateFamilySetData(
             setNum: '75192-1',
             quantity: 1,

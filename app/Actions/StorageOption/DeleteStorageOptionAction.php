@@ -5,20 +5,30 @@ declare(strict_types=1);
 namespace App\Actions\StorageOption;
 
 use App\Models\StorageOption;
+use Illuminate\Database\ConnectionInterface;
 
 final readonly class DeleteStorageOptionAction
 {
+    public function __construct(
+        private ConnectionInterface $connection,
+    ) {}
+
     public function execute(StorageOption $storageOption): void
     {
-        // Recursively delete children first
+        $storageOption->load('children.storageOptionParts', 'storageOptionParts');
+
+        $this->connection->transaction(function () use ($storageOption): void {
+            $this->deleteRecursive($storageOption);
+        });
+    }
+
+    private function deleteRecursive(StorageOption $storageOption): void
+    {
         foreach ($storageOption->children as $child) {
-            $this->execute($child);
+            $this->deleteRecursive($child);
         }
 
-        // Delete associated storage option parts
         $storageOption->storageOptionParts()->delete();
-
-        // Delete the storage option
         $storageOption->delete();
     }
 }
