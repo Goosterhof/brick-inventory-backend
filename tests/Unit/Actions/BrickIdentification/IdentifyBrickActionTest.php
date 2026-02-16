@@ -4,32 +4,19 @@ declare(strict_types=1);
 
 use App\Actions\BrickIdentification\IdentifyBrickAction;
 use App\Actions\Sync\UpsertPartAction;
-use App\Contracts\BrickIdentification\IdentifyBrickInterface;
 use App\Contracts\BrickIdentificationServiceInterface;
 use App\Data\Brickognize\BrickognizePredictionData;
 use App\Data\Lego\LegoPartData;
+use App\DataTransferObjects\BrickIdentification\IdentifyBrickData;
 use App\Exceptions\BrickognizeApiException;
 use App\Models\Part;
 use Illuminate\Http\UploadedFile;
-
-/**
- * Create a test double for IdentifyBrickInterface.
- */
-function createIdentifyBrickData(UploadedFile $uploadedFile): IdentifyBrickInterface
-{
-    return new readonly class($uploadedFile) implements IdentifyBrickInterface
-    {
-        public function __construct(
-            public UploadedFile $image,
-        ) {}
-    };
-}
 
 describe('IdentifyBrickAction', function (): void {
     it('should call UpsertPartAction with correct LegoPartData', function (): void {
         // arrange
         $image = UploadedFile::fake()->create('brick.jpg', 100, 'image/jpeg');
-        $data = createIdentifyBrickData($image);
+        $data = new IdentifyBrickData(image: $image);
 
         $predictions = [
             new BrickognizePredictionData(
@@ -73,7 +60,7 @@ describe('IdentifyBrickAction', function (): void {
     it('should select highest scoring part prediction', function (): void {
         // arrange
         $image = UploadedFile::fake()->create('brick.jpg', 100, 'image/jpeg');
-        $data = createIdentifyBrickData($image);
+        $data = new IdentifyBrickData(image: $image);
 
         $predictions = [
             new BrickognizePredictionData(
@@ -130,7 +117,7 @@ describe('IdentifyBrickAction', function (): void {
     it('should filter out non-part predictions', function (): void {
         // arrange
         $image = UploadedFile::fake()->create('brick.jpg', 100, 'image/jpeg');
-        $data = createIdentifyBrickData($image);
+        $data = new IdentifyBrickData(image: $image);
 
         $predictions = [
             new BrickognizePredictionData(
@@ -179,7 +166,7 @@ describe('IdentifyBrickAction', function (): void {
     it('should throw BrickognizeApiException when no part predictions found', function (): void {
         // arrange
         $image = UploadedFile::fake()->create('brick.jpg', 100, 'image/jpeg');
-        $data = createIdentifyBrickData($image);
+        $data = new IdentifyBrickData(image: $image);
 
         $predictions = [
             new BrickognizePredictionData(
@@ -209,7 +196,7 @@ describe('IdentifyBrickAction', function (): void {
     it('should throw BrickognizeApiException when API returns empty predictions', function (): void {
         // arrange
         $image = UploadedFile::fake()->create('brick.jpg', 100, 'image/jpeg');
-        $data = createIdentifyBrickData($image);
+        $data = new IdentifyBrickData(image: $image);
 
         $brickIdentificationService = Mockery::mock(BrickIdentificationServiceInterface::class);
         $brickIdentificationService->shouldReceive('identifyBrick')
@@ -229,7 +216,7 @@ describe('IdentifyBrickAction', function (): void {
     it('should pass null imageUrl when prediction has no image', function (): void {
         // arrange
         $image = UploadedFile::fake()->create('brick.jpg', 100, 'image/jpeg');
-        $data = createIdentifyBrickData($image);
+        $data = new IdentifyBrickData(image: $image);
 
         $predictions = [
             new BrickognizePredictionData(

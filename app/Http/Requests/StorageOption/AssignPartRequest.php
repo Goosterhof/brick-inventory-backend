@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\StorageOption;
 
-use App\Contracts\StorageOption\AssignPartToStorageInterface;
-use App\Http\Requests\DTOFormRequest;
-use Illuminate\Http\Request;
+use App\DataTransferObjects\StorageOption\AssignPartToStorageData;
+use Illuminate\Foundation\Http\FormRequest;
 
-final readonly class AssignPartRequest extends DTOFormRequest implements AssignPartToStorageInterface
+final class AssignPartRequest extends FormRequest
 {
     public const string PART_ID = 'part_id';
 
@@ -16,13 +15,10 @@ final readonly class AssignPartRequest extends DTOFormRequest implements AssignP
 
     public const string QUANTITY = 'quantity';
 
-    public function __construct(
-        public int $partId,
-        public int $quantity,
-        public ?int $colorId = null,
-    ) {}
-
-    public static function rules(Request $request): array
+    /**
+     * @return array<string, array<int, string>>
+     */
+    public function rules(): array
     {
         return [
             self::PART_ID => ['required', 'integer', 'exists:parts,id'],
@@ -31,12 +27,12 @@ final readonly class AssignPartRequest extends DTOFormRequest implements AssignP
         ];
     }
 
-    protected static function toDTO(Request $request): static
+    public function toDto(): AssignPartToStorageData
     {
-        return new self(
-            partId: $request->integer(self::PART_ID),
-            quantity: $request->integer(self::QUANTITY),
-            colorId: $request->isNotFilled(self::COLOR_ID) ? null : $request->integer(self::COLOR_ID),
+        return new AssignPartToStorageData(
+            partId: $this->safe()->integer(self::PART_ID),
+            colorId: $this->isNotFilled(self::COLOR_ID) ? null : $this->safe()->integer(self::COLOR_ID),
+            quantity: $this->safe()->integer(self::QUANTITY),
         );
     }
 }

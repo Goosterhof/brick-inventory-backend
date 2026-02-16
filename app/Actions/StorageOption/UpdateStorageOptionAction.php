@@ -4,12 +4,12 @@ declare(strict_types=1);
 
 namespace App\Actions\StorageOption;
 
-use App\Contracts\StorageOption\StorageOptionDataInterface;
+use App\DataTransferObjects\StorageOption\StorageOptionData;
 use App\Models\StorageOption;
 
 final readonly class UpdateStorageOptionAction
 {
-    public function execute(StorageOption $storageOption, StorageOptionDataInterface $storageOptionData): StorageOption
+    public function execute(StorageOption $storageOption, StorageOptionData $storageOptionData): StorageOption
     {
         $storageOption->name = $storageOptionData->name;
         $storageOption->description = $storageOptionData->description;

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\StorageOption;
 
-use App\Contracts\StorageOption\StorageOptionDataInterface;
+use App\DataTransferObjects\StorageOption\StorageOptionData;
 use App\Models\StorageOption;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
@@ -17,7 +17,7 @@ final readonly class CreateStorageOptionAction
         private User $user,
     ) {}
 
-    public function execute(StorageOptionDataInterface $storageOptionData): StorageOption
+    public function execute(StorageOptionData $storageOptionData): StorageOption
     {
         $storageOption = $this->storageOption->newInstance();
         $storageOption->family_id = $this->user->family_id;

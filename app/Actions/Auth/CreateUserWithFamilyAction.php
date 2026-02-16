@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Auth;
 
-use App\Contracts\Auth\RegisterUserInterface;
+use App\DataTransferObjects\Auth\RegisterUserData;
 use App\Models\Family;
 use App\Models\User;
 use Illuminate\Database\ConnectionInterface;
@@ -17,18 +17,17 @@ final readonly class CreateUserWithFamilyAction
         private ConnectionInterface $connection,
     ) {}
 
-    public function execute(RegisterUserInterface $registerUser): User
+    public function execute(RegisterUserData $registerUserData): User
     {
-        /** @var User */
-        return $this->connection->transaction(function () use ($registerUser): User {
+        return $this->connection->transaction(function () use ($registerUserData): User {
             $family = $this->family->newInstance();
-            $family->name = $registerUser->familyName;
+            $family->name = $registerUserData->familyName;
             $family->save();
 
             $user = $this->user->newInstance();
-            $user->name = $registerUser->name;
-            $user->email = $registerUser->email;
-            $user->password = $registerUser->password;
+            $user->name = $registerUserData->name;
+            $user->email = $registerUserData->email;
+            $user->password = $registerUserData->password;
 
             $family->users()->save($user);
 

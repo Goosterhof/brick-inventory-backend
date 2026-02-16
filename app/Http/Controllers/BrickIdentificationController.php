@@ -17,7 +17,7 @@ class BrickIdentificationController extends Controller
 
     public function identify(IdentifyBrickRequest $identifyBrickRequest): JsonResponse
     {
-        $part = $this->identifyBrickAction->execute($identifyBrickRequest);
+        $part = $this->identifyBrickAction->execute($identifyBrickRequest->toDto());
 
         return PartResourceData::from($part)->toResponse();
     }

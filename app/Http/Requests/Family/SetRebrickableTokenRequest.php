@@ -4,29 +4,27 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\Family;
 
-use App\Contracts\Family\SetRebrickableTokenInterface;
-use App\Http\Requests\DTOFormRequest;
-use Illuminate\Http\Request;
+use App\DataTransferObjects\Family\SetRebrickableTokenData;
+use Illuminate\Foundation\Http\FormRequest;
 
-final readonly class SetRebrickableTokenRequest extends DTOFormRequest implements SetRebrickableTokenInterface
+final class SetRebrickableTokenRequest extends FormRequest
 {
     public const string REBRICKABLE_USER_TOKEN = 'rebrickable_user_token';
 
-    public function __construct(
-        public string $rebrickableUserToken,
-    ) {}
-
-    public static function rules(Request $request): array
+    /**
+     * @return array<string, array<int, string>>
+     */
+    public function rules(): array
     {
         return [
             self::REBRICKABLE_USER_TOKEN => ['required', 'string', 'max:255'],
         ];
     }
 
-    protected static function toDTO(Request $request): static
+    public function toDto(): SetRebrickableTokenData
     {
-        return new self(
-            rebrickableUserToken: $request->string(self::REBRICKABLE_USER_TOKEN)->toString(),
+        return new SetRebrickableTokenData(
+            rebrickableUserToken: $this->safe()->string(self::REBRICKABLE_USER_TOKEN)->toString(),
         );
     }
 }

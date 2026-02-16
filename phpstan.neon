@@ -4,6 +4,12 @@ includes:
     - vendor/phpstan/phpstan-deprecation-rules/rules.neon
     - phar://phpstan.phar/conf/bleedingEdge.neon
 
+services:
+    -
+        class: App\PHPStan\ConnectionTransactionReturnTypeExtension
+        tags:
+            - phpstan.broker.dynamicMethodReturnTypeExtension
+
 parameters:
     level: max
 

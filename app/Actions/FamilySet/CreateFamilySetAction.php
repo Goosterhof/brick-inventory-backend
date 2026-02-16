@@ -5,7 +5,8 @@ declare(strict_types=1);
 namespace App\Actions\FamilySet;
 
 use App\Actions\GetSetAction;
-use App\Contracts\FamilySet\CreateFamilySetInterface;
+use App\DataTransferObjects\FamilySet\CreateFamilySetData;
+use App\DataTransferObjects\FamilySet\UpdateFamilySetData;
 use App\Models\Family;
 use App\Models\FamilySet;
 
@@ -17,9 +18,9 @@ final readonly class CreateFamilySetAction
         private FamilySet $familySet,
     ) {}
 
-    public function execute(Family $family, CreateFamilySetInterface $createFamilySet): FamilySet
+    public function execute(Family $family, CreateFamilySetData $createFamilySetData): FamilySet
     {
-        $set = $this->getSetAction->execute($createFamilySet->setNum);
+        $set = $this->getSetAction->execute($createFamilySetData->setNum);
 
         /** @var FamilySet $familySet */
         $familySet = $this->familySet->newInstance();
@@ -27,6 +28,11 @@ final readonly class CreateFamilySetAction
         $familySet->set_id = $set->id;
         $familySet->save();
 
-        return $this->updateFamilySetAction->execute($familySet, $createFamilySet);
+        return $this->updateFamilySetAction->execute($familySet, new UpdateFamilySetData(
+            quantity: $createFamilySetData->quantity,
+            status: $createFamilySetData->status,
+            purchaseDate: $createFamilySetData->purchaseDate,
+            notes: $createFamilySetData->notes,
+        ));
     }
 }

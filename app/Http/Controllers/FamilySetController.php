@@ -39,7 +39,7 @@ class FamilySetController extends Controller
 
     public function store(StoreFamilySetRequest $storeFamilySetRequest, #[CurrentUser] User $user): JsonResponse
     {
-        $familySet = $this->createFamilySetAction->execute($user->family, $storeFamilySetRequest);
+        $familySet = $this->createFamilySetAction->execute($user->family, $storeFamilySetRequest->toDto());
 
         return FamilySetResourceData::from($familySet)->toResponseWithStatus(201);
     }
@@ -51,7 +51,7 @@ class FamilySetController extends Controller
 
     public function update(UpdateFamilySetRequest $updateFamilySetRequest, FamilySet $familySet): JsonResponse
     {
-        $familySet = $this->updateFamilySetAction->execute($familySet, $updateFamilySetRequest);
+        $familySet = $this->updateFamilySetAction->execute($familySet, $updateFamilySetRequest->toDto());
 
         return FamilySetResourceData::from($familySet)->toResponse();
     }

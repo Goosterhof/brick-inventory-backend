@@ -4,11 +4,10 @@ declare(strict_types=1);
 
 namespace App\Http\Requests\StorageOption;
 
-use App\Contracts\StorageOption\StorageOptionDataInterface;
-use App\Http\Requests\DTOFormRequest;
-use Illuminate\Http\Request;
+use App\DataTransferObjects\StorageOption\StorageOptionData;
+use Illuminate\Foundation\Http\FormRequest;
 
-final readonly class StorageOptionRequest extends DTOFormRequest implements StorageOptionDataInterface
+final class StorageOptionRequest extends FormRequest
 {
     public const string NAME = 'name';
 
@@ -20,15 +19,10 @@ final readonly class StorageOptionRequest extends DTOFormRequest implements Stor
 
     public const string COLUMN = 'column';
 
-    public function __construct(
-        public string $name,
-        public ?string $description = null,
-        public ?int $parentId = null,
-        public ?int $row = null,
-        public ?int $column = null,
-    ) {}
-
-    public static function rules(Request $request): array
+    /**
+     * @return array<string, array<int, string>>
+     */
+    public function rules(): array
     {
         return [
             self::NAME => ['required', 'string', 'max:255'],
@@ -39,14 +33,14 @@ final readonly class StorageOptionRequest extends DTOFormRequest implements Stor
         ];
     }
 
-    protected static function toDTO(Request $request): static
+    public function toDto(): StorageOptionData
     {
-        return new self(
-            name: $request->string(self::NAME)->toString(),
-            description: $request->isNotFilled(self::DESCRIPTION) ? null : $request->string(self::DESCRIPTION)->toString(),
-            parentId: $request->isNotFilled(self::PARENT_ID) ? null : $request->integer(self::PARENT_ID),
-            row: $request->isNotFilled(self::ROW) ? null : $request->integer(self::ROW),
-            column: $request->isNotFilled(self::COLUMN) ? null : $request->integer(self::COLUMN),
+        return new StorageOptionData(
+            name: $this->safe()->string(self::NAME)->toString(),
+            description: $this->isNotFilled(self::DESCRIPTION) ? null : $this->safe()->string(self::DESCRIPTION)->toString(),
+            parentId: $this->isNotFilled(self::PARENT_ID) ? null : $this->safe()->integer(self::PARENT_ID),
+            row: $this->isNotFilled(self::ROW) ? null : $this->safe()->integer(self::ROW),
+            column: $this->isNotFilled(self::COLUMN) ? null : $this->safe()->integer(self::COLUMN),
         );
     }
 }
