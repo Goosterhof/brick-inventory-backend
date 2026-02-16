@@ -544,6 +544,15 @@ describe('FamilySetController', function (): void {
                 ->assertJson(['error' => 'Rebrickable user token not configured']);
         });
 
+        it('should return 403 when non-head family member tries to import', function (): void {
+            $headUser = User::factory()->create();
+            $memberUser = User::factory()->forFamily($headUser->family)->create();
+
+            $response = $this->actingAs($memberUser)->postJson('/api/family-sets/import-from-rebrickable');
+
+            $response->assertStatus(403);
+        });
+
         it('should return 401 when unauthenticated', function (): void {
             $response = $this->postJson('/api/family-sets/import-from-rebrickable');
 

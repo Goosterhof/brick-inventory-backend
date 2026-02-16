@@ -5,6 +5,9 @@ declare(strict_types=1);
 namespace App\Http\Requests\StorageOption;
 
 use App\DataTransferObjects\StorageOption\StorageOptionData;
+use App\Models\StorageOption;
+use App\Models\User;
+use Closure;
 use Illuminate\Foundation\Http\FormRequest;
 
 final class StorageOptionRequest extends FormRequest
@@ -20,14 +23,23 @@ final class StorageOptionRequest extends FormRequest
     public const string COLUMN = 'column';
 
     /**
-     * @return array<string, array<int, string>>
+     * @return array<string, array<int, string|Closure>>
      */
     public function rules(): array
     {
         return [
             self::NAME => ['required', 'string', 'max:255'],
             self::DESCRIPTION => ['nullable', 'string', 'max:65535'],
-            self::PARENT_ID => ['nullable', 'integer', 'exists:storage_options,id'],
+            self::PARENT_ID => ['nullable', 'integer', 'exists:storage_options,id', function (string $attribute, mixed $value, Closure $fail): void {
+                /** @var User $user */
+                $user = $this->user();
+                /** @var StorageOption|null $parentOption */
+                $parentOption = StorageOption::query()->find($value);
+
+                if ($parentOption !== null && $parentOption->family_id !== $user->family_id) {
+                    $fail('The selected parent does not belong to your family.');
+                }
+            }],
             self::ROW => ['nullable', 'integer', 'min:0'],
             self::COLUMN => ['nullable', 'integer', 'min:0'],
         ];
