@@ -116,6 +116,19 @@ describe('StorageOptionController', function (): void {
             $response->assertStatus(422)
                 ->assertJsonValidationErrors(['name']);
         });
+
+        it('should return 422 when parent_id belongs to another family', function (): void {
+            $user = User::factory()->create();
+            $otherFamilyOption = StorageOption::factory()->create();
+
+            $response = $this->actingAs($user)->postJson('/api/storage-options', [
+                'name' => 'Child Drawer',
+                'parent_id' => $otherFamilyOption->id,
+            ]);
+
+            $response->assertStatus(422)
+                ->assertJsonValidationErrors(['parent_id']);
+        });
     });
 
     describe('show', function (): void {

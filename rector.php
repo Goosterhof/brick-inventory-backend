@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use Rector\Config\RectorConfig;
+use Rector\DeadCode\Rector\ClassMethod\RemoveUnusedPublicMethodParameterRector;
 use Rector\Naming\Rector\Assign\RenameVariableToMatchMethodCallReturnTypeRector;
 use Rector\Naming\Rector\ClassMethod\RenameParamToMatchTypeRector;
 use Rector\Naming\Rector\ClassMethod\RenameVariableToMatchNewTypeRector;
@@ -33,6 +34,10 @@ return RectorConfig::configure()
         // Skip arrow function conversion in Actions (arch test requires full closure in transactions)
         ClosureToArrowFunctionRector::class => [
             __DIR__ . '/app/Actions',
+        ],
+        // Skip unused parameter removal in Policies (Laravel requires $user and model params by contract)
+        RemoveUnusedPublicMethodParameterRector::class => [
+            __DIR__ . '/app/Policies',
         ],
         // Skip variable renaming in tests (keeps meaningful mock variable names)
         RenameVariableToMatchMethodCallReturnTypeRector::class => [

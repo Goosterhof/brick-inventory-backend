@@ -19,11 +19,13 @@ use App\Models\StorageOption;
 use App\Models\StorageOptionPart;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
+use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Http\JsonResponse;
 
 class StorageOptionController extends Controller
 {
     public function __construct(
+        private readonly Gate $gate,
         private readonly GetStorageOptionsAction $getStorageOptionsAction,
         private readonly GetStorageOptionPartsAction $getStorageOptionPartsAction,
         private readonly CreateStorageOptionAction $createStorageOptionAction,
@@ -38,6 +40,8 @@ class StorageOptionController extends Controller
      */
     public function index(#[CurrentUser] User $user): array
     {
+        $this->gate->authorize('viewAny', StorageOption::class);
+
         $storageOptions = $this->getStorageOptionsAction->execute($user);
 
         return StorageOptionResourceData::collection($storageOptions);
@@ -45,6 +49,8 @@ class StorageOptionController extends Controller
 
     public function store(StorageOptionRequest $storageOptionRequest): JsonResponse
     {
+        $this->gate->authorize('create', StorageOption::class);
+
         $storageOption = $this->createStorageOptionAction->execute($storageOptionRequest->toDto());
 
         return StorageOptionResourceData::from($storageOption)->toResponseWithStatus(201);
@@ -52,11 +58,15 @@ class StorageOptionController extends Controller
 
     public function show(StorageOption $storageOption): JsonResponse
     {
+        $this->gate->authorize('view', $storageOption);
+
         return StorageOptionResourceData::from($storageOption)->toResponse();
     }
 
     public function update(StorageOptionRequest $storageOptionRequest, StorageOption $storageOption): JsonResponse
     {
+        $this->gate->authorize('update', $storageOption);
+
         $storageOption = $this->updateStorageOptionAction->execute($storageOption, $storageOptionRequest->toDto());
 
         return StorageOptionResourceData::from($storageOption)->toResponse();
@@ -64,6 +74,8 @@ class StorageOptionController extends Controller
 
     public function destroy(StorageOption $storageOption): JsonResponse
     {
+        $this->gate->authorize('delete', $storageOption);
+
         $this->deleteStorageOptionAction->execute($storageOption);
 
         return response()->json(null, 204);
@@ -74,6 +86,8 @@ class StorageOptionController extends Controller
      */
     public function parts(StorageOption $storageOption): array
     {
+        $this->gate->authorize('viewParts', $storageOption);
+
         $parts = $this->getStorageOptionPartsAction->execute($storageOption);
 
         return StorageOptionPartResourceData::collection($parts);
@@ -81,6 +95,8 @@ class StorageOptionController extends Controller
 
     public function assignPart(AssignPartRequest $assignPartRequest, StorageOption $storageOption): JsonResponse
     {
+        $this->gate->authorize('assignPart', $storageOption);
+
         $storageOptionPart = $this->assignPartToStorageAction->execute($storageOption, $assignPartRequest->toDto());
         $statusCode = $storageOptionPart->wasRecentlyCreated ? 201 : 200;
 
@@ -89,6 +105,8 @@ class StorageOptionController extends Controller
 
     public function removePart(StorageOption $storageOption, StorageOptionPart $storageOptionPart): JsonResponse
     {
+        $this->gate->authorize('delete', $storageOptionPart);
+
         $this->deleteStorageOptionPartAction->execute($storageOptionPart);
 
         return response()->json(null, 204);
