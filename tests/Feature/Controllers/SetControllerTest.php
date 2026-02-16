@@ -6,6 +6,7 @@ use App\Models\Color;
 use App\Models\Part;
 use App\Models\Set;
 use App\Models\SetPart;
+use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 
@@ -13,7 +14,15 @@ uses(RefreshDatabase::class);
 
 describe('SetController', function (): void {
     describe('parts', function (): void {
+        it('should return 401 for unauthenticated requests', function (): void {
+            $response = $this->getJson('/api/sets/75192-1/parts');
+
+            $response->assertStatus(401);
+        });
+
         it('should return parts for a cached set', function (): void {
+            $user = User::factory()->create();
+
             $set = Set::factory()->create([
                 'set_num' => '75192-1',
                 'name' => 'Millennium Falcon',
@@ -46,7 +55,7 @@ describe('SetController', function (): void {
             $setPart->element_id = '300101';
             $setPart->save();
 
-            $response = $this->getJson('/api/sets/75192-1/parts');
+            $response = $this->actingAs($user)->getJson('/api/sets/75192-1/parts');
 
             $response->assertStatus(200)
                 ->assertJson([
@@ -61,6 +70,8 @@ describe('SetController', function (): void {
         });
 
         it('should fetch parts from rebrickable api when not cached', function (): void {
+            $user = User::factory()->create();
+
             Http::fake([
                 'rebrickable.com/api/v3/lego/sets/10281-1/' => Http::response([
                     'set_num' => '10281-1',
@@ -95,7 +106,7 @@ describe('SetController', function (): void {
                 ]),
             ]);
 
-            $response = $this->getJson('/api/sets/10281-1/parts');
+            $response = $this->actingAs($user)->getJson('/api/sets/10281-1/parts');
 
             $response->assertStatus(200)
                 ->assertJson([
@@ -115,6 +126,8 @@ describe('SetController', function (): void {
         });
 
         it('should return 404 for non-existent set', function (): void {
+            $user = User::factory()->create();
+
             Http::fake([
                 'rebrickable.com/api/v3/lego/sets/99999-1/' => Http::response(
                     ['detail' => 'Not found.'],
@@ -122,13 +135,15 @@ describe('SetController', function (): void {
                 ),
             ]);
 
-            $response = $this->getJson('/api/sets/99999-1/parts');
+            $response = $this->actingAs($user)->getJson('/api/sets/99999-1/parts');
 
             $response->assertStatus(404)
                 ->assertJson(['error' => 'Set not found']);
         });
 
         it('should return 401 for invalid api key', function (): void {
+            $user = User::factory()->create();
+
             Http::fake([
                 'rebrickable.com/api/v3/lego/sets/10281-1/' => Http::response(
                     ['detail' => 'Invalid API Key.'],
@@ -136,13 +151,15 @@ describe('SetController', function (): void {
                 ),
             ]);
 
-            $response = $this->getJson('/api/sets/10281-1/parts');
+            $response = $this->actingAs($user)->getJson('/api/sets/10281-1/parts');
 
             $response->assertStatus(401)
                 ->assertJson(['error' => 'Invalid API key']);
         });
 
         it('should handle pagination from rebrickable api', function (): void {
+            $user = User::factory()->create();
+
             Http::fake([
                 'rebrickable.com/api/v3/lego/sets/42056-1/' => Http::response([
                     'set_num' => '42056-1',
@@ -200,7 +217,7 @@ describe('SetController', function (): void {
                 ]),
             ]);
 
-            $response = $this->getJson('/api/sets/42056-1/parts');
+            $response = $this->actingAs($user)->getJson('/api/sets/42056-1/parts');
 
             $response->assertStatus(200)
                 ->assertJsonCount(2, 'parts');

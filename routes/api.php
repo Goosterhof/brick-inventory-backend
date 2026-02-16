@@ -22,13 +22,14 @@ Route::get('/health', fn () => response()->json([
     'timestamp' => now()->toIso8601String(),
 ]));
 
-Route::post('/register', RegisterController::class);
+Route::post('/register', RegisterController::class)->middleware('throttle:5,1');
 Route::post('/login', LoginController::class)->middleware('throttle:5,1');
 Route::post('/logout', LogoutController::class)->middleware('auth:sanctum');
 Route::get('/me', MeController::class)->middleware('auth:sanctum');
 
 Route::get('/sets/{setNum}/parts', [SetController::class, 'parts'])
-    ->where('setNum', '\d+-\d+');
+    ->where('setNum', '\d+-\d+')
+    ->middleware('auth:sanctum');
 
 Route::middleware(['auth:sanctum', 'family.ownership'])->group(function (): void {
     Route::apiResource('storage-options', StorageOptionController::class);
