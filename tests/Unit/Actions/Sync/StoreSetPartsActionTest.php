@@ -12,9 +12,15 @@ use App\Models\Color;
 use App\Models\Part;
 use App\Models\Set;
 use App\Models\SetPart;
+use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\Eloquent\Builder;
 
 describe('StoreSetPartsAction', function (): void {
+    beforeEach(function (): void {
+        $this->db = Mockery::mock(ConnectionInterface::class);
+        $this->db->allows('transaction')->andReturnUsing(fn (Closure $callback) => $callback());
+    });
+
     it('should create set parts when they do not exist', function (): void {
         // arrange
         $set = Mockery::mock(Set::class);
@@ -59,7 +65,7 @@ describe('StoreSetPartsAction', function (): void {
         $setPart->shouldReceive('newQuery')->andReturn($setPartQueryBuilder);
         $setPart->shouldReceive('newInstance')->once()->andReturn($newSetPart);
 
-        $action = new StoreSetPartsAction($upsertColorAction, $upsertPartAction, $setPart);
+        $action = new StoreSetPartsAction($upsertColorAction, $upsertPartAction, $setPart, $this->db);
 
         $partsData = [
             new LegoSetPartData(
@@ -123,7 +129,7 @@ describe('StoreSetPartsAction', function (): void {
         $setPart = Mockery::mock(SetPart::class);
         $setPart->shouldReceive('newQuery')->andReturn($setPartQueryBuilder);
 
-        $action = new StoreSetPartsAction($upsertColorAction, $upsertPartAction, $setPart);
+        $action = new StoreSetPartsAction($upsertColorAction, $upsertPartAction, $setPart, $this->db);
 
         $partsData = [
             new LegoSetPartData(
@@ -194,7 +200,7 @@ describe('StoreSetPartsAction', function (): void {
         $setPart->shouldReceive('newQuery')->andReturn($setPartQueryBuilder);
         $setPart->shouldReceive('newInstance')->twice()->andReturn($newSetPart1, $newSetPart2);
 
-        $action = new StoreSetPartsAction($upsertColorAction, $upsertPartAction, $setPart);
+        $action = new StoreSetPartsAction($upsertColorAction, $upsertPartAction, $setPart, $this->db);
 
         $partsData = [
             new LegoSetPartData(
@@ -236,7 +242,7 @@ describe('StoreSetPartsAction', function (): void {
 
         $setPart = Mockery::mock(SetPart::class);
 
-        $action = new StoreSetPartsAction($upsertColorAction, $upsertPartAction, $setPart);
+        $action = new StoreSetPartsAction($upsertColorAction, $upsertPartAction, $setPart, $this->db);
 
         // act
         $action->execute($set, []);
