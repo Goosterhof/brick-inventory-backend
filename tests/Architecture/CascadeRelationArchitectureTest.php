@@ -109,3 +109,46 @@ it('should only reference valid HasMany or HasOne relationships in cascadeRelati
         }
     }
 });
+
+it('delete actions should handle all declared cascade relations', function (): void {
+    $actionsDir = dirname(__DIR__, 2) . '/app/Actions';
+
+    foreach (getClassesInDirectory($actionsDir, 'App\\Actions\\') as $className) {
+        $reflection = new ReflectionClass($className);
+        $shortName = $reflection->getShortName();
+        if (!str_starts_with($shortName, 'Delete')) {
+            continue;
+        }
+        if (!str_ends_with($shortName, 'Action')) {
+            continue;
+        }
+
+        $modelName = mb_substr($shortName, mb_strlen('Delete'), -mb_strlen('Action'));
+        $modelClass = 'App\\Models\\' . $modelName;
+
+        if (!class_exists($modelClass)) {
+            continue;
+        }
+
+        $cascadeRelations = $modelClass::cascadeRelations();
+
+        if ($cascadeRelations === []) {
+            continue;
+        }
+
+        $file = $reflection->getFileName();
+        $source = shell_exec('cat ' . escapeshellarg($file));
+
+        foreach ($cascadeRelations as $cascadeRelation) {
+            expect($source)->toContain(
+                $cascadeRelation,
+                sprintf(
+                    'Delete action %s must handle cascade relation "%s" declared by %s',
+                    $className,
+                    $cascadeRelation,
+                    $modelClass,
+                ),
+            );
+        }
+    }
+});
