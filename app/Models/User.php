@@ -48,6 +48,16 @@ class User extends Authenticatable
     }
 
     /**
+     * Relations that must be cascade-deleted when this model is deleted.
+     *
+     * @return list<string>
+     */
+    public static function cascadeRelations(): array
+    {
+        return [];
+    }
+
+    /**
      * Get the attributes that should be cast.
      *
      * @return array<string, string>

@@ -47,4 +47,14 @@ class StorageOptionPart extends Model
     {
         return $this->belongsTo(Color::class);
     }
+
+    /**
+     * Relations that must be cascade-deleted when this model is deleted.
+     *
+     * @return list<string>
+     */
+    public static function cascadeRelations(): array
+    {
+        return [];
+    }
 }
