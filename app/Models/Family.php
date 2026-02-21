@@ -58,6 +58,16 @@ class Family extends Model
     }
 
     /**
+     * Relations that must be cascade-deleted when this model is deleted.
+     *
+     * @return list<string>
+     */
+    public static function cascadeRelations(): array
+    {
+        return ['users', 'storageOptions', 'familySets'];
+    }
+
+    /**
      * @return array<string, string>
      */
     protected function casts(): array

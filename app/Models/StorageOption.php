@@ -64,4 +64,14 @@ class StorageOption extends Model implements BelongsToFamilyInterface
     {
         return $this->hasMany(StorageOptionPart::class);
     }
+
+    /**
+     * Relations that must be cascade-deleted when this model is deleted.
+     *
+     * @return list<string>
+     */
+    public static function cascadeRelations(): array
+    {
+        return ['children', 'storageOptionParts'];
+    }
 }

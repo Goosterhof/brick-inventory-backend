@@ -52,4 +52,14 @@ class Set extends Model
     {
         return $this->hasMany(FamilySet::class);
     }
+
+    /**
+     * Relations that must be cascade-deleted when this model is deleted.
+     *
+     * @return list<string>
+     */
+    public static function cascadeRelations(): array
+    {
+        return ['setParts', 'familySets'];
+    }
 }

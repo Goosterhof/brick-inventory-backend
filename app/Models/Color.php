@@ -33,6 +33,24 @@ class Color extends Model
     }
 
     /**
+     * @return HasMany<StorageOptionPart, $this>
+     */
+    public function storageOptionParts(): HasMany
+    {
+        return $this->hasMany(StorageOptionPart::class);
+    }
+
+    /**
+     * Relations that must be cascade-deleted when this model is deleted.
+     *
+     * @return list<string>
+     */
+    public static function cascadeRelations(): array
+    {
+        return ['setParts', 'storageOptionParts'];
+    }
+
+    /**
      * @return array<string, string>
      */
     protected function casts(): array
