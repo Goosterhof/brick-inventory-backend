@@ -5,11 +5,16 @@ declare(strict_types=1);
 use App\Actions\Sync\UpsertPartAction;
 use App\Data\Lego\LegoPartData;
 use App\Models\Part;
+use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\UniqueConstraintViolationException;
 
 describe('UpsertPartAction', function (): void {
     it('should create a new part when it does not exist', function (): void {
         // arrange
+        $connection = Mockery::mock(ConnectionInterface::class);
+        $connection->shouldReceive('transaction')->andReturnUsing(fn (Closure $callback) => $callback());
+
         $queryBuilder = Mockery::mock(Builder::class);
         $queryBuilder->shouldReceive('where')->with('part_num', '3001')->once()->andReturnSelf();
         $queryBuilder->shouldReceive('first')->once()->andReturn(null);
@@ -28,7 +33,7 @@ describe('UpsertPartAction', function (): void {
         $part->shouldReceive('newQuery')->once()->andReturn($queryBuilder);
         $part->shouldReceive('newInstance')->once()->andReturn($newPart);
 
-        $action = new UpsertPartAction($part);
+        $action = new UpsertPartAction($part, $connection);
 
         $data = new LegoPartData(
             partNum: '3001',
@@ -50,6 +55,9 @@ describe('UpsertPartAction', function (): void {
 
     it('should update an existing part when it exists', function (): void {
         // arrange
+        $connection = Mockery::mock(ConnectionInterface::class);
+        $connection->shouldReceive('transaction')->andReturnUsing(fn (Closure $callback) => $callback());
+
         $existingSavedValues = ['id' => 1, 'part_num' => '3001'];
         $existingPart = Mockery::mock(Part::class);
         $existingPart->allows('setAttribute')->andReturnUsing(function ($key, $value) use (&$existingSavedValues): void {
@@ -67,7 +75,7 @@ describe('UpsertPartAction', function (): void {
         $part = Mockery::mock(Part::class);
         $part->shouldReceive('newQuery')->once()->andReturn($queryBuilder);
 
-        $action = new UpsertPartAction($part);
+        $action = new UpsertPartAction($part, $connection);
 
         $data = new LegoPartData(
             partNum: '3001',
@@ -88,6 +96,9 @@ describe('UpsertPartAction', function (): void {
 
     it('should handle null part_cat_id and part_img_url', function (): void {
         // arrange
+        $connection = Mockery::mock(ConnectionInterface::class);
+        $connection->shouldReceive('transaction')->andReturnUsing(fn (Closure $callback) => $callback());
+
         $queryBuilder = Mockery::mock(Builder::class);
         $queryBuilder->shouldReceive('where')->andReturnSelf();
         $queryBuilder->shouldReceive('first')->andReturn(null);
@@ -106,7 +117,7 @@ describe('UpsertPartAction', function (): void {
         $part->shouldReceive('newQuery')->andReturn($queryBuilder);
         $part->shouldReceive('newInstance')->andReturn($newPart);
 
-        $action = new UpsertPartAction($part);
+        $action = new UpsertPartAction($part, $connection);
 
         $data = new LegoPartData(
             partNum: '3002',
@@ -121,5 +132,63 @@ describe('UpsertPartAction', function (): void {
         // assert
         expect($newPartSavedValues['category'])->toBeNull();
         expect($newPartSavedValues['image_url'])->toBeNull();
+    });
+
+    it('should retry and update on unique constraint violation', function (): void {
+        // arrange
+        $connection = Mockery::mock(ConnectionInterface::class);
+        $connection->shouldReceive('transaction')
+            ->twice()
+            ->andReturnUsing(fn (Closure $callback) => $callback());
+
+        // First attempt: new instance whose save throws
+        $newInstance = Mockery::mock(Part::class);
+        $newInstance->allows('setAttribute');
+        $newInstance->allows('getAttribute');
+        $newInstance->shouldReceive('save')->once()
+            ->andThrow(new UniqueConstraintViolationException('default', 'INSERT', [], new Exception('dup')));
+
+        // Retry: existing record found and updated
+        $existingValues = [];
+        $existingInstance = Mockery::mock(Part::class);
+        $existingInstance->allows('setAttribute')->andReturnUsing(function ($key, $value) use (&$existingValues): void {
+            $existingValues[$key] = $value;
+        });
+        $existingInstance->allows('getAttribute')->andReturnUsing(function ($key) use (&$existingValues): mixed {
+            return $existingValues[$key] ?? null;
+        });
+        $existingInstance->shouldReceive('save')->once();
+
+        // First query: find nothing
+        $builder1 = Mockery::mock(Builder::class);
+        $builder1->shouldReceive('where')->with('part_num', '3001')->once()->andReturnSelf();
+        $builder1->shouldReceive('first')->once()->andReturn(null);
+
+        // Retry query: find existing
+        $builder2 = Mockery::mock(Builder::class);
+        $builder2->shouldReceive('where')->with('part_num', '3001')->once()->andReturnSelf();
+        $builder2->shouldReceive('firstOrFail')->once()->andReturn($existingInstance);
+
+        $part = Mockery::mock(Part::class);
+        $part->shouldReceive('newQuery')->twice()->andReturn($builder1, $builder2);
+        $part->shouldReceive('newInstance')->once()->andReturn($newInstance);
+
+        $action = new UpsertPartAction($part, $connection);
+
+        $data = new LegoPartData(
+            partNum: '3001',
+            name: 'Brick 2 x 4',
+            categoryId: 11,
+            imageUrl: 'https://example.com/3001.jpg',
+        );
+
+        // act
+        $result = $action->execute($data);
+
+        // assert
+        expect($result)->toBe($existingInstance)
+            ->and($existingValues['name'])->toBe('Brick 2 x 4')
+            ->and($existingValues['category'])->toBe('11')
+            ->and($existingValues['image_url'])->toBe('https://example.com/3001.jpg');
     });
 });

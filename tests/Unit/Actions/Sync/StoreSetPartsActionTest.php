@@ -14,6 +14,7 @@ use App\Models\Set;
 use App\Models\SetPart;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\UniqueConstraintViolationException;
 
 describe('StoreSetPartsAction', function (): void {
     beforeEach(function (): void {
@@ -248,5 +249,80 @@ describe('StoreSetPartsAction', function (): void {
         $action->execute($set, []);
 
         // assert - Mockery verifies expectations automatically
+    });
+
+    it('should retry and update set part on unique constraint violation', function (): void {
+        // arrange
+        $set = Mockery::mock(Set::class);
+        $set->allows('getAttribute')->with('id')->andReturn(1);
+
+        $color = Mockery::mock(Color::class);
+        $color->allows('getAttribute')->with('id')->andReturn(1);
+
+        $part = Mockery::mock(Part::class);
+        $part->allows('getAttribute')->with('id')->andReturn(1);
+
+        $upsertColorAction = Mockery::mock(UpsertColorAction::class);
+        $upsertColorAction->shouldReceive('execute')->once()->andReturn($color);
+
+        $upsertPartAction = Mockery::mock(UpsertPartAction::class);
+        $upsertPartAction->shouldReceive('execute')->once()->andReturn($part);
+
+        // First attempt: new instance whose save throws
+        $newInstance = Mockery::mock(SetPart::class);
+        $newInstance->allows('setAttribute');
+        $newInstance->allows('getAttribute');
+        $newInstance->shouldReceive('save')->once()
+            ->andThrow(new UniqueConstraintViolationException('default', 'INSERT', [], new Exception('dup')));
+
+        // Retry: existing record found and updated
+        $existingValues = [];
+        $existingInstance = Mockery::mock(SetPart::class);
+        $existingInstance->allows('setAttribute')->andReturnUsing(function ($key, $value) use (&$existingValues): void {
+            $existingValues[$key] = $value;
+        });
+        $existingInstance->allows('getAttribute')->andReturnUsing(function ($key) use (&$existingValues): mixed {
+            return $existingValues[$key] ?? null;
+        });
+        $existingInstance->shouldReceive('save')->once();
+
+        // First query: find nothing
+        $builder1 = Mockery::mock(Builder::class);
+        $builder1->shouldReceive('where')->with('set_id', 1)->once()->andReturnSelf();
+        $builder1->shouldReceive('where')->with('part_id', 1)->once()->andReturnSelf();
+        $builder1->shouldReceive('where')->with('color_id', 1)->once()->andReturnSelf();
+        $builder1->shouldReceive('where')->with('is_spare', false)->once()->andReturnSelf();
+        $builder1->shouldReceive('first')->once()->andReturn(null);
+
+        // Retry query: find existing
+        $builder2 = Mockery::mock(Builder::class);
+        $builder2->shouldReceive('where')->with('set_id', 1)->once()->andReturnSelf();
+        $builder2->shouldReceive('where')->with('part_id', 1)->once()->andReturnSelf();
+        $builder2->shouldReceive('where')->with('color_id', 1)->once()->andReturnSelf();
+        $builder2->shouldReceive('where')->with('is_spare', false)->once()->andReturnSelf();
+        $builder2->shouldReceive('firstOrFail')->once()->andReturn($existingInstance);
+
+        $setPart = Mockery::mock(SetPart::class);
+        $setPart->shouldReceive('newQuery')->twice()->andReturn($builder1, $builder2);
+        $setPart->shouldReceive('newInstance')->once()->andReturn($newInstance);
+
+        $action = new StoreSetPartsAction($upsertColorAction, $upsertPartAction, $setPart, $this->db);
+
+        $partsData = [
+            new LegoSetPartData(
+                part: new LegoPartData(partNum: '3001', name: 'Brick 2 x 4', categoryId: 11, imageUrl: null),
+                color: new LegoColorData(id: 1, name: 'White', rgb: 'FFFFFF', isTransparent: false),
+                quantity: 10,
+                isSpare: false,
+                elementId: '300101',
+            ),
+        ];
+
+        // act
+        $action->execute($set, $partsData);
+
+        // assert
+        expect($existingValues['quantity'])->toBe(10)
+            ->and($existingValues['element_id'])->toBe('300101');
     });
 });
