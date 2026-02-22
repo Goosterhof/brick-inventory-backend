@@ -229,5 +229,18 @@ describe('BrickIdentificationController', function (): void {
                 ->assertJsonPath('id', $part->id)
                 ->assertJsonPath('part_num', '3001');
         });
+
+        it('should rate limit identify-brick requests', function (): void {
+            $this->freezeTime();
+            $user = User::factory()->create();
+
+            for ($i = 0; $i < 10; $i++) {
+                $this->actingAs($user)->postJson('/api/identify-brick', [])
+                    ->assertStatus(422);
+            }
+
+            $this->actingAs($user)->postJson('/api/identify-brick', [])
+                ->assertStatus(429);
+        });
     });
 });
