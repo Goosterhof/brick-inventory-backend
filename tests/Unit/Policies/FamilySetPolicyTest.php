@@ -17,9 +17,12 @@ describe('FamilySetPolicy', function (): void {
         expect($this->policy->viewAny($user))->toBeTrue();
     });
 
-    it('should allow view', function (): void {
+    it('should allow view for user from same family', function (): void {
         $user = Mockery::mock(User::class);
+        $user->shouldReceive('getAttribute')->with('family_id')->andReturn(1);
+
         $familySet = Mockery::mock(FamilySet::class);
+        $familySet->shouldReceive('getAttribute')->with('family_id')->andReturn(1);
 
         expect($this->policy->view($user, $familySet))->toBeTrue();
     });
@@ -30,18 +33,54 @@ describe('FamilySetPolicy', function (): void {
         expect($this->policy->create($user))->toBeTrue();
     });
 
-    it('should allow update', function (): void {
+    it('should allow update for user from same family', function (): void {
         $user = Mockery::mock(User::class);
+        $user->shouldReceive('getAttribute')->with('family_id')->andReturn(1);
+
         $familySet = Mockery::mock(FamilySet::class);
+        $familySet->shouldReceive('getAttribute')->with('family_id')->andReturn(1);
 
         expect($this->policy->update($user, $familySet))->toBeTrue();
     });
 
-    it('should allow delete', function (): void {
+    it('should allow delete for user from same family', function (): void {
         $user = Mockery::mock(User::class);
+        $user->shouldReceive('getAttribute')->with('family_id')->andReturn(1);
+
         $familySet = Mockery::mock(FamilySet::class);
+        $familySet->shouldReceive('getAttribute')->with('family_id')->andReturn(1);
 
         expect($this->policy->delete($user, $familySet))->toBeTrue();
+    });
+
+    it('should deny view for user from different family', function (): void {
+        $user = Mockery::mock(User::class);
+        $user->shouldReceive('getAttribute')->with('family_id')->andReturn(1);
+
+        $familySet = Mockery::mock(FamilySet::class);
+        $familySet->shouldReceive('getAttribute')->with('family_id')->andReturn(2);
+
+        expect($this->policy->view($user, $familySet))->toBeFalse();
+    });
+
+    it('should deny update for user from different family', function (): void {
+        $user = Mockery::mock(User::class);
+        $user->shouldReceive('getAttribute')->with('family_id')->andReturn(1);
+
+        $familySet = Mockery::mock(FamilySet::class);
+        $familySet->shouldReceive('getAttribute')->with('family_id')->andReturn(2);
+
+        expect($this->policy->update($user, $familySet))->toBeFalse();
+    });
+
+    it('should deny delete for user from different family', function (): void {
+        $user = Mockery::mock(User::class);
+        $user->shouldReceive('getAttribute')->with('family_id')->andReturn(1);
+
+        $familySet = Mockery::mock(FamilySet::class);
+        $familySet->shouldReceive('getAttribute')->with('family_id')->andReturn(2);
+
+        expect($this->policy->delete($user, $familySet))->toBeFalse();
     });
 
     describe('importFromRebrickable', function (): void {

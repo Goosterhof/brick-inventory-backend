@@ -11,6 +11,7 @@ final readonly class StorageOptionPartPolicy
 {
     public function delete(User $user, StorageOptionPart $storageOptionPart): bool
     {
-        return true;
+        return $storageOptionPart->storageOption !== null
+            && $storageOptionPart->storageOption->family_id === $user->family_id;
     }
 }

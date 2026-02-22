@@ -16,7 +16,7 @@ final readonly class FamilySetPolicy
 
     public function view(User $user, FamilySet $familySet): bool
     {
-        return true;
+        return $familySet->family_id === $user->family_id;
     }
 
     public function create(User $user): bool
@@ -26,12 +26,12 @@ final readonly class FamilySetPolicy
 
     public function update(User $user, FamilySet $familySet): bool
     {
-        return true;
+        return $familySet->family_id === $user->family_id;
     }
 
     public function delete(User $user, FamilySet $familySet): bool
     {
-        return true;
+        return $familySet->family_id === $user->family_id;
     }
 
     public function importFromRebrickable(User $user): bool
