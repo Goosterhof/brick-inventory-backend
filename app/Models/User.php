@@ -11,7 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 /**
- * @property int $id
+ * @property positive-int $id
  * @property int $family_id
  * @property string $name
  * @property string $email
