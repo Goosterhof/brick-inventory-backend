@@ -16,7 +16,7 @@ final readonly class StorageOptionPolicy
 
     public function view(User $user, StorageOption $storageOption): bool
     {
-        return true;
+        return $storageOption->family_id === $user->family_id;
     }
 
     public function create(User $user): bool
@@ -26,21 +26,21 @@ final readonly class StorageOptionPolicy
 
     public function update(User $user, StorageOption $storageOption): bool
     {
-        return true;
+        return $storageOption->family_id === $user->family_id;
     }
 
     public function delete(User $user, StorageOption $storageOption): bool
     {
-        return true;
+        return $storageOption->family_id === $user->family_id;
     }
 
     public function assignPart(User $user, StorageOption $storageOption): bool
     {
-        return true;
+        return $storageOption->family_id === $user->family_id;
     }
 
     public function viewParts(User $user, StorageOption $storageOption): bool
     {
-        return true;
+        return $storageOption->family_id === $user->family_id;
     }
 }
