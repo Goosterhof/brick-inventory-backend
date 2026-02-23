@@ -7,8 +7,14 @@ use App\DataTransferObjects\Family\SetRebrickableTokenData;
 use App\Exceptions\NotFamilyHeadException;
 use App\Models\Family;
 use App\Models\User;
+use Illuminate\Database\ConnectionInterface;
 
 describe('SetRebrickableTokenAction', function (): void {
+    beforeEach(function (): void {
+        $this->db = Mockery::mock(ConnectionInterface::class);
+        $this->db->allows('transaction')->andReturnUsing(fn (Closure $callback) => $callback());
+    });
+
     it('should set the rebrickable user token on the family', function (): void {
         // arrange
         $user = Mockery::mock(User::class);
@@ -33,7 +39,7 @@ describe('SetRebrickableTokenAction', function (): void {
             rebrickableUserToken: 'my-secret-token',
         );
 
-        $action = new SetRebrickableTokenAction;
+        $action = new SetRebrickableTokenAction($this->db);
 
         // act
         $action->execute($family, $data, $user);
@@ -56,7 +62,7 @@ describe('SetRebrickableTokenAction', function (): void {
             rebrickableUserToken: 'another-token',
         );
 
-        $action = new SetRebrickableTokenAction;
+        $action = new SetRebrickableTokenAction($this->db);
 
         // act
         $result = $action->execute($family, $data, $user);
@@ -89,7 +95,7 @@ describe('SetRebrickableTokenAction', function (): void {
             rebrickableUserToken: 'new-token',
         );
 
-        $action = new SetRebrickableTokenAction;
+        $action = new SetRebrickableTokenAction($this->db);
 
         // act
         $action->execute($family, $data, $user);
@@ -111,7 +117,7 @@ describe('SetRebrickableTokenAction', function (): void {
             rebrickableUserToken: 'my-token',
         );
 
-        $action = new SetRebrickableTokenAction;
+        $action = new SetRebrickableTokenAction($this->db);
 
         // act & assert
         expect(fn (): Family => $action->execute($family, $data, $user))
@@ -142,7 +148,7 @@ describe('SetRebrickableTokenAction', function (): void {
             rebrickableUserToken: 'valid-token',
         );
 
-        $action = new SetRebrickableTokenAction;
+        $action = new SetRebrickableTokenAction($this->db);
 
         // act
         $result = $action->execute($family, $data, $user);
