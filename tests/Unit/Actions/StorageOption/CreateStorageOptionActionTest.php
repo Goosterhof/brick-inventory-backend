@@ -6,8 +6,14 @@ use App\Actions\StorageOption\CreateStorageOptionAction;
 use App\DataTransferObjects\StorageOption\StorageOptionData;
 use App\Models\StorageOption;
 use App\Models\User;
+use Illuminate\Database\ConnectionInterface;
 
 describe('CreateStorageOptionAction', function (): void {
+    beforeEach(function (): void {
+        $this->db = Mockery::mock(ConnectionInterface::class);
+        $this->db->allows('transaction')->andReturnUsing(fn (Closure $callback) => $callback());
+    });
+
     it('should create a storage option with the provided data', function (): void {
         // arrange
         $savedValues = [];
@@ -29,7 +35,7 @@ describe('CreateStorageOptionAction', function (): void {
         $user = Mockery::mock(User::class);
         $user->allows('getAttribute')->with('family_id')->andReturn(1);
 
-        $action = new CreateStorageOptionAction($storageOption, $user);
+        $action = new CreateStorageOptionAction($storageOption, $user, $this->db);
         $data = new StorageOptionData(
             name: 'Cabinet 1',
             description: 'Main storage cabinet',
@@ -66,7 +72,7 @@ describe('CreateStorageOptionAction', function (): void {
         $user = Mockery::mock(User::class);
         $user->allows('getAttribute')->with('family_id')->andReturn(1);
 
-        $action = new CreateStorageOptionAction($storageOption, $user);
+        $action = new CreateStorageOptionAction($storageOption, $user, $this->db);
         $data = new StorageOptionData(
             name: 'Drawer A1',
             parentId: 5,
@@ -98,7 +104,7 @@ describe('CreateStorageOptionAction', function (): void {
         $user = Mockery::mock(User::class);
         $user->allows('getAttribute')->with('family_id')->andReturn(1);
 
-        $action = new CreateStorageOptionAction($storageOption, $user);
+        $action = new CreateStorageOptionAction($storageOption, $user, $this->db);
         $data = new StorageOptionData(
             name: 'Test Cabinet',
         );

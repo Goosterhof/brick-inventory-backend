@@ -7,11 +7,15 @@ use App\DataTransferObjects\FamilySet\UpdateFamilySetData;
 use App\Enums\FamilySetStatus;
 use App\Models\FamilySet;
 use Carbon\CarbonImmutable;
+use Illuminate\Database\ConnectionInterface;
 use Illuminate\Support\DateFactory;
 use Illuminate\Support\Facades\Date;
 
 describe('UpdateFamilySetAction', function (): void {
     beforeEach(function (): void {
+        $this->db = Mockery::mock(ConnectionInterface::class);
+        $this->db->allows('transaction')->andReturnUsing(fn (Closure $callback) => $callback());
+
         $this->dateFactory = Mockery::mock(DateFactory::class);
         $this->dateFactory->allows('instance')->andReturnUsing(
             fn (DateTimeInterface $date): CarbonImmutable => CarbonImmutable::instance($date),
@@ -32,7 +36,7 @@ describe('UpdateFamilySetAction', function (): void {
 
         $purchaseDate = Date::parse('2024-06-15');
 
-        $action = new UpdateFamilySetAction($this->dateFactory);
+        $action = new UpdateFamilySetAction($this->dateFactory, $this->db);
         $data = new UpdateFamilySetData(
             quantity: 5,
             status: FamilySetStatus::Built,
@@ -63,7 +67,7 @@ describe('UpdateFamilySetAction', function (): void {
         });
         $familySet->shouldReceive('save')->once();
 
-        $action = new UpdateFamilySetAction($this->dateFactory);
+        $action = new UpdateFamilySetAction($this->dateFactory, $this->db);
         $data = new UpdateFamilySetData(
             quantity: 3,
             status: FamilySetStatus::InProgress,
@@ -86,7 +90,7 @@ describe('UpdateFamilySetAction', function (): void {
         $familySet->allows('getAttribute');
         $familySet->shouldReceive('save')->once();
 
-        $action = new UpdateFamilySetAction($this->dateFactory);
+        $action = new UpdateFamilySetAction($this->dateFactory, $this->db);
         $data = new UpdateFamilySetData(
             quantity: 1,
             status: FamilySetStatus::Sealed,
@@ -105,7 +109,7 @@ describe('UpdateFamilySetAction', function (): void {
         $familySet->allows('getAttribute');
         $familySet->shouldReceive('save')->once();
 
-        $action = new UpdateFamilySetAction($this->dateFactory);
+        $action = new UpdateFamilySetAction($this->dateFactory, $this->db);
         $data = new UpdateFamilySetData(
             quantity: 3,
             status: FamilySetStatus::Sealed,

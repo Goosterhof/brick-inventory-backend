@@ -5,8 +5,14 @@ declare(strict_types=1);
 use App\Actions\StorageOption\UpdateStorageOptionAction;
 use App\DataTransferObjects\StorageOption\StorageOptionData;
 use App\Models\StorageOption;
+use Illuminate\Database\ConnectionInterface;
 
 describe('UpdateStorageOptionAction', function (): void {
+    beforeEach(function (): void {
+        $this->db = Mockery::mock(ConnectionInterface::class);
+        $this->db->allows('transaction')->andReturnUsing(fn (Closure $callback) => $callback());
+    });
+
     it('should update storage option properties', function (): void {
         // arrange
         $savedValues = [];
@@ -19,7 +25,7 @@ describe('UpdateStorageOptionAction', function (): void {
         });
         $storageOption->shouldReceive('save')->once();
 
-        $action = new UpdateStorageOptionAction;
+        $action = new UpdateStorageOptionAction($this->db);
         $data = new StorageOptionData(
             name: 'New Name',
             description: 'New description',
@@ -46,7 +52,7 @@ describe('UpdateStorageOptionAction', function (): void {
         });
         $storageOption->shouldReceive('save')->once();
 
-        $action = new UpdateStorageOptionAction;
+        $action = new UpdateStorageOptionAction($this->db);
         $data = new StorageOptionData(
             name: 'Drawer',
             row: 3,
@@ -73,7 +79,7 @@ describe('UpdateStorageOptionAction', function (): void {
         });
         $storageOption->shouldReceive('save')->once();
 
-        $action = new UpdateStorageOptionAction;
+        $action = new UpdateStorageOptionAction($this->db);
         $data = new StorageOptionData(
             name: 'Drawer',
             parentId: 5,
@@ -93,7 +99,7 @@ describe('UpdateStorageOptionAction', function (): void {
         $storageOption->allows('getAttribute');
         $storageOption->shouldReceive('save')->once();
 
-        $action = new UpdateStorageOptionAction;
+        $action = new UpdateStorageOptionAction($this->db);
         $data = new StorageOptionData(
             name: 'Updated',
         );
