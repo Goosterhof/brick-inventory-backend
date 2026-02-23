@@ -58,8 +58,7 @@ it('should declare all HasMany and HasOne relationships in cascadeRelations', fu
                 continue;
             }
 
-            expect($cascadeRelations)->toContain(
-                $ownPublicMethod->getName(),
+            expect(in_array($ownPublicMethod->getName(), $cascadeRelations, true))->toBeTrue(
                 sprintf(
                     'Model %s has %s relationship %s() that is not declared in cascadeRelations()',
                     $className,
@@ -119,6 +118,7 @@ it('delete actions should handle all declared cascade relations', function (): v
         if (!str_starts_with($shortName, 'Delete')) {
             continue;
         }
+
         if (!str_ends_with($shortName, 'Action')) {
             continue;
         }
@@ -140,8 +140,7 @@ it('delete actions should handle all declared cascade relations', function (): v
         $source = shell_exec('cat ' . escapeshellarg($file));
 
         foreach ($cascadeRelations as $cascadeRelation) {
-            expect($source)->toContain(
-                $cascadeRelation,
+            expect(str_contains($source, $cascadeRelation))->toBeTrue(
                 sprintf(
                     'Delete action %s must handle cascade relation "%s" declared by %s',
                     $className,
