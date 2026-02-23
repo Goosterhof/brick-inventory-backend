@@ -66,11 +66,7 @@ composer lint
 composer phpstan
 ```
 
-## API Documentation
-
-API documentation is automatically generated using [Scramble](https://scramble.dedoc.co/) and available at `/docs/api` when running the application.
-
-### Main Endpoints
+## API Endpoints
 
 | Method | Endpoint | Description |
 |--------|----------|-------------|
