@@ -87,10 +87,11 @@ deptrac:
       - Data
       - Exception
 
-    # Form requests validate input, produce DTOs, reference enums
+    # Form requests validate input, produce DTOs, reference enums and models (closure rules check ownership)
     FormRequest:
       - DataTransferObject
       - Enum
+      - Model
 
     # Resource data transforms models into API responses
     ResourceData:
