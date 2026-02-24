@@ -526,6 +526,37 @@ describe('ImportOwnedSetsAction', function (): void {
             ->toThrow(RebrickableApiException::class, 'Failed to fetch user sets: HTTP 401');
     });
 
+    it('should skip processing when page has no user sets', function (): void {
+        // arrange
+        $legoDataService = Mockery::mock(LegoDataServiceInterface::class);
+        $legoDataService->shouldReceive('fetchUserSets')
+            ->andReturnUsing(function (): Generator {
+                yield [];
+            });
+
+        $upsertSetAction = Mockery::mock(UpsertSetAction::class);
+        $upsertSetAction->shouldNotReceive('execute');
+
+        $familySetModel = Mockery::mock(FamilySet::class);
+        $familySetModel->shouldNotReceive('newQuery');
+
+        $family = Mockery::mock(Family::class);
+        $family->allows('getAttribute')->with('id')->andReturn(1);
+        $family->allows('getAttribute')->with('rebrickable_user_token')->andReturn('user-token-123');
+
+        $action = new ImportOwnedSetsAction($legoDataService, $upsertSetAction, $familySetModel, $this->db);
+
+        // act
+        $result = $action->execute($family);
+
+        // assert
+        expect($result->created)->toBe(0);
+        expect($result->updated)->toBe(0);
+        expect($result->skipped)->toBe(0);
+        expect($result->total)->toBe(0);
+        expect($result->complete)->toBeTrue();
+    });
+
     it('should use per-page transactions', function (): void {
         // arrange
         $legoSetData = new LegoSetData(
