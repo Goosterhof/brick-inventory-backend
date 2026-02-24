@@ -13,6 +13,7 @@ use App\Data\Lego\RebrickableUserSetData;
 use App\Exceptions\InvalidApiResponseException;
 use App\Exceptions\RebrickableApiException;
 use App\Exceptions\SetNotFoundException;
+use Generator;
 use Illuminate\Container\Attributes\Config;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
@@ -122,12 +123,10 @@ final readonly class RebrickableService implements LegoDataServiceInterface
      * @throws RebrickableApiException
      * @throws InvalidApiResponseException
      *
-     * @return list<RebrickableUserSetData>
+     * @return Generator<int, list<RebrickableUserSetData>>
      */
-    public function fetchUserSets(string $userToken): array
+    public function fetchUserSets(string $userToken): Generator
     {
-        /** @var list<RebrickableUserSetData> $sets */
-        $sets = [];
         /** @var string|null $nextUrl @phpstan-ignore varTag.nativeType */
         $nextUrl = sprintf('/users/%s/sets/', $userToken);
 
@@ -143,8 +142,11 @@ final readonly class RebrickableService implements LegoDataServiceInterface
             /** @var array{results: list<array{set: array{set_num: string, name: string, year: int, theme_id: int|null, num_parts: int, set_img_url: string|null}, quantity: int}>, next: string|null} $validatedData */
             $validatedData = $data;
 
+            /** @var list<RebrickableUserSetData> $pageResults */
+            $pageResults = [];
+
             foreach ($validatedData['results'] as $setData) {
-                $sets[] = new RebrickableUserSetData(
+                $pageResults[] = new RebrickableUserSetData(
                     set: new LegoSetData(
                         setNum: $setData['set']['set_num'],
                         name: $setData['set']['name'],
@@ -157,10 +159,10 @@ final readonly class RebrickableService implements LegoDataServiceInterface
                 );
             }
 
+            yield $pageResults;
+
             $nextUrl = $validatedData['next'];
         }
-
-        return $sets;
     }
 
     private function httpClient(): PendingRequest

@@ -10,6 +10,7 @@ use App\Data\Lego\RebrickableUserSetData;
 use App\Exceptions\InvalidApiResponseException;
 use App\Exceptions\RebrickableApiException;
 use App\Exceptions\SetNotFoundException;
+use Generator;
 
 interface LegoDataServiceInterface
 {
@@ -33,12 +34,12 @@ interface LegoDataServiceInterface
     public function fetchSetParts(string $setNum): array;
 
     /**
-     * Fetch all sets from a user's Rebrickable collection.
+     * Fetch sets from a user's Rebrickable collection, yielding one page at a time.
      *
      * @throws RebrickableApiException
      * @throws InvalidApiResponseException
      *
-     * @return list<RebrickableUserSetData>
+     * @return Generator<int, list<RebrickableUserSetData>>
      */
-    public function fetchUserSets(string $userToken): array;
+    public function fetchUserSets(string $userToken): Generator;
 }

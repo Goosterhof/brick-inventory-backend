@@ -81,13 +81,22 @@ class FamilySetController extends Controller
 
         $importOwnedSetsResultData = $this->importOwnedSetsAction->execute($user->family);
 
+        $message = $importOwnedSetsResultData->complete
+            ? 'Import completed successfully'
+            : sprintf('Import partially completed: %d sets imported', $importOwnedSetsResultData->created + $importOwnedSetsResultData->updated);
+
         $response = [
-            'message' => 'Import completed successfully',
+            'message' => $message,
             'created' => $importOwnedSetsResultData->created,
             'updated' => $importOwnedSetsResultData->updated,
             'skipped' => $importOwnedSetsResultData->skipped,
             'total' => $importOwnedSetsResultData->total,
+            'complete' => $importOwnedSetsResultData->complete,
         ];
+
+        if ($importOwnedSetsResultData->error !== null) {
+            $response['error'] = $importOwnedSetsResultData->error;
+        }
 
         if ($importOwnedSetsResultData->skippedSetNums !== []) {
             $response['skipped_set_nums'] = $importOwnedSetsResultData->skippedSetNums;

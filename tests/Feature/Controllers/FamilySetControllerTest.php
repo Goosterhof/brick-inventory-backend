@@ -412,7 +412,8 @@ describe('FamilySetController', function (): void {
                 ->assertJsonPath('created', 2)
                 ->assertJsonPath('updated', 0)
                 ->assertJsonPath('skipped', 0)
-                ->assertJsonPath('total', 2);
+                ->assertJsonPath('total', 2)
+                ->assertJsonPath('complete', true);
 
             $this->assertDatabaseHas('sets', ['set_num' => '75192-1']);
             $this->assertDatabaseHas('sets', ['set_num' => '10281-1']);
@@ -463,7 +464,8 @@ describe('FamilySetController', function (): void {
                 ->assertJsonPath('created', 0)
                 ->assertJsonPath('updated', 1)
                 ->assertJsonPath('skipped', 0)
-                ->assertJsonPath('total', 1);
+                ->assertJsonPath('total', 1)
+                ->assertJsonPath('complete', true);
 
             $this->assertDatabaseHas('family_sets', [
                 'family_id' => $user->family_id,
@@ -518,6 +520,7 @@ describe('FamilySetController', function (): void {
                 ->assertJsonPath('updated', 0)
                 ->assertJsonPath('skipped', 1)
                 ->assertJsonPath('total', 0)
+                ->assertJsonPath('complete', true)
                 ->assertJsonPath('skipped_set_nums', ['75192-1']);
 
             // Verify neither family set was modified
@@ -577,7 +580,52 @@ describe('FamilySetController', function (): void {
                 ->assertJsonPath('created', 0)
                 ->assertJsonPath('updated', 0)
                 ->assertJsonPath('skipped', 0)
-                ->assertJsonPath('total', 0);
+                ->assertJsonPath('total', 0)
+                ->assertJsonPath('complete', true);
+        });
+
+        it('should report partial import when API fails after first page', function (): void {
+            Http::fake([
+                'rebrickable.com/api/v3/users/test-user-token/sets/' => Http::response([
+                    'results' => [
+                        [
+                            'set' => [
+                                'set_num' => '75192-1',
+                                'name' => 'Millennium Falcon',
+                                'year' => 2017,
+                                'theme_id' => 158,
+                                'num_parts' => 7541,
+                                'set_img_url' => null,
+                            ],
+                            'quantity' => 1,
+                        ],
+                    ],
+                    'next' => 'https://rebrickable.com/api/v3/users/test-user-token/sets/?page=2',
+                ]),
+                'rebrickable.com/api/v3/users/test-user-token/sets/?page=2' => Http::response([], 500),
+            ]);
+
+            $user = User::factory()->create();
+            $user->family->rebrickable_user_token = 'test-user-token';
+            $user->family->save();
+
+            $response = $this->actingAs($user)->postJson('/api/family-sets/import-from-rebrickable');
+
+            $response->assertStatus(200)
+                ->assertJsonPath('created', 1)
+                ->assertJsonPath('total', 1)
+                ->assertJsonPath('complete', false)
+                ->assertJsonStructure(['error']);
+
+            expect($response->json('message'))->toContain('partially completed');
+            expect($response->json('error'))->toContain('Import incomplete');
+
+            // Verify page 1 data was saved
+            $this->assertDatabaseHas('sets', ['set_num' => '75192-1']);
+            $this->assertDatabaseHas('family_sets', [
+                'family_id' => $user->family_id,
+                'quantity' => 1,
+            ]);
         });
 
         it('should handle rebrickable API errors', function (): void {

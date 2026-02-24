@@ -10,6 +10,7 @@ use App\Data\Lego\LegoSetData;
 use App\Data\Lego\RebrickableUserSetData;
 use App\Enums\FamilySetStatus;
 use App\Exceptions\MissingRebrickableTokenException;
+use App\Exceptions\RebrickableApiException;
 use App\Models\Family;
 use App\Models\FamilySet;
 use App\Models\Set;
@@ -46,7 +47,9 @@ describe('ImportOwnedSetsAction', function (): void {
         $legoDataService->shouldReceive('fetchUserSets')
             ->with('user-token-123')
             ->once()
-            ->andReturn([]);
+            ->andReturnUsing(function (): Generator {
+                yield from [];
+            });
 
         $upsertSetAction = Mockery::mock(UpsertSetAction::class);
         $familySetModel = Mockery::mock(FamilySet::class);
@@ -79,7 +82,10 @@ describe('ImportOwnedSetsAction', function (): void {
         $set->allows('getAttribute')->with('id')->andReturn(42);
 
         $legoDataService = Mockery::mock(LegoDataServiceInterface::class);
-        $legoDataService->shouldReceive('fetchUserSets')->andReturn([$userSetData]);
+        $legoDataService->shouldReceive('fetchUserSets')
+            ->andReturnUsing(function () use ($userSetData): Generator {
+                yield [$userSetData];
+            });
 
         $upsertSetAction = Mockery::mock(UpsertSetAction::class);
         $upsertSetAction->shouldReceive('execute')
@@ -149,7 +155,10 @@ describe('ImportOwnedSetsAction', function (): void {
         $existingFamilySet->shouldReceive('save')->once();
 
         $legoDataService = Mockery::mock(LegoDataServiceInterface::class);
-        $legoDataService->shouldReceive('fetchUserSets')->andReturn([$userSetData]);
+        $legoDataService->shouldReceive('fetchUserSets')
+            ->andReturnUsing(function () use ($userSetData): Generator {
+                yield [$userSetData];
+            });
 
         $upsertSetAction = Mockery::mock(UpsertSetAction::class);
         $upsertSetAction->shouldReceive('execute')->andReturn($set);
@@ -205,7 +214,10 @@ describe('ImportOwnedSetsAction', function (): void {
         $set2->allows('getAttribute')->with('id')->andReturn(2);
 
         $legoDataService = Mockery::mock(LegoDataServiceInterface::class);
-        $legoDataService->shouldReceive('fetchUserSets')->andReturn([$userSetData1, $userSetData2]);
+        $legoDataService->shouldReceive('fetchUserSets')
+            ->andReturnUsing(function () use ($userSetData1, $userSetData2): Generator {
+                yield [$userSetData1, $userSetData2];
+            });
 
         $upsertSetAction = Mockery::mock(UpsertSetAction::class);
         $upsertSetAction->shouldReceive('execute')->with($legoSetData1)->andReturn($set1);
@@ -247,12 +259,17 @@ describe('ImportOwnedSetsAction', function (): void {
         expect($result->updated)->toBe(1);
         expect($result->skipped)->toBe(0);
         expect($result->total)->toBe(2);
+        expect($result->complete)->toBeTrue();
+        expect($result->error)->toBeNull();
     });
 
     it('should return zero counts when no sets are found', function (): void {
         // arrange
         $legoDataService = Mockery::mock(LegoDataServiceInterface::class);
-        $legoDataService->shouldReceive('fetchUserSets')->andReturn([]);
+        $legoDataService->shouldReceive('fetchUserSets')
+            ->andReturnUsing(function (): Generator {
+                yield from [];
+            });
 
         $upsertSetAction = Mockery::mock(UpsertSetAction::class);
         $familySetModel = Mockery::mock(FamilySet::class);
@@ -271,6 +288,8 @@ describe('ImportOwnedSetsAction', function (): void {
         expect($result->updated)->toBe(0);
         expect($result->skipped)->toBe(0);
         expect($result->total)->toBe(0);
+        expect($result->complete)->toBeTrue();
+        expect($result->error)->toBeNull();
         expect($result->skippedSetNums)->toBe([]);
     });
 
@@ -290,7 +309,10 @@ describe('ImportOwnedSetsAction', function (): void {
         $set->allows('getAttribute')->with('id')->andReturn(42);
 
         $legoDataService = Mockery::mock(LegoDataServiceInterface::class);
-        $legoDataService->shouldReceive('fetchUserSets')->andReturn([$userSetData]);
+        $legoDataService->shouldReceive('fetchUserSets')
+            ->andReturnUsing(function () use ($userSetData): Generator {
+                yield [$userSetData];
+            });
 
         $upsertSetAction = Mockery::mock(UpsertSetAction::class);
         $upsertSetAction->shouldReceive('execute')
@@ -329,10 +351,11 @@ describe('ImportOwnedSetsAction', function (): void {
         expect($result->updated)->toBe(0);
         expect($result->skipped)->toBe(1);
         expect($result->total)->toBe(0);
+        expect($result->complete)->toBeTrue();
         expect($result->skippedSetNums)->toBe(['75192-1']);
     });
 
-    it('should preload all family sets in a single query', function (): void {
+    it('should preload family sets per page in a single query', function (): void {
         // arrange
         $legoSetData1 = new LegoSetData(
             setNum: '75192-1',
@@ -372,7 +395,10 @@ describe('ImportOwnedSetsAction', function (): void {
         $set3->allows('getAttribute')->with('id')->andReturn(3);
 
         $legoDataService = Mockery::mock(LegoDataServiceInterface::class);
-        $legoDataService->shouldReceive('fetchUserSets')->andReturn([$userSetData1, $userSetData2, $userSetData3]);
+        $legoDataService->shouldReceive('fetchUserSets')
+            ->andReturnUsing(function () use ($userSetData1, $userSetData2, $userSetData3): Generator {
+                yield [$userSetData1, $userSetData2, $userSetData3];
+            });
 
         $upsertSetAction = Mockery::mock(UpsertSetAction::class);
         $upsertSetAction->shouldReceive('execute')->with($legoSetData1)->andReturn($set1);
@@ -394,7 +420,7 @@ describe('ImportOwnedSetsAction', function (): void {
         $newFamilySet3->allows('getAttribute');
         $newFamilySet3->shouldReceive('save');
 
-        // Verify only ONE query is made with all set IDs
+        // Verify only ONE query is made with all set IDs for the single page
         $queryBuilder = Mockery::mock(Builder::class);
         $queryBuilder->shouldReceive('where')->with('family_id', 1)->once()->andReturnSelf();
         $queryBuilder->shouldReceive('whereIn')->with('set_id', [1, 2, 3])->once()->andReturnSelf();
@@ -419,5 +445,174 @@ describe('ImportOwnedSetsAction', function (): void {
         expect($result->created)->toBe(3);
         expect($result->updated)->toBe(0);
         expect($result->total)->toBe(3);
+        expect($result->complete)->toBeTrue();
+    });
+
+    it('should report partial import when API fails after first page', function (): void {
+        // arrange
+        $legoSetData = new LegoSetData(
+            setNum: '75192-1',
+            name: 'Millennium Falcon',
+            year: 2017,
+            themeId: 158,
+            numParts: 7541,
+            imageUrl: null,
+        );
+        $userSetData = new RebrickableUserSetData(set: $legoSetData, quantity: 1);
+
+        $set = Mockery::mock(Set::class);
+        $set->allows('getAttribute')->with('id')->andReturn(42);
+
+        $legoDataService = Mockery::mock(LegoDataServiceInterface::class);
+        $legoDataService->shouldReceive('fetchUserSets')
+            ->andReturnUsing(function () use ($userSetData): Generator {
+                yield [$userSetData];
+
+                throw new RebrickableApiException('Failed to fetch user sets: HTTP 500', 500);
+            });
+
+        $upsertSetAction = Mockery::mock(UpsertSetAction::class);
+        $upsertSetAction->shouldReceive('execute')->andReturn($set);
+
+        $newFamilySet = Mockery::mock(FamilySet::class);
+        $newFamilySet->allows('setAttribute');
+        $newFamilySet->allows('getAttribute');
+        $newFamilySet->shouldReceive('save');
+
+        $queryBuilder = Mockery::mock(Builder::class);
+        $queryBuilder->shouldReceive('where')->with('family_id', 1)->andReturnSelf();
+        $queryBuilder->shouldReceive('whereIn')->with('set_id', [42])->andReturnSelf();
+        $queryBuilder->shouldReceive('get')->andReturn(new Collection([]));
+
+        $familySetModel = Mockery::mock(FamilySet::class);
+        $familySetModel->shouldReceive('newQuery')->andReturn($queryBuilder);
+        $familySetModel->shouldReceive('newInstance')->andReturn($newFamilySet);
+
+        $family = Mockery::mock(Family::class);
+        $family->allows('getAttribute')->with('id')->andReturn(1);
+        $family->allows('getAttribute')->with('rebrickable_user_token')->andReturn('user-token-123');
+
+        $action = new ImportOwnedSetsAction($legoDataService, $upsertSetAction, $familySetModel, $this->db);
+
+        // act
+        $result = $action->execute($family);
+
+        // assert
+        expect($result->created)->toBe(1);
+        expect($result->total)->toBe(1);
+        expect($result->complete)->toBeFalse();
+        expect($result->error)->toContain('Import incomplete');
+        expect($result->error)->toContain('1 sets were imported successfully');
+        expect($result->error)->toContain('Retry to fetch remaining sets');
+    });
+
+    it('should re-throw exception when first page fails', function (): void {
+        // arrange
+        $legoDataService = Mockery::mock(LegoDataServiceInterface::class);
+        $legoDataService->shouldReceive('fetchUserSets')
+            ->andThrow(new RebrickableApiException('Failed to fetch user sets: HTTP 401', 401));
+
+        $upsertSetAction = Mockery::mock(UpsertSetAction::class);
+        $familySetModel = Mockery::mock(FamilySet::class);
+
+        $family = Mockery::mock(Family::class);
+        $family->allows('getAttribute')->with('id')->andReturn(1);
+        $family->allows('getAttribute')->with('rebrickable_user_token')->andReturn('user-token-123');
+
+        $action = new ImportOwnedSetsAction($legoDataService, $upsertSetAction, $familySetModel, $this->db);
+
+        // act & assert
+        expect(fn (): ImportOwnedSetsResultData => $action->execute($family))
+            ->toThrow(RebrickableApiException::class, 'Failed to fetch user sets: HTTP 401');
+    });
+
+    it('should skip processing when page has no user sets', function (): void {
+        // arrange
+        $legoDataService = Mockery::mock(LegoDataServiceInterface::class);
+        $legoDataService->shouldReceive('fetchUserSets')
+            ->andReturnUsing(function (): Generator {
+                yield [];
+            });
+
+        $upsertSetAction = Mockery::mock(UpsertSetAction::class);
+        $upsertSetAction->shouldNotReceive('execute');
+
+        $familySetModel = Mockery::mock(FamilySet::class);
+        $familySetModel->shouldNotReceive('newQuery');
+
+        $family = Mockery::mock(Family::class);
+        $family->allows('getAttribute')->with('id')->andReturn(1);
+        $family->allows('getAttribute')->with('rebrickable_user_token')->andReturn('user-token-123');
+
+        $action = new ImportOwnedSetsAction($legoDataService, $upsertSetAction, $familySetModel, $this->db);
+
+        // act
+        $result = $action->execute($family);
+
+        // assert
+        expect($result->created)->toBe(0);
+        expect($result->updated)->toBe(0);
+        expect($result->skipped)->toBe(0);
+        expect($result->total)->toBe(0);
+        expect($result->complete)->toBeTrue();
+    });
+
+    it('should use per-page transactions', function (): void {
+        // arrange
+        $legoSetData = new LegoSetData(
+            setNum: '75192-1',
+            name: 'Millennium Falcon',
+            year: 2017,
+            themeId: 158,
+            numParts: 7541,
+            imageUrl: null,
+        );
+        $userSetData = new RebrickableUserSetData(set: $legoSetData, quantity: 1);
+
+        $set = Mockery::mock(Set::class);
+        $set->allows('getAttribute')->with('id')->andReturn(42);
+
+        $legoDataService = Mockery::mock(LegoDataServiceInterface::class);
+        $legoDataService->shouldReceive('fetchUserSets')
+            ->andReturnUsing(function () use ($userSetData): Generator {
+                yield [$userSetData];
+
+                throw new RebrickableApiException('API error', 500);
+            });
+
+        $upsertSetAction = Mockery::mock(UpsertSetAction::class);
+        $upsertSetAction->shouldReceive('execute')->andReturn($set);
+
+        $newFamilySet = Mockery::mock(FamilySet::class);
+        $newFamilySet->allows('setAttribute');
+        $newFamilySet->allows('getAttribute');
+        $newFamilySet->shouldReceive('save');
+
+        $queryBuilder = Mockery::mock(Builder::class);
+        $queryBuilder->shouldReceive('where')->andReturnSelf();
+        $queryBuilder->shouldReceive('whereIn')->andReturnSelf();
+        $queryBuilder->shouldReceive('get')->andReturn(new Collection([]));
+
+        $familySetModel = Mockery::mock(FamilySet::class);
+        $familySetModel->shouldReceive('newQuery')->andReturn($queryBuilder);
+        $familySetModel->shouldReceive('newInstance')->andReturn($newFamilySet);
+
+        // Verify transaction is called exactly once (for the one successful page)
+        $db = Mockery::mock(ConnectionInterface::class);
+        $db->shouldReceive('transaction')
+            ->once()
+            ->andReturnUsing(fn (Closure $callback) => $callback());
+
+        $family = Mockery::mock(Family::class);
+        $family->allows('getAttribute')->with('id')->andReturn(1);
+        $family->allows('getAttribute')->with('rebrickable_user_token')->andReturn('user-token-123');
+
+        $action = new ImportOwnedSetsAction($legoDataService, $upsertSetAction, $familySetModel, $db);
+
+        // act
+        $result = $action->execute($family);
+
+        // assert — Mockery verifies transaction was called exactly once
+        expect($result->complete)->toBeFalse();
     });
 });
