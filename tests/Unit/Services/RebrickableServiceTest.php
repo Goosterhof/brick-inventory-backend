@@ -421,7 +421,7 @@ describe('RebrickableService', function (): void {
     });
 
     describe('fetchUserSets', function (): void {
-        it('should return user sets from API', function (): void {
+        it('should yield user sets page from API', function (): void {
             // arrange
             Http::fake([
                 'https://rebrickable.com/api/v3/users/user-token-123/sets/' => Http::response([
@@ -445,21 +445,22 @@ describe('RebrickableService', function (): void {
             $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL);
 
             // act
-            $result = $service->fetchUserSets('user-token-123');
+            $pages = iterator_to_array($service->fetchUserSets('user-token-123'));
 
             // assert
-            expect($result)->toHaveCount(1);
-            expect($result[0])->toBeInstanceOf(RebrickableUserSetData::class);
-            expect($result[0]->set->setNum)->toBe('75192-1');
-            expect($result[0]->set->name)->toBe('Millennium Falcon');
-            expect($result[0]->quantity)->toBe(2);
+            expect($pages)->toHaveCount(1);
+            expect($pages[0])->toHaveCount(1);
+            expect($pages[0][0])->toBeInstanceOf(RebrickableUserSetData::class);
+            expect($pages[0][0]->set->setNum)->toBe('75192-1');
+            expect($pages[0][0]->set->name)->toBe('Millennium Falcon');
+            expect($pages[0][0]->quantity)->toBe(2);
 
             Http::assertSent(fn ($request): bool => $request->url() === 'https://rebrickable.com/api/v3/users/user-token-123/sets/'
                 && $request->method() === 'GET'
                 && $request->header('Authorization') === ['key ' . TEST_API_KEY]);
         });
 
-        it('should handle pagination', function (): void {
+        it('should yield one page per API page', function (): void {
             // arrange
             Http::fake([
                 'https://rebrickable.com/api/v3/users/user-token-123/sets/' => Http::response([
@@ -499,16 +500,16 @@ describe('RebrickableService', function (): void {
             $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL);
 
             // act
-            $result = $service->fetchUserSets('user-token-123');
+            $pages = iterator_to_array($service->fetchUserSets('user-token-123'));
 
             // assert
-            expect($result)->toHaveCount(2);
-            expect($result[0]->set->setNum)->toBe('75192-1');
-            expect($result[1]->set->setNum)->toBe('10179-1');
+            expect($pages)->toHaveCount(2);
+            expect($pages[0][0]->set->setNum)->toBe('75192-1');
+            expect($pages[1][0]->set->setNum)->toBe('10179-1');
             Http::assertSentCount(2);
         });
 
-        it('should return empty array when user has no sets', function (): void {
+        it('should yield empty page when user has no sets', function (): void {
             // arrange
             Http::fake([
                 'https://rebrickable.com/api/v3/users/user-token-123/sets/' => Http::response([
@@ -520,10 +521,11 @@ describe('RebrickableService', function (): void {
             $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL);
 
             // act
-            $result = $service->fetchUserSets('user-token-123');
+            $pages = iterator_to_array($service->fetchUserSets('user-token-123'));
 
             // assert
-            expect($result)->toHaveCount(0);
+            expect($pages)->toHaveCount(1);
+            expect($pages[0])->toHaveCount(0);
         });
 
         it('should throw RebrickableApiException on API error', function (): void {
@@ -535,7 +537,7 @@ describe('RebrickableService', function (): void {
             $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL);
 
             // act & assert
-            expect(fn (): array => $service->fetchUserSets('user-token-123'))->toThrow(RebrickableApiException::class);
+            expect(fn (): array => iterator_to_array($service->fetchUserSets('user-token-123')))->toThrow(RebrickableApiException::class);
         });
 
         it('should throw InvalidApiResponseException when response is not an array', function (): void {
@@ -547,7 +549,7 @@ describe('RebrickableService', function (): void {
             $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL);
 
             // act & assert
-            expect(fn (): array => $service->fetchUserSets('user-token-123'))->toThrow(InvalidApiResponseException::class);
+            expect(fn (): array => iterator_to_array($service->fetchUserSets('user-token-123')))->toThrow(InvalidApiResponseException::class);
         });
 
         it('should throw InvalidApiResponseException when results field is missing', function (): void {
@@ -562,7 +564,7 @@ describe('RebrickableService', function (): void {
             $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL);
 
             // act & assert
-            expect(fn (): array => $service->fetchUserSets('user-token-123'))->toThrow(InvalidApiResponseException::class);
+            expect(fn (): array => iterator_to_array($service->fetchUserSets('user-token-123')))->toThrow(InvalidApiResponseException::class);
         });
 
         it('should throw InvalidApiResponseException when set data is missing required fields', function (): void {
@@ -581,7 +583,7 @@ describe('RebrickableService', function (): void {
             $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL);
 
             // act & assert
-            expect(fn (): array => $service->fetchUserSets('user-token-123'))->toThrow(InvalidApiResponseException::class);
+            expect(fn (): array => iterator_to_array($service->fetchUserSets('user-token-123')))->toThrow(InvalidApiResponseException::class);
         });
 
         it('should throw InvalidApiResponseException when nested set is not an array', function (): void {
@@ -601,7 +603,7 @@ describe('RebrickableService', function (): void {
             $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL);
 
             // act & assert
-            expect(fn (): array => $service->fetchUserSets('user-token-123'))->toThrow(InvalidApiResponseException::class);
+            expect(fn (): array => iterator_to_array($service->fetchUserSets('user-token-123')))->toThrow(InvalidApiResponseException::class);
         });
 
         it('should throw InvalidApiResponseException when nested set is missing required fields', function (): void {
@@ -624,7 +626,7 @@ describe('RebrickableService', function (): void {
             $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL);
 
             // act & assert
-            expect(fn (): array => $service->fetchUserSets('user-token-123'))->toThrow(InvalidApiResponseException::class);
+            expect(fn (): array => iterator_to_array($service->fetchUserSets('user-token-123')))->toThrow(InvalidApiResponseException::class);
         });
 
         it('should throw InvalidApiResponseException when set at index is not an array', function (): void {
@@ -641,7 +643,7 @@ describe('RebrickableService', function (): void {
             $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL);
 
             // act & assert
-            expect(fn (): array => $service->fetchUserSets('user-token-123'))->toThrow(InvalidApiResponseException::class);
+            expect(fn (): array => iterator_to_array($service->fetchUserSets('user-token-123')))->toThrow(InvalidApiResponseException::class);
         });
     });
 });

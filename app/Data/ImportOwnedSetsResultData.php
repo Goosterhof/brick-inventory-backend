@@ -20,6 +20,8 @@ final readonly class ImportOwnedSetsResultData
         public int $updated,
         public int $skipped,
         public int $total,
+        public bool $complete,
         public array $skippedSetNums = [],
+        public ?string $error = null,
     ) {}
 }

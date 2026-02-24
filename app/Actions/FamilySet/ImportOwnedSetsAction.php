@@ -9,7 +9,9 @@ use App\Contracts\LegoDataServiceInterface;
 use App\Data\ImportOwnedSetsResultData;
 use App\Data\Lego\RebrickableUserSetData;
 use App\Enums\FamilySetStatus;
+use App\Exceptions\InvalidApiResponseException;
 use App\Exceptions\MissingRebrickableTokenException;
+use App\Exceptions\RebrickableApiException;
 use App\Models\Family;
 use App\Models\FamilySet;
 use App\Models\Set;
@@ -26,6 +28,8 @@ final readonly class ImportOwnedSetsAction
 
     /**
      * @throws MissingRebrickableTokenException
+     * @throws RebrickableApiException
+     * @throws InvalidApiResponseException
      */
     public function execute(Family $family): ImportOwnedSetsResultData
     {
@@ -33,35 +37,89 @@ final readonly class ImportOwnedSetsAction
             throw MissingRebrickableTokenException::forFamily($family->id);
         }
 
-        $userSets = $this->legoDataService->fetchUserSets($family->rebrickable_user_token);
+        $created = 0;
+        $updated = 0;
+        $skipped = 0;
+        /** @var array<string> $skippedSetNums */
+        $skippedSetNums = [];
+        $complete = true;
+        $error = null;
+        $pagesProcessed = 0;
 
-        if ($userSets === []) {
-            return new ImportOwnedSetsResultData(
-                created: 0,
-                updated: 0,
-                skipped: 0,
-                total: 0,
+        try {
+            foreach ($this->legoDataService->fetchUserSets($family->rebrickable_user_token) as $pageUserSets) {
+                $this->connection->transaction(function () use (
+                    $pageUserSets, $family,
+                    &$created, &$updated, &$skipped, &$skippedSetNums,
+                ): void {
+                    $this->processPage($pageUserSets, $family, $created, $updated, $skipped, $skippedSetNums);
+                });
+
+                $pagesProcessed++;
+            }
+        } catch (RebrickableApiException|InvalidApiResponseException $e) {
+            if ($pagesProcessed === 0) {
+                throw $e;
+            }
+
+            $complete = false;
+            $error = sprintf(
+                'Import incomplete: %s. %d sets were imported successfully. Retry to fetch remaining sets.',
+                $e->getMessage(),
+                $created + $updated,
             );
         }
 
-        return $this->connection->transaction(function () use ($family, $userSets): ImportOwnedSetsResultData {
-            return $this->importSets($family, $userSets);
-        });
+        return new ImportOwnedSetsResultData(
+            created: $created,
+            updated: $updated,
+            skipped: $skipped,
+            total: $created + $updated,
+            complete: $complete,
+            skippedSetNums: $skippedSetNums,
+            error: $error,
+        );
     }
 
     /**
-     * @param array<RebrickableUserSetData> $userSets
+     * @param list<RebrickableUserSetData> $pageUserSets
+     * @param array<string> $skippedSetNums
      */
-    private function importSets(Family $family, array $userSets): ImportOwnedSetsResultData
-    {
-        $setsByNum = $this->upsertSetsFromUserData($userSets);
+    private function processPage(
+        array $pageUserSets,
+        Family $family,
+        int &$created,
+        int &$updated,
+        int &$skipped,
+        array &$skippedSetNums,
+    ): void {
+        if ($pageUserSets === []) {
+            return;
+        }
+
+        $setsByNum = $this->upsertSetsFromUserData($pageUserSets);
         $familySetsBySetId = $this->loadExistingFamilySetsGroupedBySetId($family, $setsByNum);
 
-        return $this->processUserSets($family, $userSets, $setsByNum, $familySetsBySetId);
+        foreach ($pageUserSets as $pageUserSet) {
+            $set = $setsByNum[$pageUserSet->set->setNum];
+            $existingForSet = $familySetsBySetId[$set->id] ?? [];
+            $existingCount = count($existingForSet);
+
+            if ($existingCount > 1) {
+                $skipped++;
+                $skippedSetNums[] = $pageUserSet->set->setNum;
+            } elseif ($existingCount === 1) {
+                $this->updateExistingFamilySet($existingForSet[0], $pageUserSet->quantity);
+                $updated++;
+            } else {
+                $this->createFamilySet($family, $set, $pageUserSet->quantity);
+                $created++;
+            }
+        }
     }
 
     /**
-     * @param array<RebrickableUserSetData> $userSets
+     * @param list<RebrickableUserSetData> $userSets
      *
      * @return array<string, Set>
      */
@@ -97,49 +155,6 @@ final readonly class ImportOwnedSetsAction
         }
 
         return $familySetsBySetId;
-    }
-
-    /**
-     * @param array<RebrickableUserSetData> $userSets
-     * @param array<string, Set> $setsByNum
-     * @param array<int, array<FamilySet>> $familySetsBySetId
-     */
-    private function processUserSets(
-        Family $family,
-        array $userSets,
-        array $setsByNum,
-        array $familySetsBySetId,
-    ): ImportOwnedSetsResultData {
-        $created = 0;
-        $updated = 0;
-        $skipped = 0;
-        /** @var array<string> $skippedSetNums */
-        $skippedSetNums = [];
-
-        foreach ($userSets as $userSet) {
-            $set = $setsByNum[$userSet->set->setNum];
-            $existingForSet = $familySetsBySetId[$set->id] ?? [];
-            $existingCount = count($existingForSet);
-
-            if ($existingCount > 1) {
-                $skipped++;
-                $skippedSetNums[] = $userSet->set->setNum;
-            } elseif ($existingCount === 1) {
-                $this->updateExistingFamilySet($existingForSet[0], $userSet->quantity);
-                $updated++;
-            } else {
-                $this->createFamilySet($family, $set, $userSet->quantity);
-                $created++;
-            }
-        }
-
-        return new ImportOwnedSetsResultData(
-            created: $created,
-            updated: $updated,
-            skipped: $skipped,
-            total: $created + $updated,
-            skippedSetNums: $skippedSetNums,
-        );
     }
 
     private function updateExistingFamilySet(FamilySet $familySet, int $quantity): void
