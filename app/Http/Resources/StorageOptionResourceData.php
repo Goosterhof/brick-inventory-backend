@@ -11,6 +11,8 @@ use App\Models\StorageOption;
  */
 final readonly class StorageOptionResourceData extends ResourceData
 {
+    public const EAGER_LOAD = ['children'];
+
     /**
      * @param array<int, int> $child_ids
      */
@@ -44,10 +46,5 @@ final readonly class StorageOptionResourceData extends ResourceData
             column: $model->column,
             child_ids: $childIds,
         );
-    }
-
-    protected static function requiredRelations(): array
-    {
-        return ['children'];
     }
 }

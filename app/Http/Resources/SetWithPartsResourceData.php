@@ -11,6 +11,8 @@ use App\Models\Set;
  */
 final readonly class SetWithPartsResourceData extends ResourceData
 {
+    public const EAGER_LOAD = ['setParts'];
+
     /**
      * @param array<int, SetPartResourceData> $parts
      */
@@ -46,10 +48,5 @@ final readonly class SetWithPartsResourceData extends ResourceData
                 $model->setParts->all(),
             ),
         );
-    }
-
-    protected static function requiredRelations(): array
-    {
-        return ['setParts'];
     }
 }

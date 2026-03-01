@@ -62,7 +62,7 @@ it('should have from method in concrete resource data classes', function (): voi
     }
 });
 
-it('should override requiredRelations when using nested ResourceData', function (): void {
+it('should define EAGER_LOAD constant when using nested ResourceData', function (): void {
     foreach (getClassesInDirectory(dirname(__DIR__, 2) . '/app/Http/Resources', 'App\\Http\\Resources\\') as $className) {
         $reflection = new ReflectionClass($className);
 
@@ -104,14 +104,20 @@ it('should override requiredRelations when using nested ResourceData', function 
             continue;
         }
 
-        // Verify requiredRelations is overridden
-        $requiredRelationsMethod = $reflection->getMethod('requiredRelations');
-        $declaringClass = $requiredRelationsMethod->getDeclaringClass()->getName();
+        // Verify EAGER_LOAD constant is defined in the concrete class (not just inherited)
+        $eagerLoadConstant = $reflection->getReflectionConstant('EAGER_LOAD');
 
-        expect($declaringClass)->toBe(
+        expect($eagerLoadConstant)->not->toBeFalse(
+            sprintf(
+                'ResourceData class %s has nested ResourceData but does not define EAGER_LOAD constant',
+                $className,
+            ),
+        );
+
+        expect($eagerLoadConstant->getDeclaringClass()->getName())->toBe(
             $className,
             sprintf(
-                'ResourceData class %s has nested ResourceData but does not override requiredRelations()',
+                'ResourceData class %s has nested ResourceData but does not define its own EAGER_LOAD constant',
                 $className,
             ),
         );
