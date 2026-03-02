@@ -19,6 +19,14 @@ use JsonSerializable;
 abstract readonly class ResourceData implements JsonSerializable, Responsable
 {
     /**
+     * Relations that should be eager-loaded for this resource.
+     * Single source of truth for both collection() loading and runtime validation.
+     *
+     * @var array<int, string>
+     */
+    public const EAGER_LOAD = [];
+
+    /**
      * Create an instance from a model.
      *
      * @param TModel $model
@@ -77,12 +85,13 @@ abstract readonly class ResourceData implements JsonSerializable, Responsable
 
     /**
      * Get the relationships that should be loaded for this resource.
+     * Derived from EAGER_LOAD constant — override the constant, not this method.
      *
      * @return array<int, string>
      */
     protected static function requiredRelations(): array
     {
-        return [];
+        return static::EAGER_LOAD;
     }
 
     /**
