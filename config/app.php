@@ -126,4 +126,6 @@ return [
         'store' => env('APP_MAINTENANCE_STORE', 'database'),
     ],
 
+    'rate_limit_enabled' => (bool) env('RATE_LIMIT_ENABLED', true),
+
 ];

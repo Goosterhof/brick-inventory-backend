@@ -22,8 +22,8 @@ Route::get('/health', fn () => response()->json([
     'timestamp' => now()->toIso8601String(),
 ]));
 
-Route::post('/register', RegisterController::class)->middleware('throttle:5,1');
-Route::post('/login', LoginController::class)->middleware('throttle:5,1');
+Route::post('/register', RegisterController::class)->middleware('throttle:auth');
+Route::post('/login', LoginController::class)->middleware('throttle:auth');
 Route::post('/logout', LogoutController::class)->middleware('auth:sanctum');
 Route::get('/me', MeController::class)->middleware('auth:sanctum');
 
@@ -41,5 +41,5 @@ Route::middleware(['auth:sanctum', 'family.ownership'])->group(function (): void
     Route::post('/family-sets/import-from-rebrickable', [FamilySetController::class, 'importFromRebrickable']);
     Route::put('/family/rebrickable-token', [FamilyController::class, 'setRebrickableToken']);
     Route::post('/identify-brick', [BrickIdentificationController::class, 'identify'])
-        ->middleware('throttle:10,1');
+        ->middleware('throttle:brick-identification');
 });
