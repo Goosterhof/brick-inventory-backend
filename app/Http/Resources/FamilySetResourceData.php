@@ -12,6 +12,8 @@ use App\Models\FamilySet;
  */
 final readonly class FamilySetResourceData extends ResourceData
 {
+    public const EAGER_LOAD = ['set'];
+
     public function __construct(
         public int $id,
         public int $set_id,
@@ -19,6 +21,7 @@ final readonly class FamilySetResourceData extends ResourceData
         public FamilySetStatus $status,
         public ?string $purchase_date,
         public ?string $notes,
+        public SetSummaryResourceData $set,
     ) {}
 
     /**
@@ -26,6 +29,9 @@ final readonly class FamilySetResourceData extends ResourceData
      */
     public static function from($model): static
     {
+        $model->loadMissing(self::requiredRelations());
+        self::validateRelationsLoaded($model);
+
         return new self(
             id: $model->id,
             set_id: $model->set_id,
@@ -33,6 +39,7 @@ final readonly class FamilySetResourceData extends ResourceData
             status: $model->status,
             purchase_date: $model->purchase_date?->format('Y-m-d'),
             notes: $model->notes,
+            set: SetSummaryResourceData::from($model->set),
         );
     }
 }
