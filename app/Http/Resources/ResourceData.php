@@ -40,6 +40,7 @@ abstract readonly class ResourceData implements JsonSerializable, Responsable
      */
     public function toArray(): array
     {
+        /** @var array<string, mixed> */
         return array_map(
             $this->transformValue(...),
             get_object_vars($this),
