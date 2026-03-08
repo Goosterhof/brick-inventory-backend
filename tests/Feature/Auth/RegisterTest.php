@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 use App\Models\Family;
 use App\Models\User;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\RateLimiter;
 
 uses(RefreshDatabase::class);
 
@@ -94,6 +96,7 @@ describe('RegisterController', function (): void {
     });
 
     it('should rate limit registration attempts', function (): void {
+        RateLimiter::for('auth', fn (): Limit => Limit::perMinute(5));
         $this->freezeTime();
 
         for ($i = 1; $i <= 5; $i++) {
