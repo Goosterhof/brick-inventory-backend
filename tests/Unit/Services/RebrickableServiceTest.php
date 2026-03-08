@@ -418,6 +418,40 @@ describe('RebrickableService', function (): void {
             // act & assert
             expect(fn (): array => $service->fetchSetParts('75192-1'))->toThrow(InvalidApiResponseException::class);
         });
+
+        it('should strip host from pagination next URL to prevent SSRF', function (): void {
+            // arrange — evil.com next URL should be stripped to path+query and resolved against baseUrl
+            Http::fake([
+                'https://rebrickable.com/api/v3/lego/sets/75192-1/parts/' => Http::response([
+                    'results' => [
+                        [
+                            'part' => ['part_num' => '3001', 'name' => 'Brick 2 x 4', 'part_cat_id' => 11, 'part_img_url' => null],
+                            'color' => ['id' => 1, 'name' => 'White', 'rgb' => 'FFFFFF', 'is_trans' => false],
+                            'quantity' => 5,
+                            'is_spare' => false,
+                            'element_id' => null,
+                        ],
+                    ],
+                    'next' => 'https://evil.com/steal?key=leaked',
+                ]),
+                // Path /steal resolves against baseUrl to: baseUrl + /steal
+                'https://rebrickable.com/api/v3/steal?key=leaked' => Http::response([
+                    'results' => [],
+                    'next' => null,
+                ]),
+            ]);
+
+            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL);
+
+            // act
+            $result = $service->fetchSetParts('75192-1');
+
+            // assert — the second request should go to the base URL host, not evil.com
+            expect($result)->toHaveCount(1);
+            Http::assertSentCount(2);
+            Http::assertSent(fn ($request): bool => $request->url() === 'https://rebrickable.com/api/v3/steal?key=leaked');
+            Http::assertNotSent(fn ($request): bool => str_contains((string) $request->url(), 'evil.com'));
+        });
     });
 
     describe('fetchUserSets', function (): void {
@@ -644,6 +678,43 @@ describe('RebrickableService', function (): void {
 
             // act & assert
             expect(fn (): array => iterator_to_array($service->fetchUserSets('user-token-123')))->toThrow(InvalidApiResponseException::class);
+        });
+
+        it('should strip host from pagination next URL to prevent SSRF', function (): void {
+            // arrange
+            Http::fake([
+                'https://rebrickable.com/api/v3/users/user-token-123/sets/' => Http::response([
+                    'results' => [
+                        [
+                            'set' => [
+                                'set_num' => '75192-1',
+                                'name' => 'Millennium Falcon',
+                                'year' => 2017,
+                                'theme_id' => 158,
+                                'num_parts' => 7541,
+                                'set_img_url' => null,
+                            ],
+                            'quantity' => 1,
+                        ],
+                    ],
+                    'next' => 'https://evil.com/steal?key=leaked',
+                ]),
+                'https://rebrickable.com/api/v3/steal?key=leaked' => Http::response([
+                    'results' => [],
+                    'next' => null,
+                ]),
+            ]);
+
+            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL);
+
+            // act
+            $pages = iterator_to_array($service->fetchUserSets('user-token-123'));
+
+            // assert — the second request should go to the base URL, not evil.com
+            expect($pages)->toHaveCount(2);
+            Http::assertSentCount(2);
+            Http::assertSent(fn ($request): bool => $request->url() === 'https://rebrickable.com/api/v3/steal?key=leaked');
+            Http::assertNotSent(fn ($request): bool => str_contains((string) $request->url(), 'evil.com'));
         });
     });
 });

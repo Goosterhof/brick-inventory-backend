@@ -113,7 +113,7 @@ final readonly class RebrickableService implements LegoDataServiceInterface
                 );
             }
 
-            $nextUrl = $data['next'];
+            $nextUrl = $this->sanitizePaginationUrl($data['next']);
         }
 
         return $parts;
@@ -161,8 +161,23 @@ final readonly class RebrickableService implements LegoDataServiceInterface
 
             yield $pageResults;
 
-            $nextUrl = $validatedData['next'];
+            $nextUrl = $this->sanitizePaginationUrl($validatedData['next']);
         }
+    }
+
+    private function sanitizePaginationUrl(?string $absoluteUrl): ?string
+    {
+        if ($absoluteUrl === null) {
+            return null;
+        }
+
+        if (str_starts_with($absoluteUrl, $this->baseUrl)) {
+            return $absoluteUrl;
+        }
+
+        $parsed = parse_url($absoluteUrl);
+
+        return ($parsed['path'] ?? '') . (isset($parsed['query']) ? '?' . $parsed['query'] : '');
     }
 
     private function httpClient(): PendingRequest

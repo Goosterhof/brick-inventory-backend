@@ -4,9 +4,11 @@ declare(strict_types=1);
 
 use App\Models\Part;
 use App\Models\User;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\RateLimiter;
 
 uses(RefreshDatabase::class);
 
@@ -231,6 +233,7 @@ describe('BrickIdentificationController', function (): void {
         });
 
         it('should rate limit identify-brick requests', function (): void {
+            RateLimiter::for('brick-identification', fn (): Limit => Limit::perMinute(10));
             $this->freezeTime();
             $user = User::factory()->create();
 

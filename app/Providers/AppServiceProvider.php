@@ -31,7 +31,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        $enabled = (bool) config('app.rate_limit_enabled');
+        $enabled = !app()->environment('testing');
 
         RateLimiter::for('auth', fn (): Limit => $enabled
             ? Limit::perMinute(5)
