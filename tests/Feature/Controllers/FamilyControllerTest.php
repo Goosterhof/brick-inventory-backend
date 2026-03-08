@@ -88,7 +88,7 @@ describe('FamilyController', function (): void {
             ]);
 
             $response->assertStatus(403)
-                ->assertJson(['error' => 'Only the family head can perform this action']);
+                ->assertJson(['message' => 'This action is unauthorized.']);
         });
 
         it('should allow family head to set token when other users exist', function (): void {
