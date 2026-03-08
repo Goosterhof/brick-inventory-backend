@@ -2,7 +2,10 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\BrickIdentificationController;
+use App\Http\Controllers\FamilyController;
 use App\Http\Controllers\FamilySetController;
+use App\Http\Controllers\SetController;
 use App\Http\Controllers\StorageOptionController;
 use Illuminate\Contracts\Auth\Access\Gate;
 
@@ -69,7 +72,10 @@ it('should have all policy methods return bool', function (): void {
 
 it('should have gate authorization in controllers that have policies', function (): void {
     $controllersWithPolicies = [
+        BrickIdentificationController::class,
+        FamilyController::class,
         FamilySetController::class,
+        SetController::class,
         StorageOptionController::class,
     ];
 

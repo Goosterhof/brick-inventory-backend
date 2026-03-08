@@ -8,11 +8,13 @@ use App\Actions\Family\SetRebrickableTokenAction;
 use App\Http\Requests\Family\SetRebrickableTokenRequest;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
+use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Http\JsonResponse;
 
 class FamilyController extends Controller
 {
     public function __construct(
+        private readonly Gate $gate,
         private readonly SetRebrickableTokenAction $setRebrickableTokenAction,
     ) {}
 
@@ -20,6 +22,8 @@ class FamilyController extends Controller
         SetRebrickableTokenRequest $setRebrickableTokenRequest,
         #[CurrentUser] User $user,
     ): JsonResponse {
+        $this->gate->authorize('setRebrickableToken');
+
         $this->setRebrickableTokenAction->execute($user->family, $setRebrickableTokenRequest->toDto(), $user);
 
         return response()->json(status: 204);
