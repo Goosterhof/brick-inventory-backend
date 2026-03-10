@@ -3,6 +3,7 @@ deptrac:
     - ./app
   exclude_files:
     - '#.*test.*#'
+    - '#.*PHPStan.*#'
   layers:
     # --- Leaf layers (no App\ dependencies allowed) ---
     - name: Model
@@ -45,6 +46,14 @@ deptrac:
       collectors:
         - type: classLike
           value: App\\Http\\Resources\\.*
+    - name: Policy
+      collectors:
+        - type: classLike
+          value: App\\Policies\\.*
+    - name: Middleware
+      collectors:
+        - type: classLike
+          value: App\\Http\\Middleware\\.*
 
     # --- Orchestration layer ---
     - name: Action
@@ -100,6 +109,15 @@ deptrac:
       - Data
       - Exception
 
+    # Policies check permissions using models
+    Policy:
+      - Model
+
+    # Middleware guards requests using models and contracts
+    Middleware:
+      - Model
+      - Contract
+
     # Actions orchestrate business logic across all lower layers
     Action:
       - Action
@@ -121,3 +139,4 @@ deptrac:
     Provider:
       - Contract
       - Service
+      - Policy
