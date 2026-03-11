@@ -18,6 +18,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property int $quantity
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ * @property-read StorageOption|null $storageOption
+ * @property-read Part $part
+ * @property-read Color|null $color
  */
 class StorageOptionPart extends Model
 {

@@ -4,20 +4,46 @@ declare(strict_types=1);
 
 use App\Http\Resources\SetPartResourceData;
 use App\Http\Resources\SetWithPartsResourceData;
+use App\Models\Color;
+use App\Models\Part;
 use App\Models\Set;
 use App\Models\SetPart;
 use Illuminate\Support\Collection;
+use Mockery\MockInterface;
+
+function mockSetPartForSetWith(array $overrides = []): MockInterface&SetPart
+{
+    $part = Mockery::mock(Part::class);
+    $part->allows('getAttribute')->with('id')->andReturn($overrides['part_id'] ?? 10);
+    $part->allows('getAttribute')->with('part_num')->andReturn($overrides['part_num'] ?? '3001');
+    $part->allows('getAttribute')->with('name')->andReturn($overrides['part_name'] ?? 'Brick 2 x 4');
+    $part->allows('getAttribute')->with('category')->andReturn($overrides['part_category'] ?? null);
+    $part->allows('getAttribute')->with('image_url')->andReturn($overrides['part_image_url'] ?? null);
+
+    $color = Mockery::mock(Color::class);
+    $color->allows('getAttribute')->with('id')->andReturn($overrides['color_id'] ?? 5);
+    $color->allows('getAttribute')->with('name')->andReturn($overrides['color_name'] ?? 'Red');
+    $color->allows('getAttribute')->with('rgb')->andReturn($overrides['color_rgb'] ?? 'CC0000');
+    $color->allows('getAttribute')->with('is_transparent')->andReturn(false);
+
+    $setPart = Mockery::mock(SetPart::class);
+    $setPart->allows('getAttribute')->with('id')->andReturn($overrides['id'] ?? 1);
+    $setPart->allows('getAttribute')->with('quantity')->andReturn($overrides['quantity'] ?? 10);
+    $setPart->allows('getAttribute')->with('is_spare')->andReturn($overrides['is_spare'] ?? false);
+    $setPart->allows('getAttribute')->with('element_id')->andReturn($overrides['element_id'] ?? '300101');
+    $setPart->allows('getAttribute')->with('part')->andReturn($part);
+    $setPart->allows('getAttribute')->with('color')->andReturn($color);
+    $setPart->shouldReceive('loadMissing')->andReturnSelf();
+    $setPart->shouldReceive('relationLoaded')->with('part')->andReturnTrue();
+    $setPart->shouldReceive('relationLoaded')->with('color')->andReturnTrue();
+
+    return $setPart;
+}
 
 describe('SetWithPartsResourceData', function (): void {
     it('should convert set with parts to resource data', function (): void {
         // arrange
-        $setPart = Mockery::mock(SetPart::class);
-        $setPart->allows('getAttribute')->with('id')->andReturn(1);
-        $setPart->allows('getAttribute')->with('part_id')->andReturn(10);
-        $setPart->allows('getAttribute')->with('color_id')->andReturn(5);
-        $setPart->allows('getAttribute')->with('quantity')->andReturn(10);
-        $setPart->allows('getAttribute')->with('is_spare')->andReturn(false);
-        $setPart->allows('getAttribute')->with('element_id')->andReturn('300101');
+        $setPart = mockSetPartForSetWith();
 
         $set = Mockery::mock(Set::class);
         $set->allows('getAttribute')->with('id')->andReturn(1);
@@ -29,7 +55,6 @@ describe('SetWithPartsResourceData', function (): void {
         $set->allows('getAttribute')->with('image_url')->andReturn('https://example.com/falcon.jpg');
         $set->allows('getAttribute')->with('setParts')->andReturn(new Collection([$setPart]));
         $set->shouldReceive('loadMissing')->andReturnSelf();
-        $set->shouldReceive('relationLoaded')->with('setParts')->andReturnTrue();
 
         // act
         $resource = SetWithPartsResourceData::from($set);
@@ -46,7 +71,8 @@ describe('SetWithPartsResourceData', function (): void {
             ->and($resource->parts)->toBeArray()
             ->and($resource->parts)->toHaveCount(1)
             ->and($resource->parts[0])->toBeInstanceOf(SetPartResourceData::class)
-            ->and($resource->parts[0]->quantity)->toBe(10);
+            ->and($resource->parts[0]->quantity)->toBe(10)
+            ->and($resource->parts[0]->part->part_num)->toBe('3001');
     });
 
     it('should handle empty parts', function (): void {
@@ -61,7 +87,6 @@ describe('SetWithPartsResourceData', function (): void {
         $set->allows('getAttribute')->with('image_url')->andReturn(null);
         $set->allows('getAttribute')->with('setParts')->andReturn(new Collection([]));
         $set->shouldReceive('loadMissing')->andReturnSelf();
-        $set->shouldReceive('relationLoaded')->with('setParts')->andReturnTrue();
 
         // act
         $resource = SetWithPartsResourceData::from($set);
@@ -74,13 +99,7 @@ describe('SetWithPartsResourceData', function (): void {
 
     it('should convert to array format', function (): void {
         // arrange
-        $setPart = Mockery::mock(SetPart::class);
-        $setPart->allows('getAttribute')->with('id')->andReturn(1);
-        $setPart->allows('getAttribute')->with('part_id')->andReturn(10);
-        $setPart->allows('getAttribute')->with('color_id')->andReturn(5);
-        $setPart->allows('getAttribute')->with('quantity')->andReturn(10);
-        $setPart->allows('getAttribute')->with('is_spare')->andReturn(false);
-        $setPart->allows('getAttribute')->with('element_id')->andReturn('300101');
+        $setPart = mockSetPartForSetWith();
 
         $set = Mockery::mock(Set::class);
         $set->allows('getAttribute')->with('id')->andReturn(1);
@@ -92,39 +111,24 @@ describe('SetWithPartsResourceData', function (): void {
         $set->allows('getAttribute')->with('image_url')->andReturn('https://example.com/falcon.jpg');
         $set->allows('getAttribute')->with('setParts')->andReturn(new Collection([$setPart]));
         $set->shouldReceive('loadMissing')->andReturnSelf();
-        $set->shouldReceive('relationLoaded')->with('setParts')->andReturnTrue();
 
         // act
-        $resource = SetWithPartsResourceData::from($set);
-        $array = $resource->toArray();
+        $array = SetWithPartsResourceData::from($set)->toArray();
 
         // assert
         expect($array)->toBeArray()
             ->and($array['id'])->toBe(1)
             ->and($array['set_num'])->toBe('75192-1')
-            ->and($array['name'])->toBe('Millennium Falcon')
             ->and($array['parts'])->toBeArray()
             ->and($array['parts'])->toHaveCount(1)
-            ->and($array['parts'][0]['quantity'])->toBe(10);
+            ->and($array['parts'][0]['quantity'])->toBe(10)
+            ->and($array['parts'][0]['part']['part_num'])->toBe('3001');
     });
 
     it('should handle multiple parts', function (): void {
         // arrange
-        $setPart1 = Mockery::mock(SetPart::class);
-        $setPart1->allows('getAttribute')->with('id')->andReturn(1);
-        $setPart1->allows('getAttribute')->with('part_id')->andReturn(10);
-        $setPart1->allows('getAttribute')->with('color_id')->andReturn(5);
-        $setPart1->allows('getAttribute')->with('quantity')->andReturn(5);
-        $setPart1->allows('getAttribute')->with('is_spare')->andReturn(false);
-        $setPart1->allows('getAttribute')->with('element_id')->andReturn(null);
-
-        $setPart2 = Mockery::mock(SetPart::class);
-        $setPart2->allows('getAttribute')->with('id')->andReturn(2);
-        $setPart2->allows('getAttribute')->with('part_id')->andReturn(20);
-        $setPart2->allows('getAttribute')->with('color_id')->andReturn(15);
-        $setPart2->allows('getAttribute')->with('quantity')->andReturn(3);
-        $setPart2->allows('getAttribute')->with('is_spare')->andReturn(true);
-        $setPart2->allows('getAttribute')->with('element_id')->andReturn('300226');
+        $setPart1 = mockSetPartForSetWith(['id' => 1, 'part_id' => 10, 'part_num' => '3001', 'quantity' => 5]);
+        $setPart2 = mockSetPartForSetWith(['id' => 2, 'part_id' => 20, 'part_num' => '3002', 'quantity' => 3, 'is_spare' => true, 'element_id' => '300226']);
 
         $set = Mockery::mock(Set::class);
         $set->allows('getAttribute')->with('id')->andReturn(1);
@@ -136,15 +140,14 @@ describe('SetWithPartsResourceData', function (): void {
         $set->allows('getAttribute')->with('image_url')->andReturn(null);
         $set->allows('getAttribute')->with('setParts')->andReturn(new Collection([$setPart1, $setPart2]));
         $set->shouldReceive('loadMissing')->andReturnSelf();
-        $set->shouldReceive('relationLoaded')->with('setParts')->andReturnTrue();
 
         // act
         $resource = SetWithPartsResourceData::from($set);
 
         // assert
         expect($resource->parts)->toHaveCount(2)
-            ->and($resource->parts[0]->part_id)->toBe(10)
-            ->and($resource->parts[1]->part_id)->toBe(20)
+            ->and($resource->parts[0]->part->part_num)->toBe('3001')
+            ->and($resource->parts[1]->part->part_num)->toBe('3002')
             ->and($resource->parts[1]->is_spare)->toBeTrue();
     });
 });

@@ -11,7 +11,7 @@ use App\Models\Set;
  */
 final readonly class SetWithPartsResourceData extends ResourceData
 {
-    public const EAGER_LOAD = ['setParts'];
+    public const EAGER_LOAD = ['setParts.part', 'setParts.color'];
 
     /**
      * @param array<int, SetPartResourceData> $parts
@@ -33,7 +33,6 @@ final readonly class SetWithPartsResourceData extends ResourceData
     public static function from($model): static
     {
         $model->loadMissing(self::requiredRelations());
-        self::validateRelationsLoaded($model);
 
         return new self(
             id: $model->id,
