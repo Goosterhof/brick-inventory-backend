@@ -10,7 +10,7 @@ use Illuminate\Http\UploadedFile;
 
 final class IdentifyBrickRequest extends FormRequest
 {
-    public const string IMAGE = 'image';
+    private const string IMAGE = 'image';
 
     /**
      * @return array<string, array<int, string>>

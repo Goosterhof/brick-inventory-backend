@@ -9,7 +9,7 @@ use RuntimeException;
 /**
  * Exception thrown when a required Eloquent relation is not loaded on a model.
  */
-class MissingRelationException extends RuntimeException
+final class MissingRelationException extends RuntimeException
 {
     /**
      * @param list<string> $relations

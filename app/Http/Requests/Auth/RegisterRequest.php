@@ -9,13 +9,13 @@ use Illuminate\Foundation\Http\FormRequest;
 
 final class RegisterRequest extends FormRequest
 {
-    public const string FAMILY_NAME = 'family_name';
+    private const string FAMILY_NAME = 'family_name';
 
-    public const string NAME = 'name';
+    private const string NAME = 'name';
 
-    public const string EMAIL = 'email';
+    private const string EMAIL = 'email';
 
-    public const string PASSWORD = 'password';
+    private const string PASSWORD = 'password';
 
     /**
      * @return array<string, array<int, string>>

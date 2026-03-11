@@ -7,7 +7,7 @@ namespace App\Exceptions;
 /**
  * Exception thrown when a LEGO set is not found in the Rebrickable API.
  */
-class SetNotFoundException extends RebrickableApiException
+final class SetNotFoundException extends RebrickableApiException
 {
     public static function forSetNum(string $setNum): self
     {
