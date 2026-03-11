@@ -65,7 +65,9 @@ describe('SetController', function (): void {
                     'num_parts' => 7541,
                 ])
                 ->assertJsonCount(1, 'parts')
-                ->assertJsonPath('parts.0.part_id', $part->id)
+                ->assertJsonPath('parts.0.part.id', $part->id)
+                ->assertJsonPath('parts.0.part.part_num', '3001')
+                ->assertJsonPath('parts.0.color.name', 'White')
                 ->assertJsonPath('parts.0.quantity', 10);
         });
 
@@ -119,10 +121,8 @@ describe('SetController', function (): void {
             $this->assertDatabaseHas('parts', ['part_num' => '3024']);
             $this->assertDatabaseHas('colors', ['rebrickable_id' => 6]);
 
-            $part = Part::query()->where('part_num', '3024')->firstOrFail();
-            $color = Color::query()->where('rebrickable_id', 6)->firstOrFail();
-            $response->assertJsonPath('parts.0.part_id', $part->id)
-                ->assertJsonPath('parts.0.color_id', $color->id);
+            $response->assertJsonPath('parts.0.part.part_num', '3024')
+                ->assertJsonPath('parts.0.color.name', 'Green');
         });
 
         it('should return 404 for non-existent set', function (): void {

@@ -11,13 +11,15 @@ use App\Models\SetPart;
  */
 final readonly class SetPartResourceData extends ResourceData
 {
+    public const EAGER_LOAD = ['part', 'color'];
+
     public function __construct(
         public int $id,
-        public int $part_id,
-        public int $color_id,
         public int $quantity,
         public bool $is_spare,
         public ?string $element_id,
+        public PartResourceData $part,
+        public ColorResourceData $color,
     ) {}
 
     /**
@@ -25,13 +27,16 @@ final readonly class SetPartResourceData extends ResourceData
      */
     public static function from($model): static
     {
+        $model->loadMissing(self::requiredRelations());
+        self::validateRelationsLoaded($model);
+
         return new self(
             id: $model->id,
-            part_id: $model->part_id,
-            color_id: $model->color_id,
             quantity: $model->quantity,
             is_spare: $model->is_spare,
             element_id: $model->element_id,
+            part: PartResourceData::from($model->part),
+            color: ColorResourceData::from($model->color),
         );
     }
 }

@@ -18,6 +18,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string|null $element_id
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
+ * @property-read Set $set
+ * @property-read Part $part
+ * @property-read Color $color
  */
 class SetPart extends Model
 {
