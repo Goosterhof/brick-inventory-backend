@@ -7,7 +7,7 @@ namespace App\Exceptions;
 /**
  * Exception thrown when an external API returns an unexpected response structure.
  */
-class InvalidApiResponseException extends ExternalApiException
+final class InvalidApiResponseException extends ExternalApiException
 {
     /**
      * @param list<string> $missingFields

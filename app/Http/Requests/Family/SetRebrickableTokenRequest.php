@@ -9,7 +9,7 @@ use Illuminate\Foundation\Http\FormRequest;
 
 final class SetRebrickableTokenRequest extends FormRequest
 {
-    public const string REBRICKABLE_USER_TOKEN = 'rebrickable_user_token';
+    private const string REBRICKABLE_USER_TOKEN = 'rebrickable_user_token';
 
     /**
      * @return array<string, array<int, string>>

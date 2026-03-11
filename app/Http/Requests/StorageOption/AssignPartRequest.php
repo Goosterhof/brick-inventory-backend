@@ -9,11 +9,11 @@ use Illuminate\Foundation\Http\FormRequest;
 
 final class AssignPartRequest extends FormRequest
 {
-    public const string PART_ID = 'part_id';
+    private const string PART_ID = 'part_id';
 
-    public const string COLOR_ID = 'color_id';
+    private const string COLOR_ID = 'color_id';
 
-    public const string QUANTITY = 'quantity';
+    private const string QUANTITY = 'quantity';
 
     /**
      * @return array<string, array<int, string>>

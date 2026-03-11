@@ -12,15 +12,15 @@ use Illuminate\Foundation\Http\FormRequest;
 
 final class StorageOptionRequest extends FormRequest
 {
-    public const string NAME = 'name';
+    private const string NAME = 'name';
 
-    public const string DESCRIPTION = 'description';
+    private const string DESCRIPTION = 'description';
 
-    public const string PARENT_ID = 'parent_id';
+    private const string PARENT_ID = 'parent_id';
 
-    public const string ROW = 'row';
+    private const string ROW = 'row';
 
-    public const string COLUMN = 'column';
+    private const string COLUMN = 'column';
 
     /**
      * @return array<string, array<int, string|Closure>>

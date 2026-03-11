@@ -13,15 +13,15 @@ use Illuminate\Validation\Rules\Enum;
 
 final class StoreFamilySetRequest extends FormRequest
 {
-    public const string SET_NUM = 'set_num';
+    private const string SET_NUM = 'set_num';
 
-    public const string QUANTITY = 'quantity';
+    private const string QUANTITY = 'quantity';
 
-    public const string STATUS = 'status';
+    private const string STATUS = 'status';
 
-    public const string PURCHASE_DATE = 'purchase_date';
+    private const string PURCHASE_DATE = 'purchase_date';
 
-    public const string NOTES = 'notes';
+    private const string NOTES = 'notes';
 
     /**
      * @return array<string, array<int, string|Enum>>
