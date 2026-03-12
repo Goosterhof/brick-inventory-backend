@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace App\Actions\Family;
 
-use App\DataTransferObjects\Family\FamilyStatsData;
+use App\Data\FamilyStatsData;
 use App\Models\Family;
 use App\Models\FamilySet;
 use App\Models\StorageOption;

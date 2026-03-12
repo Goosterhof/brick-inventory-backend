@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace App\DataTransferObjects\Family;
+namespace App\Data;
 
 final readonly class FamilyStatsData
 {
