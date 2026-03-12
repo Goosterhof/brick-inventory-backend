@@ -2,12 +2,87 @@
 
 declare(strict_types=1);
 
+use App\Enums\FamilySetStatus;
+use App\Models\FamilySet;
+use App\Models\StorageOption;
+use App\Models\StorageOptionPart;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
 
 describe('FamilyController', function (): void {
+    describe('stats', function (): void {
+        it('should return family stats', function (): void {
+            $user = User::factory()->create();
+            $family = $user->family;
+
+            FamilySet::factory()->forFamily($family)->create([
+                'status' => FamilySetStatus::Sealed,
+                'quantity' => 1,
+            ]);
+            FamilySet::factory()->forFamily($family)->create([
+                'status' => FamilySetStatus::Built,
+                'quantity' => 2,
+            ]);
+            FamilySet::factory()->forFamily($family)->create([
+                'status' => FamilySetStatus::Built,
+                'quantity' => 3,
+            ]);
+
+            $storageOption = StorageOption::factory()->forFamily($family)->create();
+            StorageOption::factory()->forFamily($family)->create();
+
+            StorageOptionPart::factory()->forStorageOption($storageOption)->create(['quantity' => 10]);
+            StorageOptionPart::factory()->forStorageOption($storageOption)->create(['quantity' => 5]);
+
+            $response = $this->actingAs($user)->getJson('/api/family/stats');
+
+            $response->assertStatus(200)
+                ->assertJsonPath('total_sets', 3)
+                ->assertJsonPath('total_set_quantity', 6)
+                ->assertJsonPath('sets_by_status.sealed', 1)
+                ->assertJsonPath('sets_by_status.built', 2)
+                ->assertJsonPath('total_storage_locations', 2)
+                ->assertJsonPath('total_unique_parts', 2)
+                ->assertJsonPath('total_parts_quantity', 15);
+        });
+
+        it('should return zeros when family has no data', function (): void {
+            $user = User::factory()->create();
+
+            $response = $this->actingAs($user)->getJson('/api/family/stats');
+
+            $response->assertStatus(200)
+                ->assertJsonPath('total_sets', 0)
+                ->assertJsonPath('total_set_quantity', 0)
+                ->assertJsonPath('sets_by_status', [])
+                ->assertJsonPath('total_storage_locations', 0)
+                ->assertJsonPath('total_unique_parts', 0)
+                ->assertJsonPath('total_parts_quantity', 0);
+        });
+
+        it('should not include other families data', function (): void {
+            $user = User::factory()->create();
+            $otherUser = User::factory()->create();
+
+            FamilySet::factory()->forFamily($otherUser->family)->count(3)->create();
+            StorageOption::factory()->forFamily($otherUser->family)->count(2)->create();
+
+            $response = $this->actingAs($user)->getJson('/api/family/stats');
+
+            $response->assertStatus(200)
+                ->assertJsonPath('total_sets', 0)
+                ->assertJsonPath('total_storage_locations', 0);
+        });
+
+        it('should return 401 when unauthenticated', function (): void {
+            $response = $this->getJson('/api/family/stats');
+
+            $response->assertStatus(401);
+        });
+    });
+
     describe('setRebrickableToken', function (): void {
         it('should set the rebrickable user token', function (): void {
             $user = User::factory()->create();
