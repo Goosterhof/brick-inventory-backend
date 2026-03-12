@@ -15,13 +15,11 @@ use App\Http\Resources\FamilySetResourceData;
 use App\Models\FamilySet;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
-use Illuminate\Contracts\Auth\Access\Gate;
 use Illuminate\Http\JsonResponse;
 
 class FamilySetController extends Controller
 {
     public function __construct(
-        private readonly Gate $gate,
         private readonly GetFamilySetsAction $getFamilySetsAction,
         private readonly CreateFamilySetAction $createFamilySetAction,
         private readonly UpdateFamilySetAction $updateFamilySetAction,
@@ -34,8 +32,6 @@ class FamilySetController extends Controller
      */
     public function index(#[CurrentUser] User $user): array
     {
-        $this->gate->authorize('viewAny', FamilySet::class);
-
         $familySets = $this->getFamilySetsAction->execute($user);
 
         return FamilySetResourceData::collection($familySets);
@@ -43,8 +39,6 @@ class FamilySetController extends Controller
 
     public function store(StoreFamilySetRequest $storeFamilySetRequest, #[CurrentUser] User $user): JsonResponse
     {
-        $this->gate->authorize('create', FamilySet::class);
-
         $familySet = $this->createFamilySetAction->execute($user->family, $storeFamilySetRequest->toDto());
 
         return FamilySetResourceData::from($familySet)->toResponseWithStatus(201);
@@ -52,15 +46,11 @@ class FamilySetController extends Controller
 
     public function show(FamilySet $familySet): JsonResponse
     {
-        $this->gate->authorize('view', $familySet);
-
         return FamilySetResourceData::from($familySet)->toResponse();
     }
 
     public function update(UpdateFamilySetRequest $updateFamilySetRequest, FamilySet $familySet): JsonResponse
     {
-        $this->gate->authorize('update', $familySet);
-
         $familySet = $this->updateFamilySetAction->execute($familySet, $updateFamilySetRequest->toDto());
 
         return FamilySetResourceData::from($familySet)->toResponse();
@@ -68,8 +58,6 @@ class FamilySetController extends Controller
 
     public function destroy(FamilySet $familySet): JsonResponse
     {
-        $this->gate->authorize('delete', $familySet);
-
         $this->deleteFamilySetAction->execute($familySet);
 
         return response()->json(null, 204);
@@ -77,8 +65,6 @@ class FamilySetController extends Controller
 
     public function importFromRebrickable(#[CurrentUser] User $user): JsonResponse
     {
-        $this->gate->authorize('importFromRebrickable', FamilySet::class);
-
         $importOwnedSetsResultData = $this->importOwnedSetsAction->execute($user->family);
 
         $message = $importOwnedSetsResultData->complete

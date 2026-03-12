@@ -7,7 +7,6 @@ namespace App\Providers;
 use App\Contracts\BrickIdentificationServiceInterface;
 use App\Contracts\LegoDataServiceInterface;
 use App\Policies\BrickIdentificationPolicy;
-use App\Policies\FamilyPolicy;
 use App\Policies\SetPolicy;
 use App\Services\BrickognizeService;
 use App\Services\RebrickableService;
@@ -35,7 +34,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        Gate::define('setRebrickableToken', [FamilyPolicy::class, 'setRebrickableToken']);
         Gate::define('identify', [BrickIdentificationPolicy::class, 'identify']);
         Gate::define('viewParts', [SetPolicy::class, 'viewParts']);
 

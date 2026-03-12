@@ -2,11 +2,6 @@
 
 declare(strict_types=1);
 
-use App\Http\Controllers\BrickIdentificationController;
-use App\Http\Controllers\FamilyController;
-use App\Http\Controllers\FamilySetController;
-use App\Http\Controllers\SetController;
-use App\Http\Controllers\StorageOptionController;
 use Illuminate\Contracts\Auth\Access\Gate;
 
 /*
@@ -19,6 +14,7 @@ use Illuminate\Contracts\Auth\Access\Gate;
 | - Are final readonly classes
 | - Have methods that return bool
 | - Use single-tier model (no interaction tier — unlike issue-tracker)
+| - Are enforced via `can:` middleware on routes, NOT via Gate injection
 |
 */
 
@@ -70,51 +66,62 @@ it('should have all policy methods return bool', function (): void {
     }
 });
 
-it('should have gate authorization in controllers that have policies', function (): void {
-    $controllersWithPolicies = [
-        BrickIdentificationController::class,
-        FamilyController::class,
-        FamilySetController::class,
-        SetController::class,
-        StorageOptionController::class,
-    ];
+it('should not inject Gate contract in controllers', function (): void {
+    foreach (getClassesInDirectory(dirname(__DIR__, 2) . '/app/Http/Controllers', 'App\\Http\\Controllers\\') as $className) {
+        $reflection = new ReflectionClass($className);
 
-    foreach ($controllersWithPolicies as $controllerWithPolicy) {
-        $reflection = new ReflectionClass($controllerWithPolicy);
+        if ($reflection->isAbstract()) {
+            continue;
+        }
+
         $constructor = $reflection->getConstructor();
+        if ($constructor === null) {
+            continue;
+        }
 
-        expect($constructor)->not->toBeNull(
-            sprintf('Controller %s should have a constructor', $controllerWithPolicy),
-        );
-
-        $hasGate = false;
         foreach ($constructor->getParameters() as $param) {
             $type = $param->getType();
             if ($type instanceof ReflectionNamedType && $type->getName() === Gate::class) {
-                $hasGate = true;
-                break;
+                expect(false)->toBeTrue(
+                    sprintf(
+                        'Controller %s should not inject %s. Use can: middleware on routes instead.',
+                        $className,
+                        Gate::class,
+                    ),
+                );
             }
         }
+    }
+});
 
-        expect($hasGate)->toBeTrue(
-            sprintf('Controller %s should inject Illuminate\Contracts\Auth\Access\Gate', $controllerWithPolicy),
+it('should not use gate authorize calls in controllers', function (): void {
+    $controllersDir = dirname(__DIR__, 2) . '/app/Http/Controllers';
+
+    $iterator = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($controllersDir, RecursiveDirectoryIterator::SKIP_DOTS),
+    );
+
+    foreach ($iterator as $file) {
+        if (!$file->isFile()) {
+            continue;
+        }
+
+        if ($file->getExtension() !== 'php') {
+            continue;
+        }
+
+        if ($file->getFilename() === 'Controller.php') {
+            continue;
+        }
+
+        $content = file_get_contents($file->getPathname());
+        $relativePath = str_replace($controllersDir . '/', '', $file->getPathname());
+
+        expect(str_contains($content, '->authorize('))->toBeFalse(
+            sprintf(
+                'Controller %s should not call ->authorize(). Use can: middleware on routes instead.',
+                $relativePath,
+            ),
         );
-
-        $file = $reflection->getFileName();
-        $content = (string) shell_exec('cat ' . escapeshellarg($file));
-
-        foreach ($reflection->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
-            if ($method->getDeclaringClass()->getName() !== $controllerWithPolicy) {
-                continue;
-            }
-
-            if ($method->getName() === '__construct') {
-                continue;
-            }
-
-            expect(str_contains($content, '$this->gate->authorize('))->toBeTrue(
-                sprintf('Controller %s should use $this->gate->authorize() calls', $controllerWithPolicy),
-            );
-        }
     }
 });
