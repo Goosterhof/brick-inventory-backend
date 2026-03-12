@@ -19,27 +19,22 @@ use Illuminate\Http\JsonResponse;
 
 class FamilySetController extends Controller
 {
-    public function __construct(
-        private readonly GetFamilySetsAction $getFamilySetsAction,
-        private readonly CreateFamilySetAction $createFamilySetAction,
-        private readonly UpdateFamilySetAction $updateFamilySetAction,
-        private readonly DeleteFamilySetAction $deleteFamilySetAction,
-        private readonly ImportOwnedSetsAction $importOwnedSetsAction,
-    ) {}
-
     /**
      * @return array<int, FamilySetResourceData>
      */
-    public function index(#[CurrentUser] User $user): array
+    public function index(#[CurrentUser] User $user, GetFamilySetsAction $getFamilySetsAction): array
     {
-        $familySets = $this->getFamilySetsAction->execute($user);
+        $familySets = $getFamilySetsAction->execute($user);
 
         return FamilySetResourceData::collection($familySets);
     }
 
-    public function store(StoreFamilySetRequest $storeFamilySetRequest, #[CurrentUser] User $user): JsonResponse
-    {
-        $familySet = $this->createFamilySetAction->execute($user->family, $storeFamilySetRequest->toDto());
+    public function store(
+        StoreFamilySetRequest $storeFamilySetRequest,
+        #[CurrentUser] User $user,
+        CreateFamilySetAction $createFamilySetAction,
+    ): JsonResponse {
+        $familySet = $createFamilySetAction->execute($user->family, $storeFamilySetRequest->toDto());
 
         return FamilySetResourceData::from($familySet)->toResponseWithStatus(201);
     }
@@ -49,23 +44,28 @@ class FamilySetController extends Controller
         return FamilySetResourceData::from($familySet)->toResponse();
     }
 
-    public function update(UpdateFamilySetRequest $updateFamilySetRequest, FamilySet $familySet): JsonResponse
-    {
-        $familySet = $this->updateFamilySetAction->execute($familySet, $updateFamilySetRequest->toDto());
+    public function update(
+        UpdateFamilySetRequest $updateFamilySetRequest,
+        FamilySet $familySet,
+        UpdateFamilySetAction $updateFamilySetAction,
+    ): JsonResponse {
+        $familySet = $updateFamilySetAction->execute($familySet, $updateFamilySetRequest->toDto());
 
         return FamilySetResourceData::from($familySet)->toResponse();
     }
 
-    public function destroy(FamilySet $familySet): JsonResponse
+    public function destroy(FamilySet $familySet, DeleteFamilySetAction $deleteFamilySetAction): JsonResponse
     {
-        $this->deleteFamilySetAction->execute($familySet);
+        $deleteFamilySetAction->execute($familySet);
 
         return response()->json(null, 204);
     }
 
-    public function importFromRebrickable(#[CurrentUser] User $user): JsonResponse
-    {
-        $importOwnedSetsResultData = $this->importOwnedSetsAction->execute($user->family);
+    public function importFromRebrickable(
+        #[CurrentUser] User $user,
+        ImportOwnedSetsAction $importOwnedSetsAction,
+    ): JsonResponse {
+        $importOwnedSetsResultData = $importOwnedSetsAction->execute($user->family);
 
         $message = $importOwnedSetsResultData->complete
             ? 'Import completed successfully'

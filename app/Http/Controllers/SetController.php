@@ -10,13 +10,9 @@ use Illuminate\Http\JsonResponse;
 
 class SetController extends Controller
 {
-    public function __construct(
-        private readonly GetSetPartsAction $getSetPartsAction,
-    ) {}
-
-    public function parts(string $setNum): JsonResponse
+    public function parts(string $setNum, GetSetPartsAction $getSetPartsAction): JsonResponse
     {
-        $set = $this->getSetPartsAction->execute($setNum);
+        $set = $getSetPartsAction->execute($setNum);
 
         return SetWithPartsResourceData::from($set)->toResponse();
     }

@@ -14,14 +14,11 @@ use Illuminate\Http\JsonResponse;
 
 class FamilyController extends Controller
 {
-    public function __construct(
-        private readonly GetFamilyStatsAction $getFamilyStatsAction,
-        private readonly SetRebrickableTokenAction $setRebrickableTokenAction,
-    ) {}
-
-    public function stats(#[CurrentUser] User $user): JsonResponse
-    {
-        $familyStatsData = $this->getFamilyStatsAction->execute($user->family);
+    public function stats(
+        #[CurrentUser] User $user,
+        GetFamilyStatsAction $getFamilyStatsAction,
+    ): JsonResponse {
+        $familyStatsData = $getFamilyStatsAction->execute($user->family);
 
         return FamilyStatsResourceData::from($familyStatsData)->toResponse();
     }
@@ -29,8 +26,9 @@ class FamilyController extends Controller
     public function setRebrickableToken(
         SetRebrickableTokenRequest $setRebrickableTokenRequest,
         #[CurrentUser] User $user,
+        SetRebrickableTokenAction $setRebrickableTokenAction,
     ): JsonResponse {
-        $this->setRebrickableTokenAction->execute($user->family, $setRebrickableTokenRequest->toDto(), $user);
+        $setRebrickableTokenAction->execute($user->family, $setRebrickableTokenRequest->toDto(), $user);
 
         return response()->json(status: 204);
     }

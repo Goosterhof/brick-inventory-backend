@@ -11,13 +11,9 @@ use Illuminate\Http\Request;
 
 class LogoutController extends Controller
 {
-    public function __construct(
-        private readonly StatefulGuard $statefulGuard,
-    ) {}
-
-    public function __invoke(Request $request): JsonResponse
+    public function __invoke(Request $request, StatefulGuard $statefulGuard): JsonResponse
     {
-        $this->statefulGuard->logout();
+        $statefulGuard->logout();
 
         if ($request->hasSession()) {
             $request->session()->invalidate();

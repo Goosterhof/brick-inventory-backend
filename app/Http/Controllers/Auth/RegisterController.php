@@ -13,16 +13,14 @@ use Illuminate\Http\JsonResponse;
 
 class RegisterController extends Controller
 {
-    public function __construct(
-        private readonly CreateUserWithFamilyAction $createUserWithFamilyAction,
-        private readonly StatefulGuard $statefulGuard,
-    ) {}
+    public function __invoke(
+        RegisterRequest $registerRequest,
+        CreateUserWithFamilyAction $createUserWithFamilyAction,
+        StatefulGuard $statefulGuard,
+    ): JsonResponse {
+        $user = $createUserWithFamilyAction->execute($registerRequest->toDto());
 
-    public function __invoke(RegisterRequest $registerRequest): JsonResponse
-    {
-        $user = $this->createUserWithFamilyAction->execute($registerRequest->toDto());
-
-        $this->statefulGuard->login($user);
+        $statefulGuard->login($user);
 
         return response()->json(ProfileResourceData::from($user), 201);
     }
