@@ -45,7 +45,7 @@ Uses **session-based SPA authentication** with Laravel Sanctum's stateful middle
 Uses a **single-tier** policy model (ADR-0006 two-tier was evaluated and rejected — overkill for this territory's threat model). Three-layer defense in depth:
 
 1. **`EnsureFamilyOwnership` middleware** — Tenant isolation. Returns 404 if the resource doesn't belong to the user's family. Applied to all tenant-scoped routes.
-2. **Policies** (`app/Policies/`) — Permission checks. `final readonly` classes, auto-discovered. Enforced via `can:` middleware on routes (e.g., `->middleware('can:view,storage_option')`). Controllers must **not** inject `Gate` or call `->authorize()` — authorization lives entirely in the routing layer.
+2. **Policies** (`app/Policies/`) — Permission checks. `final readonly` classes, auto-discovered. Enforced via `->can()` on routes (e.g., `->can('view', 'storage_option')` or `->can('viewAny', StorageOption::class)`). Controllers must **not** inject `Gate` or call `->authorize()` — authorization lives entirely in the routing layer.
 3. **FormRequest closure rules** — Body parameter validation that the middleware cannot reach (e.g., validating `parent_id` belongs to the user's family).
 
 Architecture tests in `tests/Architecture/PolicyArchitectureTest.php` enforce naming, `final readonly`, no Gate injection in controllers, no `->authorize()` calls, and `can:` middleware presence on all authorized routes.

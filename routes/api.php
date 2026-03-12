@@ -11,6 +11,9 @@ use App\Http\Controllers\FamilyController;
 use App\Http\Controllers\FamilySetController;
 use App\Http\Controllers\SetController;
 use App\Http\Controllers\StorageOptionController;
+use App\Models\Family;
+use App\Models\FamilySet;
+use App\Models\StorageOption;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', fn () => response()->json([
@@ -29,53 +32,55 @@ Route::get('/me', MeController::class)->middleware('auth:sanctum');
 
 Route::get('/sets/{setNum}/parts', [SetController::class, 'parts'])
     ->where('setNum', '\d+-\d+')
-    ->middleware(['auth:sanctum', 'can:viewParts']);
+    ->middleware('auth:sanctum')
+    ->can('viewParts');
 
 Route::middleware(['auth:sanctum', 'family.ownership'])->group(function (): void {
     // Storage Options
     Route::get('/storage-options', [StorageOptionController::class, 'index'])
-        ->middleware('can:viewAny,App\Models\StorageOption');
+        ->can('viewAny', StorageOption::class);
     Route::post('/storage-options', [StorageOptionController::class, 'store'])
-        ->middleware('can:create,App\Models\StorageOption');
+        ->can('create', StorageOption::class);
     Route::get('/storage-options/{storage_option}', [StorageOptionController::class, 'show'])
-        ->middleware('can:view,storage_option');
+        ->can('view', 'storage_option');
     Route::put('/storage-options/{storage_option}', [StorageOptionController::class, 'update'])
-        ->middleware('can:update,storage_option');
+        ->can('update', 'storage_option');
     Route::patch('/storage-options/{storage_option}', [StorageOptionController::class, 'update'])
-        ->middleware('can:update,storage_option');
+        ->can('update', 'storage_option');
     Route::delete('/storage-options/{storage_option}', [StorageOptionController::class, 'destroy'])
-        ->middleware('can:delete,storage_option');
+        ->can('delete', 'storage_option');
     Route::get('/storage-options/{storage_option}/parts', [StorageOptionController::class, 'parts'])
-        ->middleware('can:viewParts,storage_option');
+        ->can('viewParts', 'storage_option');
     Route::post('/storage-options/{storage_option}/parts', [StorageOptionController::class, 'assignPart'])
-        ->middleware('can:assignPart,storage_option');
+        ->can('assignPart', 'storage_option');
     Route::delete('/storage-options/{storage_option}/parts/{storage_option_part}', [StorageOptionController::class, 'removePart'])
         ->scopeBindings()
-        ->middleware('can:delete,storage_option_part');
+        ->can('delete', 'storage_option_part');
 
     // Family Sets
     Route::get('/family-sets', [FamilySetController::class, 'index'])
-        ->middleware('can:viewAny,App\Models\FamilySet');
+        ->can('viewAny', FamilySet::class);
     Route::post('/family-sets', [FamilySetController::class, 'store'])
-        ->middleware('can:create,App\Models\FamilySet');
+        ->can('create', FamilySet::class);
     Route::get('/family-sets/{family_set}', [FamilySetController::class, 'show'])
-        ->middleware('can:view,family_set');
+        ->can('view', 'family_set');
     Route::put('/family-sets/{family_set}', [FamilySetController::class, 'update'])
-        ->middleware('can:update,family_set');
+        ->can('update', 'family_set');
     Route::patch('/family-sets/{family_set}', [FamilySetController::class, 'update'])
-        ->middleware('can:update,family_set');
+        ->can('update', 'family_set');
     Route::delete('/family-sets/{family_set}', [FamilySetController::class, 'destroy'])
-        ->middleware('can:delete,family_set');
+        ->can('delete', 'family_set');
     Route::post('/family-sets/import-from-rebrickable', [FamilySetController::class, 'importFromRebrickable'])
-        ->middleware('can:importFromRebrickable,App\Models\FamilySet');
+        ->can('importFromRebrickable', FamilySet::class);
 
     // Family
     Route::get('/family/stats', [FamilyController::class, 'stats'])
-        ->middleware('can:viewStats,App\Models\Family');
+        ->can('viewStats', Family::class);
     Route::put('/family/rebrickable-token', [FamilyController::class, 'setRebrickableToken'])
-        ->middleware('can:setRebrickableToken,App\Models\Family');
+        ->can('setRebrickableToken', Family::class);
 
     // Brick Identification
     Route::post('/identify-brick', [BrickIdentificationController::class, 'identify'])
-        ->middleware(['throttle:brick-identification', 'can:identify']);
+        ->middleware('throttle:brick-identification')
+        ->can('identify');
 });
