@@ -39,6 +39,7 @@ Route::middleware(['auth:sanctum', 'family.ownership'])->group(function (): void
         ->scopeBindings();
     Route::apiResource('family-sets', FamilySetController::class);
     Route::post('/family-sets/import-from-rebrickable', [FamilySetController::class, 'importFromRebrickable']);
+    Route::get('/family/stats', [FamilyController::class, 'stats']);
     Route::put('/family/rebrickable-token', [FamilyController::class, 'setRebrickableToken']);
     Route::post('/identify-brick', [BrickIdentificationController::class, 'identify'])
         ->middleware('throttle:brick-identification');
