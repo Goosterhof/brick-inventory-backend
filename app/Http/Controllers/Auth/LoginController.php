@@ -13,16 +13,14 @@ use Illuminate\Http\JsonResponse;
 
 class LoginController extends Controller
 {
-    public function __construct(
-        private readonly LoginUserAction $loginUserAction,
-        private readonly StatefulGuard $statefulGuard,
-    ) {}
+    public function __invoke(
+        LoginRequest $loginRequest,
+        LoginUserAction $loginUserAction,
+        StatefulGuard $statefulGuard,
+    ): JsonResponse {
+        $user = $loginUserAction->execute($loginRequest->toDto());
 
-    public function __invoke(LoginRequest $loginRequest): JsonResponse
-    {
-        $user = $this->loginUserAction->execute($loginRequest->toDto());
-
-        $this->statefulGuard->login($user);
+        $statefulGuard->login($user);
 
         return response()->json(ProfileResourceData::from($user));
     }

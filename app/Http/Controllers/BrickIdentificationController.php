@@ -11,13 +11,11 @@ use Illuminate\Http\JsonResponse;
 
 class BrickIdentificationController extends Controller
 {
-    public function __construct(
-        private readonly IdentifyBrickAction $identifyBrickAction,
-    ) {}
-
-    public function identify(IdentifyBrickRequest $identifyBrickRequest): JsonResponse
-    {
-        $part = $this->identifyBrickAction->execute($identifyBrickRequest->toDto());
+    public function identify(
+        IdentifyBrickRequest $identifyBrickRequest,
+        IdentifyBrickAction $identifyBrickAction,
+    ): JsonResponse {
+        $part = $identifyBrickAction->execute($identifyBrickRequest->toDto());
 
         return PartResourceData::from($part)->toResponse();
     }

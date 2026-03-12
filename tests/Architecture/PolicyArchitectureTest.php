@@ -74,21 +74,23 @@ it('should not inject Gate contract in controllers', function (): void {
             continue;
         }
 
-        $constructor = $reflection->getConstructor();
-        if ($constructor === null) {
-            continue;
-        }
+        foreach ($reflection->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
+            if ($method->getDeclaringClass()->getName() !== $className) {
+                continue;
+            }
 
-        foreach ($constructor->getParameters() as $param) {
-            $type = $param->getType();
-            if ($type instanceof ReflectionNamedType && $type->getName() === Gate::class) {
-                expect(false)->toBeTrue(
-                    sprintf(
-                        'Controller %s should not inject %s. Use can: middleware on routes instead.',
-                        $className,
-                        Gate::class,
-                    ),
-                );
+            foreach ($method->getParameters() as $param) {
+                $type = $param->getType();
+                if ($type instanceof ReflectionNamedType && $type->getName() === Gate::class) {
+                    expect(false)->toBeTrue(
+                        sprintf(
+                            'Controller %s::%s() should not inject %s. Use can: middleware on routes instead.',
+                            $className,
+                            $method->getName(),
+                            Gate::class,
+                        ),
+                    );
+                }
             }
         }
     }

@@ -23,29 +23,21 @@ use Illuminate\Http\JsonResponse;
 
 class StorageOptionController extends Controller
 {
-    public function __construct(
-        private readonly GetStorageOptionsAction $getStorageOptionsAction,
-        private readonly GetStorageOptionPartsAction $getStorageOptionPartsAction,
-        private readonly CreateStorageOptionAction $createStorageOptionAction,
-        private readonly UpdateStorageOptionAction $updateStorageOptionAction,
-        private readonly DeleteStorageOptionAction $deleteStorageOptionAction,
-        private readonly AssignPartToStorageAction $assignPartToStorageAction,
-        private readonly DeleteStorageOptionPartAction $deleteStorageOptionPartAction,
-    ) {}
-
     /**
      * @return array<int, StorageOptionResourceData>
      */
-    public function index(#[CurrentUser] User $user): array
+    public function index(#[CurrentUser] User $user, GetStorageOptionsAction $getStorageOptionsAction): array
     {
-        $storageOptions = $this->getStorageOptionsAction->execute($user);
+        $storageOptions = $getStorageOptionsAction->execute($user);
 
         return StorageOptionResourceData::collection($storageOptions);
     }
 
-    public function store(StorageOptionRequest $storageOptionRequest): JsonResponse
-    {
-        $storageOption = $this->createStorageOptionAction->execute($storageOptionRequest->toDto());
+    public function store(
+        StorageOptionRequest $storageOptionRequest,
+        CreateStorageOptionAction $createStorageOptionAction,
+    ): JsonResponse {
+        $storageOption = $createStorageOptionAction->execute($storageOptionRequest->toDto());
 
         return StorageOptionResourceData::from($storageOption)->toResponseWithStatus(201);
     }
@@ -55,16 +47,21 @@ class StorageOptionController extends Controller
         return StorageOptionResourceData::from($storageOption)->toResponse();
     }
 
-    public function update(StorageOptionRequest $storageOptionRequest, StorageOption $storageOption): JsonResponse
-    {
-        $storageOption = $this->updateStorageOptionAction->execute($storageOption, $storageOptionRequest->toDto());
+    public function update(
+        StorageOptionRequest $storageOptionRequest,
+        StorageOption $storageOption,
+        UpdateStorageOptionAction $updateStorageOptionAction,
+    ): JsonResponse {
+        $storageOption = $updateStorageOptionAction->execute($storageOption, $storageOptionRequest->toDto());
 
         return StorageOptionResourceData::from($storageOption)->toResponse();
     }
 
-    public function destroy(StorageOption $storageOption): JsonResponse
-    {
-        $this->deleteStorageOptionAction->execute($storageOption);
+    public function destroy(
+        StorageOption $storageOption,
+        DeleteStorageOptionAction $deleteStorageOptionAction,
+    ): JsonResponse {
+        $deleteStorageOptionAction->execute($storageOption);
 
         return response()->json(null, 204);
     }
@@ -72,24 +69,32 @@ class StorageOptionController extends Controller
     /**
      * @return array<int, StorageOptionPartResourceData>
      */
-    public function parts(StorageOption $storageOption): array
-    {
-        $parts = $this->getStorageOptionPartsAction->execute($storageOption);
+    public function parts(
+        StorageOption $storageOption,
+        GetStorageOptionPartsAction $getStorageOptionPartsAction,
+    ): array {
+        $parts = $getStorageOptionPartsAction->execute($storageOption);
 
         return StorageOptionPartResourceData::collection($parts);
     }
 
-    public function assignPart(AssignPartRequest $assignPartRequest, StorageOption $storageOption): JsonResponse
-    {
-        $storageOptionPart = $this->assignPartToStorageAction->execute($storageOption, $assignPartRequest->toDto());
+    public function assignPart(
+        AssignPartRequest $assignPartRequest,
+        StorageOption $storageOption,
+        AssignPartToStorageAction $assignPartToStorageAction,
+    ): JsonResponse {
+        $storageOptionPart = $assignPartToStorageAction->execute($storageOption, $assignPartRequest->toDto());
         $statusCode = $storageOptionPart->wasRecentlyCreated ? 201 : 200;
 
         return StorageOptionPartResourceData::from($storageOptionPart)->toResponseWithStatus($statusCode);
     }
 
-    public function removePart(StorageOption $storageOption, StorageOptionPart $storageOptionPart): JsonResponse
-    {
-        $this->deleteStorageOptionPartAction->execute($storageOptionPart);
+    public function removePart(
+        StorageOption $storageOption,
+        StorageOptionPart $storageOptionPart,
+        DeleteStorageOptionPartAction $deleteStorageOptionPartAction,
+    ): JsonResponse {
+        $deleteStorageOptionPartAction->execute($storageOptionPart);
 
         return response()->json(null, 204);
     }

@@ -17,6 +17,7 @@ use Illuminate\Http\JsonResponse;
 | - Return JsonResponse or array (for collections)
 | - Do NOT use try-catch blocks (exception handling is global)
 | - Do NOT return ResourceData directly (use ->toResponse() instead)
+| - Do NOT have constructors — use method injection for all dependencies
 |
 */
 
@@ -130,6 +131,29 @@ it('should not return ResourceData directly from controller methods', function (
                     );
                 }
             }
+        }
+    }
+});
+
+it('should not have constructors in controllers', function (): void {
+    foreach (getClassesInDirectory(dirname(__DIR__, 2) . '/app/Http/Controllers', 'App\\Http\\Controllers\\') as $className) {
+        $reflection = new ReflectionClass($className);
+
+        if ($reflection->isAbstract()) {
+            continue;
+        }
+
+        $constructor = $reflection->getConstructor();
+
+        // Constructor must either not exist or be inherited (not declared in the controller itself)
+        if ($constructor !== null) {
+            expect($constructor->getDeclaringClass()->getName())->not->toBe(
+                $className,
+                sprintf(
+                    'Controller %s should not have a constructor. Use method injection instead.',
+                    $className,
+                ),
+            );
         }
     }
 });
