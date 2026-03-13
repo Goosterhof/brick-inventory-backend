@@ -32,16 +32,18 @@ Uses **session-based SPA authentication** with Laravel Sanctum's stateful middle
 - `SANCTUM_STATEFUL_DOMAINS` must include the frontend's `host:port` (e.g., `localhost:5173`)
 - Feature tests use `$this->actingAs($user)` (not `Sanctum::actingAs()`)
 
-### Gotchas
+### Gotcha
 - `$request->session()` throws if no session middleware is active; guard with `$request->hasSession()`
-- `public/frankenphp-worker.php` runs BEFORE the autoloader — never use Laravel classes in it
-- `composer lint` (Rector) may incorrectly modify `frankenphp-worker.php` — always revert changes to it
 
 ## Deployment
 
 - **Hosting**: Railway
 - **Production URL**: https://api.brick-inventory.com
 - **DNS**: Cloudflare (proxy disabled, Railway handles SSL)
+
+### FrankenPHP Worker
+- `public/frankenphp-worker.php` runs BEFORE the autoloader — never use Laravel classes in it
+- `composer lint` (Rector) may incorrectly modify this file — always revert changes to it
 
 ## Architecture
 
@@ -52,7 +54,7 @@ Uses **session-based SPA authentication** with Laravel Sanctum's stateful middle
 
 ### Authorization
 
-Uses a **single-tier** policy model (ADR-0006 two-tier was evaluated and rejected — overkill for this territory's threat model). Three-layer defense in depth:
+Uses a **single-tier** policy model with three-layer defense in depth:
 
 1. **`EnsureFamilyOwnership` middleware** — Tenant isolation. Returns 404 if the resource doesn't belong to the user's family. Applied to all tenant-scoped routes.
 2. **Policies** (`app/Policies/`) — Permission checks. `final readonly` classes, auto-discovered. Enforced via `->can()` on routes (e.g., `->can('view', 'storage_option')` or `->can('viewAny', StorageOption::class)`). Controllers must **not** inject `Gate` or call `->authorize()` — authorization lives entirely in the routing layer.
@@ -84,55 +86,31 @@ Use `/conventions` skill for detailed patterns on Action vs Service responsibili
 | `composer deptrac` | Run layer dependency analysis |
 | `composer mutation` | Run mutation testing (requires pcov) |
 
-## Code Quality
-
-After making any changes to PHP files, always run:
-
-```bash
-composer lint
-```
-
 ## Before Committing
 
-Before creating any commit, always:
+Before creating any commit, always run — in order:
 
-1. Run `composer lint` to fix code style
-2. Run `composer phpstan` to check for type errors
-3. Run `composer test` to ensure all tests pass
+1. `composer lint` — fix code style
+2. `composer phpstan` — check for type errors
+3. `composer test` — ensure all tests pass
 
-All must pass before committing.
+All three must pass before committing.
 
 ## Skills
 
-Use skills for file creation - they contain detailed templates and conventions.
+**IMPORTANT**: When creating files, use the corresponding skill. Skills contain detailed templates and conventions.
 
-| Skill | Description |
-|-------|-------------|
-| `/action` | Create Action classes |
-| `/controller` | Create resource controllers with CRUD operations |
-| `/conventions` | Architecture patterns and code conventions reference |
-| `/factory` | Generate factories from models |
-| `/feature-test` | Generate feature tests for controllers |
-| `/form-request` | Create Form Requests with DTOFormRequest pattern |
-| `/migration` | Generate migrations from model names |
-| `/model` | Generate models from migrations |
-| `/resource-data` | Create ResourceData classes for API responses |
-| `/service` | Create Service classes for external APIs |
-| `/unit-test` | Create or run unit tests |
+| File Path Pattern | Skill | Description |
+|-------------------|-------|-------------|
+| `app/Actions/**/*Action.php` | `/action` | Create Action classes |
+| `app/Http/Controllers/*Controller.php` | `/controller` | Create resource controllers with CRUD operations |
+| `app/Http/Requests/*Request.php` | `/form-request` | Create Form Requests with DTOFormRequest pattern |
+| `app/Http/Resources/*ResourceData.php` | `/resource-data` | Create ResourceData classes for API responses |
+| `app/Models/*.php` | `/model` | Generate models from migrations |
+| `app/Services/*Service.php` | `/service` | Create Service classes for external APIs |
+| `database/factories/*Factory.php` | `/factory` | Generate factories from models |
+| `database/migrations/*.php` | `/migration` | Generate migrations from model names |
+| `tests/Unit/**/*Test.php` | `/unit-test` | Create or run unit tests |
+| `tests/Feature/**/*Test.php` | `/feature-test` | Generate feature tests for controllers |
 
-### Required Skill Usage
-
-**IMPORTANT**: When creating files in these directories, use the corresponding skill:
-
-| File Path Pattern | Required Skill |
-|-------------------|----------------|
-| `app/Actions/**/*Action.php` | `/action` |
-| `app/Http/Controllers/*Controller.php` | `/controller` |
-| `app/Http/Requests/*Request.php` | `/form-request` |
-| `app/Http/Resources/*ResourceData.php` | `/resource-data` |
-| `app/Models/*.php` | `/model` |
-| `app/Services/*Service.php` | `/service` |
-| `database/factories/*Factory.php` | `/factory` |
-| `database/migrations/*.php` | `/migration` |
-| `tests/Unit/**/*Test.php` | `/unit-test` |
-| `tests/Feature/**/*Test.php` | `/feature-test` |
+Also available: `/conventions` — Architecture patterns and code conventions reference.
