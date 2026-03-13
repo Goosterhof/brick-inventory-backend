@@ -15,9 +15,9 @@ use App\Exceptions\RebrickableApiException;
 use App\Exceptions\SetNotFoundException;
 use Generator;
 use Illuminate\Container\Attributes\Config;
+use Illuminate\Http\Client\Factory as HttpFactory;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
-use Illuminate\Support\Facades\Http;
 
 final readonly class RebrickableService implements LegoDataServiceInterface
 {
@@ -32,6 +32,7 @@ final readonly class RebrickableService implements LegoDataServiceInterface
     private const array USER_SET_REQUIRED_FIELDS = ['set', 'quantity'];
 
     public function __construct(
+        private HttpFactory $httpFactory,
         #[Config('services.rebrickable.key', '')] private string $apiKey,
         #[Config('services.rebrickable.base_url', 'https://rebrickable.com/api/v3')] private string $baseUrl,
     ) {}
@@ -182,7 +183,7 @@ final readonly class RebrickableService implements LegoDataServiceInterface
 
     private function httpClient(): PendingRequest
     {
-        return Http::baseUrl($this->baseUrl)
+        return $this->httpFactory->baseUrl($this->baseUrl)
             ->withHeaders(['Authorization' => 'key ' . $this->apiKey])
             ->acceptJson()
             ->timeout(30)

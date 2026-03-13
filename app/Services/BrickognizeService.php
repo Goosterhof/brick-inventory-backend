@@ -8,15 +8,16 @@ use App\Contracts\BrickIdentificationServiceInterface;
 use App\Data\Brickognize\BrickognizePredictionData;
 use App\Exceptions\BrickognizeApiException;
 use Illuminate\Container\Attributes\Config;
+use Illuminate\Http\Client\Factory as HttpFactory;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Http;
 
 final readonly class BrickognizeService implements BrickIdentificationServiceInterface
 {
     private const array PREDICTION_REQUIRED_FIELDS = ['id', 'name', 'type', 'score'];
 
     public function __construct(
+        private HttpFactory $httpFactory,
         #[Config('services.brickognize.base_url', 'https://api.brickognize.com')] private string $baseUrl,
     ) {}
 
@@ -58,7 +59,7 @@ final readonly class BrickognizeService implements BrickIdentificationServiceInt
 
     private function httpClient(): PendingRequest
     {
-        return Http::baseUrl($this->baseUrl)
+        return $this->httpFactory->baseUrl($this->baseUrl)
             ->acceptJson()
             ->timeout(30)
             ->retry(3, 100, throw: false);

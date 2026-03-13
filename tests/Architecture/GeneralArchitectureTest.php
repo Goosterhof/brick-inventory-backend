@@ -25,5 +25,4 @@ arch('no Laravel if helpers - use explicit if statements instead')
 arch('no facades - use dependency injection instead')
     ->expect('App')
     ->not->toUse('Illuminate\Support\Facades')
-    ->ignoring('App\Providers')
-    ->ignoring('App\Services');
+    ->ignoring('App\Providers');
