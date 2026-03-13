@@ -5,6 +5,7 @@ declare(strict_types=1);
 use App\Data\Brickognize\BrickognizePredictionData;
 use App\Exceptions\BrickognizeApiException;
 use App\Services\BrickognizeService;
+use Illuminate\Http\Client\Factory as HttpFactory;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Http;
 
@@ -35,7 +36,7 @@ describe('BrickognizeService', function (): void {
                 ]),
             ]);
 
-            $service = new BrickognizeService(TEST_BRICKOGNIZE_BASE_URL);
+            $service = new BrickognizeService(resolve(HttpFactory::class), TEST_BRICKOGNIZE_BASE_URL);
             $image = UploadedFile::fake()->image('brick.jpg');
 
             // act
@@ -63,7 +64,7 @@ describe('BrickognizeService', function (): void {
                 ]),
             ]);
 
-            $service = new BrickognizeService(TEST_BRICKOGNIZE_BASE_URL);
+            $service = new BrickognizeService(resolve(HttpFactory::class), TEST_BRICKOGNIZE_BASE_URL);
             $image = UploadedFile::fake()->image('brick.jpg');
 
             // act
@@ -79,7 +80,7 @@ describe('BrickognizeService', function (): void {
                 'https://api.brickognize.com/predict/' => Http::response([], 500),
             ]);
 
-            $service = new BrickognizeService(TEST_BRICKOGNIZE_BASE_URL);
+            $service = new BrickognizeService(resolve(HttpFactory::class), TEST_BRICKOGNIZE_BASE_URL);
             $image = UploadedFile::fake()->image('brick.jpg');
 
             // act & assert
@@ -92,7 +93,7 @@ describe('BrickognizeService', function (): void {
                 'https://api.brickognize.com/predict/' => Http::response('invalid'),
             ]);
 
-            $service = new BrickognizeService(TEST_BRICKOGNIZE_BASE_URL);
+            $service = new BrickognizeService(resolve(HttpFactory::class), TEST_BRICKOGNIZE_BASE_URL);
             $image = UploadedFile::fake()->image('brick.jpg');
 
             // act & assert
@@ -107,7 +108,7 @@ describe('BrickognizeService', function (): void {
                 ]),
             ]);
 
-            $service = new BrickognizeService(TEST_BRICKOGNIZE_BASE_URL);
+            $service = new BrickognizeService(resolve(HttpFactory::class), TEST_BRICKOGNIZE_BASE_URL);
             $image = UploadedFile::fake()->image('brick.jpg');
 
             // act & assert
@@ -124,7 +125,7 @@ describe('BrickognizeService', function (): void {
                 ]),
             ]);
 
-            $service = new BrickognizeService(TEST_BRICKOGNIZE_BASE_URL);
+            $service = new BrickognizeService(resolve(HttpFactory::class), TEST_BRICKOGNIZE_BASE_URL);
             $image = UploadedFile::fake()->image('brick.jpg');
 
             // act & assert
@@ -144,7 +145,7 @@ describe('BrickognizeService', function (): void {
                 ]),
             ]);
 
-            $service = new BrickognizeService(TEST_BRICKOGNIZE_BASE_URL);
+            $service = new BrickognizeService(resolve(HttpFactory::class), TEST_BRICKOGNIZE_BASE_URL);
             $image = UploadedFile::fake()->image('brick.jpg');
 
             // act & assert
@@ -167,7 +168,7 @@ describe('BrickognizeService', function (): void {
                 ]),
             ]);
 
-            $service = new BrickognizeService(TEST_BRICKOGNIZE_BASE_URL);
+            $service = new BrickognizeService(resolve(HttpFactory::class), TEST_BRICKOGNIZE_BASE_URL);
             $image = UploadedFile::fake()->image('brick.jpg');
 
             // act

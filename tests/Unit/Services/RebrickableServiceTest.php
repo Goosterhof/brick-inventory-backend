@@ -9,6 +9,7 @@ use App\Exceptions\InvalidApiResponseException;
 use App\Exceptions\RebrickableApiException;
 use App\Exceptions\SetNotFoundException;
 use App\Services\RebrickableService;
+use Illuminate\Http\Client\Factory as HttpFactory;
 use Illuminate\Support\Facades\Http;
 
 const TEST_API_KEY = 'test-api-key';
@@ -29,7 +30,7 @@ describe('RebrickableService', function (): void {
                 ]),
             ]);
 
-            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL);
+            $service = new RebrickableService(resolve(HttpFactory::class), TEST_API_KEY, TEST_BASE_URL);
 
             // act
             $result = $service->fetchSet('75192-1');
@@ -54,7 +55,7 @@ describe('RebrickableService', function (): void {
                 'https://rebrickable.com/api/v3/lego/sets/invalid/' => Http::response([], 404),
             ]);
 
-            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL);
+            $service = new RebrickableService(resolve(HttpFactory::class), TEST_API_KEY, TEST_BASE_URL);
 
             // act & assert
             expect(fn (): LegoSetData => $service->fetchSet('invalid'))->toThrow(SetNotFoundException::class);
@@ -66,7 +67,7 @@ describe('RebrickableService', function (): void {
                 'https://rebrickable.com/api/v3/lego/sets/75192-1/' => Http::response([], 500),
             ]);
 
-            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL);
+            $service = new RebrickableService(resolve(HttpFactory::class), TEST_API_KEY, TEST_BASE_URL);
 
             // act & assert
             expect(fn (): LegoSetData => $service->fetchSet('75192-1'))->toThrow(RebrickableApiException::class);
@@ -85,7 +86,7 @@ describe('RebrickableService', function (): void {
                 ]),
             ]);
 
-            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL);
+            $service = new RebrickableService(resolve(HttpFactory::class), TEST_API_KEY, TEST_BASE_URL);
 
             // act
             $result = $service->fetchSet('10281-1');
@@ -104,7 +105,7 @@ describe('RebrickableService', function (): void {
                 ]),
             ]);
 
-            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL);
+            $service = new RebrickableService(resolve(HttpFactory::class), TEST_API_KEY, TEST_BASE_URL);
 
             // act & assert
             expect(fn (): LegoSetData => $service->fetchSet('75192-1'))->toThrow(InvalidApiResponseException::class);
@@ -123,7 +124,7 @@ describe('RebrickableService', function (): void {
                 ]),
             ]);
 
-            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL);
+            $service = new RebrickableService(resolve(HttpFactory::class), TEST_API_KEY, TEST_BASE_URL);
 
             // act
             $result = $service->fetchSet('10281-1');
@@ -146,7 +147,7 @@ describe('RebrickableService', function (): void {
                 ]),
             ]);
 
-            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL);
+            $service = new RebrickableService(resolve(HttpFactory::class), TEST_API_KEY, TEST_BASE_URL);
 
             // act
             $result = $service->fetchSet('10281-1');
@@ -162,7 +163,7 @@ describe('RebrickableService', function (): void {
                 'https://rebrickable.com/api/v3/lego/sets/75192-1/' => Http::response('invalid'),
             ]);
 
-            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL);
+            $service = new RebrickableService(resolve(HttpFactory::class), TEST_API_KEY, TEST_BASE_URL);
 
             // act & assert
             expect(fn (): LegoSetData => $service->fetchSet('75192-1'))->toThrow(InvalidApiResponseException::class);
@@ -187,7 +188,7 @@ describe('RebrickableService', function (): void {
                 ]),
             ]);
 
-            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL);
+            $service = new RebrickableService(resolve(HttpFactory::class), TEST_API_KEY, TEST_BASE_URL);
 
             // act
             $result = $service->fetchSetParts('75192-1');
@@ -231,7 +232,7 @@ describe('RebrickableService', function (): void {
                 ]),
             ]);
 
-            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL);
+            $service = new RebrickableService(resolve(HttpFactory::class), TEST_API_KEY, TEST_BASE_URL);
 
             // act
             $result = $service->fetchSetParts('75192-1');
@@ -257,7 +258,7 @@ describe('RebrickableService', function (): void {
                 'https://rebrickable.com/api/v3/lego/sets/75192-1/parts/' => Http::response([], 500),
             ]);
 
-            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL);
+            $service = new RebrickableService(resolve(HttpFactory::class), TEST_API_KEY, TEST_BASE_URL);
 
             // act & assert
             expect(fn (): array => $service->fetchSetParts('75192-1'))->toThrow(RebrickableApiException::class);
@@ -269,7 +270,7 @@ describe('RebrickableService', function (): void {
                 'https://rebrickable.com/api/v3/lego/sets/75192-1/parts/' => Http::response('invalid'),
             ]);
 
-            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL);
+            $service = new RebrickableService(resolve(HttpFactory::class), TEST_API_KEY, TEST_BASE_URL);
 
             // act & assert
             expect(fn (): array => $service->fetchSetParts('75192-1'))->toThrow(InvalidApiResponseException::class);
@@ -284,7 +285,7 @@ describe('RebrickableService', function (): void {
                 ]),
             ]);
 
-            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL);
+            $service = new RebrickableService(resolve(HttpFactory::class), TEST_API_KEY, TEST_BASE_URL);
 
             // act & assert
             expect(fn (): array => $service->fetchSetParts('75192-1'))->toThrow(InvalidApiResponseException::class);
@@ -301,7 +302,7 @@ describe('RebrickableService', function (): void {
                 ]),
             ]);
 
-            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL);
+            $service = new RebrickableService(resolve(HttpFactory::class), TEST_API_KEY, TEST_BASE_URL);
 
             // act & assert
             expect(fn (): array => $service->fetchSetParts('75192-1'))->toThrow(InvalidApiResponseException::class);
@@ -321,7 +322,7 @@ describe('RebrickableService', function (): void {
                 ]),
             ]);
 
-            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL);
+            $service = new RebrickableService(resolve(HttpFactory::class), TEST_API_KEY, TEST_BASE_URL);
 
             // act & assert
             expect(fn (): array => $service->fetchSetParts('75192-1'))->toThrow(InvalidApiResponseException::class);
@@ -344,7 +345,7 @@ describe('RebrickableService', function (): void {
                 ]),
             ]);
 
-            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL);
+            $service = new RebrickableService(resolve(HttpFactory::class), TEST_API_KEY, TEST_BASE_URL);
 
             // act & assert
             expect(fn (): array => $service->fetchSetParts('75192-1'))->toThrow(InvalidApiResponseException::class);
@@ -367,7 +368,7 @@ describe('RebrickableService', function (): void {
                 ]),
             ]);
 
-            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL);
+            $service = new RebrickableService(resolve(HttpFactory::class), TEST_API_KEY, TEST_BASE_URL);
 
             // act & assert
             expect(fn (): array => $service->fetchSetParts('75192-1'))->toThrow(InvalidApiResponseException::class);
@@ -390,7 +391,7 @@ describe('RebrickableService', function (): void {
                 ]),
             ]);
 
-            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL);
+            $service = new RebrickableService(resolve(HttpFactory::class), TEST_API_KEY, TEST_BASE_URL);
 
             // act & assert
             expect(fn (): array => $service->fetchSetParts('75192-1'))->toThrow(InvalidApiResponseException::class);
@@ -413,7 +414,7 @@ describe('RebrickableService', function (): void {
                 ]),
             ]);
 
-            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL);
+            $service = new RebrickableService(resolve(HttpFactory::class), TEST_API_KEY, TEST_BASE_URL);
 
             // act & assert
             expect(fn (): array => $service->fetchSetParts('75192-1'))->toThrow(InvalidApiResponseException::class);
@@ -441,7 +442,7 @@ describe('RebrickableService', function (): void {
                 ]),
             ]);
 
-            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL);
+            $service = new RebrickableService(resolve(HttpFactory::class), TEST_API_KEY, TEST_BASE_URL);
 
             // act
             $result = $service->fetchSetParts('75192-1');
@@ -476,7 +477,7 @@ describe('RebrickableService', function (): void {
                 ]),
             ]);
 
-            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL);
+            $service = new RebrickableService(resolve(HttpFactory::class), TEST_API_KEY, TEST_BASE_URL);
 
             // act
             $pages = iterator_to_array($service->fetchUserSets('user-token-123'));
@@ -531,7 +532,7 @@ describe('RebrickableService', function (): void {
                 ]),
             ]);
 
-            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL);
+            $service = new RebrickableService(resolve(HttpFactory::class), TEST_API_KEY, TEST_BASE_URL);
 
             // act
             $pages = iterator_to_array($service->fetchUserSets('user-token-123'));
@@ -552,7 +553,7 @@ describe('RebrickableService', function (): void {
                 ]),
             ]);
 
-            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL);
+            $service = new RebrickableService(resolve(HttpFactory::class), TEST_API_KEY, TEST_BASE_URL);
 
             // act
             $pages = iterator_to_array($service->fetchUserSets('user-token-123'));
@@ -568,7 +569,7 @@ describe('RebrickableService', function (): void {
                 'https://rebrickable.com/api/v3/users/user-token-123/sets/' => Http::response([], 401),
             ]);
 
-            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL);
+            $service = new RebrickableService(resolve(HttpFactory::class), TEST_API_KEY, TEST_BASE_URL);
 
             // act & assert
             expect(fn (): array => iterator_to_array($service->fetchUserSets('user-token-123')))->toThrow(RebrickableApiException::class);
@@ -580,7 +581,7 @@ describe('RebrickableService', function (): void {
                 'https://rebrickable.com/api/v3/users/user-token-123/sets/' => Http::response('invalid'),
             ]);
 
-            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL);
+            $service = new RebrickableService(resolve(HttpFactory::class), TEST_API_KEY, TEST_BASE_URL);
 
             // act & assert
             expect(fn (): array => iterator_to_array($service->fetchUserSets('user-token-123')))->toThrow(InvalidApiResponseException::class);
@@ -595,7 +596,7 @@ describe('RebrickableService', function (): void {
                 ]),
             ]);
 
-            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL);
+            $service = new RebrickableService(resolve(HttpFactory::class), TEST_API_KEY, TEST_BASE_URL);
 
             // act & assert
             expect(fn (): array => iterator_to_array($service->fetchUserSets('user-token-123')))->toThrow(InvalidApiResponseException::class);
@@ -614,7 +615,7 @@ describe('RebrickableService', function (): void {
                 ]),
             ]);
 
-            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL);
+            $service = new RebrickableService(resolve(HttpFactory::class), TEST_API_KEY, TEST_BASE_URL);
 
             // act & assert
             expect(fn (): array => iterator_to_array($service->fetchUserSets('user-token-123')))->toThrow(InvalidApiResponseException::class);
@@ -634,7 +635,7 @@ describe('RebrickableService', function (): void {
                 ]),
             ]);
 
-            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL);
+            $service = new RebrickableService(resolve(HttpFactory::class), TEST_API_KEY, TEST_BASE_URL);
 
             // act & assert
             expect(fn (): array => iterator_to_array($service->fetchUserSets('user-token-123')))->toThrow(InvalidApiResponseException::class);
@@ -657,7 +658,7 @@ describe('RebrickableService', function (): void {
                 ]),
             ]);
 
-            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL);
+            $service = new RebrickableService(resolve(HttpFactory::class), TEST_API_KEY, TEST_BASE_URL);
 
             // act & assert
             expect(fn (): array => iterator_to_array($service->fetchUserSets('user-token-123')))->toThrow(InvalidApiResponseException::class);
@@ -674,7 +675,7 @@ describe('RebrickableService', function (): void {
                 ]),
             ]);
 
-            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL);
+            $service = new RebrickableService(resolve(HttpFactory::class), TEST_API_KEY, TEST_BASE_URL);
 
             // act & assert
             expect(fn (): array => iterator_to_array($service->fetchUserSets('user-token-123')))->toThrow(InvalidApiResponseException::class);
@@ -705,7 +706,7 @@ describe('RebrickableService', function (): void {
                 ]),
             ]);
 
-            $service = new RebrickableService(TEST_API_KEY, TEST_BASE_URL);
+            $service = new RebrickableService(resolve(HttpFactory::class), TEST_API_KEY, TEST_BASE_URL);
 
             // act
             $pages = iterator_to_array($service->fetchUserSets('user-token-123'));
