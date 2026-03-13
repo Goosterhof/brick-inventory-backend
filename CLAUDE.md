@@ -98,19 +98,4 @@ All three must pass before committing.
 
 ## Skills
 
-**IMPORTANT**: When creating files, use the corresponding skill. Skills contain detailed templates and conventions.
-
-| File Path Pattern | Skill | Description |
-|-------------------|-------|-------------|
-| `app/Actions/**/*Action.php` | `/action` | Create Action classes |
-| `app/Http/Controllers/*Controller.php` | `/controller` | Create resource controllers with CRUD operations |
-| `app/Http/Requests/*Request.php` | `/form-request` | Create Form Requests with DTOFormRequest pattern |
-| `app/Http/Resources/*ResourceData.php` | `/resource-data` | Create ResourceData classes for API responses |
-| `app/Models/*.php` | `/model` | Generate models from migrations |
-| `app/Services/*Service.php` | `/service` | Create Service classes for external APIs |
-| `database/factories/*Factory.php` | `/factory` | Generate factories from models |
-| `database/migrations/*.php` | `/migration` | Generate migrations from model names |
-| `tests/Unit/**/*Test.php` | `/unit-test` | Create or run unit tests |
-| `tests/Feature/**/*Test.php` | `/feature-test` | Generate feature tests for controllers |
-
-Also available: `/conventions` — Architecture patterns and code conventions reference.
+When creating files, **always use the matching skill** in `.claude/skills/`. Each skill knows the project's conventions and will read existing code for patterns. Use `/conventions` for architecture reference.
