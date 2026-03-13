@@ -71,27 +71,62 @@ Uses **session-based SPA authentication** with Laravel Sanctum's stateful middle
 
 ## Architecture
 
+### Layer Map
+
+```
+HTTP Request
+  │
+  ├─ Middleware ─── EnsureFamilyOwnership (tenant isolation)
+  │
+  ▼
+Controller (thin, no constructor, method injection only)
+  │  returns JsonResponse or array
+  │
+  ├── FormRequest ──► validates + becomes DTO via interface contract
+  │
+  ▼
+Action (business logic, orchestration)
+  │  single execute() method, final readonly
+  │  can call other Actions and Services
+  │
+  ├── Service ──► external HTTP only (no DB, no Actions)
+  │
+  ▼
+Model (no $fillable/$guarded, explicit property assignment)
+  │  @property PHPDoc, cascadeRelations()
+  │
+  ▼
+ResourceData (final readonly DTO for API responses)
+     from(Model), requiredRelations(), toResponse()
+```
+
+### Cog Inventory
+
+| Layer | Count | Key Examples |
+|-------|-------|--------------|
+| Controllers | 10 | StorageOption, FamilySet, Set, Auth (4) |
+| Actions | 23 | CRUD per domain + Sync (4) + BrickIdentification |
+| Services | 2 | RebrickableService, BrickognizeService |
+| Models | 9 | User, Family, Set, Part, Color, StorageOption, ... |
+| Policies | 6 | Per tenant-scoped resource |
+| Arch Tests | 18 | One per layer + cross-cutting concerns |
+| Migrations | 16 | Schema evolution |
+
 ### Multi-tenancy
-- Tenant isolation based on "families"
-- Shared database with `family_id` column where needed
-- No separate domains per tenant
+
+Tenant isolation by "families" — shared database with `family_id` column. No separate domains per tenant.
 
 ### Authorization
 
-Uses a **single-tier** policy model with three-layer defense in depth:
+Single-tier policy model with three-layer defense in depth:
 
-1. **`EnsureFamilyOwnership` middleware** — Tenant isolation. Returns 404 if the resource doesn't belong to the user's family. Applied to all tenant-scoped routes.
-2. **Policies** (`app/Policies/`) — Permission checks. `final readonly` classes, auto-discovered. Enforced via `->can()` on routes (e.g., `->can('view', 'storage_option')` or `->can('viewAny', StorageOption::class)`). Controllers must **not** inject `Gate` or call `->authorize()` — authorization lives entirely in the routing layer.
-3. **FormRequest closure rules** — Body parameter validation that the middleware cannot reach (e.g., validating `parent_id` belongs to the user's family).
+1. **`EnsureFamilyOwnership` middleware** — returns 404 if resource doesn't belong to user's family
+2. **Policies** — `final readonly`, enforced via `->can()` on routes. No `Gate` injection, no `->authorize()`
+3. **FormRequest closure rules** — body parameter validation the middleware can't reach
 
-Architecture tests in `tests/Architecture/PolicyArchitectureTest.php` enforce naming, `final readonly`, no Gate injection in controllers, no `->authorize()` calls, and `can:` middleware presence on all authorized routes.
+### Decisions
 
-### Code Patterns
-- **Action classes**: Business logic and orchestration (single-responsibility)
-- **Service classes**: External API connections only (e.g., `RebrickableService`)
-- **ResourceData classes**: DTO-style classes for API responses
-- **DTOFormRequest pattern**: Form Requests that act as DTOs with interface contracts
-- **Standard Laravel**: Controllers, Models for the rest
+Key architectural decisions are recorded in `docs/adr/`. Each ADR captures what was chosen, what was rejected, and what enforces it. See the [ADR index](docs/adr/README.md).
 
 Use `/conventions` skill for detailed patterns on Action vs Service responsibilities, exception handling, and architecture rules.
 
