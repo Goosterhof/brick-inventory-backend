@@ -7,438 +7,48 @@ allowed-tools: Read, Grep, Glob, Write, Bash(composer lint, composer phpstan, co
 
 # Factory Skill
 
-Generate a Laravel factory based on an existing Eloquent model.
-
-## Arguments
-
-Parse `$ARGUMENTS` to get the model name (e.g., `User`, `StorageOption`).
+Generate a factory from an existing model. Parse `$ARGUMENTS` for the model name.
 
 ## Workflow
 
-### Step 1: Find the Model
+1. Find model in `app/Models/` — stop if missing
+2. Parse `@property` PHPDoc and relationships from model
+3. Find migration for constraints (unique, nullable, defaults)
+4. Generate factory at `database/factories/` (mirror model namespace structure)
+5. Run `composer lint`, `composer phpstan`, `composer test:arch`
 
-Search for the model file:
+Read existing factories for the template pattern.
 
-1. Look in `app/Models/` for `{ModelName}.php`
-2. If not found, search subdirectories: `app/Models/**/{ModelName}.php`
-3. If no model found, stop and tell the user:
-   > "No model found for `{ModelName}`. Please create one first using the `/model` skill."
+## Foreign Key Detection Priority (CRITICAL)
 
-Record the model's namespace path (e.g., `App\Models\Inventory\Part`).
+A column is a **foreign key** if the migration uses `foreignId()`/`->constrained()` OR the model has a `BelongsTo` for it.
 
-### Step 2: Parse the Model
+| Type | Example | Faker |
+|------|---------|-------|
+| Required FK | `family_id` with `BelongsTo` | `Family::factory()` |
+| Nullable FK | `parent_id` nullable with `BelongsTo` | `null` |
+| External ID (no relationship) | `rebrickable_id` | `fake()->unique()->randomNumber(4)` |
 
-Extract from the model's `@property` PHPDoc annotations:
+**If `*_id` has no constraint and no relationship, it's an external identifier — not a FK.**
 
-- **Property names**: The column names
-- **Property types**: PHP types including nullability
-- **Enum types**: Properties with enum class types
+## State Methods
 
-Extract relationships by looking for methods returning:
-- `BelongsTo` - indicates a `*_id` foreign key
-- Self-referential relationships (e.g., `parent_id` pointing to same model)
+| Relationship Type | Method Name | Notes |
+|-------------------|-------------|-------|
+| Required FK | `for{Relation}(Model $m)` | Sets the FK |
+| Nullable/optional | `with{Relation}(Model $m)` | Sets the FK |
+| Self-referential | `withParent(Model $p)` | Also copies `family_id` if tenant-scoped |
 
-### Step 3: Find the Migration
+## Password Fields
 
-Search for the corresponding migration to extract constraints:
-
-1. Convert model name to table name (e.g., `StorageOption` → `storage_options`)
-2. Look in `database/migrations/` for `Schema::create('{table_name}'`
-3. Extract:
-   - `unique()` constraints
-   - `nullable()` columns
-   - Default values
-
-### Step 4: Determine Factory Path
-
-Mirror the model's namespace structure:
-
-| Model Location | Factory Location |
-|----------------|------------------|
-| `App\Models\User` | `database/factories/UserFactory.php` |
-| `App\Models\Inventory\Part` | `database/factories/Inventory/PartFactory.php` |
-
-Create subdirectories if needed.
-
-### Step 5: Map Properties to Faker Methods
-
-**IMPORTANT: Detection Priority**
-
-Foreign key detection takes precedence over column name patterns. A column is a **foreign key** if:
-1. The migration uses `foreignId()` or `->constrained()` for it, OR
-2. The model has a `BelongsTo` relationship method for it
-
-If a `*_id` column is NOT a foreign key (no constraint, no relationship), treat it as an external identifier.
-
-**Foreign keys (detected via migration/relationships):**
-
-| Constraint | Faker Method |
-|------------|--------------|
-| Required FK | `RelatedModel::factory()` |
-| Nullable FK | `null` |
-
-Example - `family_id` with `BelongsTo` relationship → `Family::factory()`
-
-**External identifiers (non-FK `*_id` columns):**
-
-| Pattern | Faker Method | Example |
-|---------|--------------|---------|
-| `rebrickable_id`, `stripe_id`, etc. | `fake()->unique()->randomNumber(4)` | External API IDs |
-
-Example - `rebrickable_id` with no relationship → `fake()->unique()->randomNumber(4)`
-
-**By column name patterns (non-FK columns):**
-
-| Pattern | Faker Method |
-|---------|--------------|
-| `email` | `fake()->unique()->safeEmail()` |
-| `name` (person) | `fake()->name()` |
-| `name` (thing) | `fake()->words(2, true)` |
-| `password` | `Hash::make('password')` (with static caching) |
-| `*_url` | `fake()->url()` |
-| `*_date` | `fake()->date()` |
-
-**By type:**
-
-| Type | Faker Method |
-|------|--------------|
-| `string` | `fake()->word()` |
-| `string` (nullable) | `fake()->optional()->word()` |
-| `text` | `fake()->sentence()` |
-| `text` (nullable) | `fake()->optional()->sentence()` |
-| `int` | `fake()->randomNumber()` |
-| `int` (with range context) | `fake()->numberBetween(1, 10)` |
-| `bool` | `fake()->boolean()` |
-| `date` | `fake()->date()` |
-| `datetime` / `Carbon` | `fake()->dateTime()` |
-| `array` / `json` | `[]` |
-| Enum class | `fake()->randomElement(EnumClass::cases())` |
-
-**For foreign keys:**
-
-| Constraint | Faker Method |
-|------------|--------------|
-| Required `*_id` | `RelatedModel::factory()` |
-| Nullable `*_id` | `null` |
-
-### Step 6: Generate State Methods
-
-Create state methods for:
-
-**1. Nullable relationships:**
-
-```php
-public function withParent(ParentModel $parent): static
-{
-    return $this->state(fn (array $attributes): array => [
-        'parent_id' => $parent->id,
-    ]);
-}
-```
-
-**2. Self-referential relationships (e.g., `parent_id` pointing to same model):**
-
-```php
-public function withParent(ModelName $parent): static
-{
-    return $this->state(fn (array $attributes): array => [
-        // Include family_id if the model is tenant-scoped
-        'family_id' => $parent->family_id,
-        'parent_id' => $parent->id,
-    ]);
-}
-```
-
-**3. All relationships get a state method** for flexibility in tests:
-
-```php
-public function forFamily(Family $family): static
-{
-    return $this->state(fn (array $attributes): array => [
-        'family_id' => $family->id,
-    ]);
-}
-
-public function forUser(User $user): static
-{
-    return $this->state(fn (array $attributes): array => [
-        'user_id' => $user->id,
-    ]);
-}
-```
-
-**Naming conventions:**
-- Nullable/optional: `with{Relationship}` (e.g., `withParent`)
-- Required: `for{Relationship}` (e.g., `forFamily`, `forUser`)
-
-### Step 7: Generate the Factory
-
-Create the file with this structure:
-
-```php
-<?php
-
-declare(strict_types=1);
-
-namespace Database\Factories\{SubNamespace};
-
-use App\Models\{SubNamespace}\{ModelName};
-// ... other imports (related models, enums)
-use Illuminate\Database\Eloquent\Factories\Factory;
-
-/**
- * @extends Factory<{ModelName}>
- */
-class {ModelName}Factory extends Factory
-{
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
-    {
-        return [
-            // Properties mapped to faker methods
-        ];
-    }
-
-    // State methods for relationships
-}
-```
-
-**For models with password (like User):**
-
+Use static caching:
 ```php
 protected static ?string $password;
 
-public function definition(): array
-{
-    return [
-        // ...
-        'password' => static::$password ??= Hash::make('password'),
-    ];
-}
+// In definition():
+'password' => static::$password ??= Hash::make('password'),
 ```
 
-### Step 8: Overwrite Handling
+## Overwrite Handling
 
-If the factory file already exists, **ask the user for confirmation** before overwriting:
-
-> "Factory `{FactoryName}` already exists at `{path}`. Do you want to overwrite it? (y/n)"
-
-Only proceed with overwriting if the user confirms.
-
-### Step 9: Validation
-
-After generating the factory:
-
-1. Run `composer lint` to fix code style
-2. Run `composer phpstan` to check for type errors
-3. Run `composer test:arch` to verify architecture rules
-
-All must pass. If any fail, fix the issues before reporting completion.
-
-## Code Conventions
-
-### Strict Types
-
-Always start with:
-
-```php
-<?php
-
-declare(strict_types=1);
-```
-
-### PHPDoc
-
-Include the generic type annotation:
-
-```php
-/**
- * @extends Factory<ModelName>
- */
-```
-
-### Definition Method
-
-Always include the PHPDoc block:
-
-```php
-/**
- * Define the model's default state.
- *
- * @return array<string, mixed>
- */
-public function definition(): array
-```
-
-### State Method Signature
-
-Use this exact signature pattern:
-
-```php
-public function methodName(Type $param): static
-{
-    return $this->state(fn (array $attributes): array => [
-        'column' => $value,
-    ]);
-}
-```
-
-### Imports
-
-Only import what's needed:
-
-- Related model classes for factory calls and state methods
-- Enum classes if used
-- `Illuminate\Support\Facades\Hash` if password field exists
-
-## Example Output
-
-For a model like:
-
-```php
-/**
- * @property positive-int $id
- * @property int $family_id
- * @property int|null $parent_id
- * @property string $name
- * @property string|null $description
- * @property int|null $row
- * @property int|null $column
- * @property Carbon|null $created_at
- * @property Carbon|null $updated_at
- */
-class StorageOption extends Model
-{
-    public function family(): BelongsTo { ... }
-    public function parent(): BelongsTo { ... }
-}
-```
-
-Generate:
-
-```php
-<?php
-
-declare(strict_types=1);
-
-namespace Database\Factories;
-
-use App\Models\Family;
-use App\Models\StorageOption;
-use Illuminate\Database\Eloquent\Factories\Factory;
-
-/**
- * @extends Factory<StorageOption>
- */
-class StorageOptionFactory extends Factory
-{
-    /**
-     * Define the model's default state.
-     *
-     * @return array<string, mixed>
-     */
-    public function definition(): array
-    {
-        return [
-            'family_id' => Family::factory(),
-            'parent_id' => null,
-            'name' => fake()->words(2, true),
-            'description' => fake()->optional()->sentence(),
-            'row' => null,
-            'column' => null,
-        ];
-    }
-
-    public function forFamily(Family $family): static
-    {
-        return $this->state(fn (array $attributes): array => [
-            'family_id' => $family->id,
-        ]);
-    }
-
-    public function withParent(StorageOption $parent): static
-    {
-        return $this->state(fn (array $attributes): array => [
-            'family_id' => $parent->family_id,
-            'parent_id' => $parent->id,
-        ]);
-    }
-}
-```
-
-## Example with External Identifiers
-
-For a model with external IDs (non-FK `*_id` columns):
-
-```php
-/**
- * @property positive-int $id
- * @property int $rebrickable_id    // No BelongsTo relationship = external ID
- * @property string $name
- * @property string $rgb
- * @property bool $is_transparent
- */
-class Color extends Model
-{
-    // No rebrickable() relationship - it's an external identifier
-}
-```
-
-Generate:
-
-```php
-public function definition(): array
-{
-    return [
-        'rebrickable_id' => fake()->unique()->randomNumber(4),  // External ID, not a FK
-        'name' => fake()->colorName(),
-        'rgb' => fake()->hexColor(),
-        'is_transparent' => fake()->boolean(20),
-    ];
-}
-```
-
-**Contrast with foreign keys:**
-
-```php
-// This IS a foreign key (has BelongsTo relationship)
-'family_id' => Family::factory(),
-
-// This is NOT a foreign key (no relationship, external API ID)
-'rebrickable_id' => fake()->unique()->randomNumber(4),
-```
-
-## Example with Enums
-
-For a model with enum properties:
-
-```php
-/**
- * @property FamilySetStatus $status
- */
-class FamilySet extends Model
-```
-
-Generate:
-
-```php
-use App\Enums\FamilySetStatus;
-
-public function definition(): array
-{
-    return [
-        'status' => fake()->randomElement(FamilySetStatus::cases()),
-    ];
-}
-```
-
-## After Generation
-
-Report to the user:
-1. The created factory file path
-2. Any state methods that were generated
-3. Confirmation that all validation passed
+If factory already exists, **ask user for confirmation** before overwriting.
