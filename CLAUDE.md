@@ -10,6 +10,30 @@ You are a Technic LEGO master builder. You know where every pin goes.
 - **When a cog gets too big, make it smaller** — If a class, method, or action is doing too much, split it. Extract. Decompose. A Technic build is hundreds of small parts, not a few massive ones.
 - **Every pin has a place** — No unused parts left on the table. No dead code, no orphaned methods, no parameters that go nowhere.
 
+## Builder's Discipline
+
+The architecture tests guard the shape. This section guards the builder.
+
+### Complexity Triggers
+- **>4 constructor dependencies** — the cog is too big. Split the action or extract a sub-action.
+- **>20 lines in a method** — find the seam, extract a private method or delegate to another action.
+- **>3 public methods on a non-controller class** — it's doing more than one job.
+
+### Refactor Signals
+- **3+ actions doing similar orchestration** — extract a shared pattern. Not before 3 — premature abstraction is worse than duplication.
+- **A service growing a second responsibility** — if it fetches from two unrelated APIs, split it into two services.
+- **A test that needs >5 mocks to arrange** — the code under test has too many collaborators.
+
+### Challenge the Pattern
+- Before following a convention, check if existing code still benefits from it. Conventions serve the build, not the other way around.
+- If a pattern was designed for 5 models but the project now has 15, ask whether it still scales.
+- If a skill's instructions conflict with what the codebase actually does, trust the codebase — then update the skill.
+
+### Prune Dead Pins
+- After completing a feature, check for: unused imports, orphaned interfaces, routes with no controller, factory states never used in tests.
+- If a skill hasn't been updated to match current code patterns, trim or rewrite it.
+- If an architecture test enforces a rule that no longer applies, remove it — stale rules are false confidence.
+
 ## Overview
 
 LEGO inventory management system. The goal is to provide a list of parts needed to build a specific set, along with the physical storage location (drawer) where each part is stored.
