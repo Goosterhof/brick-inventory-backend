@@ -12,6 +12,11 @@ declare(strict_types=1);
 | - Concrete leaf classes (no subclasses) must be final
 | - Named static constructors preferred over raw `new`
 |
+| Allowed base classes:
+| - RuntimeException — programmer errors / bugs (e.g. missing eager-load)
+| - Exception — domain / business rule violations
+| - App\Exceptions\* — project-specific base classes (e.g. ExternalApiException)
+|
 */
 
 arch('exceptions should live in the Exceptions namespace')
@@ -58,5 +63,43 @@ it('should have all leaf exception classes as final', function (): void {
 
     expect($nonFinalLeaves)->toBeEmpty(
         'Leaf exception classes (no subclasses) must be final: ' . implode(', ', $nonFinalLeaves),
+    );
+});
+
+it('should only extend allowed base exception classes', function (): void {
+    $exceptionsDir = dirname(__DIR__, 2) . '/app/Exceptions';
+    $classes = getClassesInDirectory($exceptionsDir, 'App\\Exceptions\\');
+
+    $allowedBases = [
+        'Exception',
+        'RuntimeException',
+    ];
+
+    $violations = [];
+    foreach ($classes as $class) {
+        $reflection = new ReflectionClass($class);
+        $parent = $reflection->getParentClass();
+
+        if ($parent === false) {
+            continue;
+        }
+
+        $parentName = $parent->getName();
+
+        // Allow extending another App\Exceptions class
+        if (str_starts_with($parentName, 'App\\Exceptions\\')) {
+            continue;
+        }
+
+        // Allow extending Exception or RuntimeException directly
+        if (in_array($parentName, $allowedBases, true)) {
+            continue;
+        }
+
+        $violations[] = sprintf('%s extends %s', $class, $parentName);
+    }
+
+    expect($violations)->toBeEmpty(
+        'Exceptions must extend Exception, RuntimeException, or an App\\Exceptions class. Violations: ' . implode(', ', $violations),
     );
 });
