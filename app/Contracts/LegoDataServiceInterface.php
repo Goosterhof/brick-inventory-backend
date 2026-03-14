@@ -24,6 +24,15 @@ interface LegoDataServiceInterface
     public function fetchSet(string $setNum): LegoSetData;
 
     /**
+     * Search for a LEGO set by its EAN barcode.
+     *
+     * @throws SetNotFoundException
+     * @throws RebrickableApiException
+     * @throws InvalidApiResponseException
+     */
+    public function fetchSetByEan(string $ean): LegoSetData;
+
+    /**
      * Fetch all parts for a LEGO set.
      *
      * @throws RebrickableApiException

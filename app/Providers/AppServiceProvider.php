@@ -36,6 +36,7 @@ class AppServiceProvider extends ServiceProvider
     {
         Gate::define('identify', [BrickIdentificationPolicy::class, 'identify']);
         Gate::define('viewParts', [SetPolicy::class, 'viewParts']);
+        Gate::define('lookupByEan', [SetPolicy::class, 'lookupByEan']);
 
         $enabled = !app()->environment('testing');
 

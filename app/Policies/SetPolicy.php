@@ -12,4 +12,9 @@ final readonly class SetPolicy
     {
         return true;
     }
+
+    public function lookupByEan(User $user): bool
+    {
+        return true;
+    }
 }

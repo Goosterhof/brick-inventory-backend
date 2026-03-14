@@ -16,4 +16,12 @@ final class SetNotFoundException extends RebrickableApiException
             statusCode: 404,
         );
     }
+
+    public static function forEan(string $ean): self
+    {
+        return new self(
+            message: sprintf("No set found for EAN '%s' in Rebrickable", $ean),
+            statusCode: 404,
+        );
+    }
 }

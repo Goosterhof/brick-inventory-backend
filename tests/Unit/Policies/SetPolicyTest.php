@@ -15,4 +15,10 @@ describe('SetPolicy', function (): void {
 
         expect($this->policy->viewParts($user))->toBeTrue();
     });
+
+    it('should allow any user to lookup set by EAN', function (): void {
+        $user = Mockery::mock(User::class);
+
+        expect($this->policy->lookupByEan($user))->toBeTrue();
+    });
 });

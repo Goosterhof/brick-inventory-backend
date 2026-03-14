@@ -226,4 +226,107 @@ describe('SetController', function (): void {
             $this->assertDatabaseHas('parts', ['part_num' => '32525']);
         });
     });
+
+    describe('lookupByEan', function (): void {
+        it('should return 401 for unauthenticated requests', function (): void {
+            $response = $this->getJson('/api/sets/ean/5702016914177');
+
+            $response->assertStatus(401);
+        });
+
+        it('should return set data when EAN matches via rebrickable api', function (): void {
+            $user = User::factory()->create();
+
+            Http::fake([
+                'rebrickable.com/api/v3/lego/sets/*' => Http::response([
+                    'results' => [
+                        [
+                            'set_num' => '75192-1',
+                            'name' => 'Millennium Falcon',
+                            'year' => 2017,
+                            'theme_id' => 158,
+                            'num_parts' => 7541,
+                            'set_img_url' => 'https://example.com/75192.jpg',
+                        ],
+                    ],
+                    'next' => null,
+                ]),
+            ]);
+
+            $response = $this->actingAs($user)->getJson('/api/sets/ean/5702016914177');
+
+            $response->assertStatus(200)
+                ->assertJson([
+                    'set_num' => '75192-1',
+                    'name' => 'Millennium Falcon',
+                    'year' => 2017,
+                    'num_parts' => 7541,
+                    'image_url' => 'https://example.com/75192.jpg',
+                ]);
+
+            $this->assertDatabaseHas('sets', ['set_num' => '75192-1']);
+        });
+
+        it('should return cached set when it already exists in database', function (): void {
+            $user = User::factory()->create();
+
+            $set = Set::factory()->create([
+                'set_num' => '75192-1',
+                'name' => 'Millennium Falcon',
+                'year' => 2017,
+                'theme' => '158',
+                'num_parts' => 7541,
+                'image_url' => 'https://example.com/falcon.jpg',
+            ]);
+
+            Http::fake([
+                'rebrickable.com/api/v3/lego/sets/*' => Http::response([
+                    'results' => [
+                        [
+                            'set_num' => '75192-1',
+                            'name' => 'Millennium Falcon',
+                            'year' => 2017,
+                            'theme_id' => 158,
+                            'num_parts' => 7541,
+                            'set_img_url' => 'https://example.com/75192.jpg',
+                        ],
+                    ],
+                    'next' => null,
+                ]),
+            ]);
+
+            $response = $this->actingAs($user)->getJson('/api/sets/ean/5702016914177');
+
+            $response->assertStatus(200)
+                ->assertJson([
+                    'id' => $set->id,
+                    'set_num' => '75192-1',
+                    'name' => 'Millennium Falcon',
+                ]);
+        });
+
+        it('should return 404 when no set matches the EAN', function (): void {
+            $user = User::factory()->create();
+
+            Http::fake([
+                'rebrickable.com/api/v3/lego/sets/*' => Http::response([
+                    'results' => [],
+                    'next' => null,
+                ]),
+            ]);
+
+            $response = $this->actingAs($user)->getJson('/api/sets/ean/0000000000000');
+
+            $response->assertStatus(404)
+                ->assertJson(['error' => 'Set not found']);
+        });
+
+        it('should return 404 for invalid EAN format', function (): void {
+            $user = User::factory()->create();
+
+            $response = $this->actingAs($user)->getJson('/api/sets/ean/abc');
+
+            $response->assertStatus(404);
+        });
+    });
 });
