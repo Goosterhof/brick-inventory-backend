@@ -6,6 +6,7 @@ namespace App\Contracts;
 
 use App\Data\Brickognize\BrickognizePredictionData;
 use App\Exceptions\BrickognizeApiException;
+use App\Exceptions\InvalidApiResponseException;
 use Illuminate\Http\UploadedFile;
 
 interface BrickIdentificationServiceInterface
@@ -14,6 +15,7 @@ interface BrickIdentificationServiceInterface
      * Identify a LEGO brick from an uploaded image.
      *
      * @throws BrickognizeApiException
+     * @throws InvalidApiResponseException
      *
      * @return list<BrickognizePredictionData>
      */

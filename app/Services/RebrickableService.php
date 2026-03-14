@@ -52,23 +52,8 @@ final readonly class RebrickableService implements LegoDataServiceInterface
 
         $this->validateSetResponse($data, $setNum);
 
-        /** @var array{set_num: string, name: string, year: int, theme_id?: int|null, num_parts: int, set_img_url?: string|null} $data */
-        if (!array_key_exists('theme_id', $data)) {
-            $data['theme_id'] = null;
-        }
-
-        if (!array_key_exists('set_img_url', $data)) {
-            $data['set_img_url'] = null;
-        }
-
-        return new LegoSetData(
-            setNum: $data['set_num'],
-            name: $data['name'],
-            year: $data['year'],
-            themeId: $data['theme_id'],
-            numParts: $data['num_parts'],
-            imageUrl: $data['set_img_url'],
-        );
+        /** @var array<string, mixed> $data Validated by validateSetResponse */
+        return $this->buildLegoSetData($data);
     }
 
     /**
@@ -95,27 +80,12 @@ final readonly class RebrickableService implements LegoDataServiceInterface
             throw SetNotFoundException::forEan($ean);
         }
 
-        /** @var array{set_num: string, name: string, year: int, theme_id?: int|null, num_parts: int, set_img_url?: string|null} $setData */
+        /** @var array<string, mixed> $setData */
         $setData = $data['results'][0];
 
         $this->validateSetResponse($setData, sprintf("EAN '%s'", $ean));
 
-        if (!array_key_exists('theme_id', $setData)) {
-            $setData['theme_id'] = null;
-        }
-
-        if (!array_key_exists('set_img_url', $setData)) {
-            $setData['set_img_url'] = null;
-        }
-
-        return new LegoSetData(
-            setNum: $setData['set_num'],
-            name: $setData['name'],
-            year: $setData['year'],
-            themeId: $setData['theme_id'],
-            numParts: $setData['num_parts'],
-            imageUrl: $setData['set_img_url'],
-        );
+        return $this->buildLegoSetData($setData);
     }
 
     /**
@@ -211,6 +181,22 @@ final readonly class RebrickableService implements LegoDataServiceInterface
 
             $nextUrl = $this->sanitizePaginationUrl($validatedData['next']);
         }
+    }
+
+    /**
+     * @param array<string, mixed> $data
+     */
+    private function buildLegoSetData(array $data): LegoSetData
+    {
+        /** @var array{set_num: string, name: string, year: int, theme_id?: int|null, num_parts: int, set_img_url?: string|null} $data */
+        return new LegoSetData(
+            setNum: $data['set_num'],
+            name: $data['name'],
+            year: $data['year'],
+            themeId: $data['theme_id'] ?? null,
+            numParts: $data['num_parts'],
+            imageUrl: $data['set_img_url'] ?? null,
+        );
     }
 
     private function sanitizePaginationUrl(?string $absoluteUrl): ?string
