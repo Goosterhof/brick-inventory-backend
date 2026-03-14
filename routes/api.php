@@ -35,6 +35,11 @@ Route::get('/sets/{setNum}/parts', [SetController::class, 'parts'])
     ->middleware('auth:sanctum')
     ->can('viewParts');
 
+Route::get('/sets/ean/{ean}', [SetController::class, 'lookupByEan'])
+    ->where('ean', '\d{8,14}')
+    ->middleware('auth:sanctum')
+    ->can('lookupByEan');
+
 Route::middleware(['auth:sanctum', 'family.ownership'])->group(function (): void {
     // Storage Options
     Route::get('/storage-options', [StorageOptionController::class, 'index'])

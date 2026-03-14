@@ -72,6 +72,53 @@ final readonly class RebrickableService implements LegoDataServiceInterface
     }
 
     /**
+     * @throws SetNotFoundException
+     * @throws RebrickableApiException
+     * @throws InvalidApiResponseException
+     */
+    public function fetchSetByEan(string $ean): LegoSetData
+    {
+        $response = $this->httpClient()->get('/lego/sets/', ['search' => $ean]);
+
+        $this->throwOnApiError($response, sprintf("Failed to search for set by EAN '%s'", $ean));
+
+        $data = $response->json();
+
+        if (!is_array($data) || !array_key_exists('results', $data) || !is_array($data['results'])) {
+            throw InvalidApiResponseException::invalidStructure(
+                sprintf("Searching for set by EAN '%s'", $ean),
+                "Missing or invalid 'results' field",
+            );
+        }
+
+        if ($data['results'] === []) {
+            throw SetNotFoundException::forEan($ean);
+        }
+
+        /** @var array{set_num: string, name: string, year: int, theme_id?: int|null, num_parts: int, set_img_url?: string|null} $setData */
+        $setData = $data['results'][0];
+
+        $this->validateSetResponse($setData, sprintf("EAN '%s'", $ean));
+
+        if (!array_key_exists('theme_id', $setData)) {
+            $setData['theme_id'] = null;
+        }
+
+        if (!array_key_exists('set_img_url', $setData)) {
+            $setData['set_img_url'] = null;
+        }
+
+        return new LegoSetData(
+            setNum: $setData['set_num'],
+            name: $setData['name'],
+            year: $setData['year'],
+            themeId: $setData['theme_id'],
+            numParts: $setData['num_parts'],
+            imageUrl: $setData['set_img_url'],
+        );
+    }
+
+    /**
      * @throws RebrickableApiException
      * @throws InvalidApiResponseException
      *

@@ -44,6 +44,7 @@ it('should have can middleware on all authorized routes', function (): void {
         ['POST', 'identify-brick'],
         // Sets
         ['GET', 'sets/{setNum}/parts'],
+        ['GET', 'sets/ean/{ean}'],
     ];
 
     $routes = Route::getRoutes();

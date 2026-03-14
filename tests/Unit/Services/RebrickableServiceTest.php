@@ -170,6 +170,113 @@ describe('RebrickableService', function (): void {
         });
     });
 
+    describe('fetchSetByEan', function (): void {
+        it('should return set data when EAN matches a set', function (): void {
+            // arrange
+            Http::fake([
+                'https://rebrickable.com/api/v3/lego/sets/*' => Http::response([
+                    'results' => [
+                        [
+                            'set_num' => '75192-1',
+                            'name' => 'Millennium Falcon',
+                            'year' => 2017,
+                            'theme_id' => 158,
+                            'num_parts' => 7541,
+                            'set_img_url' => 'https://example.com/75192.jpg',
+                        ],
+                    ],
+                    'next' => null,
+                ]),
+            ]);
+
+            $service = new RebrickableService(resolve(HttpFactory::class), TEST_API_KEY, TEST_BASE_URL);
+
+            // act
+            $result = $service->fetchSetByEan('5702016914177');
+
+            // assert
+            expect($result)->toBeInstanceOf(LegoSetData::class);
+            expect($result->setNum)->toBe('75192-1');
+            expect($result->name)->toBe('Millennium Falcon');
+            expect($result->year)->toBe(2017);
+            expect($result->themeId)->toBe(158);
+            expect($result->numParts)->toBe(7541);
+            expect($result->imageUrl)->toBe('https://example.com/75192.jpg');
+
+            Http::assertSent(fn ($request): bool => str_contains((string) $request->url(), '/lego/sets/')
+                && str_contains((string) $request->url(), 'search=5702016914177')
+                && $request->method() === 'GET'
+                && $request->header('Authorization') === ['key ' . TEST_API_KEY]);
+        });
+
+        it('should throw SetNotFoundException when no results match EAN', function (): void {
+            // arrange
+            Http::fake([
+                'https://rebrickable.com/api/v3/lego/sets/*' => Http::response([
+                    'results' => [],
+                    'next' => null,
+                ]),
+            ]);
+
+            $service = new RebrickableService(resolve(HttpFactory::class), TEST_API_KEY, TEST_BASE_URL);
+
+            // act & assert
+            expect(fn (): LegoSetData => $service->fetchSetByEan('0000000000000'))->toThrow(SetNotFoundException::class);
+        });
+
+        it('should throw RebrickableApiException on server error', function (): void {
+            // arrange
+            Http::fake([
+                'https://rebrickable.com/api/v3/lego/sets/*' => Http::response([], 500),
+            ]);
+
+            $service = new RebrickableService(resolve(HttpFactory::class), TEST_API_KEY, TEST_BASE_URL);
+
+            // act & assert
+            expect(fn (): LegoSetData => $service->fetchSetByEan('5702016914177'))->toThrow(RebrickableApiException::class);
+        });
+
+        it('should throw InvalidApiResponseException when response has no results field', function (): void {
+            // arrange
+            Http::fake([
+                'https://rebrickable.com/api/v3/lego/sets/*' => Http::response([
+                    'data' => [],
+                ]),
+            ]);
+
+            $service = new RebrickableService(resolve(HttpFactory::class), TEST_API_KEY, TEST_BASE_URL);
+
+            // act & assert
+            expect(fn (): LegoSetData => $service->fetchSetByEan('5702016914177'))->toThrow(InvalidApiResponseException::class);
+        });
+
+        it('should handle missing theme_id and set_img_url in result', function (): void {
+            // arrange
+            Http::fake([
+                'https://rebrickable.com/api/v3/lego/sets/*' => Http::response([
+                    'results' => [
+                        [
+                            'set_num' => '10281-1',
+                            'name' => 'Bonsai Tree',
+                            'year' => 2021,
+                            'num_parts' => 878,
+                        ],
+                    ],
+                    'next' => null,
+                ]),
+            ]);
+
+            $service = new RebrickableService(resolve(HttpFactory::class), TEST_API_KEY, TEST_BASE_URL);
+
+            // act
+            $result = $service->fetchSetByEan('5702016914177');
+
+            // assert
+            expect($result->themeId)->toBeNull();
+            expect($result->imageUrl)->toBeNull();
+        });
+    });
+
     describe('fetchSetParts', function (): void {
         it('should return parts data from API', function (): void {
             // arrange
