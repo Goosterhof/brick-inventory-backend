@@ -103,18 +103,36 @@ final readonly class ImportOwnedSetsAction
         foreach ($pageUserSets as $pageUserSet) {
             $set = $setsByNum[$pageUserSet->set->setNum];
             $existingForSet = $familySetsBySetId[$set->id] ?? [];
-            $existingCount = count($existingForSet);
 
-            if ($existingCount > 1) {
-                $skipped++;
-                $skippedSetNums[] = $pageUserSet->set->setNum;
-            } elseif ($existingCount === 1) {
-                $this->updateExistingFamilySet($existingForSet[0], $pageUserSet->quantity);
-                $updated++;
-            } else {
-                $this->createFamilySet($family, $set, $pageUserSet->quantity);
-                $created++;
-            }
+            $this->syncFamilySet($family, $set, $existingForSet, $pageUserSet, $created, $updated, $skipped, $skippedSetNums);
+        }
+    }
+
+    /**
+     * @param array<FamilySet> $existingForSet
+     * @param array<string> $skippedSetNums
+     */
+    private function syncFamilySet(
+        Family $family,
+        Set $set,
+        array $existingForSet,
+        RebrickableUserSetData $rebrickableUserSetData,
+        int &$created,
+        int &$updated,
+        int &$skipped,
+        array &$skippedSetNums,
+    ): void {
+        $existingCount = count($existingForSet);
+
+        if ($existingCount > 1) {
+            $skipped++;
+            $skippedSetNums[] = $rebrickableUserSetData->set->setNum;
+        } elseif ($existingCount === 1) {
+            $this->updateExistingFamilySet($existingForSet[0], $rebrickableUserSetData->quantity);
+            $updated++;
+        } else {
+            $this->createFamilySet($family, $set, $rebrickableUserSetData->quantity);
+            $created++;
         }
     }
 
