@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Data\Brickognize\BrickognizePredictionData;
 use App\Exceptions\BrickognizeApiException;
+use App\Exceptions\InvalidApiResponseException;
 use App\Services\BrickognizeService;
 use Illuminate\Http\Client\Factory as HttpFactory;
 use Illuminate\Http\UploadedFile;
@@ -87,7 +88,7 @@ describe('BrickognizeService', function (): void {
             expect(fn (): array => $service->identifyBrick($image))->toThrow(BrickognizeApiException::class);
         });
 
-        it('should throw BrickognizeApiException when response is not an array', function (): void {
+        it('should throw InvalidApiResponseException when response is not an array', function (): void {
             // arrange
             Http::fake([
                 'https://api.brickognize.com/predict/' => Http::response('invalid'),
@@ -97,10 +98,10 @@ describe('BrickognizeService', function (): void {
             $image = UploadedFile::fake()->image('brick.jpg');
 
             // act & assert
-            expect(fn (): array => $service->identifyBrick($image))->toThrow(BrickognizeApiException::class);
+            expect(fn (): array => $service->identifyBrick($image))->toThrow(InvalidApiResponseException::class);
         });
 
-        it('should throw BrickognizeApiException when items field is missing', function (): void {
+        it('should throw InvalidApiResponseException when items field is missing', function (): void {
             // arrange
             Http::fake([
                 'https://api.brickognize.com/predict/' => Http::response([
@@ -112,10 +113,10 @@ describe('BrickognizeService', function (): void {
             $image = UploadedFile::fake()->image('brick.jpg');
 
             // act & assert
-            expect(fn (): array => $service->identifyBrick($image))->toThrow(BrickognizeApiException::class);
+            expect(fn (): array => $service->identifyBrick($image))->toThrow(InvalidApiResponseException::class);
         });
 
-        it('should throw BrickognizeApiException when prediction at index is not an array', function (): void {
+        it('should throw InvalidApiResponseException when prediction at index is not an array', function (): void {
             // arrange
             Http::fake([
                 'https://api.brickognize.com/predict/' => Http::response([
@@ -129,10 +130,10 @@ describe('BrickognizeService', function (): void {
             $image = UploadedFile::fake()->image('brick.jpg');
 
             // act & assert
-            expect(fn (): array => $service->identifyBrick($image))->toThrow(BrickognizeApiException::class);
+            expect(fn (): array => $service->identifyBrick($image))->toThrow(InvalidApiResponseException::class);
         });
 
-        it('should throw BrickognizeApiException when prediction is missing required fields', function (): void {
+        it('should throw InvalidApiResponseException when prediction is missing required fields', function (): void {
             // arrange
             Http::fake([
                 'https://api.brickognize.com/predict/' => Http::response([
@@ -149,7 +150,7 @@ describe('BrickognizeService', function (): void {
             $image = UploadedFile::fake()->image('brick.jpg');
 
             // act & assert
-            expect(fn (): array => $service->identifyBrick($image))->toThrow(BrickognizeApiException::class);
+            expect(fn (): array => $service->identifyBrick($image))->toThrow(InvalidApiResponseException::class);
         });
 
         it('should handle integer score values', function (): void {

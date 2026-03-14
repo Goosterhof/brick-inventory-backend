@@ -7,6 +7,7 @@ namespace App\Services;
 use App\Contracts\BrickIdentificationServiceInterface;
 use App\Data\Brickognize\BrickognizePredictionData;
 use App\Exceptions\BrickognizeApiException;
+use App\Exceptions\InvalidApiResponseException;
 use Illuminate\Container\Attributes\Config;
 use Illuminate\Http\Client\Factory as HttpFactory;
 use Illuminate\Http\Client\PendingRequest;
@@ -25,6 +26,7 @@ final readonly class BrickognizeService implements BrickIdentificationServiceInt
      * Identify a LEGO brick from an uploaded image.
      *
      * @throws BrickognizeApiException
+     * @throws InvalidApiResponseException
      *
      * @return list<BrickognizePredictionData>
      */
@@ -66,16 +68,16 @@ final readonly class BrickognizeService implements BrickIdentificationServiceInt
     }
 
     /**
-     * @throws BrickognizeApiException
+     * @throws InvalidApiResponseException
      */
     private function validateResponse(mixed $data): void
     {
         if (!is_array($data)) {
-            throw BrickognizeApiException::invalidResponse('Expected array response');
+            throw InvalidApiResponseException::invalidStructure('Identifying brick', 'Expected array response');
         }
 
         if (!array_key_exists('items', $data) || !is_array($data['items'])) {
-            throw BrickognizeApiException::invalidResponse("Missing or invalid 'items' field");
+            throw InvalidApiResponseException::invalidStructure('Identifying brick', "Missing or invalid 'items' field");
         }
 
         foreach ($data['items'] as $index => $item) {
@@ -84,12 +86,13 @@ final readonly class BrickognizeService implements BrickIdentificationServiceInt
     }
 
     /**
-     * @throws BrickognizeApiException
+     * @throws InvalidApiResponseException
      */
     private function validatePredictionItem(mixed $item, int $index): void
     {
         if (!is_array($item)) {
-            throw BrickognizeApiException::invalidResponse(
+            throw InvalidApiResponseException::invalidStructure(
+                'Identifying brick',
                 sprintf('Prediction at index %d is not an array', $index),
             );
         }
@@ -102,8 +105,9 @@ final readonly class BrickognizeService implements BrickIdentificationServiceInt
         }
 
         if ($missingFields !== []) {
-            throw BrickognizeApiException::invalidResponse(
-                sprintf('Prediction at index %d missing fields: %s', $index, implode(', ', $missingFields)),
+            throw InvalidApiResponseException::missingFields(
+                $missingFields,
+                sprintf('Prediction at index %d', $index),
             );
         }
     }
