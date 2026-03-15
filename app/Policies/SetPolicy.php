@@ -17,4 +17,9 @@ final readonly class SetPolicy
     {
         return true;
     }
+
+    public function viewStorageMap(User $user): bool
+    {
+        return true;
+    }
 }

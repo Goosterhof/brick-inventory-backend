@@ -6,8 +6,11 @@ namespace App\Http\Controllers;
 
 use App\Actions\GetSetByEanAction;
 use App\Actions\GetSetPartsAction;
+use App\Actions\GetSetStorageMapAction;
 use App\Http\Resources\SetSummaryResourceData;
 use App\Http\Resources\SetWithPartsResourceData;
+use App\Models\User;
+use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\JsonResponse;
 
 class SetController extends Controller
@@ -24,5 +27,16 @@ class SetController extends Controller
         $set = $getSetByEanAction->execute($ean);
 
         return SetSummaryResourceData::from($set)->toResponse();
+    }
+
+    public function storageMap(
+        string $setNum,
+        GetSetPartsAction $getSetPartsAction,
+        GetSetStorageMapAction $getSetStorageMapAction,
+        #[CurrentUser] User $user,
+    ): JsonResponse {
+        $set = $getSetPartsAction->execute($setNum);
+
+        return new JsonResponse($getSetStorageMapAction->execute($set, $user->family));
     }
 }
