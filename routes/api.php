@@ -40,6 +40,11 @@ Route::get('/sets/ean/{ean}', [SetController::class, 'lookupByEan'])
     ->middleware('auth:sanctum')
     ->can('lookupByEan');
 
+Route::get('/sets/{setNum}/storage-map', [SetController::class, 'storageMap'])
+    ->where('setNum', '\d+-\d+')
+    ->middleware('auth:sanctum')
+    ->can('viewStorageMap');
+
 Route::middleware(['auth:sanctum', 'family.ownership'])->group(function (): void {
     // Storage Options
     Route::get('/storage-options', [StorageOptionController::class, 'index'])
