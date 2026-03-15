@@ -84,6 +84,8 @@ Route::middleware(['auth:sanctum', 'family.ownership'])->group(function (): void
         ->can('importFromRebrickable', FamilySet::class);
 
     // Family
+    Route::get('/family/parts', [FamilyController::class, 'parts'])
+        ->can('viewParts', Family::class);
     Route::get('/family/stats', [FamilyController::class, 'stats'])
         ->can('viewStats', Family::class);
     Route::put('/family/rebrickable-token', [FamilyController::class, 'setRebrickableToken'])
