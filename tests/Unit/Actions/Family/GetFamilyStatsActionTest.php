@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Actions\Family\GetFamilyStatsAction;
+use App\Enums\FamilySetStatus;
 use App\Models\Family;
 use App\Models\FamilySet;
 use App\Models\StorageOption;
@@ -19,6 +20,9 @@ describe('GetFamilyStatsAction', function (): void {
         $familySetBuilder = Mockery::mock(Builder::class);
         $familySetBuilder->shouldReceive('where')
             ->with('family_id', 3)
+            ->andReturnSelf();
+        $familySetBuilder->shouldReceive('where')
+            ->with('status', '!=', FamilySetStatus::Wishlist)
             ->andReturnSelf();
         $familySetBuilder->shouldReceive('count')->andReturn(5);
         $familySetBuilder->shouldReceive('sum')->with('quantity')->andReturn(12);
