@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Actions\Family;
 
 use App\Data\FamilyStatsData;
+use App\Enums\FamilySetStatus;
 use App\Models\Family;
 use App\Models\FamilySet;
 use App\Models\StorageOption;
@@ -21,7 +22,8 @@ final readonly class GetFamilyStatsAction
     public function execute(Family $family): FamilyStatsData
     {
         $builder = $this->familySet->newQuery()
-            ->where('family_id', $family->id);
+            ->where('family_id', $family->id)
+            ->where('status', '!=', FamilySetStatus::Wishlist);
 
         $totalSets = $builder->count();
 
