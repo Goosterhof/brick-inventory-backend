@@ -10,6 +10,14 @@ describe('FamilyPolicy', function (): void {
         $this->policy = new FamilyPolicy;
     });
 
+    describe('viewMembers', function (): void {
+        it('should allow any authenticated user to view family members', function (): void {
+            $user = Mockery::mock(User::class);
+
+            expect($this->policy->viewMembers($user))->toBeTrue();
+        });
+    });
+
     describe('setRebrickableToken', function (): void {
         it('should allow family head to set rebrickable token', function (): void {
             $user = Mockery::mock(User::class);
