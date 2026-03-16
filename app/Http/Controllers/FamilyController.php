@@ -8,6 +8,7 @@ use App\Actions\Family\GetFamilyPartsAction;
 use App\Actions\Family\GetFamilyStatsAction;
 use App\Actions\Family\SetRebrickableTokenAction;
 use App\Http\Requests\Family\SetRebrickableTokenRequest;
+use App\Http\Resources\FamilyMemberResourceData;
 use App\Http\Resources\FamilyStatsResourceData;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
@@ -15,6 +16,12 @@ use Illuminate\Http\JsonResponse;
 
 class FamilyController extends Controller
 {
+    public function members(
+        #[CurrentUser] User $user,
+    ): JsonResponse {
+        return new JsonResponse(FamilyMemberResourceData::fromFamily($user->family));
+    }
+
     public function parts(
         #[CurrentUser] User $user,
         GetFamilyPartsAction $getFamilyPartsAction,

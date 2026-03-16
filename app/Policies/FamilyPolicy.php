@@ -8,6 +8,11 @@ use App\Models\User;
 
 final readonly class FamilyPolicy
 {
+    public function viewMembers(User $user): bool
+    {
+        return true;
+    }
+
     public function viewParts(User $user): bool
     {
         return true;
