@@ -10,4 +10,5 @@ enum FamilySetStatus: string
     case Built = 'built';
     case InProgress = 'in_progress';
     case Incomplete = 'incomplete';
+    case Wishlist = 'wishlist';
 }
