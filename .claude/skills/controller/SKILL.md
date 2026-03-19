@@ -19,7 +19,7 @@ Before creating, verify these exist (invoke their skills if missing):
 ## Key Rules
 
 - Read existing controllers for the template pattern
-- Actions injected via **constructor**, not method parameters
+- Actions injected via **method parameters**, not constructor
 - Return `JsonResponse` or `array` — never return ResourceData directly
 - Use `->toResponseWithStatus(201)` for created responses
 - No try-catch blocks — exceptions handled globally in `bootstrap/app.php`

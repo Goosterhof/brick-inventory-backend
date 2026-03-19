@@ -128,6 +128,8 @@ Single-tier policy model with three-layer defense in depth:
 
 Key architectural decisions are recorded in `docs/adr/`. Each ADR captures what was chosen, what was rejected, and what enforces it. See the [ADR index](docs/adr/README.md).
 
+This territory is also governed by war-room ADRs: **0002** (Cascade Deletion), **0004** (Import Atomicity), **0009** (ResourceData Pattern), **0011** (Action Architecture), **0012** (FormRequest → DTO Flow), **0016** (Config Attribute Injection). Canonical source: `adrs.script.nl`.
+
 Use `/conventions` skill for detailed patterns on Action vs Service responsibilities, exception handling, and architecture rules.
 
 ## Commands
