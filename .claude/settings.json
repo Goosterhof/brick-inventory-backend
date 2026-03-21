@@ -1,0 +1,28 @@
+{
+    "hooks": {
+        "Stop": [
+            {
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "bash .claude/hooks/minutes-nudge.sh",
+                        "timeout": 5,
+                        "statusMessage": "Checking shift log..."
+                    }
+                ]
+            }
+        ],
+        "SessionEnd": [
+            {
+                "hooks": [
+                    {
+                        "type": "command",
+                        "command": "if [ -f MINUTES.md ] && ! git diff --quiet MINUTES.md 2>/dev/null || ([ -f MINUTES.md ] && ! git ls-files --error-unmatch MINUTES.md >/dev/null 2>&1); then git add MINUTES.md && git commit -m 'docs: auto-commit shift log'; fi",
+                        "timeout": 15,
+                        "statusMessage": "Auto-committing shift log..."
+                    }
+                ]
+            }
+        ]
+    }
+}
