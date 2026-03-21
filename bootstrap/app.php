@@ -37,18 +37,17 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(fn (NotFamilyHeadException $notFamilyHeadException, Request $request): JsonResponse => response()->json(['error' => 'Only the family head can perform this action'], 403));
 
         $exceptions->render(function (RebrickableApiException $rebrickableApiException, Request $request): JsonResponse {
-            $status = $rebrickableApiException->statusCode ?? 500;
-            $message = match ($status) {
+            $message = match ($rebrickableApiException->statusCode) {
                 401 => 'Invalid API key',
                 default => 'Failed to fetch set data',
+            };
+            $status = match ($rebrickableApiException->statusCode) {
+                404 => 404,
+                default => 502,
             };
 
             return response()->json(['error' => $message], $status);
         });
 
-        $exceptions->render(function (BrickognizeApiException $brickognizeApiException, Request $request): JsonResponse {
-            $status = $brickognizeApiException->statusCode ?? 500;
-
-            return response()->json(['error' => 'Failed to identify brick'], $status);
-        });
+        $exceptions->render(fn (BrickognizeApiException $brickognizeApiException, Request $request): JsonResponse => response()->json(['error' => 'Failed to identify brick'], 502));
     })->create();

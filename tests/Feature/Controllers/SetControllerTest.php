@@ -141,7 +141,7 @@ describe('SetController', function (): void {
                 ->assertJson(['error' => 'Set not found']);
         });
 
-        it('should return 401 for invalid api key', function (): void {
+        it('should return 502 for invalid api key', function (): void {
             $user = User::factory()->create();
 
             Http::fake([
@@ -153,7 +153,7 @@ describe('SetController', function (): void {
 
             $response = $this->actingAs($user)->getJson('/api/sets/10281-1/parts');
 
-            $response->assertStatus(401)
+            $response->assertStatus(502)
                 ->assertJson(['error' => 'Invalid API key']);
         });
 
@@ -224,6 +224,54 @@ describe('SetController', function (): void {
 
             $this->assertDatabaseHas('parts', ['part_num' => '32316']);
             $this->assertDatabaseHas('parts', ['part_num' => '32525']);
+        });
+    });
+
+    describe('storageMap', function (): void {
+        it('should return 401 for unauthenticated requests', function (): void {
+            $response = $this->getJson('/api/sets/75192-1/storage-map');
+
+            $response->assertStatus(401);
+        });
+
+        it('should return storage map for a cached set', function (): void {
+            $user = User::factory()->create();
+
+            $set = Set::factory()->create([
+                'set_num' => '75192-1',
+                'name' => 'Millennium Falcon',
+                'year' => 2017,
+                'theme' => 'Star Wars',
+                'num_parts' => 7541,
+                'image_url' => 'https://example.com/falcon.jpg',
+            ]);
+
+            $color = Color::factory()->create([
+                'rebrickable_id' => 1,
+                'name' => 'White',
+                'rgb' => 'FFFFFF',
+                'is_transparent' => false,
+            ]);
+
+            $part = Part::factory()->create([
+                'part_num' => '3001',
+                'name' => 'Brick 2 x 4',
+                'category' => '11',
+                'image_url' => 'https://example.com/3001.jpg',
+            ]);
+
+            $setPart = new SetPart;
+            $setPart->set_id = $set->id;
+            $setPart->part_id = $part->id;
+            $setPart->color_id = $color->id;
+            $setPart->quantity = 10;
+            $setPart->is_spare = false;
+            $setPart->element_id = '300101';
+            $setPart->save();
+
+            $response = $this->actingAs($user)->getJson('/api/sets/75192-1/storage-map');
+
+            $response->assertStatus(200);
         });
     });
 

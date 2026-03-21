@@ -32,17 +32,17 @@ Route::get('/me', MeController::class)->middleware('auth:sanctum');
 
 Route::get('/sets/{setNum}/parts', [SetController::class, 'parts'])
     ->where('setNum', '\d+-\d+')
-    ->middleware('auth:sanctum')
+    ->middleware(['auth:sanctum', 'throttle:rebrickable'])
     ->can('viewParts');
 
 Route::get('/sets/ean/{ean}', [SetController::class, 'lookupByEan'])
     ->where('ean', '\d{8,14}')
-    ->middleware('auth:sanctum')
+    ->middleware(['auth:sanctum', 'throttle:rebrickable'])
     ->can('lookupByEan');
 
 Route::get('/sets/{setNum}/storage-map', [SetController::class, 'storageMap'])
     ->where('setNum', '\d+-\d+')
-    ->middleware('auth:sanctum')
+    ->middleware(['auth:sanctum', 'throttle:rebrickable'])
     ->can('viewStorageMap');
 
 Route::middleware(['auth:sanctum', 'family.ownership'])->group(function (): void {
