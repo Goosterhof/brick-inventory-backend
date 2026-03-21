@@ -45,8 +45,6 @@ pest()->extend(TestCase::class)
 |
 */
 
-expect()->extend('toBeOne', fn () => $this->toBe(1));
-
 /*
 |--------------------------------------------------------------------------
 | Architecture Test Helpers

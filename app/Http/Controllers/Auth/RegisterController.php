@@ -22,6 +22,6 @@ class RegisterController extends Controller
 
         $statefulGuard->login($user);
 
-        return response()->json(ProfileResourceData::from($user), 201);
+        return ProfileResourceData::from($user)->toResponseWithStatus(201);
     }
 }

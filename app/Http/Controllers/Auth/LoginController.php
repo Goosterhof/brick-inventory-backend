@@ -22,6 +22,6 @@ class LoginController extends Controller
 
         $statefulGuard->login($user);
 
-        return response()->json(ProfileResourceData::from($user));
+        return ProfileResourceData::from($user)->toResponse();
     }
 }
