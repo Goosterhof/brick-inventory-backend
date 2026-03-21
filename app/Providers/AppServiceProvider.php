@@ -12,6 +12,7 @@ use App\Services\BrickognizeService;
 use App\Services\RebrickableService;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Contracts\Auth\StatefulGuard;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\RateLimiter;
@@ -37,6 +38,7 @@ class AppServiceProvider extends ServiceProvider
         Gate::define('identify', [BrickIdentificationPolicy::class, 'identify']);
         Gate::define('viewParts', [SetPolicy::class, 'viewParts']);
         Gate::define('lookupByEan', [SetPolicy::class, 'lookupByEan']);
+        Gate::define('viewStorageMap', [SetPolicy::class, 'viewStorageMap']);
 
         $enabled = !app()->environment('testing');
 
@@ -47,6 +49,11 @@ class AppServiceProvider extends ServiceProvider
 
         RateLimiter::for('brick-identification', fn (): Limit => $enabled
             ? Limit::perMinute(10)
+            : Limit::none(),
+        );
+
+        RateLimiter::for('rebrickable', fn (Request $request): Limit => $enabled
+            ? Limit::perMinute(30)->by((string) ($request->user()->id ?? $request->ip()))
             : Limit::none(),
         );
     }

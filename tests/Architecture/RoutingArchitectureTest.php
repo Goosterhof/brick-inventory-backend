@@ -38,6 +38,8 @@ it('should have can middleware on all authorized routes', function (): void {
         ['DELETE', 'family-sets/{family_set}'],
         ['POST', 'family-sets/import-from-rebrickable'],
         // Family
+        ['GET', 'family/members'],
+        ['GET', 'family/parts'],
         ['GET', 'family/stats'],
         ['PUT', 'family/rebrickable-token'],
         // Brick Identification
@@ -45,6 +47,7 @@ it('should have can middleware on all authorized routes', function (): void {
         // Sets
         ['GET', 'sets/{setNum}/parts'],
         ['GET', 'sets/ean/{ean}'],
+        ['GET', 'sets/{setNum}/storage-map'],
     ];
 
     $routes = Route::getRoutes();

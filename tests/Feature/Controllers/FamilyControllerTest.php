@@ -44,6 +44,39 @@ describe('FamilyController', function (): void {
         });
     });
 
+    describe('parts', function (): void {
+        it('should return parts for authenticated user', function (): void {
+            $user = User::factory()->create();
+            $family = $user->family;
+
+            $storageOption = StorageOption::factory()->forFamily($family)->create();
+            StorageOptionPart::factory()->forStorageOption($storageOption)->create(['quantity' => 5]);
+
+            $response = $this->actingAs($user)->getJson('/api/family/parts');
+
+            $response->assertStatus(200);
+        });
+
+        it('should return 401 when unauthenticated', function (): void {
+            $response = $this->getJson('/api/family/parts');
+
+            $response->assertStatus(401);
+        });
+
+        it('should not return parts from another family', function (): void {
+            $user = User::factory()->create();
+            $otherUser = User::factory()->create();
+
+            $otherStorageOption = StorageOption::factory()->forFamily($otherUser->family)->create();
+            StorageOptionPart::factory()->forStorageOption($otherStorageOption)->create(['quantity' => 10]);
+
+            $response = $this->actingAs($user)->getJson('/api/family/parts');
+
+            $response->assertStatus(200)
+                ->assertJsonCount(0);
+        });
+    });
+
     describe('stats', function (): void {
         it('should return family stats', function (): void {
             $user = User::factory()->create();

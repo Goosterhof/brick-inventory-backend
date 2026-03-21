@@ -144,7 +144,7 @@ describe('BrickIdentificationController', function (): void {
             ]);
         });
 
-        it('should return 500 when Brickognize API fails', function (): void {
+        it('should return 502 when Brickognize API fails', function (): void {
             // arrange
             $user = User::factory()->create();
 
@@ -160,11 +160,11 @@ describe('BrickIdentificationController', function (): void {
             ]);
 
             // assert
-            $response->assertStatus(500)
+            $response->assertStatus(502)
                 ->assertJsonPath('error', 'Failed to identify brick');
         });
 
-        it('should return 500 when no parts identified in image', function (): void {
+        it('should return 502 when no parts identified in image', function (): void {
             // arrange
             $user = User::factory()->create();
 
@@ -182,7 +182,7 @@ describe('BrickIdentificationController', function (): void {
             ]);
 
             // assert
-            $response->assertStatus(500)
+            $response->assertStatus(502)
                 ->assertJsonPath('error', 'Failed to identify brick');
         });
 

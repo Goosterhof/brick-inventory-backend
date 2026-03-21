@@ -649,7 +649,7 @@ describe('FamilySetController', function (): void {
 
             $response = $this->actingAs($user)->postJson('/api/family-sets/import-from-rebrickable');
 
-            $response->assertStatus(401)
+            $response->assertStatus(502)
                 ->assertJson(['error' => 'Invalid API key']);
         });
     });
