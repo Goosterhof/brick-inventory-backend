@@ -19,10 +19,20 @@ The forces:
 
 ## Options Considered
 
+### Input Handling
+
 | Option | Pros | Cons | Why eliminated / Why chosen |
 |--------|------|------|-----------------------------|
-| **FormRequest with `toDto()` + custom ResourceData** | Type-safe both directions; self-documenting relationships; no `data` wrapper; testable | Custom base class for output; two concepts to learn | **Chosen** — type safety at both boundaries is non-negotiable |
-| **Standard FormRequest + `$request->validated()` array** | Familiar; zero setup | Loses type safety at the action boundary; Actions receive untyped arrays | Eliminated — defeats the purpose of typed Actions |
+| **FormRequest with `toDto()` bridge** | Type-safe; co-located with validation; controller stays thin; DTO construction uses `$this->safe()` for safety | FormRequest has two responsibilities (validation + DTO construction) | **Chosen** — the "two responsibilities" concern is minor; the bridge is trivially simple |
+| **Separate mapper/factory class** | Pure SRP; FormRequest only validates | Extra class per request; indirection for a simple mapping; controller must orchestrate | Eliminated — over-engineering for a direct field-to-property mapping |
+| **Pass `$request->validated()` array to Action** | No extra classes | Untyped; Action must validate array structure; loses type safety | Eliminated — defeats the purpose of typed parameters |
+| **Pass FormRequest directly to Action** | Simple | Violates ADR-0003 (Actions must not depend on Request objects); couples business logic to HTTP | Eliminated — architectural violation |
+
+### Output Handling
+
+| Option | Pros | Cons | Why eliminated / Why chosen |
+|--------|------|------|-----------------------------|
+| **Custom ResourceData with `from()` factory** | Self-documenting relationships; no `data` wrapper; testable; explicit eager loading | Custom base class; two concepts to learn | **Chosen** — type safety and explicitness are non-negotiable |
 | **Laravel ApiResource** | Built-in; well-documented | Wraps in `data` key; lazy loading risks; less explicit about properties; hard to enforce eager loading | Eliminated — too much implicit behavior |
 | **Spatie Laravel Data** | Full-featured; handles both input and output | Evaluated — but custom ResourceData is simpler, already in place, and does exactly what's needed without the package overhead | Eliminated — over-featured for the requirements |
 
@@ -30,12 +40,22 @@ The forces:
 
 ### Input: FormRequest with `toDto()` Bridge
 
-FormRequests validate HTTP input and produce typed DTOs via a `toDto()` method. Controllers call `$request->toDto()` and pass the result to Actions. See ADR-0016 for the detailed bridge pattern.
+Every FormRequest that feeds an Action must declare a `toDto()` method that returns a `final readonly` DTO. The controller calls `$request->toDto()` and passes the result to the Action.
 
 ```php
+// FormRequest — validates and bridges
 final class StoreFamilySetRequest extends FormRequest
 {
-    public function rules(): array { /* validation rules */ }
+    private const string SET_NUM = 'set_num';
+    private const string QUANTITY = 'quantity';
+
+    public function rules(): array
+    {
+        return [
+            self::SET_NUM => ['required', 'string', 'max:255'],
+            self::QUANTITY => ['sometimes', 'integer', 'min:1'],
+        ];
+    }
 
     public function toDto(): CreateFamilySetData
     {
@@ -47,7 +67,29 @@ final class StoreFamilySetRequest extends FormRequest
         );
     }
 }
+
+// DTO — immutable, typed
+final readonly class CreateFamilySetData
+{
+    public function __construct(
+        public string $setNum,
+        public int $quantity,
+    ) {}
+}
+
+// Controller — thin bridge
+public function store(StoreFamilySetRequest $request, CreateFamilySetAction $action): JsonResponse
+{
+    $familySet = $action->execute($request->user()->family, $request->toDto());
+    return FamilySetResourceData::from($familySet)->toResponseWithStatus(201);
+}
 ```
+
+**Conventions within the bridge pattern:**
+- Field name constants are `private const` — internal to the FormRequest, not part of its public API
+- `$this->safe()` is always used (never raw `$this->input()`) — only validated data enters the DTO
+- Default values for optional fields are handled in `toDto()`, not in the DTO constructor
+- Type coercion (enum parsing, date parsing) happens in `toDto()` — the DTO receives final types
 
 ### Output: Custom ResourceData
 
@@ -82,6 +124,9 @@ final readonly class StorageOptionResourceData extends ResourceData
 - `EAGER_LOAD` constants self-document relationship dependencies — architecture tests enforce their presence when nested ResourceData is used
 - Controllers call `->toResponse()` or `->toResponseWithStatus()` — never return ResourceData directly
 - Adding a new endpoint means creating a FormRequest (with DTO), a ResourceData, and wiring them through a thin controller
+- Each FormRequest has a clear, testable contract: rules + toDto
+- Controllers reduce to one-liners: `$action->execute($request->toDto(), ...)`
+- Adding a field means updating three places: rules, toDto, and the DTO class — but this is a feature (explicit surface area)
 
 ## Enforcement
 
@@ -89,7 +134,14 @@ final readonly class StorageOptionResourceData extends ResourceData
 |------|-----------|-------|
 | FormRequests are `final` | `RequestArchitectureTest` | `app/Http/Requests/` |
 | No public constants on FormRequests | `RequestArchitectureTest` | `app/Http/Requests/` |
+| Actions don't accept Request objects | `ActionArchitectureTest` | `app/Actions/` |
 | ResourceData concrete classes are `final readonly` | `ResourceDataArchitectureTest` | `app/Http/Resources/` |
 | ResourceData has `from()` method | `ResourceDataArchitectureTest` | `app/Http/Resources/` |
 | `EAGER_LOAD` required when nesting ResourceData | `ResourceDataArchitectureTest` | `app/Http/Resources/` |
 | Controllers don't return ResourceData directly | `ControllerArchitectureTest` | `app/Http/Controllers/` |
+
+## Resolved Questions
+
+### Why private constants instead of inline strings?
+
+**Resolved 2026-03-22.** Constants prevent typos between `rules()` and `toDto()` — a misspelled field name is a compile-time error, not a runtime null. They're `private` because external code should never reference a FormRequest's field names.

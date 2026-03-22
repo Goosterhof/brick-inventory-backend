@@ -30,14 +30,13 @@ Controllers must **not have constructors**. All dependencies are injected per me
 
 ```php
 public function store(
-    StoreFamilySetRequest $request,
-    CreateFamilySetAction $createAction,
-    GetFamilySetAction $getAction,
+    StoreFamilySetRequest $storeFamilySetRequest,
+    #[CurrentUser] User $user,
+    CreateFamilySetAction $createFamilySetAction,
 ): JsonResponse {
-    $familySet = $createAction->execute($request->toDto(), $request->user());
-    return FamilySetResourceData::from(
-        $getAction->execute($familySet),
-    )->toResponseWithStatus(201);
+    $familySet = $createFamilySetAction->execute($user->family, $storeFamilySetRequest->toDto());
+
+    return FamilySetResourceData::from($familySet)->toResponseWithStatus(201);
 }
 ```
 
