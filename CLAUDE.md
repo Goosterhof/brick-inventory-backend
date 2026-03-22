@@ -106,12 +106,12 @@ database/
 └── factories/                  # Test Fixtures — inventory for quality inspections
 
 tests/
-├── Architecture/               # Regulation Enforcement — 15 architecture tests
+├── Architecture/               # Regulation Enforcement — 18 architecture tests
 ├── Feature/                    # Integration Drills — controller-level tests
 └── Unit/                       # Component Inspections — action & service tests
 
 docs/
-└── adr/                        # The Decision Ledger — 9 architecture decisions
+└── adr/                        # The Decision Ledger — 9 architecture decisions (consolidated from 16)
 ```
 
 ---
@@ -239,16 +239,16 @@ Wiring:                             Provider → Contract, Service, Policy
 
 ### Architecture Decision Ledger
 
-Nine decisions that shaped the warehouse. Each records what was chosen, what was rejected, and what machine enforces it. Full records in `docs/adr/`.
+Nine decisions that shaped the warehouse (consolidated from sixteen — implementation details merged into their parent ADRs). Each records what was chosen, what was rejected, and what machine enforces it. Full records in `docs/adr/`.
 
 | ADR | Decision | Enforcement |
 |---|---|---|
 | 0001 | Session-based SPA auth, not tokens | Sanctum config |
-| 0002 | Single-tier authorization with three-layer defense | PolicyArchitectureTest, RoutingArchitectureTest |
-| 0003 | Actions for business logic, Services for HTTP only | ActionArchitectureTest, ServiceArchitectureTest, Deptrac |
-| 0004 | Explicit cascade deletion, not database-level | MigrationArchitectureTest, CascadeRelationArchitectureTest |
-| 0005 | No mass assignment ($fillable/$guarded) | ModelArchitectureTest |
-| 0006 | DTOFormRequest + custom ResourceData | RequestArchitectureTest, ResourceDataArchitectureTest |
+| 0002 | Single-tier authorization with three-layer defense (incl. family-scoped multi-tenancy) | PolicyArchitectureTest, RoutingArchitectureTest, EnsureFamilyOwnership |
+| 0003 | Actions for business logic, Services for HTTP only (incl. final readonly, instance queries, API resilience) | ActionArchitectureTest, ServiceArchitectureTest, Deptrac |
+| 0004 | Explicit cascade deletion with cascadeRelations() contract | MigrationArchitectureTest, CascadeRelationArchitectureTest |
+| 0005 | Model conventions: no mass assignment, casts-only transformations | ModelArchitectureTest |
+| 0006 | DTOFormRequest with toDto() bridge + custom ResourceData | RequestArchitectureTest, ResourceDataArchitectureTest, ActionArchitectureTest |
 | 0007 | #[Config] attributes, not helpers/facades | ConfigArchitectureTest, GeneralArchitectureTest |
 | 0008 | Explicit routes, not apiResource | RoutingArchitectureTest |
 | 0009 | Thin controllers with method injection only | ControllerArchitectureTest |
