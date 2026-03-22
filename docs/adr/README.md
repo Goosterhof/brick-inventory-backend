@@ -13,6 +13,13 @@ Decisions that shaped the build. Each records what was chosen, what was rejected
 | [0007](0007-config-attributes-not-helpers.md) | #[Config] attributes, not helpers/facades | ConfigArchitectureTest, GeneralArchitectureTest |
 | [0008](0008-explicit-routes-not-api-resource.md) | Explicit routes, not apiResource | RoutingArchitectureTest |
 | [0009](0009-thin-controllers-method-injection.md) | Thin controllers with method injection only | ControllerArchitectureTest |
+| [0010](0010-cascade-relations-method-contract.md) | cascadeRelations() method contract for explicit deletion | CascadeRelationArchitectureTest |
+| [0011](0011-final-readonly-actions-and-services.md) | Final readonly Actions and Services | ActionArchitectureTest, ServiceArchitectureTest |
+| [0012](0012-instance-query-builders-not-static-calls.md) | Instance query builders, not static model calls | ActionArchitectureTest |
+| [0013](0013-family-scoped-multi-tenancy.md) | Family-scoped multi-tenancy via interface and middleware | EnsureFamilyOwnership, routes/api.php |
+| [0014](0014-external-api-resilience-pattern.md) | External API resilience pattern (retry, timeout, typed exceptions) | ServiceArchitectureTest, bootstrap/app.php |
+| [0015](0015-attribute-casting-not-accessors.md) | Attribute casting via casts(), not accessors/mutators | Convention (candidate for arch test) |
+| [0016](0016-form-request-to-dto-bridge.md) | FormRequest-to-DTO bridge pattern | RequestArchitectureTest, ActionArchitectureTest |
 
 ## Adding a New ADR
 
