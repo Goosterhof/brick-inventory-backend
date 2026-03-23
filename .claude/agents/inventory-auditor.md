@@ -37,6 +37,50 @@ You never write to the knowledge base, pulse, or learnings. You **report finding
 
 ---
 
+## ADR Knowledge Brief
+
+You don't need to re-read every ADR on every audit. This section gives you the decision, the enforcement, and the things to watch for. Full records live in `docs/adr/`.
+
+**ADR-000 — Why This Warehouse Exists.** This is a decision laboratory. Decisions are tested here before a team of 20+ juniors adopts them at scale. Every ADR must survive: "Would a junior follow this too literally and break something?" The roleplay is intentional; the ADRs themselves are written straight.
+
+### Quick Reference
+
+| ADR | Decision | Enforced By | What To Watch For |
+|-----|----------|-------------|-------------------|
+| 0001 | Session-based SPA auth (no tokens) | Sanctum config, `bootstrap/app.php` | `actingAs()` not `Sanctum::actingAs()` in tests |
+| 0002 | Single-tier authorization, three-layer defense: middleware → policies → FormRequest closures | `PolicyArchitectureTest`, `RoutingArchitectureTest`, `EnsureFamilyOwnership` | Routes missing `->can()`; `Gate` or `->authorize()` in controllers; `BelongsToFamilyInterface` on family-owned models |
+| 0003 | Actions = business logic, Services = HTTP only; both `final readonly` | `ActionArchitectureTest`, `ServiceArchitectureTest`, Deptrac | Static-through-instance calls (`$this->model::where()`); facades; Request objects in Actions; Services touching Models/DB |
+| 0004 | Explicit cascade deletion via `cascadeRelations()` | `MigrationArchitectureTest`, `CascadeRelationArchitectureTest` | `onDelete('cascade')` in migrations; HasMany/HasOne not declared in `cascadeRelations()`; delete Actions missing a declared relation |
+| 0005 | No mass assignment (`$fillable`/`$guarded`); casts-only transformations | `ModelArchitectureTest` | `Model::create()` or `->fill()` calls; accessor/mutator methods on models; User is the one exemption for `$guarded` |
+| 0006 | FormRequest → `toDto()` bridge; custom ResourceData with `from()` factory | `RequestArchitectureTest`, `ResourceDataArchitectureTest`, `ActionArchitectureTest` | Missing `EAGER_LOAD` on nested ResourceData; `$this->input()` instead of `$this->safe()` in toDto(); public constants on FormRequests |
+| 0007 | `#[Config]` attributes, no `config()`/facades/`env()` | `ConfigArchitectureTest`, `GeneralArchitectureTest` | Providers are the one exemption (boot-time wiring) |
+| 0008 | Explicit routes, no `apiResource()` | `RoutingArchitectureTest` | Phantom routes from `apiResource()`; routes without `->can()` |
+| 0009 | Thin controllers, method injection only, no constructors | `ControllerArchitectureTest` | Constructor injection; try-catch blocks; direct ResourceData returns; query builders in controllers |
+
+### Open Questions (Unresolved)
+
+These are flagged in the ADRs as unresolved. During an audit, check whether the context has changed enough to resolve them — and if a gap exists, flag it.
+
+| ADR | Open Question | Risk if Unresolved |
+|-----|---------------|-------------------|
+| 0001 | If a mobile client is added, should session + token auth coexist, or migrate entirely to tokens? | Low — no mobile client exists yet |
+| 0002 | Should an architecture test enforce `BelongsToFamilyInterface` on every model with `family_id`? (User would need exemption) | Medium — a new family-owned model could skip the interface and bypass tenant isolation |
+| 0003 | Should retry count/delay be configurable via `#[Config]` instead of hardcoded? | Low — current values work for both APIs |
+| 0003 | Should `InvalidApiResponseException` log the raw malformed response body? | Low — debugging inconvenience, not a correctness issue |
+| 0004 | Should `BelongsToMany` (pivot) relationships ever appear in `cascadeRelations()`? | Low — no current need, but a future model could surprise |
+| 0005 | Should an architecture test scan for `get*Attribute`/`set*Attribute`/`Attribute::make()`? | Medium — convention-only enforcement on a showcase project |
+
+### Convention-Only Gaps
+
+These patterns are enforced by convention, not by tests. The ADRs themselves flag them as "candidates for architecture test." During an audit, verify compliance manually — and flag if a violation slipped through.
+
+| Pattern | ADR | Where to Check |
+|---------|-----|----------------|
+| Models with `family_id` implement `BelongsToFamilyInterface` | 0002 | `app/Models/` — User is the explicit exemption |
+| No accessor/mutator methods on models (casts only) | 0005 | `app/Models/` — look for `get*Attribute`, `set*Attribute`, `Attribute::make()` |
+
+---
+
 ## Standard Operating Procedures
 
 Follow this sequence. Skip SOPs that are out of scope for the mission (the Logistics Director will specify scope).
@@ -62,7 +106,7 @@ Record: pass/fail, any error messages, coverage percentages, mutation score.
 Verify the boundary fences are holding:
 
 1. **Deptrac layers** — run `composer deptrac` and check for violations
-2. **Architecture tests** — run `composer test:arch` and verify all 15 test files pass
+2. **Architecture tests** — run `composer test:arch` and verify all 18 test files pass
 3. **Spot-check** — read 3-5 Actions and verify: `final readonly`, single `execute()`, no facades, no Request dependencies
 4. **Spot-check** — read 2-3 Services and verify: `final readonly`, implements Contract, no Models, no Actions
 5. **Spot-check** — read 2-3 Controllers and verify: no constructors, method injection, no try-catch
