@@ -35,7 +35,13 @@ parameters:
     checkTooWideReturnTypesInProtectedAndPublicMethods: true
 
     ignoreErrors:
-        # Eloquent Builder methods are designed to be called dynamically via fluent chaining
+        # Known Larastan + phpstan-strict-rules incompatibility (larastan/larastan#1272,
+        # phpstan/phpstan-strict-rules#140). Larastan re-declares Eloquent Builder methods
+        # as static on Models so Model::where() resolves, but this makes phpstan-strict-rules
+        # flag $builder->where() as a dynamic call on a static method. No upstream fix exists.
+        # This ignore is scoped by identifier (not fragile regex) and path-limited to app/.
+        # With reportUnmatchedIgnoredErrors: true, PHPStan will flag this if Larastan fixes
+        # the issue upstream, prompting removal. Reviewed 2026-03-24.
         -
             identifier: staticMethod.dynamicCall
             path: app/*
