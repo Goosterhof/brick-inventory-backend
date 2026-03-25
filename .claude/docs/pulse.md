@@ -13,10 +13,10 @@ A consolidated, current-state assessment of the backend codebase. Updated by the
 
 ## Overall Health
 
-**Rating:** 7/10
+**Rating:** 8/10
 **Assessed:** 2026-03-25
 
-Architecture is sound — PHPStan at max with zero errors, Deptrac with zero violations, 343 tests passing, 9 coherent ADRs. Two high-severity findings (missing exception handler, undocumented try-catch deviation) prevent showcase-ready status. Coverage and mutation testing cannot be measured without a PHP coverage driver in the environment.
+Architecture is sound — PHPStan at max with zero errors, Deptrac with zero violations, 347 tests passing (1187 assertions), 9 coherent ADRs. Both high-severity findings from baseline audit resolved. Coverage and mutation testing cannot be measured without a PHP coverage driver in the environment.
 
 ## Active Concerns
 
@@ -24,9 +24,9 @@ Architecture is sound — PHPStan at max with zero errors, Deptrac with zero vio
 
 | Concern | Severity | Status | Notes |
 |---|---|---|---|
-| `InvalidApiResponseException` not globally handled | High | Open | Falls through to 500; affects 20+ code paths. Register 502 renderer in bootstrap/app.php |
-| `ImportOwnedSetsAction` try-catch violates ADR-0003 | High | Open | Code is correct; governance gap. Amend ADR-0003 to document partial-failure exception |
-| 4 architecture tests produce no assertions (risky) | Medium | Open | Add counter assertions to eliminate false-positive warnings |
+| ~~`InvalidApiResponseException` not globally handled~~ | ~~High~~ | Resolved | 502 renderer registered in bootstrap/app.php; feature test confirms |
+| ~~`ImportOwnedSetsAction` try-catch violates ADR-0003~~ | ~~High~~ | Resolved | ADR-0003 amended with approved exception documentation |
+| ~~4 architecture tests produce no assertions (risky)~~ | ~~Medium~~ | Resolved | Counter assertions added; 83 tests, 904 assertions, 0 risky |
 | PHP coverage driver missing from environment | Medium | Open | xdebug/pcov not installed; coverage and mutation testing cannot run |
 
 ## In-Progress Work
@@ -37,6 +37,7 @@ Architecture is sound — PHPStan at max with zero errors, Deptrac with zero vio
 |---|---|---|
 | Stud & Sort Logistics setup | Complete | CLAUDE.md, agents, docs, records all in place |
 | Baseline audit | Complete | Report filed; evaluation appended; pulse updated |
+| Audit remediation | Complete | 2 high, 1 medium, 3 low findings resolved |
 
 ## Pattern Maturity
 
@@ -44,7 +45,7 @@ Architecture is sound — PHPStan at max with zero errors, Deptrac with zero vio
 
 | Pattern | Maturity | Evidence |
 |---|---|---|
-| Action layer (26 classes) | Battle-tested | Architecture tests guard it; all pass. One documented deviation (try-catch in ImportOwnedSetsAction) needs ADR amendment |
+| Action layer (26 classes) | Battle-tested | Architecture tests guard it; all pass. Partial-failure try-catch in ImportOwnedSetsAction documented as approved exception in ADR-0003 |
 | Service layer (2 classes) | Battle-tested | Contract interfaces, Deptrac boundaries hold, no facade or model leakage |
 | ResourceData pattern (11 classes) | Battle-tested | All have `from()` factories, EAGER_LOAD where needed. One endpoint (family/parts) bypasses pattern without documentation |
 | Explicit cascade deletion | Battle-tested | MigrationArchitectureTest + CascadeRelationArchitectureTest confirm compliance |
@@ -56,8 +57,8 @@ Architecture is sound — PHPStan at max with zero errors, Deptrac with zero vio
 
 | Item | Severity | Notes |
 |---|---|---|
-| `InvalidApiResponseException` handler gap | High | Correctness bug — production will return 500 on malformed supplier responses |
-| ADR-0003 try-catch exception undocumented | High | Governance gap — regulation says "no try-catch" but one exists with no ADR amendment |
+| ~~`InvalidApiResponseException` handler gap~~ | ~~High~~ | Resolved — 502 renderer registered, feature test confirms |
+| ~~ADR-0003 try-catch exception undocumented~~ | ~~High~~ | Resolved — ADR-0003 amended with approved exception |
 | `decisions.md` broken ADR-000 link | Low | References nonexistent `ADR-000.md` |
 | `FamilyPolicyTest` missing `viewParts`/`viewStats` tests | Low | Trivial methods untested; would be a coverage gap if measurable |
 | `GetFamilyPartsAction` returns raw array (no ResourceData) | Low | Only endpoint bypassing the pattern without documentation |
@@ -81,6 +82,6 @@ Architecture is sound — PHPStan at max with zero errors, Deptrac with zero vio
 | Unit coverage | Unable to measure (no coverage driver) | 100% |
 | Feature coverage | Unable to measure (no coverage driver) | 80% |
 | Mutation score | Unable to measure (no coverage driver) | 75% |
-| Architecture tests | 15 files, 79 passed, 4 risky, 1 warning | All passing |
+| Architecture tests | 15 files, 83 passed, 0 risky, 1 warning (904 assertions) | All passing |
 | PHPStan | Level max, 0 errors (155 files) | Level max, zero errors |
 | Deptrac | 0 violations (431 allowed, 336 uncovered) | Zero violations |

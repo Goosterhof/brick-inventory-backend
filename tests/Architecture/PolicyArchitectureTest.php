@@ -67,6 +67,8 @@ it('should have all policy methods return bool', function (): void {
 });
 
 it('should not inject Gate contract in controllers', function (): void {
+    $methodsChecked = 0;
+
     foreach (getClassesInDirectory(dirname(__DIR__, 2) . '/app/Http/Controllers', 'App\\Http\\Controllers\\') as $className) {
         $reflection = new ReflectionClass($className);
 
@@ -78,6 +80,8 @@ it('should not inject Gate contract in controllers', function (): void {
             if ($method->getDeclaringClass()->getName() !== $className) {
                 continue;
             }
+
+            $methodsChecked++;
 
             foreach ($method->getParameters() as $param) {
                 $type = $param->getType();
@@ -94,6 +98,8 @@ it('should not inject Gate contract in controllers', function (): void {
             }
         }
     }
+
+    expect($methodsChecked)->toBeGreaterThan(0);
 });
 
 it('should not use gate authorize calls in controllers', function (): void {

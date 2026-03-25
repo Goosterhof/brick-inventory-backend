@@ -268,7 +268,7 @@ _Proposals observed once. Need a second confirming shift before graduation._
 
 | Proposal | First Observed | Log Evidence | Context |
 |---|---|---|---|
-| _(none yet)_ | | | |
+| Before accepting an audit finding about broken links, resolve the path from the referencing file's directory | 2026-03-25 | 2026-03-25-audit-remediation | Auditor flagged ADR-000 link as broken; link was valid when resolved from `.claude/docs/` |
 
 ### Graduated
 

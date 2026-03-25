@@ -95,6 +95,8 @@ it('should have controller methods return JsonResponse or array', function (): v
 });
 
 it('should not return ResourceData directly from controller methods', function (): void {
+    $methodsChecked = 0;
+
     foreach (getClassesInDirectory(dirname(__DIR__, 2) . '/app/Http/Controllers', 'App\\Http\\Controllers\\') as $className) {
         $reflection = new ReflectionClass($className);
 
@@ -118,6 +120,7 @@ it('should not return ResourceData directly from controller methods', function (
                 continue;
             }
 
+            $methodsChecked++;
             $typeNames = getTypeNames($returnType);
             foreach ($typeNames as $typeName) {
                 // Check if return type is a ResourceData subclass
@@ -133,9 +136,13 @@ it('should not return ResourceData directly from controller methods', function (
             }
         }
     }
+
+    expect($methodsChecked)->toBeGreaterThan(0);
 });
 
 it('should not have constructors in controllers', function (): void {
+    $controllersChecked = 0;
+
     foreach (getClassesInDirectory(dirname(__DIR__, 2) . '/app/Http/Controllers', 'App\\Http\\Controllers\\') as $className) {
         $reflection = new ReflectionClass($className);
 
@@ -143,6 +150,7 @@ it('should not have constructors in controllers', function (): void {
             continue;
         }
 
+        $controllersChecked++;
         $constructor = $reflection->getConstructor();
 
         // Constructor must either not exist or be inherited (not declared in the controller itself)
@@ -156,10 +164,13 @@ it('should not have constructors in controllers', function (): void {
             );
         }
     }
+
+    expect($controllersChecked)->toBeGreaterThan(0);
 });
 
 it('should not use try-catch blocks in controllers', function (): void {
     $controllersDir = dirname(__DIR__, 2) . '/app/Http/Controllers';
+    $filesChecked = 0;
 
     $iterator = new RecursiveIteratorIterator(
         new RecursiveDirectoryIterator($controllersDir, RecursiveDirectoryIterator::SKIP_DOTS),
@@ -181,6 +192,7 @@ it('should not use try-catch blocks in controllers', function (): void {
             continue;
         }
 
+        $filesChecked++;
         $content = file_get_contents($file->getPathname());
         $tokens = token_get_all($content);
         $relativePath = str_replace($controllersDir . '/', '', $file->getPathname());
@@ -196,4 +208,6 @@ it('should not use try-catch blocks in controllers', function (): void {
             }
         }
     }
+
+    expect($filesChecked)->toBeGreaterThan(0);
 });

@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Exceptions\BrickognizeApiException;
+use App\Exceptions\InvalidApiResponseException;
 use App\Exceptions\MissingRebrickableTokenException;
 use App\Exceptions\NotFamilyHeadException;
 use App\Exceptions\RebrickableApiException;
@@ -50,4 +51,6 @@ return Application::configure(basePath: dirname(__DIR__))
         });
 
         $exceptions->render(fn (BrickognizeApiException $brickognizeApiException, Request $request): JsonResponse => response()->json(['error' => 'Failed to identify brick'], 502));
+
+        $exceptions->render(fn (InvalidApiResponseException $invalidApiResponseException, Request $request): JsonResponse => response()->json(['error' => 'Unexpected response from external API'], 502));
     })->create();
