@@ -288,7 +288,9 @@ Training proposals from audit reports are tracked here. A proposal must prove it
 
 | Proposal | First Observed | Report Evidence | Context |
 |---|---|---|---|
-| _(none yet)_ | | | |
+| SOP 2: scan Actions for try-catch blocks | 2026-03-25 | 2026-03-25-full-sweep-baseline | Found try-catch in ImportOwnedSetsAction that architecture tests missed entirely |
+| SOP 3: verify all FormRequests use `$this->safe()` not `$this->input()` in toDto() | 2026-03-25 | 2026-03-25-full-sweep-baseline | ADR-0006 specifies this; no architecture test enforces it; spot-check was incomplete |
+| SOP 1: document fallback procedure when coverage driver is absent | 2026-03-25 | 2026-03-25-full-sweep-baseline | Coverage driver absent; SOP had no guidance for "unable to measure" scenario |
 
 ### Graduated
 

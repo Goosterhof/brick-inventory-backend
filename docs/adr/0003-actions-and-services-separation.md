@@ -141,6 +141,15 @@ Each exception captures the HTTP status code and response body. The global excep
 
 **Resolved 2026-03-22.** Exceptions bubble to the global handler in `bootstrap/app.php`, which maps typed exceptions to HTTP responses. This keeps error handling consistent and prevents Actions from silently swallowing failures.
 
+**Approved exception — partial-failure resilience (amended 2026-03-25).** Actions that process paginated external data may use try-catch when implementing a partial-failure resilience pattern, provided all of the following hold:
+
+1. The catch block only handles typed external API exceptions (e.g., `RebrickableApiException`, `InvalidApiResponseException`) — never generic `\Exception` or `\Throwable`
+2. If no data was successfully processed before the failure, the exception is re-thrown — the pattern does not suppress total failures
+3. The partial result is explicitly marked as incomplete in the return value (e.g., `complete: false` with an error message)
+4. The behavior is fully covered by unit tests for both the partial-success and total-failure paths
+
+This pattern exists in `ImportOwnedSetsAction`, which processes paginated Rebrickable collection imports. When a page fails after at least one successful page, the import returns what it has rather than discarding all progress. This is a deliberate trade-off: partial data with a clear incompleteness signal is more useful than no data at all.
+
 ## Open Questions
 
 - Should retry count and delay be configurable via `#[Config]` attributes instead of hardcoded? Current values work for both APIs, but a third integration with different rate limits might need flexibility.

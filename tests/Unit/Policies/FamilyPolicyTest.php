@@ -18,6 +18,22 @@ describe('FamilyPolicy', function (): void {
         });
     });
 
+    describe('viewParts', function (): void {
+        it('should allow any authenticated user to view family parts', function (): void {
+            $user = Mockery::mock(User::class);
+
+            expect($this->policy->viewParts($user))->toBeTrue();
+        });
+    });
+
+    describe('viewStats', function (): void {
+        it('should allow any authenticated user to view family stats', function (): void {
+            $user = Mockery::mock(User::class);
+
+            expect($this->policy->viewStats($user))->toBeTrue();
+        });
+    });
+
     describe('setRebrickableToken', function (): void {
         it('should allow family head to set rebrickable token', function (): void {
             $user = Mockery::mock(User::class);

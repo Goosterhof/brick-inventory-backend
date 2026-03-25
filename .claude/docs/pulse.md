@@ -13,67 +13,75 @@ A consolidated, current-state assessment of the backend codebase. Updated by the
 
 ## Overall Health
 
-**Rating:** _Not yet assessed_
-**Assessed:** _Pending first audit_
+**Rating:** 8/10
+**Assessed:** 2026-03-25
 
-The warehouse has not yet been audited under the Stud & Sort Logistics regime. The architecture is mature (9 ADRs, 15 architecture tests, 6-job CI pipeline), but no formal pulse has been taken. First Inventory Auditor deployment will establish the baseline.
+Architecture is sound — PHPStan at max with zero errors, Deptrac with zero violations, 347 tests passing (1187 assertions), 9 coherent ADRs. Both high-severity findings from baseline audit resolved. Coverage and mutation testing cannot be measured without a PHP coverage driver in the environment.
 
 ## Active Concerns
 
-**Assessed:** _Pending first audit_
+**Assessed:** 2026-03-25
 
 | Concern | Severity | Status | Notes |
 |---|---|---|---|
-| _No audit conducted yet_ | — | — | Deploy the Inventory Auditor to establish baseline |
+| ~~`InvalidApiResponseException` not globally handled~~ | ~~High~~ | Resolved | 502 renderer registered in bootstrap/app.php; feature test confirms |
+| ~~`ImportOwnedSetsAction` try-catch violates ADR-0003~~ | ~~High~~ | Resolved | ADR-0003 amended with approved exception documentation |
+| ~~4 architecture tests produce no assertions (risky)~~ | ~~Medium~~ | Resolved | Counter assertions added; 83 tests, 904 assertions, 0 risky |
+| PHP coverage driver missing from environment | Medium | Open | xdebug/pcov not installed; coverage and mutation testing cannot run |
 
 ## In-Progress Work
 
-**Assessed:** 2026-03-21
+**Assessed:** 2026-03-25
 
 | Work Item | Status | Next Step |
 |---|---|---|
-| Stud & Sort Logistics setup | In progress | CLAUDE.md, agents, docs structure |
+| Stud & Sort Logistics setup | Complete | CLAUDE.md, agents, docs, records all in place |
+| Baseline audit | Complete | Report filed; evaluation appended; pulse updated |
+| Audit remediation | Complete | 2 high, 1 medium, 3 low findings resolved |
 
 ## Pattern Maturity
 
-**Assessed:** _Pending first audit_
+**Assessed:** 2026-03-25
 
 | Pattern | Maturity | Evidence |
 |---|---|---|
-| Action layer (27 classes) | Likely battle-tested | 9 ADRs enforce it, architecture tests guard it |
-| Service layer (2 classes) | Likely battle-tested | Contract interfaces, Deptrac boundaries |
-| ResourceData pattern | Likely battle-tested | 11 classes, architecture test enforces `from()` |
-| Explicit cascade deletion | Likely battle-tested | MigrationArchitectureTest + CascadeRelationArchitectureTest |
-| Thin controllers | Likely battle-tested | ControllerArchitectureTest, ADR-0009 |
-
-_Note: "Likely" ratings will be confirmed or corrected by first Inventory Auditor deployment._
+| Action layer (26 classes) | Battle-tested | Architecture tests guard it; all pass. Partial-failure try-catch in ImportOwnedSetsAction documented as approved exception in ADR-0003 |
+| Service layer (2 classes) | Battle-tested | Contract interfaces, Deptrac boundaries hold, no facade or model leakage |
+| ResourceData pattern (11 classes) | Battle-tested | All have `from()` factories, EAGER_LOAD where needed. One endpoint (family/parts) bypasses pattern without documentation |
+| Explicit cascade deletion | Battle-tested | MigrationArchitectureTest + CascadeRelationArchitectureTest confirm compliance |
+| Thin controllers | Battle-tested | No constructors, no try-catch, method injection only. ControllerArchitectureTest confirms |
 
 ## Tech Debt
 
-**Assessed:** _Pending first audit_
+**Assessed:** 2026-03-25
 
 | Item | Severity | Notes |
 |---|---|---|
-| _No audit conducted yet_ | — | — |
+| ~~`InvalidApiResponseException` handler gap~~ | ~~High~~ | Resolved — 502 renderer registered, feature test confirms |
+| ~~ADR-0003 try-catch exception undocumented~~ | ~~High~~ | Resolved — ADR-0003 amended with approved exception |
+| `decisions.md` broken ADR-000 link | Low | References nonexistent `ADR-000.md` |
+| `FamilyPolicyTest` missing `viewParts`/`viewStats` tests | Low | Trivial methods untested; would be a coverage gap if measurable |
+| `GetFamilyPartsAction` returns raw array (no ResourceData) | Low | Only endpoint bypassing the pattern without documentation |
 
 ## Seeds
 
-**Assessed:** 2026-03-21
+**Assessed:** 2026-03-25
 
 | Seed | Trigger | What It Means |
 |---|---|---|
-| Formal pulse baseline | First Inventory Auditor run | Replace all "likely" maturity ratings with confirmed assessments |
+| ~~Formal pulse baseline~~ | ~~First Inventory Auditor run~~ | ~~Done — 2026-03-25 audit established baseline~~ |
 | Learnings bootstrap | First Head Sorter shift | Document gotchas discovered during first session under new regime |
+| Coverage infrastructure | Install pcov or xdebug | Unblocks coverage measurement, mutation testing, and full quality metrics |
 
 ## Quality Metrics
 
-**Assessed:** _Pending first audit_
+**Assessed:** 2026-03-25
 
 | Metric | Value | Threshold |
 |---|---|---|
-| Unit coverage | _TBD_ | 100% |
-| Feature coverage | _TBD_ | 80% |
-| Mutation score | _TBD_ | 75% |
-| Architecture tests | _TBD_ | 15 files, all passing |
-| PHPStan | _TBD_ | Level max, zero errors |
-| Deptrac | _TBD_ | Zero violations |
+| Unit coverage | Unable to measure (no coverage driver) | 100% |
+| Feature coverage | Unable to measure (no coverage driver) | 80% |
+| Mutation score | Unable to measure (no coverage driver) | 75% |
+| Architecture tests | 15 files, 83 passed, 0 risky, 1 warning (904 assertions) | All passing |
+| PHPStan | Level max, 0 errors (155 files) | Level max, zero errors |
+| Deptrac | 0 violations (431 allowed, 336 uncovered) | Zero violations |
