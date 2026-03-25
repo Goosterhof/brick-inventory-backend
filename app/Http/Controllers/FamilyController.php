@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Actions\Family\GetFamilyPartsAction;
 use App\Actions\Family\GetFamilyStatsAction;
+use App\Actions\Family\RemoveFamilyMemberAction;
 use App\Actions\Family\SetRebrickableTokenAction;
 use App\Http\Requests\Family\SetRebrickableTokenRequest;
 use App\Http\Resources\FamilyMemberResourceData;
@@ -46,5 +47,15 @@ class FamilyController extends Controller
         $setRebrickableTokenAction->execute($user->family, $setRebrickableTokenRequest->toDto(), $user);
 
         return response()->json(null, 204);
+    }
+
+    public function removeMember(
+        User $user,
+        #[CurrentUser] User $currentUser,
+        RemoveFamilyMemberAction $removeFamilyMemberAction,
+    ): JsonResponse {
+        $removeFamilyMemberAction->execute($currentUser->family, $user, $currentUser);
+
+        return new JsonResponse(['message' => 'Member removed from family'], 200);
     }
 }

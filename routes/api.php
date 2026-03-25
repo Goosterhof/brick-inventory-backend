@@ -92,6 +92,8 @@ Route::middleware(['auth:sanctum', 'family.ownership'])->group(function (): void
         ->can('viewStats', Family::class);
     Route::put('/family/rebrickable-token', [FamilyController::class, 'setRebrickableToken'])
         ->can('setRebrickableToken', Family::class);
+    Route::delete('/family/members/{user}', [FamilyController::class, 'removeMember'])
+        ->can('removeMember', Family::class);
 
     // Brick Identification
     Route::post('/identify-brick', [BrickIdentificationController::class, 'identify'])

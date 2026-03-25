@@ -27,4 +27,9 @@ final readonly class FamilyPolicy
     {
         return $user->family->head_id === $user->id;
     }
+
+    public function removeMember(User $user): bool
+    {
+        return $user->family->head_id === $user->id;
+    }
 }
