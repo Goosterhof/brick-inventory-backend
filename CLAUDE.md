@@ -127,7 +127,7 @@ The heart of the warehouse. Every business operation is a Sorting Procedure.
 - No facades — dependency injection or nothing
 - No `Request` objects — accept DTOs or typed parameters
 - No try-catch — exceptions bubble to the Loading Dock's global handler
-- No transaction arrow-functions — explicit `DB::beginTransaction()`/`commit()`/`rollback()`
+- Use `$this->connection->transaction(Closure)` via injected `ConnectionInterface` — no `DB` facade, no manual begin/commit/rollback
 
 ### Supply Lines (Services)
 
