@@ -288,16 +288,120 @@ The one rule: **`chore: update stuff`** is forbidden. Every commit tells the sto
 
 ---
 
-## Crew Management — The Logistics Director's Post-Dispatch Checklist
+## Operations Protocol — The Paper Trail
 
-After any crew member (Head Sorter, Inventory Auditor) completes work that includes a self-debrief with training proposals, the Logistics Director **must** evaluate those proposals and update the graduation log in the crew member's `.md` file before moving on.
+Every job at Stud & Sort Logistics leaves a paper trail. No exceptions.
 
-1. **Evaluate each proposal** — Is it concrete, actionable, and would it have prevented the issue? Would it apply beyond this one shift?
-2. **Add valid proposals** to the Candidates table in the crew member's graduation log
-3. **Drop bad proposals** with a reason in the Dropped table — institutional memory matters
-4. **Check for graduations** — does any existing candidate now have a second confirming shift? If so, promote it and record it in the Graduated table
+### The Accountability Pipeline
 
-This is not optional. The graduation system is how the warehouse crew improves over time. Skipping it means the same mislabeled shipments go out twice.
+```
+Shipping Order (before work)
+  → Shift Log (after work, by Head Sorter)
+    → Logistics Director Evaluation (appended to shift log)
+      → Audit Report (optional, by Inventory Auditor)
+```
+
+### Shipping Orders (`.claude/records/permits/`)
+
+Filed BEFORE work starts. Every non-trivial task gets a shipping order — filed by whoever assigns the work (CEO, Logistics Director, or General when deployed by the war room). Trivial changes (typo fixes, config tweaks) are exempt.
+
+A shipping order specifies: what to sort, what's in scope, what's not, and how to verify it's done.
+
+**Naming:** `YYYY-MM-DD-{short-description}.md`
+**Template:** `.claude/records/permits/.shipping-order-template.md`
+
+### Shift Logs (`.claude/records/journals/`)
+
+Filed AFTER work completes. The Head Sorter produces a shift log for every shipping order. The log includes: what was sorted, whether acceptance criteria were met, decisions made, quality gauntlet results, proposed knowledge updates, and a self-debrief with training proposals.
+
+The Logistics Director appends an evaluation — assessing the work, reviewing decisions, and dispositioning training proposals.
+
+**Naming:** `YYYY-MM-DD-{short-description}.md` (matches the shipping order it fulfills)
+**Template:** `.claude/records/journals/.shift-log-template.md`
+
+### Audit Reports (`.claude/records/inspections/`)
+
+Filed by the Inventory Auditor after an audit. Audits can be routine (periodic sweeps), post-order (verify a specific delivery), or on-demand (CEO/Logistics Director request).
+
+**Naming:** `YYYY-MM-DD-{scope-description}.md`
+**Template:** `.claude/records/inspections/.audit-report-template.md`
+
+### Who Files What
+
+| Document | Filed By | Reviewed By | Approved By |
+|---|---|---|---|
+| Shipping Order | CEO, Logistics Director, or General | — | — (filed = active) |
+| Shift Log | Head Sorter | Logistics Director (appends evaluation) | CEO (approves knowledge updates) |
+| Audit Report | Inventory Auditor | Logistics Director (appends evaluation) | CEO (approves findings disposition) |
+
+### War Room Integration
+
+When the General deploys the warehouse via the war room:
+1. The General issues a shipping order (or the Logistics Director translates deployment orders into a shipping order)
+2. The Head Sorter works and files a shift log
+3. The Logistics Director evaluates and reports back to the General
+4. The General does NOT file in the warehouse's records — the warehouse's paper trail is sovereign
+
+### Graduation — Evidence-Backed Training
+
+Both crew members (sorter and auditor) propose training improvements in their logs/reports. The Logistics Director tracks these in each crew member's Graduation Log with evidence:
+
+- A proposal must be observed in **at least 2 shifts** before promotion into the crew member's training
+- Every graduation log entry references the specific log or report that provided evidence
+- The Logistics Director dispositions proposals (Candidate / Dropped) with rationale — no silent ignoring
+
+---
+
+## Crew Management — The Dispatch Report
+
+After any crew member (Head Sorter, Inventory Auditor) completes work that includes a self-debrief with training proposals, the Logistics Director **must** produce a structured **Dispatch Report** before responding to the CEO. This is not a checklist to remember — it is a required output. The Logistics Director cannot present results without having written it.
+
+### Dispatch Report Format
+
+```
+## Dispatch Report: [Crew Member] — [Task Summary]
+
+### Result
+[1-2 sentences: what the crew member delivered, did it meet the brief?]
+
+### Training Evaluation
+| Proposal | Verdict | Reason |
+| --- | --- | --- |
+| [proposal from debrief] | Candidate / Dropped | [why] |
+
+### Graduation Check
+[Did any existing candidate get a second confirming session? If yes, draft test scenarios below. If no, state "No graduations this round."]
+
+### Graduation Tests (if applicable)
+[For each candidate hitting its second confirmation, write 2-3 test scenarios:]
+
+| Scenario | Without Training | With Training | Assertion |
+| --- | --- | --- | --- |
+| [specific situation] | [failure mode] | [correct behavior] | [objectively verifiable check] |
+
+Verdict: Pass / Fail / Hold — [reasoning]
+
+### Concerns
+[Anything the Logistics Director noticed that the crew member missed, or quality issues to flag to the CEO. "None" is acceptable.]
+```
+
+The Dispatch Report is presented to the CEO as part of the crew member's results — not filed separately. The graduation log in the crew member's `.md` file is updated as a side effect of writing the report, not as a separate step.
+
+### Graduation Protocol — Test-Case-Driven Promotion
+
+Training proposals graduate only when they pass concrete, verifiable test scenarios — not on observation count alone. The full protocol (scenario format, process, and rationale) lives in each crew member's `.md` file under **Graduation Protocol**. The Dispatch Report's **Graduation Tests** section is where the Logistics Director executes this protocol in practice: drafting scenarios, evaluating them, and recording the verdict.
+
+### Why a structured report instead of a checklist
+
+A checklist says "you must do this" but produces no artifact — it's easy to skip because nothing is visibly missing. A structured report is a document the CEO sees. If the Training Evaluation section is missing, the CEO sees it's missing. The report makes the evaluation visible, not just mandatory.
+
+### The Rebuttal Protocol
+
+When the Inventory Auditor files findings rated **medium or above**, the Logistics Director forwards them to the Head Sorter for a formal response. The Sorter responds with ACCEPT, REBUT (with evidence), or PARTIAL (valid finding, better fix). The Logistics Director reads both sides and rules.
+
+This is productive disagreement by design. The juniors who read this portfolio should see that the best engineering teams challenge findings with evidence, not compliance. Findings that survive rebuttal are stronger. Rebuttals that succeed sharpen the Auditor's methodology. Both outcomes feed the graduation logs.
+
+Full protocol details live in each crew member's `.md` file.
 
 ---
 
