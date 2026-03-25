@@ -98,19 +98,36 @@ The one aesthetic concern: Rector renamed `$familyModel` to `$family` on the con
 
 _Appended by the Logistics Director after reviewing the log. The sorter's sections above are not edited -- they stand as written._
 
-**Overall Assessment:**
+**Overall Assessment:** Clean delivery. All acceptance criteria met, all quality gates pass, the implementation follows established patterns faithfully.
 
 ### Order Fulfillment Review
 
+All 12 acceptance criteria verified. The three-layer authorization defense is properly implemented: policy at route level (`->can('removeMember', Family::class)`), guard in the action (`NotFamilyHeadException`), and family ownership middleware on the route group. Exception handlers correctly registered with appropriate HTTP status codes (422 for self-removal, 404 for not-in-family). Transaction atomicity verified by feature test. Test counts are healthy — 10 unit, 7 feature, 2 policy.
+
 ### Decision Review
 
+1. **Family model injection for `newInstance()`** — Correct call. The `new Family` was untestable via Mockery. Follows the precedent in `CreateUserWithFamilyAction`. Good pattern recognition.
+
+2. **Accepting Rector's `$familyModel` → `$family` rename** — Acceptable. The naming overlap between `$this->family` (injected model prototype) and `$family` (execute parameter) is slightly confusing on first read, but PHP scoping handles it correctly and PHPStan confirms no ambiguity. Fighting Rector here would create lint churn. Pragmatic choice.
+
+3. **422 for self-removal** — Better than the 400 alternative. 422 is semantically precise: the request is well-formed but the business rule rejects it. Consistent with how the ecosystem uses 422.
+
+4. **Separate feature test file** — Good judgment. The existing `FamilyControllerTest.php` handles different concerns; keeping removal tests isolated improves readability and makes it easy to find the coverage for this endpoint.
+
+5. **Closure-based `$this->connection->transaction()`** — The Sorter noted this is "the established codebase pattern," and they're right — every action in the warehouse uses this form. The written regulation says "explicit `DB::beginTransaction()`/`commit()`/`rollback()`" but the codebase unanimously uses closures. The Sorter followed the code, not the letter. No correction needed; if anything, the regulation text should be amended to match reality.
+
 ### Showcase Assessment
+
+Solid showcase material. The action is lean (49 lines), the controller method is 4 lines, the exception classes follow the static factory pattern established elsewhere. The unit tests properly verify save ordering (not just that things are saved, but in the right sequence). Feature tests cover all response codes including atomicity. A reviewer auditing this would see consistent patterns, no surprises.
 
 ### Training Proposal Dispositions
 
 | Proposal | Disposition | Rationale |
 |---|---|---|
-| | | |
+| Before writing unit tests for an Action, check if it directly instantiates models with `new` — if so, refactor to `newInstance()` first | Candidate | Valid first observation. The failure mode is real (wasted test cycle on unmockable code). Needs a second confirming session before graduation. |
 
 ### Notes for the Sorter
+
+- The blind spot about `ExceptionHandlerTest.php` was an honest self-assessment. The feature tests do implicitly cover the exception rendering (they assert exact status codes and JSON bodies), so coverage isn't actually missing — but adding explicit handler tests in the existing `ExceptionHandlerTest.php` would be more thorough. Not a blocker for this order.
+- The `/** @var positive-int $memberId */` annotation on line 43-44 of the action is a pragmatic PHPStan appeasement. Acceptable.
 
