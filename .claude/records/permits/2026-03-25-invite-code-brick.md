@@ -65,5 +65,5 @@ The Plate is blocked on this — agree on the API contract early.
 
 ---
 
-**Status:** Open
-**Shift Log:** _link to shift log when filed_
+**Status:** Complete
+**Shift Log:** `.claude/records/journals/2026-03-25-invite-code-brick.md`
