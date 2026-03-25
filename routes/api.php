@@ -9,6 +9,7 @@ use App\Http\Controllers\Auth\RegisterController;
 use App\Http\Controllers\BrickIdentificationController;
 use App\Http\Controllers\FamilyController;
 use App\Http\Controllers\FamilySetController;
+use App\Http\Controllers\InviteCodeController;
 use App\Http\Controllers\SetController;
 use App\Http\Controllers\StorageOptionController;
 use App\Models\Family;
@@ -94,6 +95,14 @@ Route::middleware(['auth:sanctum', 'family.ownership'])->group(function (): void
         ->can('setRebrickableToken', Family::class);
     Route::delete('/family/members/{user}', [FamilyController::class, 'removeMember'])
         ->can('removeMember', Family::class);
+
+    // Invite Codes
+    Route::post('/family/invite-code', [InviteCodeController::class, 'store'])
+        ->can('generateInviteCode', Family::class);
+    Route::get('/family/invite-code', [InviteCodeController::class, 'show'])
+        ->can('viewInviteCode', Family::class);
+    Route::delete('/family/invite-code', [InviteCodeController::class, 'destroy'])
+        ->can('revokeInviteCode', Family::class);
 
     // Brick Identification
     Route::post('/identify-brick', [BrickIdentificationController::class, 'identify'])

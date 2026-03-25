@@ -270,6 +270,9 @@ _Proposals observed once. Need a second confirming shift before graduation._
 |---|---|---|---|
 | Before accepting an audit finding about broken links, resolve the path from the referencing file's directory | 2026-03-25 | 2026-03-25-audit-remediation | Auditor flagged ADR-000 link as broken; link was valid when resolved from `.claude/docs/` |
 | Before writing unit tests for an Action, check if it directly instantiates models with `new` — if so, refactor to `newInstance()` first | 2026-03-25 | 2026-03-25-member-removal-wrench | First test attempt failed because `new Family` cannot be mocked; wasted a cycle |
+| Before writing an Action that calls another Action, check the no-try-catch regulation — if error swallowing is needed, inline the query instead | 2026-03-25 | 2026-03-25-invite-code-brick | First draft of GenerateInviteCodeAction used try-catch around RevokeInviteCodeAction |
+| Before adding contextual bindings in AppServiceProvider, check deptrac.yaml Provider ruleset for the target layer | 2026-03-25 | 2026-03-25-invite-code-brick | Deptrac violation from Provider → Action import |
+| When creating ResourceData with model timestamp properties, always use nullable types (Carbon timestamps can be null) | 2026-03-25 | 2026-03-25-invite-code-brick | PHPStan error on created_at: DateTimeInterface vs Carbon|null |
 
 ### Graduated
 
