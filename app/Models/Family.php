@@ -58,13 +58,21 @@ class Family extends Model
     }
 
     /**
+     * @return HasMany<InviteCode, $this>
+     */
+    public function inviteCodes(): HasMany
+    {
+        return $this->hasMany(InviteCode::class);
+    }
+
+    /**
      * Relations that must be cascade-deleted when this model is deleted.
      *
      * @return list<string>
      */
     public static function cascadeRelations(): array
     {
-        return ['users', 'storageOptions', 'familySets'];
+        return ['users', 'storageOptions', 'familySets', 'inviteCodes'];
     }
 
     /**

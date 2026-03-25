@@ -17,16 +17,19 @@ final class RegisterRequest extends FormRequest
 
     private const string PASSWORD = 'password';
 
+    private const string INVITE_CODE = 'invite_code';
+
     /**
      * @return array<string, array<int, string>>
      */
     public function rules(): array
     {
         return [
-            self::FAMILY_NAME => ['required', 'string', 'max:255'],
+            self::FAMILY_NAME => ['required_without:invite_code', 'nullable', 'string', 'max:255'],
             self::NAME => ['required', 'string', 'max:255'],
             self::EMAIL => ['required', 'string', 'email', 'max:255', 'unique:users'],
             self::PASSWORD => ['required', 'string', 'min:8', 'confirmed'],
+            self::INVITE_CODE => ['sometimes', 'nullable', 'string', 'max:10'],
         ];
     }
 
@@ -37,6 +40,9 @@ final class RegisterRequest extends FormRequest
             name: $this->safe()->string(self::NAME)->toString(),
             email: $this->safe()->string(self::EMAIL)->toString(),
             password: $this->safe()->string(self::PASSWORD)->toString(),
+            inviteCode: $this->safe()->has(self::INVITE_CODE)
+                ? $this->safe()->string(self::INVITE_CODE)->toString()
+                : null,
         );
     }
 }

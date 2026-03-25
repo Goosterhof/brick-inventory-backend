@@ -32,4 +32,19 @@ final readonly class FamilyPolicy
     {
         return $user->family->head_id === $user->id;
     }
+
+    public function generateInviteCode(User $user): bool
+    {
+        return $user->family->head_id === $user->id;
+    }
+
+    public function viewInviteCode(User $user): bool
+    {
+        return $user->family->head_id === $user->id;
+    }
+
+    public function revokeInviteCode(User $user): bool
+    {
+        return $user->family->head_id === $user->id;
+    }
 }

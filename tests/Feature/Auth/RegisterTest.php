@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Models\Family;
+use App\Models\InviteCode;
 use App\Models\User;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -32,6 +33,119 @@ describe('RegisterController', function (): void {
         $user = User::query()->where('email', 'john@example.com')->firstOrFail();
         expect($user->family)->toBeInstanceOf(Family::class)
             ->and($user->family->name)->toBe('Smith Family');
+    });
+
+    it('should register a user with an invite code and join existing family', function (): void {
+        $headUser = User::factory()->create();
+        $inviteCode = InviteCode::factory()
+            ->forFamily($headUser->family)
+            ->generatedBy($headUser)
+            ->create();
+
+        $response = $this->postJson('/api/register', [
+            'name' => 'Jane Smith',
+            'email' => 'jane@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+            'invite_code' => $inviteCode->code,
+        ]);
+
+        $response->assertStatus(201)
+            ->assertJsonStructure(['id', 'name', 'email', 'family_id']);
+
+        $user = User::query()->where('email', 'jane@example.com')->firstOrFail();
+        expect($user->family_id)->toBe($headUser->family_id)
+            ->and($user->family->head_id)->toBe($headUser->id);
+    });
+
+    it('should not set invite code user as family head', function (): void {
+        $headUser = User::factory()->create();
+        $inviteCode = InviteCode::factory()
+            ->forFamily($headUser->family)
+            ->generatedBy($headUser)
+            ->create();
+
+        $this->postJson('/api/register', [
+            'name' => 'Jane Smith',
+            'email' => 'jane@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+            'invite_code' => $inviteCode->code,
+        ]);
+
+        $headUser->family->refresh();
+        expect($headUser->family->head_id)->toBe($headUser->id);
+    });
+
+    it('should return 422 for invalid invite code', function (): void {
+        $response = $this->postJson('/api/register', [
+            'name' => 'Jane Smith',
+            'email' => 'jane@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+            'invite_code' => 'BRICK-FAKE',
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJsonPath('error', 'The invite code is invalid, expired, or revoked');
+    });
+
+    it('should return 422 for expired invite code', function (): void {
+        $headUser = User::factory()->create();
+        $inviteCode = InviteCode::factory()
+            ->forFamily($headUser->family)
+            ->generatedBy($headUser)
+            ->expired()
+            ->create();
+
+        $response = $this->postJson('/api/register', [
+            'name' => 'Jane Smith',
+            'email' => 'jane@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+            'invite_code' => $inviteCode->code,
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJsonPath('error', 'The invite code is invalid, expired, or revoked');
+    });
+
+    it('should return 422 for revoked invite code', function (): void {
+        $headUser = User::factory()->create();
+        $inviteCode = InviteCode::factory()
+            ->forFamily($headUser->family)
+            ->generatedBy($headUser)
+            ->revoked()
+            ->create();
+
+        $response = $this->postJson('/api/register', [
+            'name' => 'Jane Smith',
+            'email' => 'jane@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+            'invite_code' => $inviteCode->code,
+        ]);
+
+        $response->assertStatus(422)
+            ->assertJsonPath('error', 'The invite code is invalid, expired, or revoked');
+    });
+
+    it('should not require family_name when invite_code is provided', function (): void {
+        $headUser = User::factory()->create();
+        $inviteCode = InviteCode::factory()
+            ->forFamily($headUser->family)
+            ->generatedBy($headUser)
+            ->create();
+
+        $response = $this->postJson('/api/register', [
+            'name' => 'Jane Smith',
+            'email' => 'jane@example.com',
+            'password' => 'password123',
+            'password_confirmation' => 'password123',
+            'invite_code' => $inviteCode->code,
+        ]);
+
+        $response->assertStatus(201);
     });
 
     it('should require all fields for registration', function (): void {

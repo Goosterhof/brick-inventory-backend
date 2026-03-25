@@ -135,8 +135,9 @@ deptrac:
       - ResourceData
       - Model
 
-    # Providers wire interfaces to implementations
+    # Providers wire interfaces to implementations and configure action dependencies
     Provider:
+      - Action
       - Contract
       - Service
       - Policy
