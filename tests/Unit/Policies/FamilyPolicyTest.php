@@ -34,6 +34,24 @@ describe('FamilyPolicy', function (): void {
         });
     });
 
+    describe('removeMember', function (): void {
+        it('should allow family head to remove a member', function (): void {
+            $user = Mockery::mock(User::class);
+            $user->shouldReceive('getAttribute')->with('family')->andReturn((object) ['head_id' => 42]);
+            $user->shouldReceive('getAttribute')->with('id')->andReturn(42);
+
+            expect($this->policy->removeMember($user))->toBeTrue();
+        });
+
+        it('should deny non-head member from removing a member', function (): void {
+            $user = Mockery::mock(User::class);
+            $user->shouldReceive('getAttribute')->with('family')->andReturn((object) ['head_id' => 42]);
+            $user->shouldReceive('getAttribute')->with('id')->andReturn(99);
+
+            expect($this->policy->removeMember($user))->toBeFalse();
+        });
+    });
+
     describe('setRebrickableToken', function (): void {
         it('should allow family head to set rebrickable token', function (): void {
             $user = Mockery::mock(User::class);

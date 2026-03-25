@@ -269,6 +269,7 @@ _Proposals observed once. Need a second confirming shift before graduation._
 | Proposal | First Observed | Log Evidence | Context |
 |---|---|---|---|
 | Before accepting an audit finding about broken links, resolve the path from the referencing file's directory | 2026-03-25 | 2026-03-25-audit-remediation | Auditor flagged ADR-000 link as broken; link was valid when resolved from `.claude/docs/` |
+| Before writing unit tests for an Action, check if it directly instantiates models with `new` — if so, refactor to `newInstance()` first | 2026-03-25 | 2026-03-25-member-removal-wrench | First test attempt failed because `new Family` cannot be mocked; wasted a cycle |
 
 ### Graduated
 
