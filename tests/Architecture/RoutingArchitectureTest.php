@@ -42,6 +42,14 @@ it('should have can middleware on all authorized routes', function (): void {
         ['GET', 'family/parts'],
         ['GET', 'family/stats'],
         ['PUT', 'family/rebrickable-token'],
+        // Brick DNA
+        ['GET', 'family/brick-dna'],
+        // Member Management
+        ['DELETE', 'family/members/{user}'],
+        // Invite Codes
+        ['POST', 'family/invite-code'],
+        ['GET', 'family/invite-code'],
+        ['DELETE', 'family/invite-code'],
         // Brick Identification
         ['POST', 'identify-brick'],
         // Sets

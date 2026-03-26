@@ -34,7 +34,7 @@ final readonly class CreateUserWithFamilyAction
     private function createNewFamily(RegisterUserData $registerUserData): User
     {
         $family = $this->family->newInstance();
-        $family->name = $registerUserData->familyName;
+        $family->name = (string) $registerUserData->familyName;
         $family->save();
 
         $user = $this->user->newInstance();

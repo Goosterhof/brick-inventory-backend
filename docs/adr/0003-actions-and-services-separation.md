@@ -150,6 +150,22 @@ Each exception captures the HTTP status code and response body. The global excep
 
 This pattern exists in `ImportOwnedSetsAction`, which processes paginated Rebrickable collection imports. When a page fails after at least one successful page, the import returns what it has rather than discarding all progress. This is a deliberate trade-off: partial data with a clear incompleteness signal is more useful than no data at all.
 
+**Approved exception — optimistic-locking upsert (amended 2026-03-26).** Actions implementing race-condition-safe upsert may use try-catch on `UniqueConstraintViolationException`, provided all of the following hold:
+
+1. The catch block only handles `Illuminate\Database\UniqueConstraintViolationException` — never generic `\Exception` or `\Throwable`
+2. The catch block retries the operation as a direct update (not swallows the error or returns a default)
+3. Both the initial insert-or-update path and the retry-on-conflict path are wrapped in transactions
+4. The behavior is covered by unit tests
+
+This pattern handles the race condition where two concurrent requests attempt to insert the same unique record. The first request wins the insert; the second catches the constraint violation and falls back to an update. Without this, the second request would fail with an unhandled database exception.
+
+**Current Actions using this pattern:**
+- `AssignPartToStorageAction` — upsert storage-option-part assignment by unique (storage_option_id, part_id, color_id) constraint
+- `UpsertColorAction` — upsert color by unique rebrickable_color_id
+- `UpsertPartAction` — upsert part by unique part_num
+- `UpsertSetAction` — upsert set by unique set_num
+- `StoreSetPartsAction` — upsert set-part relationship by unique (set_num, part_id, color_id) constraint
+
 ## Open Questions
 
 - Should retry count and delay be configurable via `#[Config]` attributes instead of hardcoded? Current values work for both APIs, but a third integration with different rate limits might need flexibility.
