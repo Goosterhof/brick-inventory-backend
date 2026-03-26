@@ -33,8 +33,10 @@ final readonly class CreateUserWithFamilyAction
 
     private function createNewFamily(RegisterUserData $registerUserData): User
     {
+        assert($registerUserData->familyName !== null, 'familyName is required when not using an invite code');
+
         $family = $this->family->newInstance();
-        $family->name = (string) $registerUserData->familyName;
+        $family->name = $registerUserData->familyName;
         $family->save();
 
         $user = $this->user->newInstance();
