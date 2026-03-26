@@ -83,6 +83,12 @@ describe('FamilySetPolicy', function (): void {
         expect($this->policy->delete($user, $familySet))->toBeFalse();
     });
 
+    it('should allow viewCompletion', function (): void {
+        $user = Mockery::mock(User::class);
+
+        expect($this->policy->viewCompletion($user))->toBeTrue();
+    });
+
     describe('importFromRebrickable', function (): void {
         it('should allow family head to import', function (): void {
             $user = Mockery::mock(User::class);

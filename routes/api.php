@@ -71,6 +71,8 @@ Route::middleware(['auth:sanctum', 'family.ownership'])->group(function (): void
     // Family Sets
     Route::get('/family-sets', [FamilySetController::class, 'index'])
         ->can('viewAny', FamilySet::class);
+    Route::get('/family-sets/completion', [FamilySetController::class, 'completion'])
+        ->can('viewCompletion', FamilySet::class);
     Route::post('/family-sets', [FamilySetController::class, 'store'])
         ->can('create', FamilySet::class);
     Route::get('/family-sets/{family_set}', [FamilySetController::class, 'show'])
