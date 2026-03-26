@@ -73,7 +73,7 @@ final readonly class GetFamilySetCompletionAction
                         ->whereIn('set_parts.set_id', $setIds)
                         ->where('set_parts.is_spare', false);
                 })
-                ->selectRaw("set_parts.set_id, COUNT(DISTINCT set_parts.part_id || '-' || set_parts.color_id) as stored_parts")
+                ->selectRaw("set_parts.set_id, COUNT(DISTINCT CAST(set_parts.part_id AS TEXT) || '-' || CAST(set_parts.color_id AS TEXT)) as stored_parts")
                 ->groupBy('set_parts.set_id')
                 ->toBase()
                 ->get()
