@@ -9,6 +9,8 @@ use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\UniqueConstraintViolationException;
 
+covers(UpsertPartAction::class);
+
 describe('UpsertPartAction', function (): void {
     it('should create a new part when it does not exist', function (): void {
         // arrange

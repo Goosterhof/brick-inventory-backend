@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\SetController;
 use App\Models\Color;
 use App\Models\Part;
 use App\Models\Set;
@@ -9,6 +10,8 @@ use App\Models\SetPart;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
+
+covers(SetController::class);
 
 uses(RefreshDatabase::class);
 

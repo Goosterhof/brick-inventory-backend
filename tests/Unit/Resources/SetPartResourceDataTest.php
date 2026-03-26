@@ -10,6 +10,8 @@ use App\Models\Part;
 use App\Models\SetPart;
 use Mockery\MockInterface;
 
+covers(SetPartResourceData::class);
+
 function mockSetPart(array $overrides = []): MockInterface&SetPart
 {
     $part = Mockery::mock(Part::class);

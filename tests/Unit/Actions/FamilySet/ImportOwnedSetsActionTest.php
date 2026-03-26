@@ -18,6 +18,8 @@ use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
+covers(ImportOwnedSetsAction::class);
+
 describe('ImportOwnedSetsAction', function (): void {
     beforeEach(function (): void {
         $this->db = Mockery::mock(ConnectionInterface::class);

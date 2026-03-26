@@ -8,6 +8,8 @@ use App\Models\StorageOption;
 use App\Models\User;
 use Illuminate\Database\ConnectionInterface;
 
+covers(CreateStorageOptionAction::class);
+
 describe('CreateStorageOptionAction', function (): void {
     beforeEach(function (): void {
         $this->db = Mockery::mock(ConnectionInterface::class);

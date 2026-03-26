@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Http\Resources\ColorResourceData;
 use App\Models\Color;
 
+covers(ColorResourceData::class);
+
 describe('ColorResourceData', function (): void {
     it('should convert color model to resource data', function (): void {
         // arrange

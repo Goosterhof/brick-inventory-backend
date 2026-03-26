@@ -7,6 +7,8 @@ use App\Models\StorageOption;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+covers(GetStorageOptionPartsAction::class);
+
 describe('GetStorageOptionPartsAction', function (): void {
     it('should query storage option parts', function (): void {
         // arrange

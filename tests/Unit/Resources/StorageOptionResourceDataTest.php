@@ -6,6 +6,8 @@ use App\Http\Resources\StorageOptionResourceData;
 use App\Models\StorageOption;
 use Illuminate\Support\Collection;
 
+covers(StorageOptionResourceData::class);
+
 describe('StorageOptionResourceData', function (): void {
     it('should convert storage option model to resource data with child_ids', function (): void {
         // arrange

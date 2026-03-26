@@ -12,6 +12,8 @@ use App\Exceptions\BrickognizeApiException;
 use App\Models\Part;
 use Illuminate\Http\UploadedFile;
 
+covers(IdentifyBrickAction::class);
+
 describe('IdentifyBrickAction', function (): void {
     it('should call UpsertPartAction with correct LegoPartData', function (): void {
         // arrange

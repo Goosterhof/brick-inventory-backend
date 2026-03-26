@@ -6,6 +6,8 @@ use App\Models\Family;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
+covers(Family::class);
+
 uses(RefreshDatabase::class);
 
 describe('Family', function (): void {

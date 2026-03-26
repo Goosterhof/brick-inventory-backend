@@ -7,6 +7,8 @@ use App\DataTransferObjects\StorageOption\StorageOptionData;
 use App\Models\StorageOption;
 use Illuminate\Database\ConnectionInterface;
 
+covers(UpdateStorageOptionAction::class);
+
 describe('UpdateStorageOptionAction', function (): void {
     beforeEach(function (): void {
         $this->db = Mockery::mock(ConnectionInterface::class);

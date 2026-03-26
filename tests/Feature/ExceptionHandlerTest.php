@@ -2,10 +2,13 @@
 
 declare(strict_types=1);
 
+use App\Exceptions\InvalidApiResponseException;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Http;
+
+covers(InvalidApiResponseException::class);
 
 uses(RefreshDatabase::class);
 

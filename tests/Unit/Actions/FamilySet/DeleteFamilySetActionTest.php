@@ -6,6 +6,8 @@ use App\Actions\FamilySet\DeleteFamilySetAction;
 use App\Models\FamilySet;
 use Illuminate\Database\ConnectionInterface;
 
+covers(DeleteFamilySetAction::class);
+
 describe('DeleteFamilySetAction', function (): void {
     beforeEach(function (): void {
         $this->db = Mockery::mock(ConnectionInterface::class);

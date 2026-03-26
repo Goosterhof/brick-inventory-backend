@@ -10,6 +10,8 @@ use Illuminate\Http\Client\Factory as HttpFactory;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Http;
 
+covers(BrickognizeService::class);
+
 const TEST_BRICKOGNIZE_BASE_URL = 'https://api.brickognize.com';
 
 describe('BrickognizeService', function (): void {
@@ -88,10 +90,10 @@ describe('BrickognizeService', function (): void {
             expect(fn (): array => $service->identifyBrick($image))->toThrow(BrickognizeApiException::class);
         });
 
-        it('should throw InvalidApiResponseException when response is not an array', function (): void {
+        it('should throw InvalidApiResponseException for malformed response', function (mixed $responseBody): void {
             // arrange
             Http::fake([
-                'https://api.brickognize.com/predict/' => Http::response('invalid'),
+                'https://api.brickognize.com/predict/' => Http::response($responseBody),
             ]);
 
             $service = new BrickognizeService(resolve(HttpFactory::class), TEST_BRICKOGNIZE_BASE_URL);
@@ -99,59 +101,12 @@ describe('BrickognizeService', function (): void {
 
             // act & assert
             expect(fn (): array => $service->identifyBrick($image))->toThrow(InvalidApiResponseException::class);
-        });
-
-        it('should throw InvalidApiResponseException when items field is missing', function (): void {
-            // arrange
-            Http::fake([
-                'https://api.brickognize.com/predict/' => Http::response([
-                    'data' => [], // wrong field name
-                ]),
-            ]);
-
-            $service = new BrickognizeService(resolve(HttpFactory::class), TEST_BRICKOGNIZE_BASE_URL);
-            $image = UploadedFile::fake()->image('brick.jpg');
-
-            // act & assert
-            expect(fn (): array => $service->identifyBrick($image))->toThrow(InvalidApiResponseException::class);
-        });
-
-        it('should throw InvalidApiResponseException when prediction at index is not an array', function (): void {
-            // arrange
-            Http::fake([
-                'https://api.brickognize.com/predict/' => Http::response([
-                    'items' => [
-                        'not-an-array',
-                    ],
-                ]),
-            ]);
-
-            $service = new BrickognizeService(resolve(HttpFactory::class), TEST_BRICKOGNIZE_BASE_URL);
-            $image = UploadedFile::fake()->image('brick.jpg');
-
-            // act & assert
-            expect(fn (): array => $service->identifyBrick($image))->toThrow(InvalidApiResponseException::class);
-        });
-
-        it('should throw InvalidApiResponseException when prediction is missing required fields', function (): void {
-            // arrange
-            Http::fake([
-                'https://api.brickognize.com/predict/' => Http::response([
-                    'items' => [
-                        [
-                            'id' => '3001',
-                            // missing 'name', 'type', 'score'
-                        ],
-                    ],
-                ]),
-            ]);
-
-            $service = new BrickognizeService(resolve(HttpFactory::class), TEST_BRICKOGNIZE_BASE_URL);
-            $image = UploadedFile::fake()->image('brick.jpg');
-
-            // act & assert
-            expect(fn (): array => $service->identifyBrick($image))->toThrow(InvalidApiResponseException::class);
-        });
+        })->with([
+            'response is not an array' => ['invalid'],
+            'items field is missing' => [['data' => []]],
+            'prediction at index is not an array' => [['items' => ['not-an-array']]],
+            'prediction is missing required fields' => [['items' => [['id' => '3001']]]],
+        ]);
 
         it('should handle integer score values', function (): void {
             // arrange

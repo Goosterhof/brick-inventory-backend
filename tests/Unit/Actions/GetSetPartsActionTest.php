@@ -14,6 +14,8 @@ use App\Models\Set;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+covers(GetSetPartsAction::class);
+
 describe('GetSetPartsAction', function (): void {
     it('should return existing set from database when set has parts', function (): void {
         // arrange

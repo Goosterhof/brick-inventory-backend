@@ -9,6 +9,8 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Route;
 use Symfony\Component\HttpFoundation\Response;
 
+covers(EnsureFamilyOwnership::class);
+
 describe('EnsureFamilyOwnership', function (): void {
     it('should return 401 when user is not authenticated', function (): void {
         // arrange

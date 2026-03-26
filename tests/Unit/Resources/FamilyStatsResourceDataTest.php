@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Data\FamilyStatsData;
 use App\Http\Resources\FamilyStatsResourceData;
 
+covers(FamilyStatsResourceData::class);
+
 describe('FamilyStatsResourceData', function (): void {
     it('should create resource from FamilyStatsData', function (): void {
         // arrange

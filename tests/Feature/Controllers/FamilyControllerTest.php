@@ -3,11 +3,14 @@
 declare(strict_types=1);
 
 use App\Enums\FamilySetStatus;
+use App\Http\Controllers\FamilyController;
 use App\Models\FamilySet;
 use App\Models\StorageOption;
 use App\Models\StorageOptionPart;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+
+covers(FamilyController::class);
 
 uses(RefreshDatabase::class);
 

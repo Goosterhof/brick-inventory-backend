@@ -10,6 +10,8 @@ use App\Models\Family;
 use App\Models\User;
 use Illuminate\Database\ConnectionInterface;
 
+covers(RemoveFamilyMemberAction::class);
+
 describe('RemoveFamilyMemberAction', function (): void {
     beforeEach(function (): void {
         $this->db = Mockery::mock(ConnectionInterface::class);

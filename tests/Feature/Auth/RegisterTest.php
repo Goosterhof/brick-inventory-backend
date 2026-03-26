@@ -2,12 +2,15 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Auth\RegisterController;
 use App\Models\Family;
 use App\Models\InviteCode;
 use App\Models\User;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\RateLimiter;
+
+covers(RegisterController::class);
 
 uses(RefreshDatabase::class);
 

@@ -10,6 +10,8 @@ use App\Models\Part;
 use App\Models\StorageOptionPart;
 use Mockery\MockInterface;
 
+covers(StorageOptionPartResourceData::class);
+
 function mockStorageOptionPart(array $overrides = []): MockInterface&StorageOptionPart
 {
     $part = Mockery::mock(Part::class);

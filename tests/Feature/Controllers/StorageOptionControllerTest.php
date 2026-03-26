@@ -2,11 +2,14 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\StorageOptionController;
 use App\Models\Part;
 use App\Models\StorageOption;
 use App\Models\StorageOptionPart;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+
+covers(StorageOptionController::class);
 
 uses(RefreshDatabase::class);
 

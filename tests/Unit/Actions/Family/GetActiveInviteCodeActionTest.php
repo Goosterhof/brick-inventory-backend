@@ -8,6 +8,8 @@ use App\Models\Family;
 use App\Models\InviteCode;
 use Illuminate\Database\Eloquent\Builder;
 
+covers(GetActiveInviteCodeAction::class);
+
 describe('GetActiveInviteCodeAction', function (): void {
     it('should return the active invite code for the family', function (): void {
         // arrange

@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Http\Resources\ProfileResourceData;
 use App\Models\User;
 
+covers(ProfileResourceData::class);
+
 describe('ProfileResourceData', function (): void {
     it('should convert user model to profile resource data', function (): void {
         // arrange

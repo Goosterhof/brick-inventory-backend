@@ -6,6 +6,8 @@ use App\Actions\StorageOption\DeleteStorageOptionPartAction;
 use App\Models\StorageOptionPart;
 use Illuminate\Database\ConnectionInterface;
 
+covers(DeleteStorageOptionPartAction::class);
+
 describe('DeleteStorageOptionPartAction', function (): void {
     beforeEach(function (): void {
         $this->db = Mockery::mock(ConnectionInterface::class);

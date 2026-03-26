@@ -11,6 +11,8 @@ use Illuminate\Database\ConnectionInterface;
 use Illuminate\Support\DateFactory;
 use Illuminate\Support\Facades\Date;
 
+covers(UpdateFamilySetAction::class);
+
 describe('UpdateFamilySetAction', function (): void {
     beforeEach(function (): void {
         $this->db = Mockery::mock(ConnectionInterface::class);

@@ -9,6 +9,8 @@ use Illuminate\Contracts\Hashing\Hasher;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Validation\ValidationException;
 
+covers(LoginUserAction::class);
+
 describe('LoginUserAction', function (): void {
     it('should return user when credentials are valid', function (): void {
         // arrange

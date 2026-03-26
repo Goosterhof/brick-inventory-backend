@@ -8,6 +8,8 @@ use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+covers(DeleteStorageOptionAction::class);
+
 describe('DeleteStorageOptionAction', function (): void {
     beforeEach(function (): void {
         $this->db = Mockery::mock(ConnectionInterface::class);

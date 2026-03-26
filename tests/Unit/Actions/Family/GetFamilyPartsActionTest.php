@@ -8,6 +8,8 @@ use App\Models\StorageOptionPart;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
+covers(GetFamilyPartsAction::class);
+
 describe('GetFamilyPartsAction', function (): void {
     it('should return empty array when family has no stored parts', function (): void {
         // arrange

@@ -118,6 +118,16 @@ it('should use shouldReceive instead of shouldHaveReceived in unit tests', funct
     }
 });
 
+it('should declare covers() in all test files', function (): void {
+    foreach (getTestFiles() as $file) {
+        $content = file_get_contents($file);
+        $relativePath = str_replace(dirname(__DIR__) . '/', '', $file);
+
+        expect(preg_match('/\bcovers\s*\(/', $content))
+            ->toBe(1, sprintf('Test file %s should declare covers() to bind it to the class(es) it tests', $relativePath));
+    }
+});
+
 it('should not use makePartial in unit tests', function (): void {
     $unitDir = dirname(__DIR__) . '/Unit';
     if (!is_dir($unitDir)) {

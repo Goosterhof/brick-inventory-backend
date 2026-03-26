@@ -2,8 +2,11 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\Auth\LoginController;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+
+covers(LoginController::class);
 
 uses(RefreshDatabase::class);
 

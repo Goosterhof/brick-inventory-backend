@@ -9,6 +9,8 @@ use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\UniqueConstraintViolationException;
 
+covers(UpsertColorAction::class);
+
 describe('UpsertColorAction', function (): void {
     it('should create a new color when it does not exist', function (): void {
         // arrange
