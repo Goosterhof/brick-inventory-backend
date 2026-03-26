@@ -293,6 +293,7 @@ Training proposals from audit reports are tracked here. A proposal must prove it
 | SOP 1: document fallback procedure when coverage driver is absent | 2026-03-25 | 2026-03-25-full-sweep-baseline | Coverage driver absent; SOP had no guidance for "unable to measure" scenario |
 
 | SOP 4: count Policy public methods and compare to unit test describe blocks | 2026-03-26 | 2026-03-26-routine-sweep | FamilyPolicy grew to 9 methods; test covers 5; same recurrence pattern as baseline Finding 6 |
+| When filing a finding about enforcement drift, ask: can the enforcement be made self-maintaining instead? Recommend the structural fix, not a human-memory fix | 2026-03-26 | 2026-03-26-route-test-auto-detect | Filed Finding 2 recommending "add routes to hardcoded list" — the real fix was making the test auto-detect routes. CEO identified the structural solution. |
 
 ### Graduated
 

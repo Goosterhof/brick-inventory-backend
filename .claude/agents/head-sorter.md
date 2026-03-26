@@ -277,6 +277,8 @@ _Proposals observed once. Need a second confirming shift before graduation._
 | When writing Actions with raw SQL joins, use `toBase()->get()` returning `stdClass` instead of Eloquent `get()` with `getAttribute()` | 2026-03-25 | 2026-03-25-brick-dna-lab | PHPStan flags `getAttribute()` as `mixed`; `stdClass` property access is cleaner |
 
 | When adding new policy methods, always add corresponding unit tests in the same commit | 2026-03-26 | 2026-03-26-audit-remediation-2 | Same gap pattern recurred from the first remediation; 4 new methods without unit tests |
+| When satisfying PHPStan on a narrowed nullable type, use `assert()` not a cast — casts hide bugs silently, assertions document invariants and fail loudly | 2026-03-26 | 2026-03-26-route-test-auto-detect | `(string)` cast on `?string` familyName would silently convert null to ""; assert() catches the violation |
+| When proposing "remember to do X" training, first ask: can a test enforce X instead? If yes, build the test — machine enforcement beats human memory | 2026-03-26 | 2026-03-26-route-test-auto-detect | Route list drift was proposed as a training candidate by both Sorter and Auditor; CEO identified the real fix was an auto-detecting test |
 
 ### Graduated
 
