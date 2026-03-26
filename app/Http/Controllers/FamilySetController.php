@@ -6,11 +6,13 @@ namespace App\Http\Controllers;
 
 use App\Actions\FamilySet\CreateFamilySetAction;
 use App\Actions\FamilySet\DeleteFamilySetAction;
+use App\Actions\FamilySet\GetFamilySetCompletionAction;
 use App\Actions\FamilySet\GetFamilySetsAction;
 use App\Actions\FamilySet\ImportOwnedSetsAction;
 use App\Actions\FamilySet\UpdateFamilySetAction;
 use App\Http\Requests\FamilySet\StoreFamilySetRequest;
 use App\Http\Requests\FamilySet\UpdateFamilySetRequest;
+use App\Http\Resources\FamilySetCompletionResourceData;
 use App\Http\Resources\FamilySetResourceData;
 use App\Models\FamilySet;
 use App\Models\User;
@@ -27,6 +29,21 @@ class FamilySetController extends Controller
         $familySets = $getFamilySetsAction->execute($user);
 
         return FamilySetResourceData::collection($familySets);
+    }
+
+    /**
+     * @return array<int, FamilySetCompletionResourceData>
+     */
+    public function completion(
+        #[CurrentUser] User $user,
+        GetFamilySetCompletionAction $getFamilySetCompletionAction,
+    ): array {
+        $completionData = $getFamilySetCompletionAction->execute($user->family);
+
+        return array_map(
+            FamilySetCompletionResourceData::from(...),
+            $completionData,
+        );
     }
 
     public function store(

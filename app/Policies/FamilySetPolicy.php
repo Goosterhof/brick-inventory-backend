@@ -34,6 +34,11 @@ final readonly class FamilySetPolicy
         return $familySet->family_id === $user->family_id;
     }
 
+    public function viewCompletion(User $user): bool
+    {
+        return true;
+    }
+
     public function importFromRebrickable(User $user): bool
     {
         return $user->family->head_id === $user->id;

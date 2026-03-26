@@ -103,6 +103,8 @@ composer mutation
 - Single `execute()` method — one procedure, one entry point
 - Can call other Actions, Models, Services (via Contract), DTOs
 - Cannot depend on HTTP layer (Request, Response, Controller)
+- When using raw SQL joins or aggregates, use `->toBase()->get()` returning `stdClass` — not Eloquent `get()` with `getAttribute()`. PHPStan handles `stdClass` property access cleanly; `getAttribute()` returns `mixed` and forces `@phpstan-ignore` annotations.
+- When an Action needs multiple independent queries, inject each Model separately and call `$model->newQuery()` per query — never `clone $builder`. Cloned Eloquent builders trigger `__clone()` which Mockery mocks don't support, breaking unit tests.
 - Test coverage: 100%
 
 ### Services (Supply Lines)
@@ -273,14 +275,15 @@ _Proposals observed once. Need a second confirming shift before graduation._
 | Before writing an Action that calls another Action, check the no-try-catch regulation — if error swallowing is needed, inline the query instead | 2026-03-25 | 2026-03-25-invite-code-brick | First draft of GenerateInviteCodeAction used try-catch around RevokeInviteCodeAction |
 | Before adding contextual bindings in AppServiceProvider, check deptrac.yaml Provider ruleset for the target layer | 2026-03-25 | 2026-03-25-invite-code-brick | Deptrac violation from Provider → Action import |
 | When creating ResourceData with model timestamp properties, always use nullable types (Carbon timestamps can be null) | 2026-03-25 | 2026-03-25-invite-code-brick | PHPStan error on created_at: DateTimeInterface vs Carbon|null |
-| Before using `clone` on Eloquent Builder in an Action, check if it will be unit tested with Mockery — use separate `newQuery()` calls instead | 2026-03-25 | 2026-03-25-brick-dna-lab | `clone $builder` triggers `__clone()` which Mockery mocks don't support |
-| When writing Actions with raw SQL joins, use `toBase()->get()` returning `stdClass` instead of Eloquent `get()` with `getAttribute()` | 2026-03-25 | 2026-03-25-brick-dna-lab | PHPStan flags `getAttribute()` as `mixed`; `stdClass` property access is cleaner |
+| ~~Before using `clone` on Eloquent Builder in an Action, check if it will be unit tested with Mockery — use separate `newQuery()` calls instead~~ | 2026-03-25 | 2026-03-25-brick-dna-lab | **Graduated 2026-03-26** — see Graduated table |
+| ~~When writing Actions with raw SQL joins, use `toBase()->get()` returning `stdClass` instead of Eloquent `get()` with `getAttribute()`~~ | 2026-03-25 | 2026-03-25-brick-dna-lab | **Graduated 2026-03-26** — see Graduated table |
 
 | When adding new policy methods, always add corresponding unit tests in the same commit | 2026-03-26 | 2026-03-26-audit-remediation-2 | Same gap pattern recurred from the first remediation; 4 new methods without unit tests |
 | When satisfying PHPStan on a narrowed nullable type, use `assert()` not a cast — casts hide bugs silently, assertions document invariants and fail loudly | 2026-03-26 | 2026-03-26-route-test-auto-detect | `(string)` cast on `?string` familyName would silently convert null to ""; assert() catches the violation |
 | When proposing "remember to do X" training, first ask: can a test enforce X instead? If yes, build the test — machine enforcement beats human memory | 2026-03-26 | 2026-03-26-route-test-auto-detect | Route list drift was proposed as a training candidate by both Sorter and Auditor; CEO identified the real fix was an auto-detecting test |
 | Before adding a `use` import to a file, check if the class is already imported to avoid duplicates that Pint will silently remove | 2026-03-26 | 2026-03-26-expand-pest-tests | Added duplicate `use App\Models\Family` to FamilyTest.php; caught on review |
 | When modifying 10+ files with identical patterns, read them in batches of 8-10 to minimize round-trips between read and edit phases | 2026-03-26 | 2026-03-26-expand-pest-tests | 66-file scope required many serial reads; batching was faster |
+| When building ResourceData for DTOs (not Models), document the phpstan-ignore with a comment explaining why the override is necessary | 2026-03-26 | 2026-03-26-set-completion-gauge | `@phpstan-ignore method.childParameterType` on `from()` is non-obvious without context |
 
 ### Graduated
 
@@ -288,7 +291,8 @@ _Proposals confirmed across 2+ shifts. Promoted into training above._
 
 | Proposal | Graduated | Confirming Logs | Promoted To |
 |---|---|---|---|
-| _(none yet)_ | | | |
+| Use `toBase()->get()` returning `stdClass` for raw SQL joins in Actions | 2026-03-26 | 2026-03-25-brick-dna-lab, 2026-03-26-set-completion-gauge | Actions (Sorting Procedures) training |
+| Use separate `newQuery()` calls instead of `clone` on Eloquent Builder | 2026-03-26 | 2026-03-25-brick-dna-lab, 2026-03-26-set-completion-gauge | Actions (Sorting Procedures) training |
 
 ### Dropped
 
