@@ -8,6 +8,8 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
+covers(GetFamilySetsAction::class);
+
 describe('GetFamilySetsAction', function (): void {
     it('should query family sets by user family_id', function (): void {
         // arrange

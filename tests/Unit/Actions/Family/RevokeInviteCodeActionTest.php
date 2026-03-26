@@ -9,6 +9,8 @@ use App\Models\InviteCode;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\Eloquent\Builder;
 
+covers(RevokeInviteCodeAction::class);
+
 describe('RevokeInviteCodeAction', function (): void {
     beforeEach(function (): void {
         $this->db = Mockery::mock(ConnectionInterface::class);

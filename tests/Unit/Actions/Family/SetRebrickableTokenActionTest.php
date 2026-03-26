@@ -9,6 +9,8 @@ use App\Models\Family;
 use App\Models\User;
 use Illuminate\Database\ConnectionInterface;
 
+covers(SetRebrickableTokenAction::class);
+
 describe('SetRebrickableTokenAction', function (): void {
     beforeEach(function (): void {
         $this->db = Mockery::mock(ConnectionInterface::class);

@@ -12,6 +12,8 @@ use App\Services\RebrickableService;
 use Illuminate\Http\Client\Factory as HttpFactory;
 use Illuminate\Support\Facades\Http;
 
+covers(RebrickableService::class);
+
 const TEST_API_KEY = 'test-api-key';
 const TEST_BASE_URL = 'https://rebrickable.com/api/v3';
 

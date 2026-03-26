@@ -9,6 +9,8 @@ use App\Data\Lego\LegoSetData;
 use App\Models\Set;
 use Illuminate\Database\Eloquent\Builder;
 
+covers(GetSetByEanAction::class);
+
 describe('GetSetByEanAction', function (): void {
     it('should return existing set from database when API result matches a cached set', function (): void {
         // arrange

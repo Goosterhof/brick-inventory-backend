@@ -8,6 +8,8 @@ use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
+covers(GetStorageOptionsAction::class);
+
 describe('GetStorageOptionsAction', function (): void {
     it('should query storage options by user family_id', function (): void {
         // arrange

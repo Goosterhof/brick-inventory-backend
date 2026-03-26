@@ -10,6 +10,8 @@ use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\UniqueConstraintViolationException;
 
+covers(AssignPartToStorageAction::class);
+
 describe('AssignPartToStorageAction', function (): void {
     it('should create a new assignment when one does not exist', function (): void {
         // arrange

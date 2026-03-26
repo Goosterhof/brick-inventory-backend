@@ -9,6 +9,8 @@ use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\UniqueConstraintViolationException;
 
+covers(UpsertSetAction::class);
+
 describe('UpsertSetAction', function (): void {
     it('should create a new set when it does not exist', function (): void {
         // arrange

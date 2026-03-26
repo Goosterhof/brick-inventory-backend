@@ -9,6 +9,8 @@ use App\Data\Lego\LegoSetData;
 use App\Models\Set;
 use Illuminate\Database\Eloquent\Builder;
 
+covers(GetSetAction::class);
+
 describe('GetSetAction', function (): void {
     it('should return existing set from database without calling API', function (): void {
         // arrange

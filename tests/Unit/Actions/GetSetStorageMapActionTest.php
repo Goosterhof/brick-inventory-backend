@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
+covers(GetSetStorageMapAction::class);
+
 describe('GetSetStorageMapAction', function (): void {
     it('should return empty array when set has no parts', function (): void {
         // arrange

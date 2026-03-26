@@ -15,6 +15,8 @@ use Illuminate\Database\Eloquent\Collection as EloquentCollection;
 use Illuminate\Database\Query\Builder as BaseBuilder;
 use Illuminate\Support\Collection;
 
+covers(GetFamilySetCompletionAction::class);
+
 describe('GetFamilySetCompletionAction', function (): void {
     it('should return empty array when family has no non-wishlist sets', function (): void {
         $family = Mockery::mock(Family::class);

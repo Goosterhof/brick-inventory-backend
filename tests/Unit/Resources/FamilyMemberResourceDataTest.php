@@ -7,6 +7,8 @@ use App\Models\Family;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 
+covers(FamilyMemberResourceData::class);
+
 describe('FamilyMemberResourceData', function (): void {
     it('should create resource from user model', function (): void {
         // arrange

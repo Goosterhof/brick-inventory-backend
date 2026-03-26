@@ -3,6 +3,7 @@
 declare(strict_types=1);
 
 use App\Enums\FamilySetStatus;
+use App\Http\Controllers\FamilySetController;
 use App\Models\Color;
 use App\Models\FamilySet;
 use App\Models\Part;
@@ -14,6 +15,8 @@ use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 
 uses(RefreshDatabase::class);
+
+covers(FamilySetController::class);
 
 describe('FamilySetController completion', function (): void {
     it('should return 401 when unauthenticated', function (): void {

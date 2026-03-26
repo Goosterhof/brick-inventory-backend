@@ -2,12 +2,15 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\FamilyController;
 use App\Models\Color;
 use App\Models\Part;
 use App\Models\StorageOption;
 use App\Models\StorageOptionPart;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+
+covers(FamilyController::class);
 
 uses(RefreshDatabase::class);
 

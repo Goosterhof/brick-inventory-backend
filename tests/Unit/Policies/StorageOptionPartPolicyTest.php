@@ -7,30 +7,22 @@ use App\Models\StorageOptionPart;
 use App\Models\User;
 use App\Policies\StorageOptionPartPolicy;
 
+covers(StorageOptionPartPolicy::class);
+
 describe('StorageOptionPartPolicy', function (): void {
-    it('should allow delete for user from same family', function (): void {
+    it('should allow or deny delete based on family match', function (int $userFamilyId, int $storageFamilyId, bool $expected): void {
         $user = Mockery::mock(User::class);
-        $user->shouldReceive('getAttribute')->with('family_id')->andReturn(1);
+        $user->shouldReceive('getAttribute')->with('family_id')->andReturn($userFamilyId);
 
         $storageOption = Mockery::mock(StorageOption::class);
-        $storageOption->shouldReceive('getAttribute')->with('family_id')->andReturn(1);
+        $storageOption->shouldReceive('getAttribute')->with('family_id')->andReturn($storageFamilyId);
 
         $storageOptionPart = Mockery::mock(StorageOptionPart::class);
         $storageOptionPart->shouldReceive('getAttribute')->with('storageOption')->andReturn($storageOption);
 
-        expect(new StorageOptionPartPolicy()->delete($user, $storageOptionPart))->toBeTrue();
-    });
-
-    it('should deny delete for user from different family', function (): void {
-        $user = Mockery::mock(User::class);
-        $user->shouldReceive('getAttribute')->with('family_id')->andReturn(1);
-
-        $storageOption = Mockery::mock(StorageOption::class);
-        $storageOption->shouldReceive('getAttribute')->with('family_id')->andReturn(2);
-
-        $storageOptionPart = Mockery::mock(StorageOptionPart::class);
-        $storageOptionPart->shouldReceive('getAttribute')->with('storageOption')->andReturn($storageOption);
-
-        expect(new StorageOptionPartPolicy()->delete($user, $storageOptionPart))->toBeFalse();
-    });
+        expect(new StorageOptionPartPolicy()->delete($user, $storageOptionPart))->toBe($expected);
+    })->with([
+        'same family allows delete' => [1, 1, true],
+        'different family denies delete' => [1, 2, false],
+    ]);
 });

@@ -9,6 +9,8 @@ use App\Models\User;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\Eloquent\Builder;
 
+covers(GenerateInviteCodeAction::class);
+
 describe('GenerateInviteCodeAction', function (): void {
     beforeEach(function (): void {
         $this->db = Mockery::mock(ConnectionInterface::class);

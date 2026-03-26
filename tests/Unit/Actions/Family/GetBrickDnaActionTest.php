@@ -11,6 +11,8 @@ use Illuminate\Database\Query\Builder as BaseBuilder;
 use Illuminate\Support\Collection;
 use Mockery\MockInterface;
 
+covers(GetBrickDnaAction::class);
+
 /**
  * Helper to create a mock Eloquent Builder that returns itself for chained calls.
  *

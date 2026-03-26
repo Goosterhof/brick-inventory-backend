@@ -14,6 +14,8 @@ use App\Models\Set;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Support\Facades\Date;
 
+covers(CreateFamilySetAction::class);
+
 describe('CreateFamilySetAction', function (): void {
     beforeEach(function (): void {
         $this->db = Mockery::mock(ConnectionInterface::class);

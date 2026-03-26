@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\BrickIdentificationController;
 use App\Models\Part;
 use App\Models\User;
 use Illuminate\Cache\RateLimiting\Limit;
@@ -9,6 +10,8 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\RateLimiter;
+
+covers(BrickIdentificationController::class);
 
 uses(RefreshDatabase::class);
 

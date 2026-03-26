@@ -2,9 +2,12 @@
 
 declare(strict_types=1);
 
+use App\Http\Controllers\InviteCodeController;
 use App\Models\InviteCode;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+
+covers(InviteCodeController::class);
 
 uses(RefreshDatabase::class);
 

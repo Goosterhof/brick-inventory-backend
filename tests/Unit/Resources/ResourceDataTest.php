@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 
+covers(ResourceData::class);
+
 // Concrete test doubles for the abstract ResourceData base class
 
 final readonly class TestResourceData extends ResourceData

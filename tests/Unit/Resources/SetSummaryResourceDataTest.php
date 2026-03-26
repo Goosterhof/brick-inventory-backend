@@ -5,6 +5,8 @@ declare(strict_types=1);
 use App\Http\Resources\SetSummaryResourceData;
 use App\Models\Set;
 
+covers(SetSummaryResourceData::class);
+
 describe('SetSummaryResourceData', function (): void {
     it('should convert set model to summary resource data', function (): void {
         // arrange

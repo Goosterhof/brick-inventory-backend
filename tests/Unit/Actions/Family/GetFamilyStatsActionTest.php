@@ -11,6 +11,8 @@ use App\Models\StorageOptionPart;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
 
+covers(GetFamilyStatsAction::class);
+
 describe('GetFamilyStatsAction', function (): void {
     it('should query family stats for the given family', function (): void {
         // arrange

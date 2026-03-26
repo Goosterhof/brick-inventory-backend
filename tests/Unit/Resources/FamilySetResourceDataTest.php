@@ -8,6 +8,8 @@ use App\Http\Resources\SetSummaryResourceData;
 use App\Models\FamilySet;
 use App\Models\Set;
 
+covers(FamilySetResourceData::class);
+
 describe('FamilySetResourceData', function (): void {
     it('should convert family set model to resource data with nested set', function (): void {
         // arrange

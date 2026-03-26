@@ -11,6 +11,8 @@ use App\Models\SetPart;
 use Illuminate\Support\Collection;
 use Mockery\MockInterface;
 
+covers(SetWithPartsResourceData::class);
+
 function mockSetPartForSetWith(array $overrides = []): MockInterface&SetPart
 {
     $part = Mockery::mock(Part::class);

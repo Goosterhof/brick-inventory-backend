@@ -3,12 +3,15 @@
 declare(strict_types=1);
 
 use App\Enums\FamilySetStatus;
+use App\Http\Controllers\FamilySetController;
 use App\Models\Family;
 use App\Models\FamilySet;
 use App\Models\Set;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
+
+covers(FamilySetController::class);
 
 uses(RefreshDatabase::class);
 
