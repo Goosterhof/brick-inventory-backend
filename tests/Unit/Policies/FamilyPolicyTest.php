@@ -34,6 +34,14 @@ describe('FamilyPolicy', function (): void {
         });
     });
 
+    describe('viewBrickDna', function (): void {
+        it('should allow any authenticated user to view brick DNA', function (): void {
+            $user = Mockery::mock(User::class);
+
+            expect($this->policy->viewBrickDna($user))->toBeTrue();
+        });
+    });
+
     describe('removeMember', function (): void {
         it('should allow family head to remove a member', function (): void {
             $user = Mockery::mock(User::class);
@@ -67,6 +75,60 @@ describe('FamilyPolicy', function (): void {
             $user->shouldReceive('getAttribute')->with('id')->andReturn(99);
 
             expect($this->policy->setRebrickableToken($user))->toBeFalse();
+        });
+    });
+
+    describe('generateInviteCode', function (): void {
+        it('should allow family head to generate invite code', function (): void {
+            $user = Mockery::mock(User::class);
+            $user->shouldReceive('getAttribute')->with('family')->andReturn((object) ['head_id' => 42]);
+            $user->shouldReceive('getAttribute')->with('id')->andReturn(42);
+
+            expect($this->policy->generateInviteCode($user))->toBeTrue();
+        });
+
+        it('should deny non-head member from generating invite code', function (): void {
+            $user = Mockery::mock(User::class);
+            $user->shouldReceive('getAttribute')->with('family')->andReturn((object) ['head_id' => 42]);
+            $user->shouldReceive('getAttribute')->with('id')->andReturn(99);
+
+            expect($this->policy->generateInviteCode($user))->toBeFalse();
+        });
+    });
+
+    describe('viewInviteCode', function (): void {
+        it('should allow family head to view invite code', function (): void {
+            $user = Mockery::mock(User::class);
+            $user->shouldReceive('getAttribute')->with('family')->andReturn((object) ['head_id' => 42]);
+            $user->shouldReceive('getAttribute')->with('id')->andReturn(42);
+
+            expect($this->policy->viewInviteCode($user))->toBeTrue();
+        });
+
+        it('should deny non-head member from viewing invite code', function (): void {
+            $user = Mockery::mock(User::class);
+            $user->shouldReceive('getAttribute')->with('family')->andReturn((object) ['head_id' => 42]);
+            $user->shouldReceive('getAttribute')->with('id')->andReturn(99);
+
+            expect($this->policy->viewInviteCode($user))->toBeFalse();
+        });
+    });
+
+    describe('revokeInviteCode', function (): void {
+        it('should allow family head to revoke invite code', function (): void {
+            $user = Mockery::mock(User::class);
+            $user->shouldReceive('getAttribute')->with('family')->andReturn((object) ['head_id' => 42]);
+            $user->shouldReceive('getAttribute')->with('id')->andReturn(42);
+
+            expect($this->policy->revokeInviteCode($user))->toBeTrue();
+        });
+
+        it('should deny non-head member from revoking invite code', function (): void {
+            $user = Mockery::mock(User::class);
+            $user->shouldReceive('getAttribute')->with('family')->andReturn((object) ['head_id' => 42]);
+            $user->shouldReceive('getAttribute')->with('id')->andReturn(99);
+
+            expect($this->policy->revokeInviteCode($user))->toBeFalse();
         });
     });
 });

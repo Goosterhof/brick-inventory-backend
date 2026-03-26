@@ -36,7 +36,9 @@ final class RegisterRequest extends FormRequest
     public function toDto(): RegisterUserData
     {
         return new RegisterUserData(
-            familyName: $this->safe()->string(self::FAMILY_NAME)->toString(),
+            familyName: $this->safe()->has(self::FAMILY_NAME)
+                ? $this->safe()->string(self::FAMILY_NAME)->toString()
+                : null,
             name: $this->safe()->string(self::NAME)->toString(),
             email: $this->safe()->string(self::EMAIL)->toString(),
             password: $this->safe()->string(self::PASSWORD)->toString(),

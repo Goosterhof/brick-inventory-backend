@@ -276,6 +276,10 @@ _Proposals observed once. Need a second confirming shift before graduation._
 | Before using `clone` on Eloquent Builder in an Action, check if it will be unit tested with Mockery — use separate `newQuery()` calls instead | 2026-03-25 | 2026-03-25-brick-dna-lab | `clone $builder` triggers `__clone()` which Mockery mocks don't support |
 | When writing Actions with raw SQL joins, use `toBase()->get()` returning `stdClass` instead of Eloquent `get()` with `getAttribute()` | 2026-03-25 | 2026-03-25-brick-dna-lab | PHPStan flags `getAttribute()` as `mixed`; `stdClass` property access is cleaner |
 
+| When adding new policy methods, always add corresponding unit tests in the same commit | 2026-03-26 | 2026-03-26-audit-remediation-2 | Same gap pattern recurred from the first remediation; 4 new methods without unit tests |
+| When satisfying PHPStan on a narrowed nullable type, use `assert()` not a cast — casts hide bugs silently, assertions document invariants and fail loudly | 2026-03-26 | 2026-03-26-route-test-auto-detect | `(string)` cast on `?string` familyName would silently convert null to ""; assert() catches the violation |
+| When proposing "remember to do X" training, first ask: can a test enforce X instead? If yes, build the test — machine enforcement beats human memory | 2026-03-26 | 2026-03-26-route-test-auto-detect | Route list drift was proposed as a training candidate by both Sorter and Auditor; CEO identified the real fix was an auto-detecting test |
+
 ### Graduated
 
 _Proposals confirmed across 2+ shifts. Promoted into training above._
@@ -290,4 +294,4 @@ _Proposals evaluated and rejected. Kept for institutional memory._
 
 | Proposal | Dropped | Log Evidence | Reason |
 |---|---|---|---|
-| _(none yet)_ | | | |
+| When adding new routes, always update RoutingArchitectureTest's hardcoded route list in the same commit | 2026-03-26 | 2026-03-26-route-test-auto-detect | Structurally eliminated — RoutingArchitectureTest now auto-detects all auth:sanctum routes. No hardcoded list to update. |

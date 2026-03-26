@@ -111,6 +111,7 @@ Verify the boundary fences are holding:
 3. **Spot-check** — read 3-5 Actions and verify: `final readonly`, single `execute()`, no facades, no Request dependencies
 4. **Spot-check** — read 2-3 Services and verify: `final readonly`, implements Contract, no Models, no Actions
 5. **Spot-check** — read 2-3 Controllers and verify: no constructors, method injection, no try-catch
+6. **Scan Actions for try-catch** — run `grep -rn "try {" app/Actions/` and cross-reference every hit against ADR-0003's documented exceptions. Any try-catch not covered by a documented exception is a finding. Do not flag try-catch blocks that are already documented in the ADR.
 
 ### SOP 3: Audit Manifest Accuracy
 
@@ -288,18 +289,20 @@ Training proposals from audit reports are tracked here. A proposal must prove it
 
 | Proposal | First Observed | Report Evidence | Context |
 |---|---|---|---|
-| SOP 2: scan Actions for try-catch blocks | 2026-03-25 | 2026-03-25-full-sweep-baseline | Found try-catch in ImportOwnedSetsAction that architecture tests missed entirely |
 | SOP 3: verify all FormRequests use `$this->safe()` not `$this->input()` in toDto() | 2026-03-25 | 2026-03-25-full-sweep-baseline | ADR-0006 specifies this; no architecture test enforces it; spot-check was incomplete |
 | SOP 1: document fallback procedure when coverage driver is absent | 2026-03-25 | 2026-03-25-full-sweep-baseline | Coverage driver absent; SOP had no guidance for "unable to measure" scenario |
+
+| SOP 4: count Policy public methods and compare to unit test describe blocks | 2026-03-26 | 2026-03-26-routine-sweep | FamilyPolicy grew to 9 methods; test covers 5; same recurrence pattern as baseline Finding 6 |
+| When filing a finding about enforcement drift, ask: can the enforcement be made self-maintaining instead? Recommend the structural fix, not a human-memory fix | 2026-03-26 | 2026-03-26-route-test-auto-detect | Filed Finding 2 recommending "add routes to hardcoded list" — the real fix was making the test auto-detect routes. CEO identified the structural solution. |
 
 ### Graduated
 
 | Proposal | Graduated | Confirming Reports | Promoted To |
 |---|---|---|---|
-| _(none yet)_ | | | |
+| SOP 2: scan Actions for try-catch blocks | 2026-03-26 | 2026-03-25-full-sweep-baseline, 2026-03-26-routine-sweep | SOP 2 step 6 |
 
 ### Dropped
 
 | Proposal | Dropped | Report Evidence | Reason |
 |---|---|---|---|
-| _(none yet)_ | | | |
+| SOP 3: cross-reference RoutingArchitectureTest hardcoded route list against actual routes | 2026-03-26 | 2026-03-26-route-test-auto-detect | Structurally eliminated — test now auto-detects all auth:sanctum routes. No hardcoded list to cross-reference. |
