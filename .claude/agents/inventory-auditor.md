@@ -291,7 +291,7 @@ Training proposals from audit reports are tracked here. A proposal must prove it
 |---|---|---|---|
 | SOP 3: verify all FormRequests use `$this->safe()` not `$this->input()` in toDto() | 2026-03-25 | 2026-03-25-full-sweep-baseline | ADR-0006 specifies this; no architecture test enforces it; spot-check was incomplete |
 | SOP 1: document fallback procedure when coverage driver is absent | 2026-03-25 | 2026-03-25-full-sweep-baseline | Coverage driver absent; SOP had no guidance for "unable to measure" scenario |
-| SOP 3: cross-reference RoutingArchitectureTest hardcoded route list against actual routes | 2026-03-26 | 2026-03-26-routine-sweep | 5 new routes missing from hardcoded enforcement list; test passed but wasn't testing new routes |
+
 | SOP 4: count Policy public methods and compare to unit test describe blocks | 2026-03-26 | 2026-03-26-routine-sweep | FamilyPolicy grew to 9 methods; test covers 5; same recurrence pattern as baseline Finding 6 |
 
 ### Graduated
@@ -304,4 +304,4 @@ Training proposals from audit reports are tracked here. A proposal must prove it
 
 | Proposal | Dropped | Report Evidence | Reason |
 |---|---|---|---|
-| _(none yet)_ | | | |
+| SOP 3: cross-reference RoutingArchitectureTest hardcoded route list against actual routes | 2026-03-26 | 2026-03-26-route-test-auto-detect | Structurally eliminated — test now auto-detects all auth:sanctum routes. No hardcoded list to cross-reference. |
