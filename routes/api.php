@@ -91,6 +91,8 @@ Route::middleware(['auth:sanctum', 'family.ownership'])->group(function (): void
         ->can('viewParts', Family::class);
     Route::get('/family/stats', [FamilyController::class, 'stats'])
         ->can('viewStats', Family::class);
+    Route::get('/family/brick-dna', [FamilyController::class, 'brickDna'])
+        ->can('viewBrickDna', Family::class);
     Route::put('/family/rebrickable-token', [FamilyController::class, 'setRebrickableToken'])
         ->can('setRebrickableToken', Family::class);
     Route::delete('/family/members/{user}', [FamilyController::class, 'removeMember'])

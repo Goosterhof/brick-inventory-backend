@@ -4,11 +4,13 @@ declare(strict_types=1);
 
 namespace App\Http\Controllers;
 
+use App\Actions\Family\GetBrickDnaAction;
 use App\Actions\Family\GetFamilyPartsAction;
 use App\Actions\Family\GetFamilyStatsAction;
 use App\Actions\Family\RemoveFamilyMemberAction;
 use App\Actions\Family\SetRebrickableTokenAction;
 use App\Http\Requests\Family\SetRebrickableTokenRequest;
+use App\Http\Resources\BrickDnaResourceData;
 use App\Http\Resources\FamilyMemberResourceData;
 use App\Http\Resources\FamilyStatsResourceData;
 use App\Models\User;
@@ -37,6 +39,15 @@ class FamilyController extends Controller
         $familyStatsData = $getFamilyStatsAction->execute($user->family);
 
         return FamilyStatsResourceData::from($familyStatsData)->toResponse();
+    }
+
+    public function brickDna(
+        #[CurrentUser] User $user,
+        GetBrickDnaAction $getBrickDnaAction,
+    ): JsonResponse {
+        $brickDnaData = $getBrickDnaAction->execute($user->family);
+
+        return BrickDnaResourceData::from($brickDnaData)->toResponse();
     }
 
     public function setRebrickableToken(

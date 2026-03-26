@@ -273,6 +273,8 @@ _Proposals observed once. Need a second confirming shift before graduation._
 | Before writing an Action that calls another Action, check the no-try-catch regulation — if error swallowing is needed, inline the query instead | 2026-03-25 | 2026-03-25-invite-code-brick | First draft of GenerateInviteCodeAction used try-catch around RevokeInviteCodeAction |
 | Before adding contextual bindings in AppServiceProvider, check deptrac.yaml Provider ruleset for the target layer | 2026-03-25 | 2026-03-25-invite-code-brick | Deptrac violation from Provider → Action import |
 | When creating ResourceData with model timestamp properties, always use nullable types (Carbon timestamps can be null) | 2026-03-25 | 2026-03-25-invite-code-brick | PHPStan error on created_at: DateTimeInterface vs Carbon|null |
+| Before using `clone` on Eloquent Builder in an Action, check if it will be unit tested with Mockery — use separate `newQuery()` calls instead | 2026-03-25 | 2026-03-25-brick-dna-lab | `clone $builder` triggers `__clone()` which Mockery mocks don't support |
+| When writing Actions with raw SQL joins, use `toBase()->get()` returning `stdClass` instead of Eloquent `get()` with `getAttribute()` | 2026-03-25 | 2026-03-25-brick-dna-lab | PHPStan flags `getAttribute()` as `mixed`; `stdClass` property access is cleaner |
 
 ### Graduated
 
