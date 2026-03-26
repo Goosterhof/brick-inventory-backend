@@ -59,5 +59,5 @@ For the architecture test enforcing `covers()`: follow the existing pattern in `
 
 ---
 
-**Status:** Open
-**Shift Log:** _link to shift log when filed_
+**Status:** Complete
+**Shift Log:** `.claude/records/journals/2026-03-26-expand-pest-tests.md`
