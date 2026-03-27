@@ -151,7 +151,7 @@ jobs:
       - name: Generate app key
         run: php artisan key:generate
 
-      - name: Run unit tests with 100% coverage requirement
+      - name: Run unit tests with 99% coverage requirement
         run: composer test:coverage
 
   feature-coverage:
