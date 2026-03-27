@@ -19,10 +19,10 @@ parameters:
         - config
         - database
         - routes
+        - tests
 
     excludePaths:
         - bootstrap/cache
-        - tests
 
     # Larastan-specific rules
     checkModelProperties: true
@@ -45,3 +45,84 @@ parameters:
         -
             identifier: staticMethod.dynamicCall
             path: app/*
+
+        # Pest test suite: Pest's DSL uses internal classes, dynamic method chaining,
+        # and returns mixed types that PHPStan at level max cannot resolve. These are
+        # scoped strictly to tests/ and do not mask app/ errors. With
+        # reportUnmatchedIgnoredErrors: true, any category that becomes resolvable
+        # upstream will surface for cleanup. Reviewed 2026-03-26.
+        -
+            identifier: method.notFound
+            path: tests/*
+        -
+            identifier: method.nonObject
+            path: tests/*
+        -
+            identifier: method.internalClass
+            path: tests/*
+        -
+            identifier: argument.type
+            path: tests/*
+        -
+            identifier: property.notFound
+            path: tests/*
+        -
+            identifier: offsetAccess.invalidOffset
+            path: tests/*
+        -
+            identifier: offsetAccess.nonOffsetAccessible
+            path: tests/*
+        -
+            identifier: property.nonObject
+            path: tests/*
+        -
+            identifier: method.dynamicName
+            path: tests/*
+        -
+            identifier: cast.string
+            path: tests/*
+        -
+            identifier: cast.useless
+            path: tests/*
+        -
+            identifier: missingType.generics
+            path: tests/*
+        -
+            identifier: missingType.iterableValue
+            path: tests/*
+        -
+            identifier: foreach.nonIterable
+            path: tests/*
+        -
+            identifier: binaryOp.invalid
+            path: tests/*
+        -
+            identifier: if.condNotBoolean
+            path: tests/*
+        -
+            identifier: return.type
+            path: tests/*
+        -
+            identifier: argument.templateType
+            path: tests/*
+        -
+            identifier: ternary.shortNotAllowed
+            path: tests/*
+        -
+            identifier: staticMethod.dynamicCall
+            path: tests/*
+        -
+            identifier: staticMethod.deprecated
+            path: tests/*
+        -
+            identifier: cast.int
+            path: tests/*
+        -
+            identifier: booleanNot.exprNotBoolean
+            path: tests/*
+        -
+            identifier: booleanAnd.rightNotBoolean
+            path: tests/*
+        -
+            identifier: booleanAnd.leftNotBoolean
+            path: tests/*
