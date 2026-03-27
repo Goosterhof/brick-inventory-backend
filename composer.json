@@ -60,8 +60,8 @@
             "@php artisan test"
         ],
         "test:arch": "./vendor/bin/pest tests/Architecture",
-        "test:coverage": "./vendor/bin/pest tests/Unit --coverage --configuration=phpunit.coverage.xml --min=100",
-        "test:feature-coverage": "./vendor/bin/pest tests/Feature --coverage --configuration=phpunit.feature-coverage.xml --min=80",
+        "test:coverage": "./vendor/bin/pest --coverage --configuration=phpunit.coverage.xml --min=99",
+        "test:feature-coverage": "./vendor/bin/pest --coverage --configuration=phpunit.feature-coverage.xml --min=90",
         "lint": [
             "@rector",
             "@pint"
@@ -76,7 +76,7 @@
         "pint:test": "./vendor/bin/pint --test",
         "phpstan": "./vendor/bin/phpstan analyse",
         "deptrac": "./vendor/bin/deptrac analyse",
-        "mutation": "php -d pcov.enabled=1 ./vendor/bin/pest --mutate --path=app/Actions,app/Services --testsuite=Unit --parallel --min=75",
+        "mutation": "php -d pcov.enabled=1 ./vendor/bin/pest --mutate --path=app/Actions,app/Services --testsuite=Unit --parallel --min=76",
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi"

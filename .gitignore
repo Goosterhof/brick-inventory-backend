@@ -6,6 +6,7 @@
 .phpactor.json
 .deptrac.cache
 .phpunit.result.cache
+coverage*.xml
 /.claude/settings.local.json
 /.fleet
 /.idea

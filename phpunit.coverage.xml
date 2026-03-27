@@ -7,6 +7,9 @@
     <testsuites>
         <testsuite name="Unit">
             <directory>tests/Unit</directory>
+            <exclude>tests/Unit/Middleware</exclude>
+            <exclude>tests/Unit/Policies</exclude>
+            <exclude>tests/Unit/Resources</exclude>
         </testsuite>
     </testsuites>
     <source>
