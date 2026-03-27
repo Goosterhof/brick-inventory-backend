@@ -6,13 +6,14 @@ namespace App\Http\Resources;
 
 use App\Enums\FamilySetStatus;
 use App\Models\FamilySet;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * @extends ResourceData<FamilySet>
  */
 final readonly class FamilySetResourceData extends ResourceData
 {
-    public const EAGER_LOAD = ['set'];
+    public const array EAGER_LOAD = ['set'];
 
     public function __construct(
         public int $id,
@@ -27,7 +28,7 @@ final readonly class FamilySetResourceData extends ResourceData
     /**
      * @param FamilySet $model
      */
-    public static function from($model): static
+    public static function from(Model $model): static
     {
         $model->loadMissing(self::requiredRelations());
         self::validateRelationsLoaded($model);

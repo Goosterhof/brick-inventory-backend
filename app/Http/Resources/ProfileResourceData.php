@@ -6,6 +6,7 @@ namespace App\Http\Resources;
 
 use App\Models\User;
 use DateTimeInterface;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * @extends ResourceData<User>
@@ -23,7 +24,7 @@ final readonly class ProfileResourceData extends ResourceData
     /**
      * @param User $model
      */
-    public static function from($model): static
+    public static function from(Model $model): static
     {
         return new self(
             id: $model->id,

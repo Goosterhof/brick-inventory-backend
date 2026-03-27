@@ -28,10 +28,8 @@ final readonly class BrickDnaResourceData extends ResourceData
 
     /**
      * @param BrickDnaData $model
-     *
-     * @phpstan-ignore method.childParameterType
      */
-    public static function from($model): static
+    public static function from(mixed $model): static // @phpstan-ignore method.childParameterType
     {
         return new self(
             top_colors: $model->topColors,

@@ -22,10 +22,8 @@ final readonly class FamilySetCompletionResourceData extends ResourceData
 
     /**
      * @param FamilySetCompletionData $model
-     *
-     * @phpstan-ignore method.childParameterType
      */
-    public static function from($model): static
+    public static function from(mixed $model): static // @phpstan-ignore method.childParameterType
     {
         return new self(
             family_set_id: $model->familySetId,

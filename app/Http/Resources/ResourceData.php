@@ -24,14 +24,14 @@ abstract readonly class ResourceData implements JsonSerializable, Responsable
      *
      * @var array<int, string>
      */
-    public const EAGER_LOAD = [];
+    public const array EAGER_LOAD = [];
 
     /**
      * Create an instance from a model.
      *
      * @param TModel $model
      */
-    abstract public static function from($model): static;
+    abstract public static function from(Model $model): static;
 
     /**
      * Convert the resource to an array.
@@ -71,7 +71,7 @@ abstract readonly class ResourceData implements JsonSerializable, Responsable
         return $this->toArray();
     }
 
-    public function toResponse($request = null): JsonResponse
+    public function toResponse(mixed $request = null): JsonResponse
     {
         return new JsonResponse($this->toArray());
     }

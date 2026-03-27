@@ -20,7 +20,7 @@ final readonly class TestResourceData extends ResourceData
         public int $age,
     ) {}
 
-    public static function from($model): static
+    public static function from(Model $model): static
     {
         return new self(
             name: $model->name,
@@ -31,14 +31,14 @@ final readonly class TestResourceData extends ResourceData
 
 final readonly class TestParentResourceData extends ResourceData
 {
-    public const EAGER_LOAD = ['child'];
+    public const array EAGER_LOAD = ['child'];
 
     public function __construct(
         public int $id,
         public TestResourceData $child,
     ) {}
 
-    public static function from($model): static
+    public static function from(Model $model): static
     {
         $model->loadMissing(self::requiredRelations());
         self::validateRelationsLoaded($model);
@@ -56,7 +56,7 @@ final readonly class TestEnumResourceData extends ResourceData
         public FamilySetStatus $status,
     ) {}
 
-    public static function from($model): static
+    public static function from(Model $model): static
     {
         return new self(status: $model->status);
     }
@@ -68,7 +68,7 @@ final readonly class TestDateResourceData extends ResourceData
         public DateTimeInterface $created_at,
     ) {}
 
-    public static function from($model): static
+    public static function from(Model $model): static
     {
         return new self(created_at: $model->created_at);
     }
@@ -81,7 +81,7 @@ final readonly class TestArrayResourceData extends ResourceData
         public array $statuses,
     ) {}
 
-    public static function from($model): static
+    public static function from(Model $model): static
     {
         return new self(statuses: $model->statuses);
     }
@@ -93,7 +93,7 @@ final readonly class TestNullableResourceData extends ResourceData
         public ?string $optional,
     ) {}
 
-    public static function from($model): static
+    public static function from(Model $model): static
     {
         return new self(optional: $model->optional);
     }

@@ -30,7 +30,8 @@
         "phpstan/phpstan": "^2.1",
         "phpstan/phpstan-deprecation-rules": "^2.0",
         "phpstan/phpstan-strict-rules": "^2.0",
-        "rector/rector": "^2.3"
+        "rector/rector": "^2.3",
+        "tomasvotruba/type-coverage": "^2.1"
     },
     "autoload": {
         "psr-4": {
@@ -75,6 +76,7 @@
         "pint": "./vendor/bin/pint",
         "pint:test": "./vendor/bin/pint --test",
         "phpstan": "./vendor/bin/phpstan analyse",
+        "phpstan:types": "./vendor/bin/phpstan analyse --configuration=phpstan-type-coverage.neon",
         "deptrac": "./vendor/bin/deptrac analyse",
         "mutation": "php -d pcov.enabled=1 ./vendor/bin/pest --mutate --path=app/Actions,app/Services --testsuite=Unit --parallel --min=76",
         "post-autoload-dump": [
