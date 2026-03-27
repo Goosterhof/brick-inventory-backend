@@ -107,4 +107,52 @@ The unit coverage gap (99% vs 100%) deserves a follow-up order. Two Actions have
 
 _Appended by the Logistics Director after reviewing the log. The sorter's sections above are not edited -- they stand as written._
 
-**Overall Assessment:** _pending_
+**Overall Assessment:** Solid
+
+### Order Fulfillment Review
+
+All five deliverables are present and verified in the diff (6 files changed, 232 insertions):
+
+1. **Composer audit** — New `audit` job in CI with full checkout/setup/cache/install/audit chain. Clean, minimal, blocking. ✓
+2. **MSI threshold** — Raised from 75 to 76. Below the 80% floor specified in the order, but the Sorter ran the actual measurement (76.83%) and proved 80% is unreachable without new tests, which the order prohibited. Honest calibration over aspirational fiction. ✓ (accepted deviation)
+3. **Lint blocking** — Verified already blocking (`rector --dry-run` exits 2, `pint --test` exits 1). Correct call to not change what works. ✓
+4. **PHPStan on tests** — Added `tests/` to paths with 25 scoped identifier ignores all limited to `tests/*`. The `reportUnmatchedIgnoredErrors: true` safeguard is the right approach. 262 files analyzed, 0 errors. ✓
+5. **Feature coverage** — Raised from 80 to 90. Actual is 97.5%, so 90% gives healthy headroom. XML exclusions for non-controller tests are correct. ✓
+
+**Bonus findings the Sorter surfaced:**
+- Unit coverage was 99.3%, not 100% — a pre-existing gap masked by the old setup. Threshold honestly set to 99%.
+- `covers()` annotations targeting classes outside `<source>` directories caused Pest to exit 1, silently suppressing coverage. Fixed with XML exclusions.
+- Pest path arguments override XML `<exclude>` directives — path args removed from composer scripts.
+
+These are real discoveries, not scope creep. The Sorter couldn't fulfill the order without fixing them.
+
+### Decision Review
+
+**MSI at 76 vs 80** — The shipping order set 80 as the floor. The Sorter proved with data (76.83% actual) that 80 is unreachable without new tests. Setting 76 is the right call — it's the highest integer the suite sustains without fiction. This is exactly what "adjust thresholds to what the current suite already sustains" means.
+
+**Unit coverage at 99 vs 100** — A pre-existing gap in two Actions (GetBrickDnaAction, GetFamilySetCompletionAction). The Sorter documented the exact lines and recommended a follow-up. Dropping to 99% rather than writing tests outside the order scope was disciplined.
+
+**PHPStan 25 scoped ignores** — Correct approach. Identifier-based, path-scoped to `tests/*`, with auto-cleanup via `reportUnmatchedIgnoredErrors`. The alternative (level reduction or separate config) would have been worse.
+
+**Coverage XML exclusions** — Necessary fix. Tests covering Middleware/Policies/Resources don't belong in unit coverage measurement of Actions/Services. Same for Model tests in feature coverage of Controllers.
+
+No decisions needed escalation.
+
+### Showcase Assessment
+
+This delivery demonstrates infrastructure maturity. The CI pipeline now has seven jobs, and every threshold is calibrated to a measured actual — not an aspirational guess. The PHPStan expansion from 171 to 262 files shows the team isn't afraid to extend static analysis, and the scoped-ignore approach shows they know how to handle tooling limitations without compromising strictness on production code.
+
+The most impressive part is what the Sorter found that nobody asked about: the `covers()` + `<source>` interaction that was silently breaking coverage, and the Pest path-arg override. These would have caused CI failures downstream. Catching them now is the kind of defensive work that impresses auditors.
+
+### Training Proposal Dispositions
+
+| Proposal | Disposition | Rationale |
+|---|---|---|
+| Before setting a coverage or mutation threshold, always run the actual measurement first — never set based on assumption | Candidate | Valid — the first commit set MSI to 80% without measurement. Running actuals first is a general principle worth reinforcing. First observation. |
+| When coverage tests produce warnings instead of reports, check for `covers()` annotations targeting classes outside the `<source>` directories in the phpunit XML | Candidate | Valid and specific enough to be actionable. The `covers()` + `<source>` mismatch is a non-obvious failure mode. First observation. |
+
+### Notes for the Sorter
+
+Strong execution. Building pcov from source when apt was network-blocked showed good problem-solving. Running actual measurements before setting thresholds was the right instinct — it caught both the MSI gap (76% vs assumed 80%) and the unit coverage gap (99.3% vs assumed 100%).
+
+The self-debrief note about "previous commit (not mine)" setting MSI to 80% is worth clarifying: that was the first Sorter deployment in this session that got stuck on pcov. The revised orders from the Logistics Director specified 80 as a config-only change precisely because we couldn't verify locally. You proved the assumption wrong — that's the value of measurement.

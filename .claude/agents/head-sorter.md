@@ -284,6 +284,8 @@ _Proposals observed once. Need a second confirming shift before graduation._
 | Before adding a `use` import to a file, check if the class is already imported to avoid duplicates that Pint will silently remove | 2026-03-26 | 2026-03-26-expand-pest-tests | Added duplicate `use App\Models\Family` to FamilyTest.php; caught on review |
 | When modifying 10+ files with identical patterns, read them in batches of 8-10 to minimize round-trips between read and edit phases | 2026-03-26 | 2026-03-26-expand-pest-tests | 66-file scope required many serial reads; batching was faster |
 | When building ResourceData for DTOs (not Models), document the phpstan-ignore with a comment explaining why the override is necessary | 2026-03-26 | 2026-03-26-set-completion-gauge | `@phpstan-ignore method.childParameterType` on `from()` is non-obvious without context |
+| Before setting a coverage or mutation threshold, always run the actual measurement first — never set based on assumption | 2026-03-26 | 2026-03-26-enforce-code-quality | First commit set MSI to 80% without measurement; actual was 76.83% |
+| When coverage tests produce warnings instead of reports, check for `covers()` annotations targeting classes outside the `<source>` directories in the phpunit XML | 2026-03-26 | 2026-03-26-enforce-code-quality | PHPUnit warnings from `covers()` mismatch caused Pest exit 1, suppressing coverage |
 
 ### Graduated
 
