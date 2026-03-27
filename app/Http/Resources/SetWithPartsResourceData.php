@@ -11,7 +11,7 @@ use App\Models\Set;
  */
 final readonly class SetWithPartsResourceData extends ResourceData
 {
-    public const EAGER_LOAD = ['setParts.part', 'setParts.color'];
+    public const array EAGER_LOAD = ['setParts.part', 'setParts.color'];
 
     /**
      * @param array<int, SetPartResourceData> $parts

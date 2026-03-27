@@ -31,7 +31,7 @@ final readonly class TestResourceData extends ResourceData
 
 final readonly class TestParentResourceData extends ResourceData
 {
-    public const EAGER_LOAD = ['child'];
+    public const array EAGER_LOAD = ['child'];
 
     public function __construct(
         public int $id,

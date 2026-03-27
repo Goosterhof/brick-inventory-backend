@@ -11,7 +11,7 @@ use App\Models\StorageOption;
  */
 final readonly class StorageOptionResourceData extends ResourceData
 {
-    public const EAGER_LOAD = ['children'];
+    public const array EAGER_LOAD = ['children'];
 
     /**
      * @param array<int, int> $child_ids

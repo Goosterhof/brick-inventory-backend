@@ -24,7 +24,7 @@ abstract readonly class ResourceData implements JsonSerializable, Responsable
      *
      * @var array<int, string>
      */
-    public const EAGER_LOAD = [];
+    public const array EAGER_LOAD = [];
 
     /**
      * Create an instance from a model.

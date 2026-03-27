@@ -11,7 +11,7 @@ use App\Models\SetPart;
  */
 final readonly class SetPartResourceData extends ResourceData
 {
-    public const EAGER_LOAD = ['part', 'color'];
+    public const array EAGER_LOAD = ['part', 'color'];
 
     public function __construct(
         public int $id,

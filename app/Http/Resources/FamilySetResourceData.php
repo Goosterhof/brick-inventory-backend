@@ -12,7 +12,7 @@ use App\Models\FamilySet;
  */
 final readonly class FamilySetResourceData extends ResourceData
 {
-    public const EAGER_LOAD = ['set'];
+    public const array EAGER_LOAD = ['set'];
 
     public function __construct(
         public int $id,
