@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Resources;
 
 use App\Models\Set;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * @extends ResourceData<Set>
@@ -24,7 +25,7 @@ final readonly class SetSummaryResourceData extends ResourceData
     /**
      * @param Set $model
      */
-    public static function from($model): static
+    public static function from(Model $model): static
     {
         return new self(
             id: $model->id,

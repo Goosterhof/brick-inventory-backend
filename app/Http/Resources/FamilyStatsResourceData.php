@@ -26,10 +26,8 @@ final readonly class FamilyStatsResourceData extends ResourceData
 
     /**
      * @param FamilyStatsData $model
-     *
-     * @phpstan-ignore method.childParameterType
      */
-    public static function from($model): static
+    public static function from(mixed $model): static // @phpstan-ignore method.childParameterType
     {
         return new self(
             total_sets: $model->totalSets,

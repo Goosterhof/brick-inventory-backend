@@ -2,7 +2,6 @@ includes:
     - vendor/larastan/larastan/extension.neon
     - vendor/phpstan/phpstan-strict-rules/rules.neon
     - vendor/phpstan/phpstan-deprecation-rules/rules.neon
-    - vendor/tomasvotruba/type-coverage/config/extension.neon
     - phar://phpstan.phar/conf/bleedingEdge.neon
 
 services:
@@ -34,15 +33,6 @@ parameters:
     # PHPStan strictness rules
     reportUnmatchedIgnoredErrors: true
     checkTooWideReturnTypesInProtectedAndPublicMethods: true
-
-    # Type coverage thresholds — the ratchet that prevents type regression.
-    # Return and property types are fully covered. Param is at 79% because Pest
-    # test closures use untyped parameters by design (framework-injected via DI).
-    # All app/ code is fully typed — this floor prevents regression.
-    type_coverage:
-        return: 100
-        param: 79
-        property: 100
 
     ignoreErrors:
         # Known Larastan + phpstan-strict-rules incompatibility (larastan/larastan#1272,

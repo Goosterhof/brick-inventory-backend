@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Resources;
 
 use App\Models\StorageOptionPart;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * @extends ResourceData<StorageOptionPart>
@@ -24,7 +25,7 @@ final readonly class StorageOptionPartResourceData extends ResourceData
     /**
      * @param StorageOptionPart $model
      */
-    public static function from($model): static
+    public static function from(Model $model): static
     {
         $model->loadMissing(self::requiredRelations());
 

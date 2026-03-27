@@ -28,7 +28,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->bind(LegoDataServiceInterface::class, RebrickableService::class);
         $this->app->bind(BrickIdentificationServiceInterface::class, BrickognizeService::class);
-        $this->app->bind(StatefulGuard::class, fn ($app) => Auth::guard('web'));
+        $this->app->bind(StatefulGuard::class, fn (mixed $app) => Auth::guard('web'));
 
         $this->app->when(GenerateInviteCodeAction::class)
             ->needs('$ttlDays')

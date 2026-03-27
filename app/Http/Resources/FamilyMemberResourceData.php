@@ -6,6 +6,7 @@ namespace App\Http\Resources;
 
 use App\Models\Family;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * @extends ResourceData<User>
@@ -22,7 +23,7 @@ final readonly class FamilyMemberResourceData extends ResourceData
     /**
      * @param User $model
      */
-    public static function from($model): static
+    public static function from(Model $model): static
     {
         return new self(
             id: $model->id,

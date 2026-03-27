@@ -76,6 +76,7 @@
         "pint": "./vendor/bin/pint",
         "pint:test": "./vendor/bin/pint --test",
         "phpstan": "./vendor/bin/phpstan analyse",
+        "phpstan:types": "./vendor/bin/phpstan analyse --configuration=phpstan-type-coverage.neon",
         "deptrac": "./vendor/bin/deptrac analyse",
         "mutation": "php -d pcov.enabled=1 ./vendor/bin/pest --mutate --path=app/Actions,app/Services --testsuite=Unit --parallel --min=76",
         "post-autoload-dump": [

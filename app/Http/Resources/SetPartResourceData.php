@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace App\Http\Resources;
 
 use App\Models\SetPart;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * @extends ResourceData<SetPart>
@@ -25,7 +26,7 @@ final readonly class SetPartResourceData extends ResourceData
     /**
      * @param SetPart $model
      */
-    public static function from($model): static
+    public static function from(Model $model): static
     {
         $model->loadMissing(self::requiredRelations());
         self::validateRelationsLoaded($model);
