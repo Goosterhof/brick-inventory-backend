@@ -226,6 +226,21 @@ jobs:
       - name: Run mutation testing
         run: composer mutation
 
+  sast:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Run Semgrep SAST
+        uses: semgrep/semgrep-action@v1
+        with:
+          config: >-
+            p/php
+            p/laravel
+            p/owasp-top-ten
+            p/security-audit
+
   seed:
     runs-on: ubuntu-latest
 
