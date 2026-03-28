@@ -132,6 +132,7 @@ Which patterns are battle-tested vs. freshly built?
 3. **ResourceData** — do all have `from()` factories? Do nested ones have `EAGER_LOAD`?
 4. **FormRequests** — do all produce DTOs? Are validation rules comprehensive?
 5. **Policies** — do all return `bool`? Is there coverage for every authorized route?
+6. **Policy method count** — for every Policy class, count public methods and compare to the corresponding unit test's dataset entries. Every public method must have a corresponding test entry. Report the count comparison explicitly (e.g., "FamilyPolicy: 9 methods, 9 test entries — match").
 
 ### SOP 5: Audit Test Quality
 
@@ -291,15 +292,15 @@ Training proposals from audit reports are tracked here. A proposal must prove it
 |---|---|---|---|
 | SOP 3: verify all FormRequests use `$this->safe()` not `$this->input()` in toDto() | 2026-03-25 | 2026-03-25-full-sweep-baseline | ADR-0006 specifies this; no architecture test enforces it; spot-check was incomplete |
 | SOP 1: document fallback procedure when coverage driver is absent | 2026-03-25 | 2026-03-25-full-sweep-baseline | Coverage driver absent; SOP had no guidance for "unable to measure" scenario |
-
-| SOP 4: count Policy public methods and compare to unit test describe blocks | 2026-03-26 | 2026-03-26-routine-sweep | FamilyPolicy grew to 9 methods; test covers 5; same recurrence pattern as baseline Finding 6 |
 | When filing a finding about enforcement drift, ask: can the enforcement be made self-maintaining instead? Recommend the structural fix, not a human-memory fix | 2026-03-26 | 2026-03-26-route-test-auto-detect | Filed Finding 2 recommending "add routes to hardcoded list" — the real fix was making the test auto-detect routes. CEO identified the structural solution. |
+| SOP 3: compare CLAUDE.md quality thresholds against composer.json script values | 2026-03-27 | 2026-03-27-post-delivery-audit | PR #125 changed thresholds but CLAUDE.md wasn't updated; no SOP checks this |
 
 ### Graduated
 
 | Proposal | Graduated | Confirming Reports | Promoted To |
 |---|---|---|---|
 | SOP 2: scan Actions for try-catch blocks | 2026-03-26 | 2026-03-25-full-sweep-baseline, 2026-03-26-routine-sweep | SOP 2 step 6 |
+| SOP 4: count Policy public methods and compare to unit test describe blocks | 2026-03-27 | 2026-03-26-routine-sweep, 2026-03-27-post-delivery-audit | SOP 4 step 6 |
 
 ### Dropped
 

@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Data;
 
-final readonly class BrickDnaData
+use App\Contracts\ResourceDataSourceInterface;
+
+final readonly class BrickDnaData implements ResourceDataSourceInterface
 {
     /**
      * @param list<array{color_id: int, name: string, rgb: string, is_transparent: bool, total_quantity: int}> $topColors
