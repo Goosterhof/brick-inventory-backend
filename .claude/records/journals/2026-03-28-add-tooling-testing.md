@@ -120,26 +120,43 @@ One minor weakness: `scramble:export` fails without a live database, which means
 
 _Appended by the Logistics Director after reviewing the log. The sorter's sections above are not edited — they stand as written._
 
-**Overall Assessment:** _pending_
+**Overall Assessment:** Solid
 
 ### Order Fulfillment Review
 
-_pending_
+All four deliverables landed. The Sorter correctly identified the one partial: Scramble export requires a live database, so local validation is environment-dependent. That's a Scramble design constraint, not a delivery gap — the package is installed, routes are registered, and it will produce a spec in any environment with a database (CI, staging, dev with SQLite). Acceptable.
+
+The CI expansion beyond scope (coverage, feature-coverage, mutation, seed jobs) is useful but should have been flagged in the shipping order as a scope addition before implementation. The Sorter acknowledged this in Blind Spots — good self-awareness, but the protocol is to flag *before*, not *after*.
+
+Decision #6 about coverage thresholds is the one item worth scrutinizing. The actual thresholds are `--min=99` (unit) and `--min=90` (feature) vs CLAUDE.md's documented 100% and 80%. The unit threshold being 99% instead of 100% is pragmatic but undocumented — CLAUDE.md should either be updated to reflect the actual threshold, or the threshold should be raised to match. The feature threshold exceeding the documented minimum (90% vs 80%) is fine — exceeding a floor is not a violation.
 
 ### Decision Review
 
-_pending_
+Decisions 1-4 are sound. No custom Scramble config, grouped Dependabot, Semgrep defaults, `covers()` annotations — all defensible and straightforward.
+
+Decision #5 (CI expansion beyond scope) should have been escalated or at minimum documented in the shipping order before implementation. The additions are valuable, but the warehouse runs on paper trails — undocumented scope expansion is how manifests drift from reality.
+
+Decision #6 (threshold discrepancy) needed a comment in the workflow or a CLAUDE.md update in the same commit. The Sorter's own training proposal catches this — good that they noticed it, but the fix should have been part of the delivery.
 
 ### Showcase Assessment
 
-_pending_
+Strong addition to the portfolio. A senior architect reviewing this codebase would see:
+- API documentation that generates itself (Scramble)
+- Dependency management that runs itself (Dependabot with thoughtful grouping)
+- Security scanning that catches OWASP Top 10 patterns (Semgrep)
+- Contract tests that prove external API integration is actively monitored
+
+The contract test fixtures are particularly well-crafted — they include fields the DTOs don't consume, which demonstrates understanding of forward-compatible parsing. This is the kind of detail that separates a portfolio piece from a hobby project.
 
 ### Training Proposal Dispositions
 
 | Proposal | Disposition | Rationale |
 |---|---|---|
-| _pending_ | | |
+| When a shipping order is issued, file the shift log immediately upon completion — never retroactively | Candidate | Valid process gap. This is the first retroactive log in the warehouse — it needs a second observation to graduate, but the principle is correct. The accountability pipeline's value is in contemporaneous documentation. |
+| When CI thresholds differ from documented standards (CLAUDE.md), add a comment in the CI config explaining the deviation | Candidate | Good instinct. Undocumented deviations between CLAUDE.md and actual enforcement create confusion. A comment or a CLAUDE.md update — either works, but silence doesn't. |
 
 ### Notes for the Sorter
 
-_pending_
+Clean delivery on a four-item shipping order. The contract tests are the highlight — well-structured fixtures with realistic edge cases. The retroactive filing is noted but not a pattern yet.
+
+Two items to tighten next time: (1) flag scope additions *before* implementing them, not in the self-debrief after; (2) when a threshold deviates from documented standards, resolve the discrepancy in the same commit rather than leaving it as a known gap.
