@@ -62,7 +62,7 @@
             "@php artisan test"
         ],
         "test:arch": "./vendor/bin/pest tests/Architecture",
-        "test:coverage": "./vendor/bin/pest --coverage --configuration=phpunit.coverage.xml --min=99",
+        "test:coverage": "./vendor/bin/pest --coverage --configuration=phpunit.coverage.xml --min=100",
         "test:feature-coverage": "./vendor/bin/pest --coverage --configuration=phpunit.feature-coverage.xml --min=90",
         "lint": [
             "@rector",

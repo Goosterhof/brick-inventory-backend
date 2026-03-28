@@ -288,6 +288,8 @@ _Proposals observed once. Need a second confirming shift before graduation._
 | When coverage tests produce warnings instead of reports, check for `covers()` annotations targeting classes outside the `<source>` directories in the phpunit XML | 2026-03-26 | 2026-03-26-enforce-code-quality | PHPUnit warnings from `covers()` mismatch caused Pest exit 1, suppressing coverage |
 | When adding a new interface implementation to a class in a Deptrac-guarded layer, check that the layer's ruleset allows the interface's layer as a dependency | 2026-03-28 | 2026-03-28-computed-resource-data | Deptrac failed because ResourceData layer needed Contract but only Data → Contract was anticipated |
 | When a class implements multiple interfaces that both declare a method with the same name, check for parameter type conflicts between the interfaces before PHPStan | 2026-03-28 | 2026-03-28-computed-resource-data | Responsable::toResponse(Request) vs ResourceResponse::toResponse(mixed) caused a PHPStan error |
+| When a shipping order is issued, file the shift log immediately upon completion — never retroactively | 2026-03-28 | 2026-03-28-add-tooling-testing | Shift log filed after the fact; accountability pipeline requires contemporaneous documentation |
+| When CI thresholds differ from documented standards (CLAUDE.md), add a comment in the CI config explaining the deviation | 2026-03-28 | 2026-03-28-add-tooling-testing | CI uses 99%/90% vs documented 100%/80% — reasoning is sound but undocumented in the workflow file |
 
 ### Graduated
 
