@@ -283,9 +283,11 @@ _Proposals observed once. Need a second confirming shift before graduation._
 | When proposing "remember to do X" training, first ask: can a test enforce X instead? If yes, build the test — machine enforcement beats human memory | 2026-03-26 | 2026-03-26-route-test-auto-detect | Route list drift was proposed as a training candidate by both Sorter and Auditor; CEO identified the real fix was an auto-detecting test |
 | Before adding a `use` import to a file, check if the class is already imported to avoid duplicates that Pint will silently remove | 2026-03-26 | 2026-03-26-expand-pest-tests | Added duplicate `use App\Models\Family` to FamilyTest.php; caught on review |
 | When modifying 10+ files with identical patterns, read them in batches of 8-10 to minimize round-trips between read and edit phases | 2026-03-26 | 2026-03-26-expand-pest-tests | 66-file scope required many serial reads; batching was faster |
-| When building ResourceData for DTOs (not Models), document the phpstan-ignore with a comment explaining why the override is necessary | 2026-03-26 | 2026-03-26-set-completion-gauge | `@phpstan-ignore method.childParameterType` on `from()` is non-obvious without context |
+| ~~When building ResourceData for DTOs (not Models), document the phpstan-ignore with a comment explaining why the override is necessary~~ | 2026-03-26 | 2026-03-26-set-completion-gauge | **Dropped 2026-03-28** — see Dropped table |
 | Before setting a coverage or mutation threshold, always run the actual measurement first — never set based on assumption | 2026-03-26 | 2026-03-26-enforce-code-quality | First commit set MSI to 80% without measurement; actual was 76.83% |
 | When coverage tests produce warnings instead of reports, check for `covers()` annotations targeting classes outside the `<source>` directories in the phpunit XML | 2026-03-26 | 2026-03-26-enforce-code-quality | PHPUnit warnings from `covers()` mismatch caused Pest exit 1, suppressing coverage |
+| When adding a new interface implementation to a class in a Deptrac-guarded layer, check that the layer's ruleset allows the interface's layer as a dependency | 2026-03-28 | 2026-03-28-computed-resource-data | Deptrac failed because ResourceData layer needed Contract but only Data → Contract was anticipated |
+| When a class implements multiple interfaces that both declare a method with the same name, check for parameter type conflicts between the interfaces before PHPStan | 2026-03-28 | 2026-03-28-computed-resource-data | Responsable::toResponse(Request) vs ResourceResponse::toResponse(mixed) caused a PHPStan error |
 
 ### Graduated
 
@@ -303,3 +305,4 @@ _Proposals evaluated and rejected. Kept for institutional memory._
 | Proposal | Dropped | Log Evidence | Reason |
 |---|---|---|---|
 | When adding new routes, always update RoutingArchitectureTest's hardcoded route list in the same commit | 2026-03-26 | 2026-03-26-route-test-auto-detect | Structurally eliminated — RoutingArchitectureTest now auto-detects all auth:sanctum routes. No hardcoded list to update. |
+| When building ResourceData for DTOs (not Models), document the phpstan-ignore with a comment explaining why the override is necessary | 2026-03-28 | 2026-03-28-computed-resource-data | Structurally eliminated — ADR-0010 introduced ComputedResourceData. DTO-sourced resources extend ComputedResourceData instead of using @phpstan-ignore. No suppression needed. |

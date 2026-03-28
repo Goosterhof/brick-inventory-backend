@@ -65,7 +65,7 @@ The duplication trigger for extraction is explicit: if a third abstract variant 
 
 ### Deptrac change
 
-`Data → Contract` added. Data DTOs implement the `ResourceDataSource` interface defined in Contracts. This is the clean dependency direction — implementations depend on abstractions, not the reverse. `Contract → Data` already exists (contracts reference Data DTOs in their signatures).
+`Data → Contract` and `ResourceData → Contract` added. Data DTOs implement the `ResourceDataSource` interface defined in Contracts. Both abstract resource classes implement `ResourceResponse` from Contracts. This is the clean dependency direction — implementations depend on abstractions, not the reverse. `Contract → Data` already exists (contracts reference Data DTOs in their signatures).
 
 ## Consequences
 
@@ -74,7 +74,7 @@ The duplication trigger for extraction is explicit: if a third abstract variant 
 - New computed endpoints require the Data DTO to implement `ResourceDataSource` — typically a one-line addition since the DTO already exists
 - Architecture tests reference `ResourceResponse` interface instead of `ResourceData` class for shared-type checks (3 spots)
 - Serialization duplicated in two abstract classes — code comments mark the extraction trigger
-- Deptrac gains a new edge: `Data → Contract`
+- Deptrac gains two new edges: `Data → Contract` and `ResourceData → Contract`
 
 ## Enforcement
 
@@ -100,6 +100,14 @@ The duplication trigger for extraction is explicit: if a third abstract variant 
 ### Should `ComputedResourceData` have its own `collection()` that accepts arrays of DTOs?
 
 **Resolved 2026-03-28.** No. None of the three current use cases need it — the controllers return single computed results or the Action already returns a list of DTOs that the controller maps. If a need arises, it can be added to `ComputedResourceData` later without breaking anything.
+
+### Why `ResourceResponseInterface` / `ResourceDataSourceInterface` instead of `ResourceResponse` / `ResourceDataSource`?
+
+**Resolved 2026-03-28.** The `App\Contracts` layer enforces an `Interface` suffix on all interfaces via `ContractArchitectureTest`. The ADR uses the shorter conceptual names for readability; the actual class names in code are `ResourceResponseInterface` and `ResourceDataSourceInterface`.
+
+### Why remove `Responsable` from `ResourceData`?
+
+**Resolved 2026-03-28.** `ResourceData` previously implemented Laravel's `Responsable` interface. Adding `ResourceResponseInterface` (which declares `toResponse(mixed $request = null)`) created a parameter type conflict — Larastan infers `Responsable::toResponse()` as `toResponse(Request $request)`, which is narrower than `ResourceResponseInterface::toResponse(mixed)`. Since nothing in the codebase type-hints against `Responsable` (controllers call `->toResponse()` explicitly), removing it was the clean fix.
 
 ## Open Questions
 
