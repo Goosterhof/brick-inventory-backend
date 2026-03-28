@@ -13,6 +13,7 @@ Decisions that shaped the build. Each records what was chosen, what was rejected
 | [0007](0007-config-attributes-not-helpers.md) | #[Config] attributes, not helpers/facades | ConfigArchitectureTest, GeneralArchitectureTest |
 | [0008](0008-explicit-routes-not-api-resource.md) | Explicit routes, not apiResource | RoutingArchitectureTest |
 | [0009](0009-thin-controllers-method-injection.md) | Thin controllers with method injection only | ControllerArchitectureTest |
+| [0010](0010-computed-resource-data.md) | ComputedResourceData for DTO-sourced responses (sibling to ResourceData, shared ResourceResponse interface) | ResourceDataArchitectureTest, PHPStan, Deptrac |
 
 ## Adding a New ADR
 
