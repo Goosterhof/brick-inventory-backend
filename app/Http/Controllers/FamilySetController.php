@@ -18,17 +18,24 @@ use App\Models\FamilySet;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class FamilySetController extends Controller
 {
-    /**
-     * @return array<int, FamilySetResourceData>
-     */
-    public function index(#[CurrentUser] User $user, GetFamilySetsAction $getFamilySetsAction): array
-    {
-        $familySets = $getFamilySetsAction->execute($user);
+    public function index(
+        #[CurrentUser] User $user,
+        GetFamilySetsAction $getFamilySetsAction,
+        Request $request,
+    ): JsonResponse {
+        $cursorPaginator = $getFamilySetsAction->execute(
+            user: $user,
+            perPage: $request->integer('per_page', 25),
+            cursor: $request->query('cursor'),
+        );
 
-        return FamilySetResourceData::collection($familySets);
+        return new JsonResponse(
+            $cursorPaginator->through(fn (FamilySet $familySet): array => FamilySetResourceData::from($familySet)->toArray()),
+        );
     }
 
     /**

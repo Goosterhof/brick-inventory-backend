@@ -6,25 +6,34 @@ use App\Actions\StorageOption\GetStorageOptionsAction;
 use App\Models\StorageOption;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Pagination\CursorPaginator;
 
 covers(GetStorageOptionsAction::class);
 
 describe('GetStorageOptionsAction', function (): void {
-    it('should query storage options by user family_id', function (): void {
+    it('should query storage options by user family_id with cursor pagination', function (): void {
         // arrange
         $user = Mockery::mock(User::class);
         $user->allows('getAttribute')->with('family_id')->andReturn(5);
 
-        $collection = new Collection;
+        $cursorPaginator = new CursorPaginator(collect(), 25);
 
         $builder = Mockery::mock(Builder::class);
         $builder->shouldReceive('where')
             ->with('family_id', 5)
             ->once()
             ->andReturnSelf();
-        $builder->shouldReceive('whereNull')->with('parent_id')->andReturnSelf();
-        $builder->shouldReceive('get')->andReturn($collection);
+        $builder->shouldReceive('whereNull')
+            ->with('parent_id')
+            ->once()
+            ->andReturnSelf();
+        $builder->shouldReceive('orderBy')
+            ->with('id')
+            ->once()
+            ->andReturnSelf();
+        $builder->shouldReceive('cursorPaginate')
+            ->once()
+            ->andReturn($cursorPaginator);
 
         $storageOption = Mockery::mock(StorageOption::class);
         $storageOption->shouldReceive('newQuery')
@@ -37,23 +46,24 @@ describe('GetStorageOptionsAction', function (): void {
         $result = $action->execute($user);
 
         // assert
-        expect($result)->toBe($collection);
+        expect($result)->toBe($cursorPaginator);
     });
 
-    it('should filter to only root storage options', function (): void {
+    it('should cap per_page at 100', function (): void {
         // arrange
         $user = Mockery::mock(User::class);
         $user->allows('getAttribute')->with('family_id')->andReturn(1);
 
-        $collection = new Collection;
+        $cursorPaginator = new CursorPaginator(collect(), 100);
 
         $builder = Mockery::mock(Builder::class);
         $builder->shouldReceive('where')->andReturnSelf();
-        $builder->shouldReceive('whereNull')
-            ->with('parent_id')
+        $builder->shouldReceive('whereNull')->andReturnSelf();
+        $builder->shouldReceive('orderBy')->andReturnSelf();
+        $builder->shouldReceive('cursorPaginate')
+            ->withArgs(fn (int $perPage): bool => $perPage === 100)
             ->once()
-            ->andReturnSelf();
-        $builder->shouldReceive('get')->andReturn($collection);
+            ->andReturn($cursorPaginator);
 
         $storageOption = Mockery::mock(StorageOption::class);
         $storageOption->shouldReceive('newQuery')->andReturn($builder);
@@ -61,8 +71,9 @@ describe('GetStorageOptionsAction', function (): void {
         $action = new GetStorageOptionsAction($storageOption);
 
         // act
-        $action->execute($user);
+        $result = $action->execute($user, perPage: 200);
 
-        // assert - Mockery expectations verify the interactions
+        // assert
+        expect($result)->toBe($cursorPaginator);
     });
 });

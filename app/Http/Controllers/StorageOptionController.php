@@ -20,17 +20,24 @@ use App\Models\StorageOptionPart;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class StorageOptionController extends Controller
 {
-    /**
-     * @return array<int, StorageOptionResourceData>
-     */
-    public function index(#[CurrentUser] User $user, GetStorageOptionsAction $getStorageOptionsAction): array
-    {
-        $storageOptions = $getStorageOptionsAction->execute($user);
+    public function index(
+        #[CurrentUser] User $user,
+        GetStorageOptionsAction $getStorageOptionsAction,
+        Request $request,
+    ): JsonResponse {
+        $cursorPaginator = $getStorageOptionsAction->execute(
+            user: $user,
+            perPage: $request->integer('per_page', 25),
+            cursor: $request->query('cursor'),
+        );
 
-        return StorageOptionResourceData::collection($storageOptions);
+        return new JsonResponse(
+            $cursorPaginator->through(fn (StorageOption $storageOption): array => StorageOptionResourceData::from($storageOption)->toArray()),
+        );
     }
 
     public function store(
@@ -66,16 +73,20 @@ class StorageOptionController extends Controller
         return response()->json(null, 204);
     }
 
-    /**
-     * @return array<int, StorageOptionPartResourceData>
-     */
     public function parts(
         StorageOption $storageOption,
         GetStorageOptionPartsAction $getStorageOptionPartsAction,
-    ): array {
-        $parts = $getStorageOptionPartsAction->execute($storageOption);
+        Request $request,
+    ): JsonResponse {
+        $cursorPaginator = $getStorageOptionPartsAction->execute(
+            storageOption: $storageOption,
+            perPage: $request->integer('per_page', 25),
+            cursor: $request->query('cursor'),
+        );
 
-        return StorageOptionPartResourceData::collection($parts);
+        return new JsonResponse(
+            $cursorPaginator->through(fn (StorageOptionPart $storageOptionPart): array => StorageOptionPartResourceData::from($storageOptionPart)->toArray()),
+        );
     }
 
     public function assignPart(
