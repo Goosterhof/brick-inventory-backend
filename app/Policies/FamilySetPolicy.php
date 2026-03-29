@@ -43,4 +43,9 @@ final readonly class FamilySetPolicy
     {
         return $user->family->head_id === $user->id;
     }
+
+    public function viewImportStatus(User $user): bool
+    {
+        return true;
+    }
 }

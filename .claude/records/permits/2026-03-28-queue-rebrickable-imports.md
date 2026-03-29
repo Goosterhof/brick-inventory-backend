@@ -65,5 +65,5 @@ Concurrency guard: Use a database unique constraint or `Cache::lock()` to preven
 
 ---
 
-**Status:** Open
-**Shift Log:** _link to shift log when filed_
+**Status:** Complete
+**Shift Log:** `.claude/records/journals/2026-03-28-queue-rebrickable-imports.md`

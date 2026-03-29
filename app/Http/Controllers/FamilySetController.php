@@ -8,13 +8,16 @@ use App\Actions\FamilySet\CreateFamilySetAction;
 use App\Actions\FamilySet\DeleteFamilySetAction;
 use App\Actions\FamilySet\GetFamilySetCompletionAction;
 use App\Actions\FamilySet\GetFamilySetsAction;
-use App\Actions\FamilySet\ImportOwnedSetsAction;
+use App\Actions\FamilySet\GetImportStatusAction;
+use App\Actions\FamilySet\StartImportAction;
 use App\Actions\FamilySet\UpdateFamilySetAction;
 use App\Http\Requests\FamilySet\StoreFamilySetRequest;
 use App\Http\Requests\FamilySet\UpdateFamilySetRequest;
 use App\Http\Resources\FamilySetCompletionResourceData;
 use App\Http\Resources\FamilySetResourceData;
+use App\Http\Resources\ImportJobResourceData;
 use App\Models\FamilySet;
+use App\Models\ImportJob;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\JsonResponse;
@@ -80,31 +83,23 @@ class FamilySetController extends Controller
 
     public function importFromRebrickable(
         #[CurrentUser] User $user,
-        ImportOwnedSetsAction $importOwnedSetsAction,
+        StartImportAction $startImportAction,
     ): JsonResponse {
-        $importOwnedSetsResultData = $importOwnedSetsAction->execute($user->family);
+        $importJob = $startImportAction->execute($user->family);
 
-        $message = $importOwnedSetsResultData->complete
-            ? 'Import completed successfully'
-            : sprintf('Import partially completed: %d sets imported', $importOwnedSetsResultData->created + $importOwnedSetsResultData->updated);
+        return ImportJobResourceData::from($importJob)->toResponseWithStatus(202);
+    }
 
-        $response = [
-            'message' => $message,
-            'created' => $importOwnedSetsResultData->created,
-            'updated' => $importOwnedSetsResultData->updated,
-            'skipped' => $importOwnedSetsResultData->skipped,
-            'total' => $importOwnedSetsResultData->total,
-            'complete' => $importOwnedSetsResultData->complete,
-        ];
+    public function importStatus(
+        #[CurrentUser] User $user,
+        GetImportStatusAction $getImportStatusAction,
+    ): JsonResponse {
+        $importJob = $getImportStatusAction->execute($user->family);
 
-        if ($importOwnedSetsResultData->error !== null) {
-            $response['error'] = $importOwnedSetsResultData->error;
+        if (!$importJob instanceof ImportJob) {
+            return response()->json(['message' => 'No import jobs found'], 404);
         }
 
-        if ($importOwnedSetsResultData->skippedSetNums !== []) {
-            $response['skipped_set_nums'] = $importOwnedSetsResultData->skippedSetNums;
-        }
-
-        return response()->json($response);
+        return ImportJobResourceData::from($importJob)->toResponse();
     }
 }
