@@ -14,6 +14,8 @@ use App\Exceptions\RebrickableApiException;
 use App\Exceptions\SetNotFoundException;
 use App\Exceptions\UserNotInFamilyException;
 use App\Http\Middleware\EnsureFamilyOwnership;
+use App\Http\Middleware\SetCacheHeaders;
+use App\Http\Middleware\SetEtagHeaders;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -33,6 +35,8 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
         $middleware->alias([
             'family.ownership' => EnsureFamilyOwnership::class,
+            'cache.headers' => SetCacheHeaders::class,
+            'etag' => SetEtagHeaders::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
