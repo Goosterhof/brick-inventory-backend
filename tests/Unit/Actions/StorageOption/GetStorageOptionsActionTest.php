@@ -6,17 +6,17 @@ use App\Actions\StorageOption\GetStorageOptionsAction;
 use App\Models\StorageOption;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Pagination\CursorPaginator;
+use Illuminate\Database\Eloquent\Collection;
 
 covers(GetStorageOptionsAction::class);
 
 describe('GetStorageOptionsAction', function (): void {
-    it('should query storage options by user family_id with cursor pagination', function (): void {
+    it('should query storage options by user family_id', function (): void {
         // arrange
         $user = Mockery::mock(User::class);
         $user->allows('getAttribute')->with('family_id')->andReturn(5);
 
-        $cursorPaginator = new CursorPaginator(collect(), 25);
+        $collection = new Collection;
 
         $builder = Mockery::mock(Builder::class);
         $builder->shouldReceive('where')
@@ -31,9 +31,9 @@ describe('GetStorageOptionsAction', function (): void {
             ->with('id')
             ->once()
             ->andReturnSelf();
-        $builder->shouldReceive('cursorPaginate')
+        $builder->shouldReceive('get')
             ->once()
-            ->andReturn($cursorPaginator);
+            ->andReturn($collection);
 
         $storageOption = Mockery::mock(StorageOption::class);
         $storageOption->shouldReceive('newQuery')
@@ -46,34 +46,6 @@ describe('GetStorageOptionsAction', function (): void {
         $result = $action->execute($user);
 
         // assert
-        expect($result)->toBe($cursorPaginator);
-    });
-
-    it('should cap per_page at 100', function (): void {
-        // arrange
-        $user = Mockery::mock(User::class);
-        $user->allows('getAttribute')->with('family_id')->andReturn(1);
-
-        $cursorPaginator = new CursorPaginator(collect(), 100);
-
-        $builder = Mockery::mock(Builder::class);
-        $builder->shouldReceive('where')->andReturnSelf();
-        $builder->shouldReceive('whereNull')->andReturnSelf();
-        $builder->shouldReceive('orderBy')->andReturnSelf();
-        $builder->shouldReceive('cursorPaginate')
-            ->withArgs(fn (int $perPage): bool => $perPage === 100)
-            ->once()
-            ->andReturn($cursorPaginator);
-
-        $storageOption = Mockery::mock(StorageOption::class);
-        $storageOption->shouldReceive('newQuery')->andReturn($builder);
-
-        $action = new GetStorageOptionsAction($storageOption);
-
-        // act
-        $result = $action->execute($user, perPage: 200);
-
-        // assert
-        expect($result)->toBe($cursorPaginator);
+        expect($result)->toBe($collection);
     });
 });

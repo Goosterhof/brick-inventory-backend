@@ -20,24 +20,19 @@ use App\Models\StorageOptionPart;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 
 class StorageOptionController extends Controller
 {
+    /**
+     * @return array<int, StorageOptionResourceData>
+     */
     public function index(
         #[CurrentUser] User $user,
         GetStorageOptionsAction $getStorageOptionsAction,
-        Request $request,
-    ): JsonResponse {
-        $cursorPaginator = $getStorageOptionsAction->execute(
-            user: $user,
-            perPage: $request->integer('per_page', 25),
-            cursor: $request->query('cursor'),
-        );
+    ): array {
+        $storageOptions = $getStorageOptionsAction->execute(user: $user);
 
-        return new JsonResponse(
-            $cursorPaginator->through(fn (StorageOption $storageOption): array => StorageOptionResourceData::from($storageOption)->toArray()),
-        );
+        return StorageOptionResourceData::collection($storageOptions);
     }
 
     public function store(
@@ -73,20 +68,16 @@ class StorageOptionController extends Controller
         return response()->json(null, 204);
     }
 
+    /**
+     * @return array<int, StorageOptionPartResourceData>
+     */
     public function parts(
         StorageOption $storageOption,
         GetStorageOptionPartsAction $getStorageOptionPartsAction,
-        Request $request,
-    ): JsonResponse {
-        $cursorPaginator = $getStorageOptionPartsAction->execute(
-            storageOption: $storageOption,
-            perPage: $request->integer('per_page', 25),
-            cursor: $request->query('cursor'),
-        );
+    ): array {
+        $parts = $getStorageOptionPartsAction->execute(storageOption: $storageOption);
 
-        return new JsonResponse(
-            $cursorPaginator->through(fn (StorageOptionPart $storageOptionPart): array => StorageOptionPartResourceData::from($storageOptionPart)->toArray()),
-        );
+        return StorageOptionPartResourceData::collection($parts);
     }
 
     public function assignPart(

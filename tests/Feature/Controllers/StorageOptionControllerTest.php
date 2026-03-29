@@ -25,9 +25,8 @@ describe('StorageOptionController', function (): void {
             $response = $this->actingAs($user)->getJson('/api/storage-options');
 
             $response->assertStatus(200)
-                ->assertJsonCount(1, 'data')
-                ->assertJsonPath('data.0.name', 'Cabinet 1')
-                ->assertJsonStructure(['data', 'path', 'per_page', 'next_cursor', 'next_page_url', 'prev_cursor', 'prev_page_url']);
+                ->assertJsonCount(1)
+                ->assertJsonPath('0.name', 'Cabinet 1');
         });
 
         it('should not return storage options from other families', function (): void {
@@ -37,7 +36,7 @@ describe('StorageOptionController', function (): void {
             $response = $this->actingAs($user)->getJson('/api/storage-options');
 
             $response->assertStatus(200)
-                ->assertJsonCount(0, 'data');
+                ->assertJsonCount(0);
         });
 
         it('should return 401 when unauthenticated', function (): void {
@@ -61,58 +60,8 @@ describe('StorageOptionController', function (): void {
             $response = $this->actingAs($user)->getJson('/api/storage-options');
 
             $response->assertStatus(200)
-                ->assertJsonCount(1, 'data')
-                ->assertJsonPath('data.0.child_ids.0', $drawer->id);
-        });
-
-        it('should use default per_page of 25', function (): void {
-            $user = User::factory()->create();
-
-            $response = $this->actingAs($user)->getJson('/api/storage-options');
-
-            $response->assertStatus(200)
-                ->assertJsonPath('per_page', 25);
-        });
-
-        it('should accept custom per_page', function (): void {
-            $user = User::factory()->create();
-
-            $response = $this->actingAs($user)->getJson('/api/storage-options?per_page=10');
-
-            $response->assertStatus(200)
-                ->assertJsonPath('per_page', 10);
-        });
-
-        it('should cap per_page at 100', function (): void {
-            $user = User::factory()->create();
-
-            $response = $this->actingAs($user)->getJson('/api/storage-options?per_page=200');
-
-            $response->assertStatus(200)
-                ->assertJsonPath('per_page', 100);
-        });
-
-        it('should paginate results with cursor navigation', function (): void {
-            $user = User::factory()->create();
-
-            StorageOption::factory()->count(3)->create([
-                'family_id' => $user->family_id,
-                'parent_id' => null,
-            ]);
-
-            $firstPage = $this->actingAs($user)->getJson('/api/storage-options?per_page=2');
-
-            $firstPage->assertStatus(200)
-                ->assertJsonCount(2, 'data');
-
-            $nextCursor = $firstPage->json('next_cursor');
-            expect($nextCursor)->not->toBeNull();
-
-            $secondPage = $this->actingAs($user)->getJson('/api/storage-options?per_page=2&cursor=' . $nextCursor);
-
-            $secondPage->assertStatus(200)
-                ->assertJsonCount(1, 'data');
-            expect($secondPage->json('next_cursor'))->toBeNull();
+                ->assertJsonCount(1)
+                ->assertJsonPath('0.child_ids.0', $drawer->id);
         });
     });
 
@@ -328,9 +277,8 @@ describe('StorageOptionController', function (): void {
             $response = $this->actingAs($user)->getJson(sprintf('/api/storage-options/%s/parts', $storageOption->id));
 
             $response->assertStatus(200)
-                ->assertJsonCount(1, 'data')
-                ->assertJsonPath('data.0.quantity', 50)
-                ->assertJsonStructure(['data', 'path', 'per_page', 'next_cursor', 'next_page_url', 'prev_cursor', 'prev_page_url']);
+                ->assertJsonCount(1)
+                ->assertJsonPath('0.quantity', 50);
         });
 
         it('should return 404 for storage option from another family', function (): void {
@@ -348,55 +296,6 @@ describe('StorageOptionController', function (): void {
             $response = $this->getJson(sprintf('/api/storage-options/%s/parts', $storageOption->id));
 
             $response->assertStatus(401);
-        });
-
-        it('should use default per_page of 25', function (): void {
-            $user = User::factory()->create();
-            $storageOption = StorageOption::factory()->create([
-                'family_id' => $user->family_id,
-            ]);
-
-            $response = $this->actingAs($user)->getJson(sprintf('/api/storage-options/%s/parts', $storageOption->id));
-
-            $response->assertStatus(200)
-                ->assertJsonPath('per_page', 25);
-        });
-
-        it('should cap per_page at 100', function (): void {
-            $user = User::factory()->create();
-            $storageOption = StorageOption::factory()->create([
-                'family_id' => $user->family_id,
-            ]);
-
-            $response = $this->actingAs($user)->getJson(sprintf('/api/storage-options/%s/parts?per_page=200', $storageOption->id));
-
-            $response->assertStatus(200)
-                ->assertJsonPath('per_page', 100);
-        });
-
-        it('should paginate results with cursor navigation', function (): void {
-            $user = User::factory()->create();
-            $storageOption = StorageOption::factory()->create([
-                'family_id' => $user->family_id,
-            ]);
-
-            StorageOptionPart::factory()->count(3)->create([
-                'storage_option_id' => $storageOption->id,
-            ]);
-
-            $firstPage = $this->actingAs($user)->getJson(sprintf('/api/storage-options/%s/parts?per_page=2', $storageOption->id));
-
-            $firstPage->assertStatus(200)
-                ->assertJsonCount(2, 'data');
-
-            $nextCursor = $firstPage->json('next_cursor');
-            expect($nextCursor)->not->toBeNull();
-
-            $secondPage = $this->actingAs($user)->getJson(sprintf('/api/storage-options/%s/parts?per_page=2&cursor=%s', $storageOption->id, $nextCursor));
-
-            $secondPage->assertStatus(200)
-                ->assertJsonCount(1, 'data');
-            expect($secondPage->json('next_cursor'))->toBeNull();
         });
     });
 
