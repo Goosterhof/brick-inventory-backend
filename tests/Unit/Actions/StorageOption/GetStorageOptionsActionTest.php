@@ -23,8 +23,17 @@ describe('GetStorageOptionsAction', function (): void {
             ->with('family_id', 5)
             ->once()
             ->andReturnSelf();
-        $builder->shouldReceive('whereNull')->with('parent_id')->andReturnSelf();
-        $builder->shouldReceive('get')->andReturn($collection);
+        $builder->shouldReceive('whereNull')
+            ->with('parent_id')
+            ->once()
+            ->andReturnSelf();
+        $builder->shouldReceive('orderBy')
+            ->with('id')
+            ->once()
+            ->andReturnSelf();
+        $builder->shouldReceive('get')
+            ->once()
+            ->andReturn($collection);
 
         $storageOption = Mockery::mock(StorageOption::class);
         $storageOption->shouldReceive('newQuery')
@@ -38,31 +47,5 @@ describe('GetStorageOptionsAction', function (): void {
 
         // assert
         expect($result)->toBe($collection);
-    });
-
-    it('should filter to only root storage options', function (): void {
-        // arrange
-        $user = Mockery::mock(User::class);
-        $user->allows('getAttribute')->with('family_id')->andReturn(1);
-
-        $collection = new Collection;
-
-        $builder = Mockery::mock(Builder::class);
-        $builder->shouldReceive('where')->andReturnSelf();
-        $builder->shouldReceive('whereNull')
-            ->with('parent_id')
-            ->once()
-            ->andReturnSelf();
-        $builder->shouldReceive('get')->andReturn($collection);
-
-        $storageOption = Mockery::mock(StorageOption::class);
-        $storageOption->shouldReceive('newQuery')->andReturn($builder);
-
-        $action = new GetStorageOptionsAction($storageOption);
-
-        // act
-        $action->execute($user);
-
-        // assert - Mockery expectations verify the interactions
     });
 });

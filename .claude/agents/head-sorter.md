@@ -290,6 +290,8 @@ _Proposals observed once. Need a second confirming shift before graduation._
 | When a class implements multiple interfaces that both declare a method with the same name, check for parameter type conflicts between the interfaces before PHPStan | 2026-03-28 | 2026-03-28-computed-resource-data | Responsable::toResponse(Request) vs ResourceResponse::toResponse(mixed) caused a PHPStan error |
 | When a shipping order is issued, file the shift log immediately upon completion — never retroactively | 2026-03-28 | 2026-03-28-add-tooling-testing | Shift log filed after the fact; accountability pipeline requires contemporaneous documentation |
 | When CI thresholds differ from documented standards (CLAUDE.md), add a comment in the CI config explaining the deviation | 2026-03-28 | 2026-03-28-add-tooling-testing | CI uses 99%/90% vs documented 100%/80% — reasoning is sound but undocumented in the workflow file |
+| When calling methods on Eloquent relations forwarded via `__call()`, use positional arguments — named args cause runtime errors | 2026-03-28 | 2026-03-28-cursor-pagination | `HasMany::cursorPaginate()` with named params caused `Unknown named parameter` error |
+| Before choosing a return type for an Action, check what the Controller needs to do with the result — concrete types enable methods like `through()` that interfaces may only declare in PHPDoc | 2026-03-28 | 2026-03-28-cursor-pagination | Chose interface first, then had to switch to concrete because `through()` is only on the concrete class for PHPStan |
 
 ### Graduated
 

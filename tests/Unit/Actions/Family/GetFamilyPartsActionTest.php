@@ -6,26 +6,34 @@ use App\Actions\Family\GetFamilyPartsAction;
 use App\Models\Family;
 use App\Models\StorageOptionPart;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Pagination\CursorPaginator;
 
 covers(GetFamilyPartsAction::class);
 
 describe('GetFamilyPartsAction', function (): void {
-    it('should return empty array when family has no stored parts', function (): void {
+    it('should return cursor paginator for family parts', function (): void {
         // arrange
         $family = Mockery::mock(Family::class);
         $family->shouldReceive('getAttribute')->with('id')->andReturn(1);
 
-        $queryBuilder = Mockery::mock(Builder::class);
-        $queryBuilder->shouldReceive('join')->andReturnSelf();
-        $queryBuilder->shouldReceive('leftJoin')->andReturnSelf();
-        $queryBuilder->shouldReceive('where')->with('storage_options.family_id', 1)->andReturnSelf();
-        $queryBuilder->shouldReceive('select')->andReturnSelf();
-        $queryBuilder->shouldReceive('orderBy')->andReturnSelf();
-        $queryBuilder->shouldReceive('get')->andReturn(new Collection([]));
+        $cursorPaginator = new CursorPaginator(collect(), 25);
+
+        $baseBuilder = Mockery::mock(QueryBuilder::class);
+        $baseBuilder->shouldReceive('cursorPaginate')
+            ->once()
+            ->andReturn($cursorPaginator);
+
+        $eloquentBuilder = Mockery::mock(Builder::class);
+        $eloquentBuilder->shouldReceive('join')->andReturnSelf();
+        $eloquentBuilder->shouldReceive('leftJoin')->andReturnSelf();
+        $eloquentBuilder->shouldReceive('where')->with('storage_options.family_id', 1)->andReturnSelf();
+        $eloquentBuilder->shouldReceive('select')->andReturnSelf();
+        $eloquentBuilder->shouldReceive('orderBy')->with('storage_option_parts.id')->andReturnSelf();
+        $eloquentBuilder->shouldReceive('toBase')->once()->andReturn($baseBuilder);
 
         $storageOptionPart = Mockery::mock(StorageOptionPart::class);
-        $storageOptionPart->shouldReceive('newQuery')->once()->andReturn($queryBuilder);
+        $storageOptionPart->shouldReceive('newQuery')->once()->andReturn($eloquentBuilder);
 
         $action = new GetFamilyPartsAction($storageOptionPart);
 
@@ -33,55 +41,69 @@ describe('GetFamilyPartsAction', function (): void {
         $result = $action->execute($family);
 
         // assert
-        expect($result)->toBe([]);
+        expect($result)->toBe($cursorPaginator);
     });
 
-    it('should return parts with storage locations for family', function (): void {
+    it('should cap per_page at 100', function (): void {
         // arrange
         $family = Mockery::mock(Family::class);
         $family->shouldReceive('getAttribute')->with('id')->andReturn(1);
 
-        $resultModel = Mockery::mock(StorageOptionPart::class);
-        $resultModel->shouldReceive('getAttribute')->with('part_id')->andReturn(10);
-        $resultModel->shouldReceive('getAttribute')->with('part_num')->andReturn('3001');
-        $resultModel->shouldReceive('getAttribute')->with('part_name')->andReturn('Brick 2 x 4');
-        $resultModel->shouldReceive('getAttribute')->with('part_image_url')->andReturn('https://example.com/3001.jpg');
-        $resultModel->shouldReceive('getAttribute')->with('color_id')->andReturn(1);
-        $resultModel->shouldReceive('getAttribute')->with('color_name')->andReturn('Red');
-        $resultModel->shouldReceive('getAttribute')->with('color_rgb')->andReturn('CC0000');
-        $resultModel->shouldReceive('getAttribute')->with('storage_option_id')->andReturn(5);
-        $resultModel->shouldReceive('getAttribute')->with('storage_option_name')->andReturn('Drawer A');
-        $resultModel->shouldReceive('getAttribute')->with('quantity')->andReturn(8);
+        $cursorPaginator = new CursorPaginator(collect(), 100);
 
-        $queryBuilder = Mockery::mock(Builder::class);
-        $queryBuilder->shouldReceive('join')->andReturnSelf();
-        $queryBuilder->shouldReceive('leftJoin')->andReturnSelf();
-        $queryBuilder->shouldReceive('where')->with('storage_options.family_id', 1)->andReturnSelf();
-        $queryBuilder->shouldReceive('select')->andReturnSelf();
-        $queryBuilder->shouldReceive('orderBy')->with('parts.name')->andReturnSelf();
-        $queryBuilder->shouldReceive('get')->andReturn(new Collection([$resultModel]));
+        $baseBuilder = Mockery::mock(QueryBuilder::class);
+        $baseBuilder->shouldReceive('cursorPaginate')
+            ->withArgs(fn (int $perPage): bool => $perPage === 100)
+            ->once()
+            ->andReturn($cursorPaginator);
+
+        $eloquentBuilder = Mockery::mock(Builder::class);
+        $eloquentBuilder->shouldReceive('join')->andReturnSelf();
+        $eloquentBuilder->shouldReceive('leftJoin')->andReturnSelf();
+        $eloquentBuilder->shouldReceive('where')->andReturnSelf();
+        $eloquentBuilder->shouldReceive('select')->andReturnSelf();
+        $eloquentBuilder->shouldReceive('orderBy')->andReturnSelf();
+        $eloquentBuilder->shouldReceive('toBase')->andReturn($baseBuilder);
 
         $storageOptionPart = Mockery::mock(StorageOptionPart::class);
-        $storageOptionPart->shouldReceive('newQuery')->once()->andReturn($queryBuilder);
+        $storageOptionPart->shouldReceive('newQuery')->andReturn($eloquentBuilder);
 
         $action = new GetFamilyPartsAction($storageOptionPart);
 
         // act
-        $result = $action->execute($family);
+        $result = $action->execute($family, perPage: 200);
 
         // assert
-        expect($result)->toHaveCount(1);
-        expect($result[0])->toBe([
-            'part_id' => 10,
-            'part_num' => '3001',
-            'part_name' => 'Brick 2 x 4',
-            'part_image_url' => 'https://example.com/3001.jpg',
-            'color_id' => 1,
-            'color_name' => 'Red',
-            'color_rgb' => 'CC0000',
-            'storage_option_id' => 5,
-            'storage_option_name' => 'Drawer A',
-            'quantity' => 8,
-        ]);
+        expect($result)->toBe($cursorPaginator);
+    });
+
+    it('should use default per_page of 25', function (): void {
+        // arrange
+        $family = Mockery::mock(Family::class);
+        $family->shouldReceive('getAttribute')->with('id')->andReturn(1);
+
+        $cursorPaginator = new CursorPaginator(collect(), 25);
+
+        $baseBuilder = Mockery::mock(QueryBuilder::class);
+        $baseBuilder->shouldReceive('cursorPaginate')
+            ->withArgs(fn (int $perPage): bool => $perPage === 25)
+            ->once()
+            ->andReturn($cursorPaginator);
+
+        $eloquentBuilder = Mockery::mock(Builder::class);
+        $eloquentBuilder->shouldReceive('join')->andReturnSelf();
+        $eloquentBuilder->shouldReceive('leftJoin')->andReturnSelf();
+        $eloquentBuilder->shouldReceive('where')->andReturnSelf();
+        $eloquentBuilder->shouldReceive('select')->andReturnSelf();
+        $eloquentBuilder->shouldReceive('orderBy')->andReturnSelf();
+        $eloquentBuilder->shouldReceive('toBase')->andReturn($baseBuilder);
+
+        $storageOptionPart = Mockery::mock(StorageOptionPart::class);
+        $storageOptionPart->shouldReceive('newQuery')->andReturn($eloquentBuilder);
+
+        $action = new GetFamilyPartsAction($storageOptionPart);
+
+        // act
+        $action->execute($family);
     });
 });

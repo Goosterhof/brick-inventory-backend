@@ -15,6 +15,8 @@ final readonly class GetStorageOptionPartsAction
      */
     public function execute(StorageOption $storageOption): Collection
     {
-        return $storageOption->storageOptionParts()->get();
+        return $storageOption->storageOptionParts()
+            ->orderBy('id')
+            ->get();
     }
 }
