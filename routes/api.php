@@ -73,6 +73,10 @@ Route::middleware(['auth:sanctum', 'family.ownership'])->group(function (): void
         ->can('viewAny', FamilySet::class);
     Route::get('/family-sets/completion', [FamilySetController::class, 'completion'])
         ->can('viewCompletion', FamilySet::class);
+    Route::post('/family-sets/import-from-rebrickable', [FamilySetController::class, 'importFromRebrickable'])
+        ->can('importFromRebrickable', FamilySet::class);
+    Route::get('/family-sets/import-status', [FamilySetController::class, 'importStatus'])
+        ->can('viewImportStatus', FamilySet::class);
     Route::post('/family-sets', [FamilySetController::class, 'store'])
         ->can('create', FamilySet::class);
     Route::get('/family-sets/{family_set}', [FamilySetController::class, 'show'])
@@ -83,8 +87,6 @@ Route::middleware(['auth:sanctum', 'family.ownership'])->group(function (): void
         ->can('update', 'family_set');
     Route::delete('/family-sets/{family_set}', [FamilySetController::class, 'destroy'])
         ->can('delete', 'family_set');
-    Route::post('/family-sets/import-from-rebrickable', [FamilySetController::class, 'importFromRebrickable'])
-        ->can('importFromRebrickable', FamilySet::class);
 
     // Family
     Route::get('/family/members', [FamilyController::class, 'members'])

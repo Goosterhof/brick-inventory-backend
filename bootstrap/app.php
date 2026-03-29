@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 use App\Exceptions\BrickognizeApiException;
 use App\Exceptions\CannotRemoveSelfException;
+use App\Exceptions\ImportAlreadyInProgressException;
 use App\Exceptions\InvalidApiResponseException;
 use App\Exceptions\InvalidInviteCodeException;
 use App\Exceptions\InviteCodeNotFoundException;
@@ -65,4 +66,6 @@ return Application::configure(basePath: dirname(__DIR__))
         $exceptions->render(fn (InviteCodeNotFoundException $inviteCodeNotFoundException, Request $request): JsonResponse => response()->json(['error' => 'No active invite code found'], 404));
 
         $exceptions->render(fn (InvalidInviteCodeException $invalidInviteCodeException, Request $request): JsonResponse => response()->json(['error' => 'The invite code is invalid, expired, or revoked'], 422));
+
+        $exceptions->render(fn (ImportAlreadyInProgressException $importAlreadyInProgressException, Request $request): JsonResponse => response()->json(['error' => 'An import is already in progress for this family'], 409));
     })->create();

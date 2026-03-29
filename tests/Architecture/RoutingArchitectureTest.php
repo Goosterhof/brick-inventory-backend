@@ -88,7 +88,7 @@ it('should have the expected number of authenticated routes as a drift guard', f
      * auth:sanctum route. Update this count after verifying the new route
      * has proper ->can() middleware (or is added to the exempt list above).
      */
-    $expectedAuthenticatedRouteCount = 32;
+    $expectedAuthenticatedRouteCount = 33;
 
     $allRoutes = RouteFacade::getRoutes();
 
