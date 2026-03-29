@@ -6,30 +6,25 @@ use App\Actions\FamilySet\GetFamilySetsAction;
 use App\Models\FamilySet;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Pagination\CursorPaginator;
+use Illuminate\Database\Eloquent\Collection;
 
 covers(GetFamilySetsAction::class);
 
 describe('GetFamilySetsAction', function (): void {
-    it('should query family sets by user family_id with cursor pagination', function (): void {
+    it('should query family sets by user family_id', function (): void {
         // arrange
         $user = Mockery::mock(User::class);
         $user->allows('getAttribute')->with('family_id')->andReturn(5);
 
-        $cursorPaginator = new CursorPaginator(collect(), 25);
+        $collection = new Collection;
 
         $builder = Mockery::mock(Builder::class);
         $builder->shouldReceive('where')
             ->with('family_id', 5)
             ->once()
             ->andReturnSelf();
-        $builder->shouldReceive('orderByDesc')
-            ->with('id')
-            ->once()
-            ->andReturnSelf();
-        $builder->shouldReceive('cursorPaginate')
-            ->once()
-            ->andReturn($cursorPaginator);
+        $builder->shouldReceive('latest')->andReturnSelf();
+        $builder->shouldReceive('get')->andReturn($collection);
 
         $familySet = Mockery::mock(FamilySet::class);
         $familySet->shouldReceive('newQuery')
@@ -42,50 +37,22 @@ describe('GetFamilySetsAction', function (): void {
         $result = $action->execute($user);
 
         // assert
-        expect($result)->toBe($cursorPaginator);
+        expect($result)->toBe($collection);
     });
 
-    it('should cap per_page at 100', function (): void {
+    it('should order by latest (created_at descending)', function (): void {
         // arrange
         $user = Mockery::mock(User::class);
         $user->allows('getAttribute')->with('family_id')->andReturn(1);
 
-        $cursorPaginator = new CursorPaginator(collect(), 100);
+        $collection = new Collection;
 
         $builder = Mockery::mock(Builder::class);
         $builder->shouldReceive('where')->andReturnSelf();
-        $builder->shouldReceive('orderByDesc')->andReturnSelf();
-        $builder->shouldReceive('cursorPaginate')
-            ->withArgs(fn (int $perPage): bool => $perPage === 100)
+        $builder->shouldReceive('latest')
             ->once()
-            ->andReturn($cursorPaginator);
-
-        $familySet = Mockery::mock(FamilySet::class);
-        $familySet->shouldReceive('newQuery')->andReturn($builder);
-
-        $action = new GetFamilySetsAction($familySet);
-
-        // act
-        $result = $action->execute($user, perPage: 200);
-
-        // assert
-        expect($result)->toBe($cursorPaginator);
-    });
-
-    it('should use default per_page of 25', function (): void {
-        // arrange
-        $user = Mockery::mock(User::class);
-        $user->allows('getAttribute')->with('family_id')->andReturn(1);
-
-        $cursorPaginator = new CursorPaginator(collect(), 25);
-
-        $builder = Mockery::mock(Builder::class);
-        $builder->shouldReceive('where')->andReturnSelf();
-        $builder->shouldReceive('orderByDesc')->andReturnSelf();
-        $builder->shouldReceive('cursorPaginate')
-            ->withArgs(fn (int $perPage): bool => $perPage === 25)
-            ->once()
-            ->andReturn($cursorPaginator);
+            ->andReturnSelf();
+        $builder->shouldReceive('get')->andReturn($collection);
 
         $familySet = Mockery::mock(FamilySet::class);
         $familySet->shouldReceive('newQuery')->andReturn($builder);
@@ -94,5 +61,7 @@ describe('GetFamilySetsAction', function (): void {
 
         // act
         $action->execute($user);
+
+        // assert - Mockery expectations verify the interactions
     });
 });

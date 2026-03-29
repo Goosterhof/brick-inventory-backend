@@ -6,29 +6,22 @@ namespace App\Actions\FamilySet;
 
 use App\Models\FamilySet;
 use App\Models\User;
-use Illuminate\Pagination\CursorPaginator;
+use Illuminate\Database\Eloquent\Collection;
 
 final readonly class GetFamilySetsAction
 {
-    private const int DEFAULT_PER_PAGE = 25;
-
-    private const int MAX_PER_PAGE = 100;
-
     public function __construct(
         private FamilySet $familySet,
     ) {}
 
     /**
-     * @return CursorPaginator<int, FamilySet>
+     * @return Collection<int, FamilySet>
      */
-    public function execute(User $user, int $perPage = self::DEFAULT_PER_PAGE, ?string $cursor = null): CursorPaginator
+    public function execute(User $user): Collection
     {
         return $this->familySet->newQuery()
             ->where('family_id', $user->family_id)
-            ->orderByDesc('id')
-            ->cursorPaginate(
-                perPage: min($perPage, self::MAX_PER_PAGE),
-                cursor: $cursor,
-            );
+            ->latest()
+            ->get();
     }
 }
