@@ -23,11 +23,15 @@ The new Job layer (introduced in `2026-03-28-queue-rebrickable-imports`) shipped
    - All classes in `App\Jobs\` implement `ShouldQueue`
    - Any other conventions that emerge during implementation
 
-3. **Document Job-Model interaction convention** — Jobs use method injection via `handle()`, so they can't follow the Action pattern of constructor-injected Models with `newQuery()`. This is fine, but the convention should be explicit. Add a brief note to the relevant ADR or learnings doc so future Jobs follow a consistent pattern.
+3. **Refactor `ImportOwnedSetsJob` to inject Models into `handle()`** — Jobs CAN follow the Action pattern for Model queries. The constructor must be serializable (primitive IDs only), but `handle()` is resolved from the container. Inject `ImportJob` and `Family` Models into `handle()` and use `$model->newQuery()->findOrFail()` instead of static `ImportJob::query()` / `Family::query()` calls. This keeps Jobs consistent with Actions and makes them testable with mocked Models.
+
+4. **Document Job conventions** — Add a note to CLAUDE.md's Warehouse Regulations establishing the Job pattern:
+   - Constructor: primitive IDs only (serialization constraint)
+   - `handle()`: inject Actions for business logic, inject Models for lookups (same as Action constructors)
+   - Job body: thin async envelope — look up records, delegate to Action, update status. No business logic.
 
 ### Not on This Pallet
 
-- Refactoring `ImportOwnedSetsJob` to use injected Models (the static query pattern is standard for Laravel Jobs — document the convention, don't fight it)
 - Adding more Jobs (this order is about hardening the infrastructure, not expanding it)
 - Redis/Horizon migration
 - Real-time progress updates (WebSocket/broadcast)
@@ -36,7 +40,8 @@ The new Job layer (introduced in `2026-03-28-queue-rebrickable-imports`) shipped
 
 - [ ] Concurrent `POST /family-sets/import-from-rebrickable` requests from the same family cannot create duplicate pending ImportJobs — verified by a test that simulates the race condition
 - [ ] Architecture test exists enforcing `final` and `ShouldQueue` on all Job classes
-- [ ] Job-Model interaction pattern is documented (learnings, ADR, or CLAUDE.md — Sorter's choice on location)
+- [ ] `ImportOwnedSetsJob` injects Models into `handle()` and uses `$model->newQuery()` instead of static queries
+- [ ] Job conventions are documented in CLAUDE.md Warehouse Regulations (constructor: IDs only; handle(): inject Actions + Models; body: thin envelope, no business logic)
 - [ ] `composer test` passes — no regressions
 - [ ] `composer phpstan` passes at level max
 - [ ] `composer deptrac` passes — no boundary violations
@@ -54,7 +59,9 @@ The new Job layer (introduced in `2026-03-28-queue-rebrickable-imports`) shipped
 
 **On the architecture test:** Keep it simple. Two assertions (final, ShouldQueue) are enough for now. If Job conventions grow, the test grows with them.
 
-**On documentation:** This is a convention decision, not an ADR. A learnings entry or a note in CLAUDE.md's Warehouse Regulations is sufficient. The key point: "Jobs use static Model queries via `handle()` method injection — this is the standard Laravel pattern and is acceptable despite differing from the Action pattern of constructor-injected Models."
+**On the refactor:** The static query pattern was not a Laravel constraint — it was a shortcut. `handle()` is resolved from the container, same as an Action constructor. Inject Models there, use `$model->newQuery()`, keep the pattern consistent across the warehouse. This also makes Jobs testable with mocked Models if needed in the future.
+
+**On documentation:** Add a "Queued Jobs" section to CLAUDE.md's Warehouse Regulations. Jobs are thin async envelopes — constructor holds serializable IDs, `handle()` injects dependencies from the container (Actions for logic, Models for lookups), body delegates to Actions. No business logic in the Job itself.
 
 ---
 
