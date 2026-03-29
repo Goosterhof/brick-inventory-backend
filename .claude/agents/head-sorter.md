@@ -294,6 +294,7 @@ _Proposals observed once. Need a second confirming shift before graduation._
 | Before choosing a return type for an Action, check what the Controller needs to do with the result — concrete types enable methods like `through()` that interfaces may only declare in PHPDoc | 2026-03-28 | 2026-03-28-cursor-pagination | Chose interface first, then had to switch to concrete because `through()` is only on the concrete class for PHPStan |
 | Before placing a test file, check TestConventionsArchitectureTest for placement constraints (e.g., unit tests must not use RefreshDatabase) | 2026-03-28 | 2026-03-28-queue-rebrickable-imports | Placed Job test in Unit/ with RefreshDatabase; pre-commit hook caught it |
 | When adding routes under a path with wildcard parameters, always verify static routes come before the wildcard in the route file | 2026-03-28 | 2026-03-28-queue-rebrickable-imports | import-status was placed after {family_set} and matched as a wildcard parameter |
+| When fixing race conditions, prefer database-level constraints over application-level locks — they survive code path changes and cache failures | 2026-03-29 | 2026-03-29-harden-job-layer | Race condition in StartImportAction closed with partial unique index rather than Cache::lock() |
 
 ### Graduated
 

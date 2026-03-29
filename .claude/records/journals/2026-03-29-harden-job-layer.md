@@ -99,26 +99,43 @@ One gap worth noting: the `failed()` method on Jobs necessarily uses static quer
 
 _Appended by the Logistics Director after reviewing the log. The sorter's sections above are not edited -- they stand as written._
 
-**Overall Assessment:** _pending_
+**Overall Assessment:** Clean, efficient delivery. All 8 acceptance criteria met. The Sorter chose the strongest possible solution for each item — database constraint over application locks, architecture tests over documentation promises, injected Models over static calls. No rework cycles. 472 tests, 0 PHPStan errors, 0 Deptrac violations.
 
 ### Order Fulfillment Review
 
-_pending_
+All four deliverables shipped correctly:
+
+1. **Race condition** — Partial unique index is the right call. It's the hardest guarantee available — survives code path changes, cache failures, and concurrent workers. The dual-layer approach (application check for clean error messages, DB constraint for atomicity) is textbook.
+
+2. **Architecture test** — Two assertions, clean file. The `final` check uses reflection + file content scanning (consistent with other architecture tests in the codebase). The `ShouldQueue` check uses Pest's `arch()` API. Both approaches are fine.
+
+3. **Job refactor** — `handle()` now injects `ImportJob` and `Family` Models and uses `$model->newQuery()->findOrFail()`. Clean, consistent with Action pattern. The `failed()` callback correctly retains static queries — documented as framework constraint.
+
+4. **CLAUDE.md documentation** — The "Queued Jobs (Async Envelopes)" section is well-placed (between Shipping Labels and Security Checkpoints) and covers all four conventions: constructor serialization, `handle()` injection, thin envelope pattern, and the `failed()` exception.
 
 ### Decision Review
 
-_pending_
+1. **Partial unique index over `Cache::lock()`** — Excellent choice. Database constraints are the strongest concurrency guarantee. The Sorter correctly identified that `Cache::lock()` adds infrastructure dependency and can fail silently on TTL expiry. The raw SQL for the migration is necessary (Laravel's schema builder doesn't support partial indexes) and the syntax works identically on SQLite and PostgreSQL.
+
+2. **Application check + DB fallback** — Smart. The `whereIn` check catches the common case with a clear error message. The `UniqueConstraintViolationException` catch handles the race window. The Sorter also correctly identified that this pattern is already approved in ADR-0003.
+
+3. **Static queries in `failed()`** — The Sorter was honest about not verifying this independently (logged as a blind spot). The assessment is correct — `failed()` is called by the queue worker with only the Throwable, not resolved from the container. Documenting the exception in CLAUDE.md is the right approach.
+
+4. **Raw SQL for partial unique index** — Necessary and correct. Both SQLite and PostgreSQL support `CREATE UNIQUE INDEX ... WHERE ...`. The Sorter flagged cross-database compatibility as a blind spot, which is honest — but the syntax is standard SQL and works in both.
 
 ### Showcase Assessment
 
-_pending_
+This hardening pass would satisfy a senior reviewer. The race condition fix demonstrates understanding of concurrent system design — not just "add a lock" but "use the strongest guarantee available at the right layer." The documentation in CLAUDE.md establishes conventions that will prevent drift as more Jobs are added. The architecture tests provide machine enforcement.
+
+No concerns with this delivery.
 
 ### Training Proposal Dispositions
 
 | Proposal | Disposition | Rationale |
 |---|---|---|
-| _pending_ | | |
+| When fixing race conditions, prefer database-level constraints over application-level locks | **Candidate** | Sound principle, well-demonstrated here. First observation — needs a second confirming session. The nuance matters: this applies when the constraint is expressible as an index. Not all concurrency problems can be solved with indexes. |
+| When a Job's `failed()` method needs Model access, accept static queries as a framework constraint | **Dropped** | This is already documented in CLAUDE.md's Job conventions section as of this delivery. The convention is now part of the warehouse regulations — no need to track it as a training candidate separately. The Sorter did the right thing by documenting it in CLAUDE.md rather than relying on memory. |
 
 ### Notes for the Sorter
 
-_pending_
+Good shift. Zero rework, correct pattern choices on first pass, honest blind spots. The "nothing went poorly" self-assessment is accurate for once — the task was well-scoped and you executed cleanly. The partial unique index approach shows you're reading the existing codebase patterns (ADR-0003, UniqueConstraintViolationException) before inventing new ones. Keep doing that.

@@ -65,5 +65,5 @@ The new Job layer (introduced in `2026-03-28-queue-rebrickable-imports`) shipped
 
 ---
 
-**Status:** Open
-**Shift Log:** _link to shift log when filed_
+**Status:** Complete
+**Shift Log:** `.claude/records/journals/2026-03-29-harden-job-layer.md`
