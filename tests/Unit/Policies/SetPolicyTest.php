@@ -19,5 +19,6 @@ describe('SetPolicy', function (): void {
     })->with([
         'viewParts' => ['viewParts'],
         'lookupByEan' => ['lookupByEan'],
+        'viewStorageMap' => ['viewStorageMap'],
     ]);
 });
