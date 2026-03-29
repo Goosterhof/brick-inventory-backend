@@ -108,4 +108,36 @@ One area that could be stronger: the Job currently updates the ImportJob model i
 
 ## Logistics Director Evaluation
 
-_Appended by the Logistics Director after reviewing the log. The sorter's sections above are not edited -- they stand as written._
+_Appended by the Logistics Director after reviewing the log. The sorter's sections above are not edited — they stand as written._
+
+### Overall Assessment
+
+**Solid delivery.** All 10 acceptance criteria met. The architecture is clean: controller → action (guard + dispatch) → job (wraps existing action). The existing `ImportOwnedSetsAction` was untouched — the job is a pure async envelope around it. That's exactly the right call.
+
+Quality gauntlet: 470 tests, 0 PHPStan errors, 0 Deptrac violations. Coverage and mutation checks unavailable (no coverage driver) — noted but not the Sorter's fault.
+
+### Decision Review
+
+1. **Job as Feature test, not Unit** — Correct. The architecture tests enforce RefreshDatabase exclusion in Unit/. The Sorter was caught by pre-commit and corrected. The right outcome, though ideally the Sorter checks test conventions before placement, not after the hook rejects it.
+
+2. **Action dispatches Job (Action → Job dependency)** — Sound. The alternative (Controller dispatches) would violate thin-controller principles. The Action is the orchestrator; the Job is the async mechanism. The Deptrac layer addition (Action → Job, Job → Action/Model/Enum) is minimal and well-scoped.
+
+3. **Route ordering: static before wildcard** — Necessary fix. This would have been a runtime bug if not caught. The Sorter caught it during test execution, which is acceptable — but ideally route ordering is verified at definition time, not after a failing test.
+
+4. **Status on FamilySetPolicy, not ImportJobPolicy** — Pragmatic. A single-method policy for a read-only status check is over-engineering. If ImportJob gains more endpoints later, revisit.
+
+5. **Concurrency guard via status check, not unique constraint** — Correct. A unique constraint on (family_id, status) would block legitimate scenarios (completed import + new import). The status check is explicit and readable.
+
+### Showcase Readiness
+
+The implementation demonstrates clean async job architecture in Laravel. The separation is textbook: synchronous Action for logic, queued Job for async envelope, thin Controller for HTTP. A senior reviewer would note approvingly that the existing Action was not modified.
+
+The Sorter correctly identified the progress-tracking limitation: the Job updates counts in one shot at completion rather than incrementally. This is an honest assessment — and the right scoping decision for this order.
+
+### Concerns
+
+1. **`StartImportAction` does not use a transaction.** The concurrency check and ImportJob creation are not atomic. Under concurrent requests, two threads could both pass the `whereIn` check before either saves. The window is narrow but real. A `Cache::lock()` or `INSERT ... WHERE NOT EXISTS` would close it. Not critical for showcase, but worth noting for production-readiness.
+
+2. **`ImportOwnedSetsJob::handle()` uses static `ImportJob::query()` and `Family::query()`.** This is a departure from the injected-model pattern used in Actions (e.g., `$this->importJob->newQuery()`). Jobs use method injection via `handle()`, so the pattern is different — but it means the Job cannot be unit-tested with mocked models. The Feature test approach works, but this is a pattern to watch as more Jobs are added.
+
+3. **No architecture test for the Job layer.** Deptrac covers boundary enforcement, but there's no Pest architecture test verifying Job conventions (e.g., `final class`, implements `ShouldQueue`). If more Jobs are added, an architecture test should be created.
