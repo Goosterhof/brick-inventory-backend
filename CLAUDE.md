@@ -173,6 +173,16 @@ Structured output. What the outside world sees when they pick up a shipment.
 - Static `from()` factory method — construct from Manifest data
 - `EAGER_LOAD` constant when nesting related data — prevent N+1 loading
 
+### Queued Jobs (Async Envelopes)
+
+Thin wrappers that move sorting procedures onto the async conveyor belt.
+
+- `final` classes implementing `ShouldQueue` — sealed, queueable
+- Constructor: primitive IDs only (int, string) — must survive serialization/deserialization
+- `handle()`: inject Actions for business logic, inject Models for lookups — resolved from the container, same as Action constructors
+- Job body: look up records via `$model->newQuery()->findOrFail()`, delegate to Action, update status. No business logic in the Job itself
+- `failed()` callback: static Model queries are acceptable here — this method is called by the queue worker directly, not resolved from the container
+
 ### Security Checkpoints (Middleware)
 
 - `EnsureFamilyOwnership` — verifies the shipment belongs to the requesting tenant

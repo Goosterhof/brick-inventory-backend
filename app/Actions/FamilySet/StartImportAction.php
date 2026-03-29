@@ -10,6 +10,7 @@ use App\Jobs\ImportOwnedSetsJob;
 use App\Models\Family;
 use App\Models\ImportJob;
 use Illuminate\Contracts\Bus\Dispatcher;
+use Illuminate\Database\UniqueConstraintViolationException;
 
 final readonly class StartImportAction
 {
@@ -39,7 +40,12 @@ final readonly class StartImportAction
         $newImportJob->total_sets = 0;
         $newImportJob->processed_sets = 0;
         $newImportJob->failed_sets = 0;
-        $newImportJob->save();
+
+        try {
+            $newImportJob->save();
+        } catch (UniqueConstraintViolationException) {
+            throw ImportAlreadyInProgressException::forFamily($family->id);
+        }
 
         $this->dispatcher->dispatch(
             new ImportOwnedSetsJob(

@@ -10,6 +10,7 @@ use App\Models\Family;
 use App\Models\ImportJob;
 use Illuminate\Contracts\Bus\Dispatcher;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\UniqueConstraintViolationException;
 
 covers(StartImportAction::class);
 
@@ -94,6 +95,37 @@ describe('StartImportAction', function (): void {
 
         $importJobModel = Mockery::mock(ImportJob::class);
         $importJobModel->shouldReceive('newQuery')->once()->andReturn($queryBuilder);
+
+        $dispatcher = Mockery::mock(Dispatcher::class);
+        $dispatcher->shouldNotReceive('dispatch');
+
+        $action = new StartImportAction($importJobModel, $dispatcher);
+
+        // act & assert
+        expect(fn (): ImportJob => $action->execute($family))
+            ->toThrow(ImportAlreadyInProgressException::class);
+    });
+
+    it('should throw ImportAlreadyInProgressException when database unique constraint catches race condition', function (): void {
+        // arrange
+        $family = Mockery::mock(Family::class);
+        $family->allows('getAttribute')->with('id')->andReturn(42);
+
+        $newImportJob = Mockery::mock(ImportJob::class);
+        $newImportJob->allows('setAttribute');
+        $newImportJob->allows('getAttribute')->andReturnNull();
+        $newImportJob->shouldReceive('save')->once()->andThrow(
+            new UniqueConstraintViolationException('default', 'INSERT', [], new Exception('dup')),
+        );
+
+        $queryBuilder = Mockery::mock(Builder::class);
+        $queryBuilder->shouldReceive('where')->with('family_id', 42)->andReturnSelf();
+        $queryBuilder->shouldReceive('whereIn')->with('status', [ImportJobStatus::Pending, ImportJobStatus::InProgress])->andReturnSelf();
+        $queryBuilder->shouldReceive('first')->andReturnNull();
+
+        $importJobModel = Mockery::mock(ImportJob::class);
+        $importJobModel->shouldReceive('newQuery')->once()->andReturn($queryBuilder);
+        $importJobModel->shouldReceive('newInstance')->once()->andReturn($newImportJob);
 
         $dispatcher = Mockery::mock(Dispatcher::class);
         $dispatcher->shouldNotReceive('dispatch');

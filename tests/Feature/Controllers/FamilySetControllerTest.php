@@ -11,6 +11,7 @@ use App\Models\FamilySet;
 use App\Models\ImportJob;
 use App\Models\Set;
 use App\Models\User;
+use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
@@ -523,6 +524,37 @@ describe('FamilySetController', function (): void {
                 'family_id' => $user->family_id,
                 'quantity' => 2,
             ]);
+        });
+
+        it('should prevent duplicate pending import jobs at the database level (race condition guard)', function (): void {
+            Queue::fake();
+
+            $user = User::factory()->create();
+
+            // First request succeeds
+            $response = $this->actingAs($user)->postJson('/api/family-sets/import-from-rebrickable');
+            $response->assertStatus(202);
+
+            // Directly verify the unique constraint prevents a second pending import
+            // by attempting to insert another pending ImportJob for the same family
+            // (simulating a concurrent request that passed the application-level check)
+            $duplicateJob = new ImportJob;
+            $duplicateJob->family_id = $user->family_id;
+            $duplicateJob->status = ImportJobStatus::Pending;
+            $duplicateJob->total_sets = 0;
+            $duplicateJob->processed_sets = 0;
+            $duplicateJob->failed_sets = 0;
+
+            expect(fn () => $duplicateJob->save())
+                ->toThrow(UniqueConstraintViolationException::class);
+
+            // Only one pending import job should exist
+            expect(
+                ImportJob::query()
+                    ->where('family_id', $user->family_id)
+                    ->where('status', ImportJobStatus::Pending)
+                    ->count(),
+            )->toBe(1);
         });
     });
 

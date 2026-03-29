@@ -38,7 +38,7 @@ describe('ImportOwnedSetsJob', function (): void {
         $job = new ImportOwnedSetsJob(importJobId: $importJob->id, familyId: $family->id);
 
         // act
-        $job->handle($importOwnedSetsAction);
+        $job->handle($importOwnedSetsAction, new ImportJob, new Family);
 
         // assert
         $importJob->refresh();
@@ -74,7 +74,7 @@ describe('ImportOwnedSetsJob', function (): void {
         $job = new ImportOwnedSetsJob(importJobId: $importJob->id, familyId: $family->id);
 
         // act
-        $job->handle($importOwnedSetsAction);
+        $job->handle($importOwnedSetsAction, new ImportJob, new Family);
 
         // assert
         $importJob->refresh();
@@ -110,7 +110,7 @@ describe('ImportOwnedSetsJob', function (): void {
         $job = new ImportOwnedSetsJob(importJobId: $importJob->id, familyId: $family->id);
 
         // act
-        $job->handle($importOwnedSetsAction);
+        $job->handle($importOwnedSetsAction, new ImportJob, new Family);
 
         // assert
         $importJob->refresh();
@@ -179,7 +179,7 @@ describe('ImportOwnedSetsJob', function (): void {
         $job = new ImportOwnedSetsJob(importJobId: $importJob->id, familyId: $family->id);
 
         // act
-        $job->handle($importOwnedSetsAction);
+        $job->handle($importOwnedSetsAction, new ImportJob, new Family);
 
         // assert
         expect($statusDuringExecution)->toBe(ImportJobStatus::InProgress);

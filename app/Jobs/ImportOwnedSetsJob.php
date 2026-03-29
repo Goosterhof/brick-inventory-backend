@@ -21,17 +21,20 @@ final class ImportOwnedSetsJob implements ShouldQueue
         public readonly int $familyId,
     ) {}
 
-    public function handle(ImportOwnedSetsAction $importOwnedSetsAction): void
-    {
+    public function handle(
+        ImportOwnedSetsAction $importOwnedSetsAction,
+        ImportJob $importJobModel,
+        Family $familyModel,
+    ): void {
         /** @var ImportJob $importJob */
-        $importJob = ImportJob::query()->findOrFail($this->importJobId);
+        $importJob = $importJobModel->newQuery()->findOrFail($this->importJobId);
 
         $importJob->status = ImportJobStatus::InProgress;
         $importJob->started_at = now();
         $importJob->save();
 
         /** @var Family $family */
-        $family = Family::query()->findOrFail($this->familyId);
+        $family = $familyModel->newQuery()->findOrFail($this->familyId);
 
         $importOwnedSetsResultData = $importOwnedSetsAction->execute($family);
 
