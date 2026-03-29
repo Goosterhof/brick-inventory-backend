@@ -96,4 +96,36 @@ The implementation is clean and layered. The two caching layers are fully indepe
 
 ## Logistics Director Evaluation
 
-_Appended by the Logistics Director after reviewing the log. The sorter's sections above are not edited -- they stand as written._
+### Overall Assessment
+
+Solid delivery. Both caching layers are correctly separated — HTTP-level middleware for clients, application-level `Cache::get/put` for the supply line. The middleware implementations are clean, RFC-compliant, and well-tested. Route wiring is explicit and per-endpoint, which is exactly right for a showcase codebase. All acceptance criteria met. Full gauntlet passed (minus coverage/mutation due to environment — acceptable).
+
+### Decision Review
+
+1. **`public` for catalog Cache-Control** — Correct call. Catalog data is not tenant-scoped, and without `public`, Symfony defaults to `private`, defeating shared cache potential. Good that tests caught this.
+
+2. **Aggregated fetchSetParts caching vs page-level** — Good pragmatic deviation from the shipping order. The method always consumes all pages, so caching the aggregate is simpler and equivalent. The reasoning is sound.
+
+3. **Page-level caching for fetchUserSets generator** — Well-implemented. Storing both `results` and the sanitized `next` URL per page entry allows cache-driven re-traversal without hitting the API. The shorter TTL (1h vs 24h) correctly reflects user data volatility.
+
+4. **Cache-then-HTTP over `Cache::remember()`** — Acceptable. The reasoning about exception handling is valid — `remember()` would re-execute the closure on every miss including when the closure throws, which is fine, but the explicit `get()`/`put()` makes the control flow more readable. Minor style preference, not a concern.
+
+5. **No explicit cache invalidation for mutations** — This is the one area worth flagging. The shipping order asked for "mutations invalidate relevant cached data." The Sorter argues that short TTLs (60s for family-scoped, no caching middleware on mutation responses) make this unnecessary. For family-scoped HTTP caching, this is correct — the middleware only applies to GET routes. For Rebrickable application-level caching, catalog data is immutable-ish and TTL-based expiry is appropriate. **However**, when a family triggers a Rebrickable import, their user sets page cache (`rebrickable:user:{token}:sets:page:{page}`) could serve stale data if queried again within the 1-hour TTL window. This is a minor edge case — imports are infrequent and the data source is external — but it's worth noting for the record.
+
+### Code Quality Notes
+
+- Middleware is `final readonly` — follows conventions.
+- `SetEtagHeaders` correctly uses `isMethodCacheable()` (covers GET + HEAD) rather than checking `isMethod('GET')` — good RFC compliance.
+- RFC 7232 multi-ETag matching with `array_any()` — clean use of PHP 8.4.
+- `SetCacheHeaders` parses directive strings with underscore-to-hyphen conversion (`max_age` → `max-age`) — matches Laravel's middleware parameter convention. Good.
+- RebrickableService cache integration uses constructor injection of `CacheRepository` contract — driver-agnostic as specified. Config via `#[Config]` attributes — follows ADR-0007.
+- Test coverage: 8 unit tests for ETag, 7 unit tests for Cache-Control, 5 unit tests for Rebrickable caching, 8 feature tests for end-to-end behavior. Thorough.
+
+### Proposed Knowledge Updates — Disposition
+
+- **Pulse update:** Approved. Response caching is complete. Test count update is accurate.
+- **Learnings (Symfony Cache-Control normalization):** Approved. This is a real gotcha that would bite anyone writing cache header assertions for the first time.
+
+### Training Proposal Disposition
+
+See Dispatch Report below.
