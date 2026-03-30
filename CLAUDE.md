@@ -249,7 +249,7 @@ Wiring:                             Provider → Contract, Service, Policy
 
 ### Architecture Decision Ledger
 
-Nine decisions that shaped the warehouse (consolidated from sixteen — implementation details merged into their parent ADRs). Each records what was chosen, what was rejected, and what machine enforces it. Full records in `docs/adr/`.
+Ten decisions that shaped the warehouse (consolidated from sixteen — implementation details merged into their parent ADRs). Each records what was chosen, what was rejected, and what machine enforces it. Full records in `docs/adr/`.
 
 | ADR | Decision | Enforcement |
 |---|---|---|
@@ -262,6 +262,8 @@ Nine decisions that shaped the warehouse (consolidated from sixteen — implemen
 | 0007 | #[Config] attributes, not helpers/facades | ConfigArchitectureTest, GeneralArchitectureTest |
 | 0008 | Explicit routes, not apiResource | RoutingArchitectureTest |
 | 0009 | Thin controllers with method injection only | ControllerArchitectureTest |
+| 0010 | ComputedResourceData for DTO-sourced responses | ResourceDataArchitectureTest, PHPStan, Deptrac |
+| 0011 | Save-what-you-can import atomicity with honest reporting | Unit tests (three-scenario coverage), ADR-0003 try-catch constraints |
 
 Before building anything non-trivial, check the Ledger. Don't relitigate settled decisions — if the context has changed, propose a superseding ADR.
 
