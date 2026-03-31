@@ -127,3 +127,20 @@ Solid delivery. All four endpoints converted cleanly, the quality gauntlet passe
 ### Training Proposal Disposition
 
 See Dispatch Report below.
+
+---
+
+## Addendum: Partial Revert (2026-03-31)
+
+_Appended by the Logistics Director to document scope change after the original shift log was filed._
+
+Three of the four cursor-paginated endpoints were subsequently reverted to unbounded collection returns:
+
+| Commit | What Was Reverted |
+|---|---|
+| `219803f` | Removed cursor pagination from storage-options (`GET /storage-options`) and storage-option-parts (`GET /storage-options/{id}/parts`) |
+| `3e04f5c` | Removed cursor pagination from family-sets (`GET /family-sets`) |
+
+**Current state:** Only `/family/parts` (`GET /family/parts`) retains cursor pagination. The other three list endpoints return full collections — these are naturally bounded by family size, making pagination unnecessary overhead.
+
+**Paper trail note:** These reverts were not covered by a shipping order or shift log at the time they were made. This addendum corrects the record so the shift log accurately reflects the current warehouse floor.
