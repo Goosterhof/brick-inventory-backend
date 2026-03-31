@@ -213,12 +213,12 @@ BrickognizeApiException           → 502
 | `composer test` | Run all quality inspections |
 | `composer test:arch` | Architecture regulation enforcement only |
 | `composer test:coverage` | Unit inspections with 100% coverage requirement |
-| `composer test:feature-coverage` | Integration drills with 80% coverage requirement |
+| `composer test:feature-coverage` | Integration drills with 90% coverage requirement |
 | `composer lint` | Rector + Pint (label straightening) |
 | `composer lint:test` | Dry-run lint (check without fixing) |
 | `composer phpstan` | Static analysis at level max (the X-ray) |
 | `composer deptrac` | Boundary fence inspection |
-| `composer mutation` | Sabotage drill — 75% minimum survival on Actions & Services |
+| `composer mutation` | Sabotage drill — 76% minimum survival on Actions & Services |
 
 ### The Pre-Commit Gauntlet
 
@@ -227,8 +227,8 @@ CaptainHook enforces on every commit (PHP files only): **lint:test → phpstan �
 ### Coverage Policy
 
 - **Unit tests (Actions, Services):** 100% — every sorting procedure, every supply line
-- **Feature tests (Controllers):** 80% — integration drills cover the main paths
-- **Mutation testing:** 75% minimum — the sabotage drill ensures tests actually catch defects, not just touch lines
+- **Feature tests (Controllers):** 90% — integration drills cover the main paths
+- **Mutation testing:** 76% minimum — the sabotage drill ensures tests actually catch defects, not just touch lines
 
 ### The Boundary Fences (Deptrac)
 

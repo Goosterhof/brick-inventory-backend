@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace App\Models;
 
+use App\Contracts\BelongsToFamilyInterface;
 use Carbon\Carbon;
 use Database\Factories\InviteCodeFactory;
 use Illuminate\Database\Eloquent\Builder;
@@ -23,10 +24,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property-read Family $family
  * @property-read User $generatedBy
  */
-class InviteCode extends Model
+class InviteCode extends Model implements BelongsToFamilyInterface
 {
     /** @use HasFactory<InviteCodeFactory> */
     use HasFactory;
+
+    public function getFamilyId(): int
+    {
+        return $this->family_id;
+    }
 
     /**
      * @return BelongsTo<Family, $this>
