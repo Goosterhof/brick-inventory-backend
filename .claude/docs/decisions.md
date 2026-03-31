@@ -21,5 +21,6 @@ Every significant decision goes through a **Logistics Director-mediated review**
 | 0008 | Explicit routes, not apiResource | 2026-03-22 | Accepted |
 | 0009 | Thin controllers with method injection only | 2026-03-22 | Accepted |
 | 0010 | ComputedResourceData for DTO-sourced responses (sibling to ResourceData, shared ResourceResponse interface) | 2026-03-28 | Accepted |
+| 0011 | Save-what-you-can import atomicity with honest reporting | 2026-02-11 | Accepted |
 
-_Note: The original ADRs 0010–0016 were consolidated into their parent ADRs on 2026-03-22. The sub-decisions (cascadeRelations contract, final readonly, instance query builders, family-scoped multi-tenancy, API resilience, attribute casting, FormRequest-to-DTO bridge) now live within ADRs 0002–0006. ADR-0010 was subsequently reassigned to a new decision (ComputedResourceData)._
+_Note: The original ADRs 0010–0016 were consolidated into their parent ADRs on 2026-03-22. The sub-decisions (cascadeRelations contract, final readonly, instance query builders, family-scoped multi-tenancy, API resilience, attribute casting, FormRequest-to-DTO bridge) now live within ADRs 0002–0006. ADR-0010 and ADR-0011 were subsequently assigned to new decisions._
