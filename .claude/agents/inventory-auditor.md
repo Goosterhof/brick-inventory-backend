@@ -122,6 +122,7 @@ Does the documentation match the warehouse floor?
 3. **Model relationships** — do models with `family_id` have `family()` relationships?
 4. **Cascade declarations** — does every model's `cascadeRelations()` match its actual relationships?
 5. **Exception rendering** (`bootstrap/app.php`) — are all custom exceptions handled?
+6. **Quality thresholds** — compare CLAUDE.md stated thresholds (coverage %, mutation %) against `composer.json` script flags (`--min=N`). Flag any mismatch — the crew reference document must match what the gauntlet actually enforces.
 
 ### SOP 4: Audit Pattern Maturity
 
@@ -293,7 +294,7 @@ Training proposals from audit reports are tracked here. A proposal must prove it
 | SOP 3: verify all FormRequests use `$this->safe()` not `$this->input()` in toDto() | 2026-03-25 | 2026-03-25-full-sweep-baseline | ADR-0006 specifies this; no architecture test enforces it; spot-check was incomplete |
 | SOP 1: document fallback procedure when coverage driver is absent | 2026-03-25 | 2026-03-25-full-sweep-baseline | Coverage driver absent; SOP had no guidance for "unable to measure" scenario |
 | When filing a finding about enforcement drift, ask: can the enforcement be made self-maintaining instead? Recommend the structural fix, not a human-memory fix | 2026-03-26 | 2026-03-26-route-test-auto-detect | Filed Finding 2 recommending "add routes to hardcoded list" — the real fix was making the test auto-detect routes. CEO identified the structural solution. |
-| SOP 3: compare CLAUDE.md quality thresholds against composer.json script values | 2026-03-27 | 2026-03-27-post-delivery-audit | PR #125 changed thresholds but CLAUDE.md wasn't updated; no SOP checks this |
+| SOP 3: cross-reference recent shift log claims against git log to detect undocumented reverts or scope changes | 2026-03-30 | 2026-03-30-full-sweep-post-delivery | Cursor pagination shift log claimed full conversion; git log revealed partial revert with no paper trail |
 
 ### Graduated
 
@@ -301,6 +302,7 @@ Training proposals from audit reports are tracked here. A proposal must prove it
 |---|---|---|---|
 | SOP 2: scan Actions for try-catch blocks | 2026-03-26 | 2026-03-25-full-sweep-baseline, 2026-03-26-routine-sweep | SOP 2 step 6 |
 | SOP 4: count Policy public methods and compare to unit test describe blocks | 2026-03-27 | 2026-03-26-routine-sweep, 2026-03-27-post-delivery-audit | SOP 4 step 6 |
+| SOP 3: compare CLAUDE.md quality thresholds against composer.json script values | 2026-03-30 | 2026-03-27-post-delivery-audit, 2026-03-30-full-sweep-post-delivery | SOP 3 (new step) |
 
 ### Dropped
 

@@ -152,21 +152,39 @@ The low findings are documentation housekeeping rather than code problems. The c
 
 ## Logistics Director Evaluation
 
-_Appended by the Logistics Director after reviewing the report._
-
-**Assessment:** Thorough | Adequate | Superficial
+**Assessment:** Thorough
 
 ### Findings Review
 
-_Are the findings calibrated correctly? Any severity over/under-calls?_
+All six findings are calibrated correctly. The medium on `viewImportStatus` is justified — it's a genuine test gap in the policy layer, and the Auditor's method-count SOP surfaced it cleanly. The five lows are appropriately scoped as documentation housekeeping and convention observations, not severity inflation.
+
+Finding 5 (InviteCode missing `BelongsToFamilyInterface`) is a good catch. The Auditor correctly identified it as a convention-only gap and flagged it as an observation rather than a violation — exactly the right calibration given there's no architecture test enforcing it yet (ADR-0002 open question).
+
+Finding 6 (cursor pagination revert without paper trail) demonstrates valuable forensic rigor — correlating shift log claims against git history. The finding is accurate: the existing shift log is now misleading.
+
+No severity over/under-calls identified.
 
 ### Training Proposal Dispositions
 
 | Proposal | Disposition | Rationale |
 |---|---|---|
-| SOP 3: compare CLAUDE.md quality thresholds against composer.json | _Pending_ | Second confirming observation — graduation evaluation required |
-| SOP 3: cross-reference shift log claims against git log | _Pending_ | First observation |
+| SOP 3: compare CLAUDE.md quality thresholds against composer.json | **Candidate → Graduation evaluation** | Second confirming observation (first: 2026-03-27-post-delivery-audit, second: 2026-03-30-full-sweep-post-delivery). Graduation tests below. |
+| SOP 3: cross-reference shift log claims against git log | **Candidate** | First observation. Strong evidence — surfaced a real paper trail gap. Needs one more confirming instance. |
+
+### Graduation Tests: SOP 3 — CLAUDE.md vs composer.json threshold comparison
+
+| Scenario | Without Training | With Training | Assertion |
+|---|---|---|---|
+| A delivery changes `composer.json` test:coverage `--min` from 90 to 95, but CLAUDE.md still says 90% | Auditor runs gauntlet, reports pass/fail, does not compare the two documents | Auditor flags the mismatch in a finding with both values cited | Report contains a finding referencing both the CLAUDE.md stated threshold and the composer.json enforced threshold |
+| CLAUDE.md and composer.json thresholds are aligned (both say 90%) | N/A (no difference in behavior) | Auditor checks and confirms alignment — no finding filed | Report's doc drift table shows CLAUDE.md as "Accurate" for thresholds, or no threshold finding appears |
+| A new quality metric is added to composer.json (e.g., `test:integration-coverage --min=85`) but CLAUDE.md has no mention of it | Auditor does not notice the new metric exists | Auditor flags the missing documentation for the new metric | Report contains a finding noting the undocumented quality threshold |
+
+**Verdict: Pass.** The Auditor has now caught this mismatch twice, unprompted, using a consistent method (comparing CLAUDE.md prose against composer.json script flags). The scenarios above are realistic and the assertions are objectively verifiable. Promoting to SOP 3.
 
 ### Notes for the Auditor
 
-_Direct feedback on methodology._
+Solid sweep. The policy method-count SOP continues to pay dividends — it caught a gap that slipped through a dedicated test gap sweep because the shipping order scoped it to a different policy. That's exactly the kind of systematic check that catches what targeted sweeps miss.
+
+The shift-log-vs-git-history correlation (Finding 6) is a genuinely new methodology contribution. Keep doing it — if it surfaces another real gap, we'll fast-track the graduation.
+
+One note: you flagged that you didn't audit `deptrac.yaml` for the new Job layer. That's fair self-awareness. The Job layer was added recently (2026-03-29) and its Deptrac mapping should be verified. File it as a scope note for the next audit, not a self-criticism.
