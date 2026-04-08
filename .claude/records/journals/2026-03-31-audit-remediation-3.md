@@ -90,21 +90,31 @@ The one showcase concern is not the remediation quality but the paper trail gap 
 
 ## Logistics Director Evaluation
 
-_Appended by the Logistics Director after reviewing the log. The sorter's sections above are not edited -- they stand as written._
+_Appended by the Logistics Director after reviewing the log. The sorter's sections above are not edited — they stand as written._
 
-**Overall Assessment:**
+**Overall Assessment:** Solid retroactive filing. The Sorter was honest about the gap, thorough on verification, and didn't try to obscure the timeline. The log itself is well-structured and the acceptance criteria checks are definitive — grep results with line numbers, not hand-waving.
 
 ### Order Fulfillment Review
 
+All six findings verified as remediated with specific file locations and line numbers. The test count discrepancy (512 → 513) was correctly noted and explained rather than glossed over. Quality gauntlet appropriately scoped — running the full suite for a documentation commit rather than pretending to re-run coverage tools that weren't relevant here was the right call.
+
+One minor note: the Quality Gauntlet table lists lint/phpstan/deptrac as "Not run" because this was a docs-only commit, but the pre-commit hooks (which include lint:test, phpstan, deptrac, test:arch) did run and pass. The table could have reflected that. Not a material issue — the hooks enforced the checks regardless.
+
 ### Decision Review
 
+No decisions needed — the Sorter correctly identified this as mechanical remediation with no ambiguity. Agreed.
+
 ### Showcase Assessment
+
+The Sorter's self-assessment is accurate. The remediation quality is fine. The showcase concern is the 8-day gap, which the Sorter flagged unprompted. A retroactive log filed honestly is better than no log at all, but this pattern needs to stop recurring — hence the graduation evaluation below.
 
 ### Training Proposal Dispositions
 
 | Proposal | Disposition | Rationale |
 |---|---|---|
-| | | |
+| File shift logs immediately upon completion — never retroactively | **Candidate (2nd observation — graduation eligible)** | First observed 2026-03-28 (add-tooling-testing), confirmed here. Same failure mode: work done, log not filed. Graduation test scenarios drafted in Dispatch Report. |
+| Before closing a shift, verify the shipping order status is updated from Open to Completed | **Candidate (1st observation)** | Valid but likely a subset of the first proposal. If the Sorter files the log immediately, the permit update follows naturally. Tracking separately for now — needs a second confirming shift to evaluate independently. |
 
 ### Notes for the Sorter
 
+The accountability gap is the only real finding here. Your verification work was clean and your self-debrief was honest — that's the standard. The first proposal is heading to graduation evaluation; if it passes, it becomes permanent training. The second proposal is noted but may get folded into the first if they keep co-occurring.
