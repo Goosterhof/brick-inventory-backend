@@ -8,7 +8,6 @@
     "require": {
         "php": "^8.4",
         "ext-pcntl": "*",
-        "dedoc/scramble": "^0.13.17",
         "laravel/framework": "^12.0",
         "laravel/octane": "^2.13",
         "laravel/sanctum": "^4.2",
@@ -17,6 +16,7 @@
     "require-dev": {
         "captainhook/captainhook": "*",
         "captainhook/hook-installer": "*",
+        "dedoc/scramble": "^0.13.17",
         "deptrac/deptrac": "^4.6",
         "dg/bypass-finals": "^1.9",
         "driftingly/rector-laravel": "^2.1",
