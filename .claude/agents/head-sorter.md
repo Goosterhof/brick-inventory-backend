@@ -79,7 +79,7 @@ composer mutation
 ```
 
 2. If something fails, fix it — don't skip it.
-3. Create a shift log at `.claude/records/journals/YYYY-MM-DD-{slug}.md` using the template at `.claude/records/journals/.shift-log-template.md`.
+3. **File the shift log immediately — before reporting completion.** Create a shift log at `.claude/records/journals/YYYY-MM-DD-{slug}.md` using the template at `.claude/records/journals/.shift-log-template.md`. Update the shipping order status to `Completed` and link the shift log. The task is not done until the log is filed and the permit is closed — never defer this to "later."
 4. Fill in all sections honestly — the Logistics Director will evaluate your self-debrief.
 5. The shift log IS your report to the Logistics Director. Don't produce a separate report — everything goes in the log.
 
@@ -288,7 +288,7 @@ _Proposals observed once. Need a second confirming shift before graduation._
 | When coverage tests produce warnings instead of reports, check for `covers()` annotations targeting classes outside the `<source>` directories in the phpunit XML | 2026-03-26 | 2026-03-26-enforce-code-quality | PHPUnit warnings from `covers()` mismatch caused Pest exit 1, suppressing coverage |
 | When adding a new interface implementation to a class in a Deptrac-guarded layer, check that the layer's ruleset allows the interface's layer as a dependency | 2026-03-28 | 2026-03-28-computed-resource-data | Deptrac failed because ResourceData layer needed Contract but only Data → Contract was anticipated |
 | When a class implements multiple interfaces that both declare a method with the same name, check for parameter type conflicts between the interfaces before PHPStan | 2026-03-28 | 2026-03-28-computed-resource-data | Responsable::toResponse(Request) vs ResourceResponse::toResponse(mixed) caused a PHPStan error |
-| ~~When a shipping order is issued, file the shift log immediately upon completion — never retroactively~~ | 2026-03-28 | 2026-03-28-add-tooling-testing | **2nd observation 2026-04-08** (2026-03-31-audit-remediation-3): 8-day gap, same failure mode. **Graduation eligible — see Dispatch Report 2026-04-08.** |
+| ~~When a shipping order is issued, file the shift log immediately upon completion — never retroactively~~ | 2026-03-28 | 2026-03-28-add-tooling-testing | **Graduated 2026-04-08** — see Graduated table |
 | When CI thresholds differ from documented standards (CLAUDE.md), add a comment in the CI config explaining the deviation | 2026-03-28 | 2026-03-28-add-tooling-testing | CI uses 99%/90% vs documented 100%/80% — reasoning is sound but undocumented in the workflow file |
 | When calling methods on Eloquent relations forwarded via `__call()`, use positional arguments — named args cause runtime errors | 2026-03-28 | 2026-03-28-cursor-pagination | `HasMany::cursorPaginate()` with named params caused `Unknown named parameter` error |
 | Before choosing a return type for an Action, check what the Controller needs to do with the result — concrete types enable methods like `through()` that interfaces may only declare in PHPDoc | 2026-03-28 | 2026-03-28-cursor-pagination | Chose interface first, then had to switch to concrete because `through()` is only on the concrete class for PHPStan |
@@ -305,6 +305,7 @@ _Proposals confirmed across 2+ shifts. Promoted into training above._
 |---|---|---|---|
 | Use `toBase()->get()` returning `stdClass` for raw SQL joins in Actions | 2026-03-26 | 2026-03-25-brick-dna-lab, 2026-03-26-set-completion-gauge | Actions (Sorting Procedures) training |
 | Use separate `newQuery()` calls instead of `clone` on Eloquent Builder | 2026-03-26 | 2026-03-25-brick-dna-lab, 2026-03-26-set-completion-gauge | Actions (Sorting Procedures) training |
+| File the shift log immediately upon completion — never retroactively; update permit status to Completed before reporting done | 2026-04-08 | 2026-03-28-add-tooling-testing, 2026-03-31-audit-remediation-3 | "When You're Done" training (step 3) |
 
 ### Dropped
 
