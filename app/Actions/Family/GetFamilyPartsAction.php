@@ -7,6 +7,7 @@ namespace App\Actions\Family;
 use App\Models\Family;
 use App\Models\StorageOptionPart;
 use Illuminate\Contracts\Pagination\CursorPaginator;
+use Illuminate\Database\Query\Expression;
 use stdClass;
 
 final readonly class GetFamilyPartsAction
@@ -43,6 +44,14 @@ final readonly class GetFamilyPartsAction
                 'storage_option_parts.storage_option_id',
                 'storage_options.name as storage_option_name',
                 'storage_option_parts.quantity',
+                new Expression(
+                    '(SELECT family_sets.id FROM family_sets'
+                    . ' INNER JOIN set_parts ON set_parts.set_id = family_sets.set_id'
+                    . ' WHERE set_parts.part_id = storage_option_parts.part_id'
+                    . ' AND set_parts.color_id = storage_option_parts.color_id'
+                    . ' AND family_sets.family_id = ' . $family->id
+                    . ' LIMIT 1) as family_set_id',
+                ),
             ])
             ->orderBy('storage_option_parts.id')
             ->toBase()

@@ -9,6 +9,8 @@
             <directory>tests/Feature</directory>
             <exclude>tests/Feature/Models</exclude>
             <exclude>tests/Feature/ExceptionHandlerTest.php</exclude>
+            <exclude>tests/Feature/Jobs</exclude>
+            <exclude>tests/Feature/Controllers/ResponseCachingTest.php</exclude>
         </testsuite>
     </testsuites>
     <source>
