@@ -79,7 +79,7 @@ composer mutation
 ```
 
 2. If something fails, fix it — don't skip it.
-3. Create a shift log at `.claude/records/journals/YYYY-MM-DD-{slug}.md` using the template at `.claude/records/journals/.shift-log-template.md`.
+3. **File the shift log immediately — before reporting completion.** Create a shift log at `.claude/records/journals/YYYY-MM-DD-{slug}.md` using the template at `.claude/records/journals/.shift-log-template.md`. Update the shipping order status to `Completed` and link the shift log. The task is not done until the log is filed and the permit is closed — never defer this to "later."
 4. Fill in all sections honestly — the Logistics Director will evaluate your self-debrief.
 5. The shift log IS your report to the Logistics Director. Don't produce a separate report — everything goes in the log.
 
@@ -283,9 +283,19 @@ _Proposals observed once. Need a second confirming shift before graduation._
 | When proposing "remember to do X" training, first ask: can a test enforce X instead? If yes, build the test — machine enforcement beats human memory | 2026-03-26 | 2026-03-26-route-test-auto-detect | Route list drift was proposed as a training candidate by both Sorter and Auditor; CEO identified the real fix was an auto-detecting test |
 | Before adding a `use` import to a file, check if the class is already imported to avoid duplicates that Pint will silently remove | 2026-03-26 | 2026-03-26-expand-pest-tests | Added duplicate `use App\Models\Family` to FamilyTest.php; caught on review |
 | When modifying 10+ files with identical patterns, read them in batches of 8-10 to minimize round-trips between read and edit phases | 2026-03-26 | 2026-03-26-expand-pest-tests | 66-file scope required many serial reads; batching was faster |
-| When building ResourceData for DTOs (not Models), document the phpstan-ignore with a comment explaining why the override is necessary | 2026-03-26 | 2026-03-26-set-completion-gauge | `@phpstan-ignore method.childParameterType` on `from()` is non-obvious without context |
+| ~~When building ResourceData for DTOs (not Models), document the phpstan-ignore with a comment explaining why the override is necessary~~ | 2026-03-26 | 2026-03-26-set-completion-gauge | **Dropped 2026-03-28** — see Dropped table |
 | Before setting a coverage or mutation threshold, always run the actual measurement first — never set based on assumption | 2026-03-26 | 2026-03-26-enforce-code-quality | First commit set MSI to 80% without measurement; actual was 76.83% |
 | When coverage tests produce warnings instead of reports, check for `covers()` annotations targeting classes outside the `<source>` directories in the phpunit XML | 2026-03-26 | 2026-03-26-enforce-code-quality | PHPUnit warnings from `covers()` mismatch caused Pest exit 1, suppressing coverage |
+| When adding a new interface implementation to a class in a Deptrac-guarded layer, check that the layer's ruleset allows the interface's layer as a dependency | 2026-03-28 | 2026-03-28-computed-resource-data | Deptrac failed because ResourceData layer needed Contract but only Data → Contract was anticipated |
+| When a class implements multiple interfaces that both declare a method with the same name, check for parameter type conflicts between the interfaces before PHPStan | 2026-03-28 | 2026-03-28-computed-resource-data | Responsable::toResponse(Request) vs ResourceResponse::toResponse(mixed) caused a PHPStan error |
+| ~~When a shipping order is issued, file the shift log immediately upon completion — never retroactively~~ | 2026-03-28 | 2026-03-28-add-tooling-testing | **Graduated 2026-04-08** — see Graduated table |
+| When CI thresholds differ from documented standards (CLAUDE.md), add a comment in the CI config explaining the deviation | 2026-03-28 | 2026-03-28-add-tooling-testing | CI uses 99%/90% vs documented 100%/80% — reasoning is sound but undocumented in the workflow file |
+| When calling methods on Eloquent relations forwarded via `__call()`, use positional arguments — named args cause runtime errors | 2026-03-28 | 2026-03-28-cursor-pagination | `HasMany::cursorPaginate()` with named params caused `Unknown named parameter` error |
+| Before choosing a return type for an Action, check what the Controller needs to do with the result — concrete types enable methods like `through()` that interfaces may only declare in PHPDoc | 2026-03-28 | 2026-03-28-cursor-pagination | Chose interface first, then had to switch to concrete because `through()` is only on the concrete class for PHPStan |
+| Before placing a test file, check TestConventionsArchitectureTest for placement constraints (e.g., unit tests must not use RefreshDatabase) | 2026-03-28 | 2026-03-28-queue-rebrickable-imports | Placed Job test in Unit/ with RefreshDatabase; pre-commit hook caught it |
+| When adding routes under a path with wildcard parameters, always verify static routes come before the wildcard in the route file | 2026-03-28 | 2026-03-28-queue-rebrickable-imports | import-status was placed after {family_set} and matched as a wildcard parameter |
+| When fixing race conditions, prefer database-level constraints over application-level locks — they survive code path changes and cache failures | 2026-03-29 | 2026-03-29-harden-job-layer | Race condition in StartImportAction closed with partial unique index rather than Cache::lock() |
+| Before closing a shift, verify the shipping order status is updated from Open to Completed with a link to the shift log | 2026-04-08 | 2026-03-31-audit-remediation-3 | Shipping order left Open with no shift log link despite work being done |
 
 ### Graduated
 
@@ -295,6 +305,7 @@ _Proposals confirmed across 2+ shifts. Promoted into training above._
 |---|---|---|---|
 | Use `toBase()->get()` returning `stdClass` for raw SQL joins in Actions | 2026-03-26 | 2026-03-25-brick-dna-lab, 2026-03-26-set-completion-gauge | Actions (Sorting Procedures) training |
 | Use separate `newQuery()` calls instead of `clone` on Eloquent Builder | 2026-03-26 | 2026-03-25-brick-dna-lab, 2026-03-26-set-completion-gauge | Actions (Sorting Procedures) training |
+| File the shift log immediately upon completion — never retroactively; update permit status to Completed before reporting done | 2026-04-08 | 2026-03-28-add-tooling-testing, 2026-03-31-audit-remediation-3 | "When You're Done" training (step 3) |
 
 ### Dropped
 
@@ -303,3 +314,4 @@ _Proposals evaluated and rejected. Kept for institutional memory._
 | Proposal | Dropped | Log Evidence | Reason |
 |---|---|---|---|
 | When adding new routes, always update RoutingArchitectureTest's hardcoded route list in the same commit | 2026-03-26 | 2026-03-26-route-test-auto-detect | Structurally eliminated — RoutingArchitectureTest now auto-detects all auth:sanctum routes. No hardcoded list to update. |
+| When building ResourceData for DTOs (not Models), document the phpstan-ignore with a comment explaining why the override is necessary | 2026-03-28 | 2026-03-28-computed-resource-data | Structurally eliminated — ADR-0010 introduced ComputedResourceData. DTO-sourced resources extend ComputedResourceData instead of using @phpstan-ignore. No suppression needed. |

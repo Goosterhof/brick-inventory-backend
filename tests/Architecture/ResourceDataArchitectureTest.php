@@ -2,6 +2,7 @@
 
 declare(strict_types=1);
 
+use App\Http\Resources\ComputedResourceData;
 use App\Http\Resources\ResourceData;
 
 /*
@@ -13,7 +14,7 @@ use App\Http\Resources\ResourceData;
 | - End with "ResourceData" suffix
 | - Are readonly (immutable)
 | - Are final (concrete classes) or abstract (base class only)
-| - Extend the ResourceData base class
+| - Extend either ResourceData (Model-sourced) or ComputedResourceData (DTO-sourced)
 |
 */
 
@@ -30,6 +31,34 @@ it('should have ResourceData as abstract readonly base class', function (): void
 
     expect($reflection->isAbstract())->toBeTrue('ResourceData base class should be abstract')
         ->and($reflection->isReadOnly())->toBeTrue('ResourceData base class should be readonly');
+});
+
+it('should have ComputedResourceData as abstract readonly base class', function (): void {
+    $reflection = new ReflectionClass(ComputedResourceData::class);
+
+    expect($reflection->isAbstract())->toBeTrue('ComputedResourceData base class should be abstract')
+        ->and($reflection->isReadOnly())->toBeTrue('ComputedResourceData base class should be readonly');
+});
+
+it('should have all concrete resource data classes extending ResourceData or ComputedResourceData', function (): void {
+    foreach (getClassesInDirectory(dirname(__DIR__, 2) . '/app/Http/Resources', 'App\\Http\\Resources\\') as $className) {
+        $reflection = new ReflectionClass($className);
+
+        // Skip abstract classes (like ResourceData and ComputedResourceData base classes)
+        if ($reflection->isAbstract()) {
+            continue;
+        }
+
+        $extendsResourceData = is_subclass_of($className, ResourceData::class);
+        $extendsComputedResourceData = is_subclass_of($className, ComputedResourceData::class);
+
+        expect($extendsResourceData || $extendsComputedResourceData)->toBeTrue(
+            sprintf(
+                'Resource class %s must extend either ResourceData or ComputedResourceData',
+                $className,
+            ),
+        );
+    }
 });
 
 it('should have all concrete resource data classes as final', function (): void {

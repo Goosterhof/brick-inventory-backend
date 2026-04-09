@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Http\Resources;
 
+use App\Contracts\ResourceDataSourceInterface;
 use App\Data\FamilySetCompletionData;
-use Illuminate\Database\Eloquent\Model;
 
 /**
- * @extends ResourceData<Model>
+ * @extends ComputedResourceData<FamilySetCompletionData>
  */
-final readonly class FamilySetCompletionResourceData extends ResourceData
+final readonly class FamilySetCompletionResourceData extends ComputedResourceData
 {
     public function __construct(
         public int $family_set_id,
@@ -21,16 +21,16 @@ final readonly class FamilySetCompletionResourceData extends ResourceData
     ) {}
 
     /**
-     * @param FamilySetCompletionData $model
+     * @param FamilySetCompletionData $resourceDataSource
      */
-    public static function from(mixed $model): static // @phpstan-ignore method.childParameterType
+    public static function from(ResourceDataSourceInterface $resourceDataSource): static
     {
         return new self(
-            family_set_id: $model->familySetId,
-            set_num: $model->setNum,
-            total_parts: $model->totalParts,
-            stored_parts: $model->storedParts,
-            percentage: $model->percentage,
+            family_set_id: $resourceDataSource->familySetId,
+            set_num: $resourceDataSource->setNum,
+            total_parts: $resourceDataSource->totalParts,
+            stored_parts: $resourceDataSource->storedParts,
+            percentage: $resourceDataSource->percentage,
         );
     }
 }

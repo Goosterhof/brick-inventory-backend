@@ -15,6 +15,7 @@ use App\Exceptions\RebrickableApiException;
 use App\Exceptions\SetNotFoundException;
 use Generator;
 use Illuminate\Container\Attributes\Config;
+use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Http\Client\Factory as HttpFactory;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
@@ -33,8 +34,11 @@ final readonly class RebrickableService implements LegoDataServiceInterface
 
     public function __construct(
         private HttpFactory $httpFactory,
+        private CacheRepository $cacheRepository,
         #[Config('services.rebrickable.key', '')] private string $apiKey,
         #[Config('services.rebrickable.base_url', 'https://rebrickable.com/api/v3')] private string $baseUrl,
+        #[Config('services.rebrickable.cache_ttl', 86400)] private int $cacheTtl,
+        #[Config('services.rebrickable.user_cache_ttl', 3600)] private int $userCacheTtl,
     ) {}
 
     /**
@@ -44,6 +48,13 @@ final readonly class RebrickableService implements LegoDataServiceInterface
      */
     public function fetchSet(string $setNum): LegoSetData
     {
+        $cacheKey = sprintf('rebrickable:set:%s', $setNum);
+
+        $cached = $this->cacheRepository->get($cacheKey);
+        if ($cached instanceof LegoSetData) {
+            return $cached;
+        }
+
         $response = $this->httpClient()->get(sprintf('/lego/sets/%s/', $setNum));
 
         $this->handleSetFetchError($response, $setNum);
@@ -53,7 +64,11 @@ final readonly class RebrickableService implements LegoDataServiceInterface
         $this->validateSetResponse($data, $setNum);
 
         /** @var array<string, mixed> $data Validated by validateSetResponse */
-        return $this->buildLegoSetData($data);
+        $legoSetData = $this->buildLegoSetData($data);
+
+        $this->cacheRepository->put($cacheKey, $legoSetData, $this->cacheTtl);
+
+        return $legoSetData;
     }
 
     /**
@@ -63,6 +78,13 @@ final readonly class RebrickableService implements LegoDataServiceInterface
      */
     public function fetchSetByEan(string $ean): LegoSetData
     {
+        $cacheKey = sprintf('rebrickable:ean:%s', $ean);
+
+        $cached = $this->cacheRepository->get($cacheKey);
+        if ($cached instanceof LegoSetData) {
+            return $cached;
+        }
+
         $response = $this->httpClient()->get('/lego/sets/', ['search' => $ean]);
 
         $this->throwOnApiError($response, sprintf("Failed to search for set by EAN '%s'", $ean));
@@ -85,7 +107,11 @@ final readonly class RebrickableService implements LegoDataServiceInterface
 
         $this->validateSetResponse($setData, sprintf("EAN '%s'", $ean));
 
-        return $this->buildLegoSetData($setData);
+        $legoSetData = $this->buildLegoSetData($setData);
+
+        $this->cacheRepository->put($cacheKey, $legoSetData, $this->cacheTtl);
+
+        return $legoSetData;
     }
 
     /**
@@ -96,6 +122,14 @@ final readonly class RebrickableService implements LegoDataServiceInterface
      */
     public function fetchSetParts(string $setNum): array
     {
+        $cacheKey = sprintf('rebrickable:set:%s:parts', $setNum);
+
+        /** @var list<LegoSetPartData>|null $cached */
+        $cached = $this->cacheRepository->get($cacheKey);
+        if (is_array($cached)) {
+            return $cached;
+        }
+
         /** @var list<LegoSetPartData> $parts */
         $parts = [];
         /** @var string|null $nextUrl @phpstan-ignore varTag.nativeType */
@@ -134,6 +168,8 @@ final readonly class RebrickableService implements LegoDataServiceInterface
             $nextUrl = $this->sanitizePaginationUrl($data['next']);
         }
 
+        $this->cacheRepository->put($cacheKey, $parts, $this->cacheTtl);
+
         return $parts;
     }
 
@@ -147,8 +183,22 @@ final readonly class RebrickableService implements LegoDataServiceInterface
     {
         /** @var string|null $nextUrl @phpstan-ignore varTag.nativeType */
         $nextUrl = sprintf('/users/%s/sets/', $userToken);
+        $page = 1;
 
         while ($nextUrl !== null) {
+            $cacheKey = sprintf('rebrickable:user:%s:sets:page:%d', $userToken, $page);
+
+            /** @var array{results: list<RebrickableUserSetData>, next: string|null}|null $cachedPage */
+            $cachedPage = $this->cacheRepository->get($cacheKey);
+
+            if (is_array($cachedPage)) {
+                yield $cachedPage['results'];
+                $nextUrl = $cachedPage['next'];
+                $page++;
+
+                continue;
+            }
+
             $response = $this->httpClient()->get($nextUrl);
 
             $this->throwOnApiError($response, 'Failed to fetch user sets');
@@ -177,9 +227,17 @@ final readonly class RebrickableService implements LegoDataServiceInterface
                 );
             }
 
+            $sanitizedNext = $this->sanitizePaginationUrl($validatedData['next']);
+
+            $this->cacheRepository->put($cacheKey, [
+                'results' => $pageResults,
+                'next' => $sanitizedNext,
+            ], $this->userCacheTtl);
+
             yield $pageResults;
 
-            $nextUrl = $this->sanitizePaginationUrl($validatedData['next']);
+            $nextUrl = $sanitizedNext;
+            $page++;
         }
     }
 

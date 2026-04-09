@@ -4,19 +4,21 @@ declare(strict_types=1);
 
 namespace App\Http\Resources;
 
+use App\Contracts\ResourceResponseInterface;
 use App\Exceptions\MissingRelationException;
 use BackedEnum;
 use DateTimeInterface;
-use Illuminate\Contracts\Support\Responsable;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
-use JsonSerializable;
 
 /**
+ * Base class for API responses sourced from Eloquent Models.
+ * Sibling to ComputedResourceData (which handles DTO-sourced responses).
+ *
  * @template TModel of Model
  */
-abstract readonly class ResourceData implements JsonSerializable, Responsable
+abstract readonly class ResourceData implements ResourceResponseInterface
 {
     /**
      * Relations that should be eager-loaded for this resource.
@@ -32,6 +34,8 @@ abstract readonly class ResourceData implements JsonSerializable, Responsable
      * @param TModel $model
      */
     abstract public static function from(Model $model): static;
+
+    // Serialization duplicated in ComputedResourceData — extract into shared mechanism if a third variant emerges
 
     /**
      * Convert the resource to an array.
@@ -119,7 +123,7 @@ abstract readonly class ResourceData implements JsonSerializable, Responsable
      */
     protected function transformValue(mixed $value): mixed
     {
-        if ($value instanceof self) {
+        if ($value instanceof ResourceResponseInterface) {
             return $value->toArray();
         }
 

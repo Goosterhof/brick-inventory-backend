@@ -173,6 +173,16 @@ Structured output. What the outside world sees when they pick up a shipment.
 - Static `from()` factory method — construct from Manifest data
 - `EAGER_LOAD` constant when nesting related data — prevent N+1 loading
 
+### Queued Jobs (Async Envelopes)
+
+Thin wrappers that move sorting procedures onto the async conveyor belt.
+
+- `final` classes implementing `ShouldQueue` — sealed, queueable
+- Constructor: primitive IDs only (int, string) — must survive serialization/deserialization
+- `handle()`: inject Actions for business logic, inject Models for lookups — resolved from the container, same as Action constructors
+- Job body: look up records via `$model->newQuery()->findOrFail()`, delegate to Action, update status. No business logic in the Job itself
+- `failed()` callback: static Model queries are acceptable here — this method is called by the queue worker directly, not resolved from the container
+
 ### Security Checkpoints (Middleware)
 
 - `EnsureFamilyOwnership` — verifies the shipment belongs to the requesting tenant
@@ -203,12 +213,12 @@ BrickognizeApiException           → 502
 | `composer test` | Run all quality inspections |
 | `composer test:arch` | Architecture regulation enforcement only |
 | `composer test:coverage` | Unit inspections with 100% coverage requirement |
-| `composer test:feature-coverage` | Integration drills with 80% coverage requirement |
+| `composer test:feature-coverage` | Integration drills with 90% coverage requirement |
 | `composer lint` | Rector + Pint (label straightening) |
 | `composer lint:test` | Dry-run lint (check without fixing) |
 | `composer phpstan` | Static analysis at level max (the X-ray) |
 | `composer deptrac` | Boundary fence inspection |
-| `composer mutation` | Sabotage drill — 75% minimum survival on Actions & Services |
+| `composer mutation` | Sabotage drill — 76% minimum survival on Actions & Services |
 
 ### The Pre-Commit Gauntlet
 
@@ -217,8 +227,8 @@ CaptainHook enforces on every commit (PHP files only): **lint:test → phpstan �
 ### Coverage Policy
 
 - **Unit tests (Actions, Services):** 100% — every sorting procedure, every supply line
-- **Feature tests (Controllers):** 80% — integration drills cover the main paths
-- **Mutation testing:** 75% minimum — the sabotage drill ensures tests actually catch defects, not just touch lines
+- **Feature tests (Controllers):** 90% — integration drills cover the main paths
+- **Mutation testing:** 76% minimum — the sabotage drill ensures tests actually catch defects, not just touch lines
 
 ### The Boundary Fences (Deptrac)
 
@@ -239,7 +249,7 @@ Wiring:                             Provider → Contract, Service, Policy
 
 ### Architecture Decision Ledger
 
-Nine decisions that shaped the warehouse (consolidated from sixteen — implementation details merged into their parent ADRs). Each records what was chosen, what was rejected, and what machine enforces it. Full records in `docs/adr/`.
+Ten decisions that shaped the warehouse (consolidated from sixteen — implementation details merged into their parent ADRs). Each records what was chosen, what was rejected, and what machine enforces it. Full records in `docs/adr/`.
 
 | ADR | Decision | Enforcement |
 |---|---|---|
@@ -252,6 +262,8 @@ Nine decisions that shaped the warehouse (consolidated from sixteen — implemen
 | 0007 | #[Config] attributes, not helpers/facades | ConfigArchitectureTest, GeneralArchitectureTest |
 | 0008 | Explicit routes, not apiResource | RoutingArchitectureTest |
 | 0009 | Thin controllers with method injection only | ControllerArchitectureTest |
+| 0010 | ComputedResourceData for DTO-sourced responses | ResourceDataArchitectureTest, PHPStan, Deptrac |
+| 0011 | Save-what-you-can import atomicity with honest reporting | Unit tests (three-scenario coverage), ADR-0003 try-catch constraints |
 
 Before building anything non-trivial, check the Ledger. Don't relitigate settled decisions — if the context has changed, propose a superseding ADR.
 
