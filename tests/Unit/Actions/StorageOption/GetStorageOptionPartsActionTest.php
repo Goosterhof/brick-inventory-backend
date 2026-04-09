@@ -15,6 +15,10 @@ describe('GetStorageOptionPartsAction', function (): void {
         $collection = new Collection;
 
         $relation = Mockery::mock(HasMany::class);
+        $relation->shouldReceive('orderBy')
+            ->with('id')
+            ->once()
+            ->andReturnSelf();
         $relation->shouldReceive('get')
             ->once()
             ->andReturn($collection);

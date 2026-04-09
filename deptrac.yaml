@@ -61,6 +61,12 @@ deptrac:
         - type: classLike
           value: App\\Actions\\.*
 
+    # --- Queue layer ---
+    - name: Job
+      collectors:
+        - type: classLike
+          value: App\\Jobs\\.*
+
     # --- Entry point layer ---
     - name: Controller
       collectors:
@@ -78,7 +84,8 @@ deptrac:
     Model:
       - Enum
       - Contract
-    Data: []
+    Data:
+      - Contract
     DataTransferObject:
       - Enum
     Enum: []
@@ -108,6 +115,7 @@ deptrac:
       - Enum
       - Data
       - Exception
+      - Contract
 
     # Policies check permissions using models
     Policy:
@@ -121,12 +129,19 @@ deptrac:
     # Actions orchestrate business logic across all lower layers
     Action:
       - Action
+      - Job
       - Contract
       - Model
       - Data
       - DataTransferObject
       - Enum
       - Exception
+
+    # Jobs wrap Actions for async execution
+    Job:
+      - Action
+      - Model
+      - Enum
 
     # Controllers are thin HTTP handlers delegating to actions
     Controller:

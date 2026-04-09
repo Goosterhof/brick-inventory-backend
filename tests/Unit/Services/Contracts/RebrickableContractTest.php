@@ -6,6 +6,7 @@ use App\Data\Lego\LegoSetData;
 use App\Data\Lego\LegoSetPartData;
 use App\Data\Lego\RebrickableUserSetData;
 use App\Services\RebrickableService;
+use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Http\Client\Factory as HttpFactory;
 use Illuminate\Support\Facades\Http;
 
@@ -23,6 +24,18 @@ covers(RebrickableService::class);
 const CONTRACT_API_KEY = 'test-api-key';
 const CONTRACT_BASE_URL = 'https://rebrickable.com/api/v3';
 
+function createContractRebrickableService(): RebrickableService
+{
+    return new RebrickableService(
+        resolve(HttpFactory::class),
+        resolve(CacheRepository::class),
+        CONTRACT_API_KEY,
+        CONTRACT_BASE_URL,
+        86400,
+        3600,
+    );
+}
+
 function loadFixture(string $name): array
 {
     $path = __DIR__ . '/Fixtures/' . $name;
@@ -39,7 +52,7 @@ describe('Rebrickable API Contract', function (): void {
                 'https://rebrickable.com/api/v3/lego/sets/75192-1/' => Http::response($fixture),
             ]);
 
-            $service = new RebrickableService(resolve(HttpFactory::class), CONTRACT_API_KEY, CONTRACT_BASE_URL);
+            $service = createContractRebrickableService();
             $result = $service->fetchSet('75192-1');
 
             expect($result)->toBeInstanceOf(LegoSetData::class);
@@ -60,7 +73,7 @@ describe('Rebrickable API Contract', function (): void {
                 'https://rebrickable.com/api/v3/lego/sets/*' => Http::response($fixture),
             ]);
 
-            $service = new RebrickableService(resolve(HttpFactory::class), CONTRACT_API_KEY, CONTRACT_BASE_URL);
+            $service = createContractRebrickableService();
             $result = $service->fetchSetByEan('5702016914177');
 
             expect($result)->toBeInstanceOf(LegoSetData::class);
@@ -80,7 +93,7 @@ describe('Rebrickable API Contract', function (): void {
                 'https://rebrickable.com/api/v3/lego/sets/75192-1/parts/' => Http::response($fixture),
             ]);
 
-            $service = new RebrickableService(resolve(HttpFactory::class), CONTRACT_API_KEY, CONTRACT_BASE_URL);
+            $service = createContractRebrickableService();
             $result = $service->fetchSetParts('75192-1');
 
             expect($result)->toHaveCount(2);
@@ -116,7 +129,7 @@ describe('Rebrickable API Contract', function (): void {
                 'https://rebrickable.com/api/v3/users/user-token-123/sets/' => Http::response($fixture),
             ]);
 
-            $service = new RebrickableService(resolve(HttpFactory::class), CONTRACT_API_KEY, CONTRACT_BASE_URL);
+            $service = createContractRebrickableService();
             $pages = iterator_to_array($service->fetchUserSets('user-token-123'));
 
             expect($pages)->toHaveCount(1);

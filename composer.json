@@ -12,7 +12,7 @@
         "laravel/framework": "^12.0",
         "laravel/octane": "^2.13",
         "laravel/sanctum": "^4.2",
-        "laravel/tinker": "^2.10.1"
+        "laravel/tinker": "^3.0.0"
     },
     "require-dev": {
         "captainhook/captainhook": "*",
@@ -62,7 +62,7 @@
             "@php artisan test"
         ],
         "test:arch": "./vendor/bin/pest tests/Architecture",
-        "test:coverage": "./vendor/bin/pest --coverage --configuration=phpunit.coverage.xml --min=99",
+        "test:coverage": "./vendor/bin/pest --coverage --configuration=phpunit.coverage.xml --min=100",
         "test:feature-coverage": "./vendor/bin/pest --coverage --configuration=phpunit.feature-coverage.xml --min=90",
         "lint": [
             "@rector",

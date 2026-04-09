@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use App\Http\Resources\ResourceData;
+use App\Contracts\ResourceResponseInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 
@@ -94,7 +94,7 @@ it('should have controller methods return JsonResponse or array', function (): v
     }
 });
 
-it('should not return ResourceData directly from controller methods', function (): void {
+it('should not return ResourceResponse directly from controller methods', function (): void {
     $methodsChecked = 0;
 
     foreach (getClassesInDirectory(dirname(__DIR__, 2) . '/app/Http/Controllers', 'App\\Http\\Controllers\\') as $className) {
@@ -123,11 +123,11 @@ it('should not return ResourceData directly from controller methods', function (
             $methodsChecked++;
             $typeNames = getTypeNames($returnType);
             foreach ($typeNames as $typeName) {
-                // Check if return type is a ResourceData subclass
-                if (class_exists($typeName) && is_subclass_of($typeName, ResourceData::class)) {
+                // Check if return type implements ResourceResponse (covers both ResourceData and ComputedResourceData)
+                if (class_exists($typeName) && is_subclass_of($typeName, ResourceResponseInterface::class)) {
                     expect(false)->toBeTrue(
                         sprintf(
-                            'Controller method %s::%s() should not return ResourceData directly. Use ->toResponse() instead.',
+                            'Controller method %s::%s() should not return ResourceResponse directly. Use ->toResponse() instead.',
                             $className,
                             $method->getName(),
                         ),

@@ -21,6 +21,7 @@ describe('FamilySetPolicy', function (): void {
         })->with([
             'viewAny' => ['viewAny'],
             'create' => ['create'],
+            'viewImportStatus' => ['viewImportStatus'],
         ]);
     });
 
