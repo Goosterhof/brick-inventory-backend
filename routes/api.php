@@ -43,7 +43,7 @@ Route::get('/sets/ean/{ean}', [SetController::class, 'lookupByEan'])
 
 Route::get('/sets/{setNum}/storage-map', [SetController::class, 'storageMap'])
     ->where('setNum', '\d+-\d+')
-    ->middleware(['auth:sanctum', 'throttle:rebrickable', 'etag', 'cache.headers:public;max_age=3600'])
+    ->middleware(['auth:sanctum', 'throttle:rebrickable', 'etag', 'cache.headers:private;max_age=3600'])
     ->can('viewStorageMap');
 
 Route::middleware(['auth:sanctum', 'family.ownership'])->group(function (): void {
