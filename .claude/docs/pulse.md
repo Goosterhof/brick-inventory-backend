@@ -13,10 +13,10 @@ A consolidated, current-state assessment of the backend codebase. Updated by the
 
 ## Overall Health
 
-**Rating:** 8/10
-**Assessed:** 2026-03-26
+**Rating:** 8.5/10
+**Assessed:** 2026-03-31
 
-Architecture is sound — PHPStan at max with zero errors (171 files), Deptrac with zero violations, 417 tests passing (1472 assertions), 9 coherent ADRs. All high-severity findings resolved. Two medium governance gaps from routine sweep remediated (ADR-0003 try-catch documentation, RoutingArchitectureTest route coverage). Coverage and mutation testing cannot be measured without a PHP coverage driver in the environment.
+Architecture is sound — PHPStan at max with zero errors (291 files), Deptrac with zero violations, 512 tests passing (1801 assertions), 10 coherent ADRs. All high-severity findings resolved. Recent deliveries: queue-based imports with race condition hardening, response caching (ETag + application-level), cursor pagination (partial — `/family/parts` only), test gap sweep, and job layer hardening. Coverage and mutation testing cannot be measured without a PHP coverage driver in the environment.
 
 ## Active Concerns
 
@@ -33,37 +33,45 @@ Architecture is sound — PHPStan at max with zero errors (171 files), Deptrac w
 
 ## In-Progress Work
 
-**Assessed:** 2026-03-26
+**Assessed:** 2026-03-31
 
 | Work Item | Status | Next Step |
 |---|---|---|
 | Stud & Sort Logistics setup | Complete | CLAUDE.md, agents, docs, records all in place |
 | Baseline audit | Complete | Report filed; evaluation appended; pulse updated |
-| Audit remediation | Complete | 2 high, 1 medium, 3 low findings resolved |
+| Audit remediation (round 1) | Complete | 2 high, 1 medium, 3 low findings resolved |
 | Routine sweep audit | Complete | 5 findings (0 high, 2 medium, 3 low) — all remediated |
+| Audit remediation (round 2) | Complete | ADR-0003 try-catch docs, test gaps, code quality |
+| Queue-based imports | Complete | ImportJob model, async Rebrickable imports with race condition hardening |
+| Response caching | Complete | ETag + application-level caching for read endpoints |
+| Cursor pagination | Complete (partial) | Only `/family/parts` retains cursor pagination; three other list endpoints reverted to unbounded |
+| Test gap sweep | Complete | Policy, factory, and resource test gaps closed |
+| Job layer hardening | Complete | JobArchitectureTest added; conventions documented |
+| Audit remediation (round 3) | In Progress | 2026-03-30 full sweep — 6 findings being remediated |
 
 ## Pattern Maturity
 
-**Assessed:** 2026-03-26
+**Assessed:** 2026-03-31
 
 | Pattern | Maturity | Evidence |
 |---|---|---|
 | Action layer (31 classes) | Battle-tested | Architecture tests guard it; all pass. Two approved try-catch exceptions documented in ADR-0003: partial-failure (ImportOwnedSetsAction) and UniqueConstraintViolationException upsert (5 Actions) |
 | Service layer (2 classes) | Battle-tested | Contract interfaces, Deptrac boundaries hold, no facade or model leakage |
-| ResourceData pattern (11 classes) | Battle-tested | All have `from()` factories, EAGER_LOAD where needed. One endpoint (family/parts) bypasses pattern without documentation |
+| ResourceData pattern (17 classes) | Battle-tested | All have `from()` factories, EAGER_LOAD where needed. ComputedResourceData (ADR-0010) handles DTO-sourced responses |
 | Explicit cascade deletion | Battle-tested | MigrationArchitectureTest + CascadeRelationArchitectureTest confirm compliance |
 | Thin controllers | Battle-tested | No constructors, no try-catch, method injection only. ControllerArchitectureTest confirms |
+| Job layer (1 class) | Established | JobArchitectureTest guards conventions; thin wrapper pattern documented in CLAUDE.md |
 
 ## Tech Debt
 
-**Assessed:** 2026-03-26
+**Assessed:** 2026-03-31
 
 | Item | Severity | Notes |
 |---|---|---|
 | ~~`InvalidApiResponseException` handler gap~~ | ~~High~~ | Resolved — 502 renderer registered, feature test confirms |
 | ~~ADR-0003 try-catch exception undocumented~~ | ~~High~~ | Resolved — ADR-0003 amended with approved exception |
 | ~~`FamilyPolicyTest` missing policy method tests~~ | ~~Low~~ | Resolved — all 9 policy methods now have unit tests |
-| `decisions.md` broken ADR-000 link | Low | References nonexistent `ADR-000.md` |
+| ~~`decisions.md` broken ADR-000 link~~ | ~~Low~~ | Resolved — link fixed |
 | `GetFamilyPartsAction` returns raw array (no ResourceData) | Low | Only endpoint bypassing the pattern without documentation |
 | `RegisterUserData::familyName` empty-string on invite-code path | Low | Now nullable — passes null when family_name absent |
 
@@ -79,14 +87,14 @@ Architecture is sound — PHPStan at max with zero errors (171 files), Deptrac w
 
 ## Quality Metrics
 
-**Assessed:** 2026-03-26
+**Assessed:** 2026-03-31
 
 | Metric | Value | Threshold |
 |---|---|---|
 | Unit coverage | Unable to measure (no coverage driver) | 100% |
-| Feature coverage | Unable to measure (no coverage driver) | 80% |
-| Mutation score | Unable to measure (no coverage driver) | 75% |
-| Architecture tests | 18 files, 83 passed, 0 risky, 1 warning (1007 assertions) | All passing |
-| PHPStan | Level max, 0 errors (171 files) | Level max, zero errors |
-| Deptrac | 0 violations (494 allowed, 398 uncovered) | Zero violations |
-| Full test suite | 417 tests, 1472 assertions | All passing |
+| Feature coverage | Unable to measure (no coverage driver) | 90% |
+| Mutation score | Unable to measure (no coverage driver) | 76% |
+| Architecture tests | 19 files, 88 passed, 0 risky (1186 assertions) | All passing |
+| PHPStan | Level max, 0 errors (291 files) | Level max, zero errors |
+| Deptrac | 0 violations (607 allowed, 476 uncovered) | Zero violations |
+| Full test suite | 512 tests, 1801 assertions | All passing |

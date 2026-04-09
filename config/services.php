@@ -19,6 +19,8 @@ return [
     'rebrickable' => [
         'key' => env('REBRICKABLE_API_KEY'),
         'base_url' => env('REBRICKABLE_BASE_URL', 'https://rebrickable.com/api/v3'),
+        'cache_ttl' => (int) env('REBRICKABLE_CACHE_TTL', 86400), // 24 hours for catalog data
+        'user_cache_ttl' => (int) env('REBRICKABLE_USER_CACHE_TTL', 3600), // 1 hour for user data
     ],
 
     'brickognize' => [

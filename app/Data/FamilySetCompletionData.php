@@ -4,7 +4,9 @@ declare(strict_types=1);
 
 namespace App\Data;
 
-final readonly class FamilySetCompletionData
+use App\Contracts\ResourceDataSourceInterface;
+
+final readonly class FamilySetCompletionData implements ResourceDataSourceInterface
 {
     public function __construct(
         public int $familySetId,

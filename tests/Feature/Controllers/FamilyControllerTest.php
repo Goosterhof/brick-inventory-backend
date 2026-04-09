@@ -57,7 +57,9 @@ describe('FamilyController', function (): void {
 
             $response = $this->actingAs($user)->getJson('/api/family/parts');
 
-            $response->assertStatus(200);
+            $response->assertStatus(200)
+                ->assertJsonCount(1, 'data')
+                ->assertJsonStructure(['data', 'path', 'per_page', 'next_cursor', 'next_page_url', 'prev_cursor', 'prev_page_url']);
         });
 
         it('should return 401 when unauthenticated', function (): void {
@@ -76,7 +78,47 @@ describe('FamilyController', function (): void {
             $response = $this->actingAs($user)->getJson('/api/family/parts');
 
             $response->assertStatus(200)
-                ->assertJsonCount(0);
+                ->assertJsonCount(0, 'data');
+        });
+
+        it('should use default per_page of 25', function (): void {
+            $user = User::factory()->create();
+
+            $response = $this->actingAs($user)->getJson('/api/family/parts');
+
+            $response->assertStatus(200)
+                ->assertJsonPath('per_page', 25);
+        });
+
+        it('should cap per_page at 100', function (): void {
+            $user = User::factory()->create();
+
+            $response = $this->actingAs($user)->getJson('/api/family/parts?per_page=200');
+
+            $response->assertStatus(200)
+                ->assertJsonPath('per_page', 100);
+        });
+
+        it('should paginate results with cursor navigation', function (): void {
+            $user = User::factory()->create();
+            $family = $user->family;
+
+            $storageOption = StorageOption::factory()->forFamily($family)->create();
+            StorageOptionPart::factory()->count(3)->forStorageOption($storageOption)->create();
+
+            $firstPage = $this->actingAs($user)->getJson('/api/family/parts?per_page=2');
+
+            $firstPage->assertStatus(200)
+                ->assertJsonCount(2, 'data');
+
+            $nextCursor = $firstPage->json('next_cursor');
+            expect($nextCursor)->not->toBeNull();
+
+            $secondPage = $this->actingAs($user)->getJson('/api/family/parts?per_page=2&cursor=' . $nextCursor);
+
+            $secondPage->assertStatus(200)
+                ->assertJsonCount(1, 'data');
+            expect($secondPage->json('next_cursor'))->toBeNull();
         });
     });
 

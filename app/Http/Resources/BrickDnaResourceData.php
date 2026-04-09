@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Http\Resources;
 
+use App\Contracts\ResourceDataSourceInterface;
 use App\Data\BrickDnaData;
-use Illuminate\Database\Eloquent\Model;
 
 /**
- * @extends ResourceData<Model>
+ * @extends ComputedResourceData<BrickDnaData>
  */
-final readonly class BrickDnaResourceData extends ResourceData
+final readonly class BrickDnaResourceData extends ComputedResourceData
 {
     /**
      * @param list<array{color_id: int, name: string, rgb: string, is_transparent: bool, total_quantity: int}> $top_colors
@@ -27,17 +27,17 @@ final readonly class BrickDnaResourceData extends ResourceData
     ) {}
 
     /**
-     * @param BrickDnaData $model
+     * @param BrickDnaData $resourceDataSource
      */
-    public static function from(mixed $model): static // @phpstan-ignore method.childParameterType
+    public static function from(ResourceDataSourceInterface $resourceDataSource): static
     {
         return new self(
-            top_colors: $model->topColors,
-            top_part_types: $model->topPartTypes,
-            rarest_parts: $model->rarestParts,
-            diversity_score: $model->diversityScore,
-            total_unique_parts: $model->totalUniqueParts,
-            total_parts_quantity: $model->totalPartsQuantity,
+            top_colors: $resourceDataSource->topColors,
+            top_part_types: $resourceDataSource->topPartTypes,
+            rarest_parts: $resourceDataSource->rarestParts,
+            diversity_score: $resourceDataSource->diversityScore,
+            total_unique_parts: $resourceDataSource->totalUniqueParts,
+            total_parts_quantity: $resourceDataSource->totalPartsQuantity,
         );
     }
 }

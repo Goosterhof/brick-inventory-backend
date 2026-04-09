@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace App\Models;
 
 use Carbon\Carbon;
+use Database\Factories\SetPartFactory;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -24,6 +26,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class SetPart extends Model
 {
+    /** @use HasFactory<SetPartFactory> */
+    use HasFactory;
+
     /**
      * @return BelongsTo<Set, $this>
      */

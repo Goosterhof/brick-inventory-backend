@@ -4,13 +4,13 @@ declare(strict_types=1);
 
 namespace App\Http\Resources;
 
+use App\Contracts\ResourceDataSourceInterface;
 use App\Data\FamilyStatsData;
-use Illuminate\Database\Eloquent\Model;
 
 /**
- * @extends ResourceData<Model>
+ * @extends ComputedResourceData<FamilyStatsData>
  */
-final readonly class FamilyStatsResourceData extends ResourceData
+final readonly class FamilyStatsResourceData extends ComputedResourceData
 {
     /**
      * @param array<string, int> $sets_by_status
@@ -25,17 +25,17 @@ final readonly class FamilyStatsResourceData extends ResourceData
     ) {}
 
     /**
-     * @param FamilyStatsData $model
+     * @param FamilyStatsData $resourceDataSource
      */
-    public static function from(mixed $model): static // @phpstan-ignore method.childParameterType
+    public static function from(ResourceDataSourceInterface $resourceDataSource): static
     {
         return new self(
-            total_sets: $model->totalSets,
-            total_set_quantity: $model->totalSetQuantity,
-            sets_by_status: $model->setsByStatus,
-            total_storage_locations: $model->totalStorageLocations,
-            total_unique_parts: $model->totalUniqueParts,
-            total_parts_quantity: $model->totalPartsQuantity,
+            total_sets: $resourceDataSource->totalSets,
+            total_set_quantity: $resourceDataSource->totalSetQuantity,
+            sets_by_status: $resourceDataSource->setsByStatus,
+            total_storage_locations: $resourceDataSource->totalStorageLocations,
+            total_unique_parts: $resourceDataSource->totalUniqueParts,
+            total_parts_quantity: $resourceDataSource->totalPartsQuantity,
         );
     }
 }

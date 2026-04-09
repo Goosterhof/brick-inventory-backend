@@ -66,13 +66,21 @@ class Family extends Model
     }
 
     /**
+     * @return HasMany<ImportJob, $this>
+     */
+    public function importJobs(): HasMany
+    {
+        return $this->hasMany(ImportJob::class);
+    }
+
+    /**
      * Relations that must be cascade-deleted when this model is deleted.
      *
      * @return list<string>
      */
     public static function cascadeRelations(): array
     {
-        return ['users', 'storageOptions', 'familySets', 'inviteCodes'];
+        return ['users', 'storageOptions', 'familySets', 'inviteCodes', 'importJobs'];
     }
 
     /**

@@ -16,6 +16,7 @@ use App\Http\Resources\FamilyStatsResourceData;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class FamilyController extends Controller
 {
@@ -28,8 +29,15 @@ class FamilyController extends Controller
     public function parts(
         #[CurrentUser] User $user,
         GetFamilyPartsAction $getFamilyPartsAction,
+        Request $request,
     ): JsonResponse {
-        return new JsonResponse($getFamilyPartsAction->execute($user->family));
+        return new JsonResponse(
+            $getFamilyPartsAction->execute(
+                family: $user->family,
+                perPage: $request->integer('per_page', 25),
+                cursor: $request->query('cursor'),
+            ),
+        );
     }
 
     public function stats(

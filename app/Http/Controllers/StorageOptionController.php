@@ -26,9 +26,11 @@ class StorageOptionController extends Controller
     /**
      * @return array<int, StorageOptionResourceData>
      */
-    public function index(#[CurrentUser] User $user, GetStorageOptionsAction $getStorageOptionsAction): array
-    {
-        $storageOptions = $getStorageOptionsAction->execute($user);
+    public function index(
+        #[CurrentUser] User $user,
+        GetStorageOptionsAction $getStorageOptionsAction,
+    ): array {
+        $storageOptions = $getStorageOptionsAction->execute(user: $user);
 
         return StorageOptionResourceData::collection($storageOptions);
     }
@@ -73,7 +75,7 @@ class StorageOptionController extends Controller
         StorageOption $storageOption,
         GetStorageOptionPartsAction $getStorageOptionPartsAction,
     ): array {
-        $parts = $getStorageOptionPartsAction->execute($storageOption);
+        $parts = $getStorageOptionPartsAction->execute(storageOption: $storageOption);
 
         return StorageOptionPartResourceData::collection($parts);
     }

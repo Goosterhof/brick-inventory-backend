@@ -22,6 +22,7 @@ final readonly class GetStorageOptionsAction
         return $this->storageOption->newQuery()
             ->where('family_id', $user->family_id)
             ->whereNull('parent_id')
+            ->orderBy('id')
             ->get();
     }
 }

@@ -402,4 +402,116 @@ describe('GetBrickDnaAction', function (): void {
         expect($result->diversityScore)->toBeGreaterThan(0.0)
             ->and($result->diversityScore)->toBeLessThan(1.0);
     });
+
+    it('should return diversity score of 0 when total quantity is zero across multiple colors', function (): void {
+        $family = Mockery::mock(Family::class);
+        $family->allows('getAttribute')->with('id')->andReturn(6);
+
+        $storageOptionIds = new Collection([60]);
+
+        $storageOptionBuilder = Mockery::mock(Builder::class);
+        $storageOptionBuilder->shouldReceive('where')->with('family_id', 6)->andReturnSelf();
+        $storageOptionBuilder->shouldReceive('pluck')->with('id')->andReturn($storageOptionIds);
+
+        $storageOption = Mockery::mock(StorageOption::class);
+        $storageOption->shouldReceive('newQuery')->once()->andReturn($storageOptionBuilder);
+
+        $countBuilder = Mockery::mock(Builder::class);
+        $countBuilder->shouldReceive('whereIn')->andReturnSelf();
+        $countBuilder->shouldReceive('count')->andReturn(2);
+
+        $sumBuilder = Mockery::mock(Builder::class);
+        $sumBuilder->shouldReceive('whereIn')->andReturnSelf();
+        $sumBuilder->shouldReceive('sum')->andReturn(0);
+
+        $topColorsBaseBuilder = Mockery::mock(BaseBuilder::class);
+        $topColorsBaseBuilder->shouldReceive('get')->andReturn(new Collection);
+        $topColorsBuilder = mockChainBuilder(['whereIn', 'whereNotNull', 'join', 'selectRaw', 'groupBy', 'orderByDesc', 'limit']);
+        $topColorsBuilder->shouldReceive('toBase')->andReturn($topColorsBaseBuilder);
+
+        $topPartsBaseBuilder = Mockery::mock(BaseBuilder::class);
+        $topPartsBaseBuilder->shouldReceive('get')->andReturn(new Collection);
+        $topPartsBuilder = mockChainBuilder(['whereIn', 'join', 'selectRaw', 'groupBy', 'orderByDesc', 'limit']);
+        $topPartsBuilder->shouldReceive('toBase')->andReturn($topPartsBaseBuilder);
+
+        $rarestBaseBuilder = Mockery::mock(BaseBuilder::class);
+        $rarestBaseBuilder->shouldReceive('get')->andReturn(new Collection);
+        $rarestBuilder = mockChainBuilder(['whereIn', 'join', 'leftJoin', 'selectRaw', 'orderBy', 'limit']);
+        $rarestBuilder->shouldReceive('toBase')->andReturn($rarestBaseBuilder);
+
+        // Diversity — 2 colors, both with zero quantity
+        $diversityBaseBuilder = Mockery::mock(BaseBuilder::class);
+        $diversityBaseBuilder->shouldReceive('pluck')->with('total_quantity')->andReturn(new Collection([0, 0]));
+        $diversityBuilder = mockChainBuilder(['whereIn', 'whereNotNull', 'selectRaw', 'groupBy']);
+        $diversityBuilder->shouldReceive('toBase')->andReturn($diversityBaseBuilder);
+
+        $storageOptionPart = Mockery::mock(StorageOptionPart::class);
+        $storageOptionPart->shouldReceive('newQuery')
+            ->times(6)
+            ->andReturn($countBuilder, $sumBuilder, $topColorsBuilder, $topPartsBuilder, $rarestBuilder, $diversityBuilder);
+
+        $action = new GetBrickDnaAction($storageOption, $storageOptionPart);
+        $result = $action->execute($family);
+
+        expect($result->diversityScore)->toBe(0.0);
+    });
+
+    it('should skip zero-quantity colors in diversity computation', function (): void {
+        $family = Mockery::mock(Family::class);
+        $family->allows('getAttribute')->with('id')->andReturn(7);
+
+        $storageOptionIds = new Collection([70]);
+
+        $storageOptionBuilder = Mockery::mock(Builder::class);
+        $storageOptionBuilder->shouldReceive('where')->with('family_id', 7)->andReturnSelf();
+        $storageOptionBuilder->shouldReceive('pluck')->with('id')->andReturn($storageOptionIds);
+
+        $storageOption = Mockery::mock(StorageOption::class);
+        $storageOption->shouldReceive('newQuery')->once()->andReturn($storageOptionBuilder);
+
+        $countBuilder = Mockery::mock(Builder::class);
+        $countBuilder->shouldReceive('whereIn')->andReturnSelf();
+        $countBuilder->shouldReceive('count')->andReturn(3);
+
+        $sumBuilder = Mockery::mock(Builder::class);
+        $sumBuilder->shouldReceive('whereIn')->andReturnSelf();
+        $sumBuilder->shouldReceive('sum')->andReturn(100);
+
+        $topColorsBaseBuilder = Mockery::mock(BaseBuilder::class);
+        $topColorsBaseBuilder->shouldReceive('get')->andReturn(new Collection);
+        $topColorsBuilder = mockChainBuilder(['whereIn', 'whereNotNull', 'join', 'selectRaw', 'groupBy', 'orderByDesc', 'limit']);
+        $topColorsBuilder->shouldReceive('toBase')->andReturn($topColorsBaseBuilder);
+
+        $topPartsBaseBuilder = Mockery::mock(BaseBuilder::class);
+        $topPartsBaseBuilder->shouldReceive('get')->andReturn(new Collection);
+        $topPartsBuilder = mockChainBuilder(['whereIn', 'join', 'selectRaw', 'groupBy', 'orderByDesc', 'limit']);
+        $topPartsBuilder->shouldReceive('toBase')->andReturn($topPartsBaseBuilder);
+
+        $rarestBaseBuilder = Mockery::mock(BaseBuilder::class);
+        $rarestBaseBuilder->shouldReceive('get')->andReturn(new Collection);
+        $rarestBuilder = mockChainBuilder(['whereIn', 'join', 'leftJoin', 'selectRaw', 'orderBy', 'limit']);
+        $rarestBuilder->shouldReceive('toBase')->andReturn($rarestBaseBuilder);
+
+        // Diversity — 3 colors, one with zero quantity (skipped in Shannon computation)
+        $diversityBaseBuilder = Mockery::mock(BaseBuilder::class);
+        $diversityBaseBuilder->shouldReceive('pluck')->with('total_quantity')->andReturn(new Collection([0, 50, 50]));
+        $diversityBuilder = mockChainBuilder(['whereIn', 'whereNotNull', 'selectRaw', 'groupBy']);
+        $diversityBuilder->shouldReceive('toBase')->andReturn($diversityBaseBuilder);
+
+        $storageOptionPart = Mockery::mock(StorageOptionPart::class);
+        $storageOptionPart->shouldReceive('newQuery')
+            ->times(6)
+            ->andReturn($countBuilder, $sumBuilder, $topColorsBuilder, $topPartsBuilder, $rarestBuilder, $diversityBuilder);
+
+        $action = new GetBrickDnaAction($storageOption, $storageOptionPart);
+        $result = $action->execute($family);
+
+        // With the zero-quantity color skipped, the two remaining colors are equal
+        // Shannon normalized for 2 equal proportions out of 3 distinct colors:
+        // H = -2*(0.5*ln(0.5)) = ln(2) ≈ 0.6931
+        // H_max = ln(3) ≈ 1.0986
+        // Normalized = 0.6931/1.0986 ≈ 0.6309
+        expect($result->diversityScore)->toBeGreaterThan(0.0)
+            ->and($result->diversityScore)->toBeLessThan(1.0);
+    });
 });
