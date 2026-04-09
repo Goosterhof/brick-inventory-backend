@@ -75,8 +75,16 @@ final class ImportOwnedSetsJob implements ShouldQueue
         $importJob->status = ImportJobStatus::Failed;
         $importJob->completed_at = now();
         $importJob->failed_set_details = [
-            ['set_num' => 'N/A', 'error' => $throwable?->getMessage() ?? 'Unknown error'],
+            ['set_num' => 'N/A', 'error' => 'Import failed due to an unexpected error'],
         ];
         $importJob->save();
+
+        if ($throwable instanceof Throwable) {
+            logger()->error('ImportOwnedSetsJob failed', [
+                'import_job_id' => $this->importJobId,
+                'exception' => $throwable->getMessage(),
+                'trace' => $throwable->getTraceAsString(),
+            ]);
+        }
     }
 }
