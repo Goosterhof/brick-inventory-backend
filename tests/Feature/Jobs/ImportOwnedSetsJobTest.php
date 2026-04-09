@@ -9,6 +9,7 @@ use App\Jobs\ImportOwnedSetsJob;
 use App\Models\Family;
 use App\Models\ImportJob;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Log;
 
 covers(ImportOwnedSetsJob::class);
 
@@ -120,7 +121,7 @@ describe('ImportOwnedSetsJob', function (): void {
         expect($importJob->failed_set_details[0]['error'])->toContain('Import incomplete');
     });
 
-    it('should mark import as failed when job fails with exception', function (): void {
+    it('should mark import as failed with generic message when job fails with exception', function (): void {
         // arrange
         $family = Family::factory()->create();
 
@@ -129,8 +130,14 @@ describe('ImportOwnedSetsJob', function (): void {
 
         $job = new ImportOwnedSetsJob(importJobId: $importJob->id, familyId: $family->id);
 
+        Log::shouldReceive('error')
+            ->once()
+            ->withArgs(fn (string $message, array $context): bool => $message === 'ImportOwnedSetsJob failed'
+                && $context['exception'] === 'Connection timeout: pgsql://user:pass@host/db'
+                && array_key_exists('trace', $context));
+
         // act
-        $job->failed(new RuntimeException('Connection timeout'));
+        $job->failed(new RuntimeException('Connection timeout: pgsql://user:pass@host/db'));
 
         // assert
         $importJob->refresh();
@@ -138,7 +145,30 @@ describe('ImportOwnedSetsJob', function (): void {
         expect($importJob->completed_at)->not->toBeNull();
         assert($importJob->failed_set_details !== null);
         expect($importJob->failed_set_details)->toHaveCount(1);
-        expect($importJob->failed_set_details[0]['error'])->toBe('Connection timeout');
+        expect($importJob->failed_set_details[0]['error'])->toBe('Import failed due to an unexpected error');
+    });
+
+    it('should not log when job fails with null throwable', function (): void {
+        // arrange
+        $family = Family::factory()->create();
+
+        /** @var ImportJob $importJob */
+        $importJob = ImportJob::factory()->forFamily($family)->create();
+
+        $job = new ImportOwnedSetsJob(importJobId: $importJob->id, familyId: $family->id);
+
+        Log::shouldReceive('error')->never();
+
+        // act
+        $job->failed(null);
+
+        // assert
+        $importJob->refresh();
+        expect($importJob->status)->toBe(ImportJobStatus::Failed);
+        expect($importJob->completed_at)->not->toBeNull();
+        assert($importJob->failed_set_details !== null);
+        expect($importJob->failed_set_details)->toHaveCount(1);
+        expect($importJob->failed_set_details[0]['error'])->toBe('Import failed due to an unexpected error');
     });
 
     it('should handle failed() gracefully when import job does not exist', function (): void {
