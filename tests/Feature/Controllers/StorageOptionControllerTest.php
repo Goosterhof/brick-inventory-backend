@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 use App\Http\Controllers\StorageOptionController;
 use App\Models\Part;
@@ -13,9 +13,9 @@ covers(StorageOptionController::class);
 
 uses(RefreshDatabase::class);
 
-describe('StorageOptionController', function (): void {
-    describe('index', function (): void {
-        it('should return storage options for the authenticated user family', function (): void {
+describe('StorageOptionController', function(): void {
+    describe('index', function(): void {
+        it('should return storage options for the authenticated user family', function(): void {
             $user = User::factory()->create();
             $storageOption = StorageOption::factory()->create([
                 'family_id' => $user->family_id,
@@ -29,7 +29,7 @@ describe('StorageOptionController', function (): void {
                 ->assertJsonPath('0.name', 'Cabinet 1');
         });
 
-        it('should not return storage options from other families', function (): void {
+        it('should not return storage options from other families', function(): void {
             $user = User::factory()->create();
             StorageOption::factory()->create(['name' => 'Other Family Cabinet']);
 
@@ -39,13 +39,13 @@ describe('StorageOptionController', function (): void {
                 ->assertJsonCount(0);
         });
 
-        it('should return 401 when unauthenticated', function (): void {
+        it('should return 401 when unauthenticated', function(): void {
             $response = $this->getJson('/api/storage-options');
 
             $response->assertStatus(401);
         });
 
-        it('should return child_ids for nested children', function (): void {
+        it('should return child_ids for nested children', function(): void {
             $user = User::factory()->create();
             $cabinet = StorageOption::factory()->create([
                 'family_id' => $user->family_id,
@@ -65,8 +65,8 @@ describe('StorageOptionController', function (): void {
         });
     });
 
-    describe('store', function (): void {
-        it('should create a storage option', function (): void {
+    describe('store', function(): void {
+        it('should create a storage option', function(): void {
             $user = User::factory()->create();
 
             $response = $this->actingAs($user)->postJson('/api/storage-options', [
@@ -84,7 +84,7 @@ describe('StorageOptionController', function (): void {
             ]);
         });
 
-        it('should create a storage option with parent', function (): void {
+        it('should create a storage option with parent', function(): void {
             $user = User::factory()->create();
             $cabinet = StorageOption::factory()->create([
                 'family_id' => $user->family_id,
@@ -103,7 +103,7 @@ describe('StorageOptionController', function (): void {
                 ->assertJsonPath('column', 1);
         });
 
-        it('should return 401 when unauthenticated', function (): void {
+        it('should return 401 when unauthenticated', function(): void {
             $response = $this->postJson('/api/storage-options', [
                 'name' => 'New Cabinet',
             ]);
@@ -111,7 +111,7 @@ describe('StorageOptionController', function (): void {
             $response->assertStatus(401);
         });
 
-        it('should require name', function (): void {
+        it('should require name', function(): void {
             $user = User::factory()->create();
 
             $response = $this->actingAs($user)->postJson('/api/storage-options', []);
@@ -120,7 +120,7 @@ describe('StorageOptionController', function (): void {
                 ->assertJsonValidationErrors(['name']);
         });
 
-        it('should return 422 when parent_id belongs to another family', function (): void {
+        it('should return 422 when parent_id belongs to another family', function(): void {
             $user = User::factory()->create();
             $otherFamilyOption = StorageOption::factory()->create();
 
@@ -134,8 +134,8 @@ describe('StorageOptionController', function (): void {
         });
     });
 
-    describe('show', function (): void {
-        it('should return a storage option', function (): void {
+    describe('show', function(): void {
+        it('should return a storage option', function(): void {
             $user = User::factory()->create();
             $storageOption = StorageOption::factory()->create([
                 'family_id' => $user->family_id,
@@ -148,7 +148,7 @@ describe('StorageOptionController', function (): void {
                 ->assertJsonPath('name', 'Cabinet 1');
         });
 
-        it('should return 404 for storage option from another family', function (): void {
+        it('should return 404 for storage option from another family', function(): void {
             $user = User::factory()->create();
             $storageOption = StorageOption::factory()->create(['name' => 'Other Family Cabinet']);
 
@@ -157,7 +157,7 @@ describe('StorageOptionController', function (): void {
             $response->assertStatus(404);
         });
 
-        it('should return 401 when unauthenticated', function (): void {
+        it('should return 401 when unauthenticated', function(): void {
             $storageOption = StorageOption::factory()->create();
 
             $response = $this->getJson('/api/storage-options/' . $storageOption->id);
@@ -166,8 +166,8 @@ describe('StorageOptionController', function (): void {
         });
     });
 
-    describe('update', function (): void {
-        it('should update a storage option', function (): void {
+    describe('update', function(): void {
+        it('should update a storage option', function(): void {
             $user = User::factory()->create();
             $storageOption = StorageOption::factory()->create([
                 'family_id' => $user->family_id,
@@ -190,7 +190,7 @@ describe('StorageOptionController', function (): void {
             ]);
         });
 
-        it('should return 404 for storage option from another family', function (): void {
+        it('should return 404 for storage option from another family', function(): void {
             $user = User::factory()->create();
             $storageOption = StorageOption::factory()->create(['name' => 'Other Family Cabinet']);
 
@@ -201,7 +201,7 @@ describe('StorageOptionController', function (): void {
             $response->assertStatus(404);
         });
 
-        it('should return 401 when unauthenticated', function (): void {
+        it('should return 401 when unauthenticated', function(): void {
             $storageOption = StorageOption::factory()->create();
 
             $response = $this->putJson('/api/storage-options/' . $storageOption->id, [
@@ -212,8 +212,8 @@ describe('StorageOptionController', function (): void {
         });
     });
 
-    describe('destroy', function (): void {
-        it('should delete a storage option', function (): void {
+    describe('destroy', function(): void {
+        it('should delete a storage option', function(): void {
             $user = User::factory()->create();
             $storageOption = StorageOption::factory()->create([
                 'family_id' => $user->family_id,
@@ -225,7 +225,7 @@ describe('StorageOptionController', function (): void {
             $this->assertDatabaseMissing('storage_options', ['id' => $storageOption->id]);
         });
 
-        it('should return 404 for storage option from another family', function (): void {
+        it('should return 404 for storage option from another family', function(): void {
             $user = User::factory()->create();
             $storageOption = StorageOption::factory()->create();
 
@@ -235,7 +235,7 @@ describe('StorageOptionController', function (): void {
             $this->assertDatabaseHas('storage_options', ['id' => $storageOption->id]);
         });
 
-        it('should return 401 when unauthenticated', function (): void {
+        it('should return 401 when unauthenticated', function(): void {
             $storageOption = StorageOption::factory()->create();
 
             $response = $this->deleteJson('/api/storage-options/' . $storageOption->id);
@@ -243,7 +243,7 @@ describe('StorageOptionController', function (): void {
             $response->assertStatus(401);
         });
 
-        it('should cascade delete children', function (): void {
+        it('should cascade delete children', function(): void {
             $user = User::factory()->create();
             $cabinet = StorageOption::factory()->create([
                 'family_id' => $user->family_id,
@@ -261,8 +261,8 @@ describe('StorageOptionController', function (): void {
         });
     });
 
-    describe('parts', function (): void {
-        it('should return parts assigned to storage option', function (): void {
+    describe('parts', function(): void {
+        it('should return parts assigned to storage option', function(): void {
             $user = User::factory()->create();
             $storageOption = StorageOption::factory()->create([
                 'family_id' => $user->family_id,
@@ -274,40 +274,40 @@ describe('StorageOptionController', function (): void {
                 'quantity' => 50,
             ]);
 
-            $response = $this->actingAs($user)->getJson(sprintf('/api/storage-options/%s/parts', $storageOption->id));
+            $response = $this->actingAs($user)->getJson(\sprintf('/api/storage-options/%s/parts', $storageOption->id));
 
             $response->assertStatus(200)
                 ->assertJsonCount(1)
                 ->assertJsonPath('0.quantity', 50);
         });
 
-        it('should return 404 for storage option from another family', function (): void {
+        it('should return 404 for storage option from another family', function(): void {
             $user = User::factory()->create();
             $storageOption = StorageOption::factory()->create();
 
-            $response = $this->actingAs($user)->getJson(sprintf('/api/storage-options/%s/parts', $storageOption->id));
+            $response = $this->actingAs($user)->getJson(\sprintf('/api/storage-options/%s/parts', $storageOption->id));
 
             $response->assertStatus(404);
         });
 
-        it('should return 401 when unauthenticated', function (): void {
+        it('should return 401 when unauthenticated', function(): void {
             $storageOption = StorageOption::factory()->create();
 
-            $response = $this->getJson(sprintf('/api/storage-options/%s/parts', $storageOption->id));
+            $response = $this->getJson(\sprintf('/api/storage-options/%s/parts', $storageOption->id));
 
             $response->assertStatus(401);
         });
     });
 
-    describe('assignPart', function (): void {
-        it('should assign a part to a storage option', function (): void {
+    describe('assignPart', function(): void {
+        it('should assign a part to a storage option', function(): void {
             $user = User::factory()->create();
             $storageOption = StorageOption::factory()->create([
                 'family_id' => $user->family_id,
             ]);
             $part = Part::factory()->create();
 
-            $response = $this->actingAs($user)->postJson(sprintf('/api/storage-options/%s/parts', $storageOption->id), [
+            $response = $this->actingAs($user)->postJson(\sprintf('/api/storage-options/%s/parts', $storageOption->id), [
                 'part_id' => $part->id,
                 'quantity' => 100,
             ]);
@@ -322,7 +322,7 @@ describe('StorageOptionController', function (): void {
             ]);
         });
 
-        it('should update quantity if part already assigned', function (): void {
+        it('should update quantity if part already assigned', function(): void {
             $user = User::factory()->create();
             $storageOption = StorageOption::factory()->create([
                 'family_id' => $user->family_id,
@@ -334,7 +334,7 @@ describe('StorageOptionController', function (): void {
                 'quantity' => 50,
             ]);
 
-            $response = $this->actingAs($user)->postJson(sprintf('/api/storage-options/%s/parts', $storageOption->id), [
+            $response = $this->actingAs($user)->postJson(\sprintf('/api/storage-options/%s/parts', $storageOption->id), [
                 'part_id' => $part->id,
                 'quantity' => 150,
             ]);
@@ -347,12 +347,12 @@ describe('StorageOptionController', function (): void {
                 ->count())->toBe(1);
         });
 
-        it('should return 404 for storage option from another family', function (): void {
+        it('should return 404 for storage option from another family', function(): void {
             $user = User::factory()->create();
             $storageOption = StorageOption::factory()->create();
             $part = Part::factory()->create();
 
-            $response = $this->actingAs($user)->postJson(sprintf('/api/storage-options/%s/parts', $storageOption->id), [
+            $response = $this->actingAs($user)->postJson(\sprintf('/api/storage-options/%s/parts', $storageOption->id), [
                 'part_id' => $part->id,
                 'quantity' => 100,
             ]);
@@ -360,11 +360,11 @@ describe('StorageOptionController', function (): void {
             $response->assertStatus(404);
         });
 
-        it('should return 401 when unauthenticated', function (): void {
+        it('should return 401 when unauthenticated', function(): void {
             $storageOption = StorageOption::factory()->create();
             $part = Part::factory()->create();
 
-            $response = $this->postJson(sprintf('/api/storage-options/%s/parts', $storageOption->id), [
+            $response = $this->postJson(\sprintf('/api/storage-options/%s/parts', $storageOption->id), [
                 'part_id' => $part->id,
                 'quantity' => 100,
             ]);
@@ -372,21 +372,21 @@ describe('StorageOptionController', function (): void {
             $response->assertStatus(401);
         });
 
-        it('should require part_id and quantity', function (): void {
+        it('should require part_id and quantity', function(): void {
             $user = User::factory()->create();
             $storageOption = StorageOption::factory()->create([
                 'family_id' => $user->family_id,
             ]);
 
-            $response = $this->actingAs($user)->postJson(sprintf('/api/storage-options/%s/parts', $storageOption->id), []);
+            $response = $this->actingAs($user)->postJson(\sprintf('/api/storage-options/%s/parts', $storageOption->id), []);
 
             $response->assertStatus(422)
                 ->assertJsonValidationErrors(['part_id', 'quantity']);
         });
     });
 
-    describe('removePart', function (): void {
-        it('should remove a part from a storage option', function (): void {
+    describe('removePart', function(): void {
+        it('should remove a part from a storage option', function(): void {
             $user = User::factory()->create();
             $storageOption = StorageOption::factory()->create([
                 'family_id' => $user->family_id,
@@ -397,13 +397,13 @@ describe('StorageOptionController', function (): void {
                 'part_id' => $part->id,
             ]);
 
-            $response = $this->actingAs($user)->deleteJson(sprintf('/api/storage-options/%s/parts/%s', $storageOption->id, $storageOptionPart->id));
+            $response = $this->actingAs($user)->deleteJson(\sprintf('/api/storage-options/%s/parts/%s', $storageOption->id, $storageOptionPart->id));
 
             $response->assertStatus(204);
             $this->assertDatabaseMissing('storage_option_parts', ['id' => $storageOptionPart->id]);
         });
 
-        it('should return 404 for storage option from another family', function (): void {
+        it('should return 404 for storage option from another family', function(): void {
             $user = User::factory()->create();
             $storageOption = StorageOption::factory()->create();
             $part = Part::factory()->create();
@@ -412,12 +412,12 @@ describe('StorageOptionController', function (): void {
                 'part_id' => $part->id,
             ]);
 
-            $response = $this->actingAs($user)->deleteJson(sprintf('/api/storage-options/%s/parts/%s', $storageOption->id, $storageOptionPart->id));
+            $response = $this->actingAs($user)->deleteJson(\sprintf('/api/storage-options/%s/parts/%s', $storageOption->id, $storageOptionPart->id));
 
             $response->assertStatus(404);
         });
 
-        it('should return 401 when unauthenticated', function (): void {
+        it('should return 401 when unauthenticated', function(): void {
             $storageOption = StorageOption::factory()->create();
             $part = Part::factory()->create();
             $storageOptionPart = StorageOptionPart::factory()->create([
@@ -425,7 +425,7 @@ describe('StorageOptionController', function (): void {
                 'part_id' => $part->id,
             ]);
 
-            $response = $this->deleteJson(sprintf('/api/storage-options/%s/parts/%s', $storageOption->id, $storageOptionPart->id));
+            $response = $this->deleteJson(\sprintf('/api/storage-options/%s/parts/%s', $storageOption->id, $storageOptionPart->id));
 
             $response->assertStatus(401);
         });

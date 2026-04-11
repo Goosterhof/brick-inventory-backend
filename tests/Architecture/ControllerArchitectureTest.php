@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 use App\Contracts\ResourceResponseInterface;
 use Illuminate\Database\Eloquent\Builder;
@@ -19,20 +19,20 @@ use Illuminate\Http\JsonResponse;
 | - Do NOT return ResourceData directly (use ->toResponse() instead)
 | - Do NOT have constructors — use method injection for all dependencies
 |
-*/
+ */
 
 /**
  * Extract all type names from a reflection type (handles named, union, and intersection types).
  *
  * @return list<string>
  */
-function getTypeNames(ReflectionType $reflectionType): array
+function getTypeNames(\ReflectionType $reflectionType): array
 {
-    if ($reflectionType instanceof ReflectionNamedType) {
+    if ($reflectionType instanceof \ReflectionNamedType) {
         return [$reflectionType->getName()];
     }
 
-    if ($reflectionType instanceof ReflectionUnionType || $reflectionType instanceof ReflectionIntersectionType) {
+    if ($reflectionType instanceof \ReflectionUnionType || $reflectionType instanceof \ReflectionIntersectionType) {
         $names = [];
         foreach ($reflectionType->getTypes() as $subType) {
             $names = array_merge($names, getTypeNames($subType));
@@ -52,18 +52,18 @@ arch('controllers should not use Eloquent Builder directly')
     ->expect('App\Http\Controllers')
     ->not->toUse(Builder::class);
 
-it('should have controller methods return JsonResponse or array', function (): void {
+it('should have controller methods return JsonResponse or array', function(): void {
     $allowedReturnTypes = [JsonResponse::class, 'array'];
 
-    foreach (getClassesInDirectory(dirname(__DIR__, 2) . '/app/Http/Controllers', 'App\\Http\\Controllers\\') as $className) {
-        $reflection = new ReflectionClass($className);
+    foreach (getClassesInDirectory(\dirname(__DIR__, 2) . '/app/Http/Controllers', 'App\Http\Controllers\\') as $className) {
+        $reflection = new \ReflectionClass($className);
 
         // Skip abstract base Controller class
         if ($reflection->isAbstract()) {
             continue;
         }
 
-        foreach ($reflection->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
+        foreach ($reflection->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {
             // Skip inherited methods and constructor
             if ($method->getDeclaringClass()->getName() !== $className) {
                 continue;
@@ -76,13 +76,13 @@ it('should have controller methods return JsonResponse or array', function (): v
             $returnType = $method->getReturnType();
 
             expect($returnType)->not->toBeNull(
-                sprintf('Controller method %s::%s() should have a return type', $className, $method->getName()),
+                \sprintf('Controller method %s::%s() should have a return type', $className, $method->getName()),
             );
 
             $typeNames = getTypeNames($returnType);
             foreach ($typeNames as $typeName) {
-                expect(in_array($typeName, $allowedReturnTypes, true))->toBeTrue(
-                    sprintf(
+                expect(\in_array($typeName, $allowedReturnTypes, true))->toBeTrue(
+                    \sprintf(
                         'Controller method %s::%s() should return JsonResponse or array, got %s',
                         $className,
                         $method->getName(),
@@ -94,18 +94,18 @@ it('should have controller methods return JsonResponse or array', function (): v
     }
 });
 
-it('should not return ResourceResponse directly from controller methods', function (): void {
+it('should not return ResourceResponse directly from controller methods', function(): void {
     $methodsChecked = 0;
 
-    foreach (getClassesInDirectory(dirname(__DIR__, 2) . '/app/Http/Controllers', 'App\\Http\\Controllers\\') as $className) {
-        $reflection = new ReflectionClass($className);
+    foreach (getClassesInDirectory(\dirname(__DIR__, 2) . '/app/Http/Controllers', 'App\Http\Controllers\\') as $className) {
+        $reflection = new \ReflectionClass($className);
 
         // Skip abstract base Controller class
         if ($reflection->isAbstract()) {
             continue;
         }
 
-        foreach ($reflection->getMethods(ReflectionMethod::IS_PUBLIC) as $method) {
+        foreach ($reflection->getMethods(\ReflectionMethod::IS_PUBLIC) as $method) {
             // Skip inherited methods and constructor
             if ($method->getDeclaringClass()->getName() !== $className) {
                 continue;
@@ -126,7 +126,7 @@ it('should not return ResourceResponse directly from controller methods', functi
                 // Check if return type implements ResourceResponse (covers both ResourceData and ComputedResourceData)
                 if (class_exists($typeName) && is_subclass_of($typeName, ResourceResponseInterface::class)) {
                     expect(false)->toBeTrue(
-                        sprintf(
+                        \sprintf(
                             'Controller method %s::%s() should not return ResourceResponse directly. Use ->toResponse() instead.',
                             $className,
                             $method->getName(),
@@ -140,11 +140,11 @@ it('should not return ResourceResponse directly from controller methods', functi
     expect($methodsChecked)->toBeGreaterThan(0);
 });
 
-it('should not have constructors in controllers', function (): void {
+it('should not have constructors in controllers', function(): void {
     $controllersChecked = 0;
 
-    foreach (getClassesInDirectory(dirname(__DIR__, 2) . '/app/Http/Controllers', 'App\\Http\\Controllers\\') as $className) {
-        $reflection = new ReflectionClass($className);
+    foreach (getClassesInDirectory(\dirname(__DIR__, 2) . '/app/Http/Controllers', 'App\Http\Controllers\\') as $className) {
+        $reflection = new \ReflectionClass($className);
 
         if ($reflection->isAbstract()) {
             continue;
@@ -157,7 +157,7 @@ it('should not have constructors in controllers', function (): void {
         if ($constructor !== null) {
             expect($constructor->getDeclaringClass()->getName())->not->toBe(
                 $className,
-                sprintf(
+                \sprintf(
                     'Controller %s should not have a constructor. Use method injection instead.',
                     $className,
                 ),
@@ -168,12 +168,12 @@ it('should not have constructors in controllers', function (): void {
     expect($controllersChecked)->toBeGreaterThan(0);
 });
 
-it('should not use try-catch blocks in controllers', function (): void {
-    $controllersDir = dirname(__DIR__, 2) . '/app/Http/Controllers';
+it('should not use try-catch blocks in controllers', function(): void {
+    $controllersDir = \dirname(__DIR__, 2) . '/app/Http/Controllers';
     $filesChecked = 0;
 
-    $iterator = new RecursiveIteratorIterator(
-        new RecursiveDirectoryIterator($controllersDir, RecursiveDirectoryIterator::SKIP_DOTS),
+    $iterator = new \RecursiveIteratorIterator(
+        new \RecursiveDirectoryIterator($controllersDir, \RecursiveDirectoryIterator::SKIP_DOTS),
     );
 
     foreach ($iterator as $file) {
@@ -198,9 +198,9 @@ it('should not use try-catch blocks in controllers', function (): void {
         $relativePath = str_replace($controllersDir . '/', '', $file->getPathname());
 
         foreach ($tokens as $token) {
-            if (is_array($token) && $token[0] === T_TRY) {
+            if (\is_array($token) && $token[0] === \T_TRY) {
                 expect(false)->toBeTrue(
-                    sprintf(
+                    \sprintf(
                         'Controller %s should not use try-catch blocks. Exception handling is done globally in bootstrap/app.php.',
                         $relativePath,
                     ),

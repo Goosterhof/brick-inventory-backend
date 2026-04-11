@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 use DG\BypassFinals;
 use Tests\TestCase;
@@ -14,7 +14,7 @@ use Tests\TestCase;
 | Only Actions need bypassing since they're the only final classes mocked
 | as dependencies. Services are mocked via interfaces instead.
 |
-*/
+ */
 
 BypassFinals::setWhitelist(['*/app/Actions/*']);
 BypassFinals::enable();
@@ -28,7 +28,7 @@ BypassFinals::enable();
 | case class. By default, that class is "PHPUnit\Framework\TestCase". Of course, you may
 | need to change it using the "pest()" function to bind a different classes or traits.
 |
-*/
+ */
 
 pest()->extend(TestCase::class)
  // ->use(Illuminate\Foundation\Testing\RefreshDatabase::class)
@@ -43,7 +43,7 @@ pest()->extend(TestCase::class)
 | "expect()" function gives you access to a set of "expectations" methods that you can use
 | to assert different things. Of course, you may extend the Expectation API at any time.
 |
-*/
+ */
 
 /*
 |--------------------------------------------------------------------------
@@ -61,7 +61,7 @@ pest()->extend(TestCase::class)
 |
 | For complex conditions, use custom reflection-based tests instead.
 |
-*/
+ */
 
 /**
  * Get all class names in a directory matching a namespace.
@@ -75,8 +75,8 @@ function getClassesInDirectory(string $directory, string $namespace): array
     }
 
     $classes = [];
-    $iterator = new RecursiveIteratorIterator(
-        new RecursiveDirectoryIterator($directory, RecursiveDirectoryIterator::SKIP_DOTS),
+    $iterator = new \RecursiveIteratorIterator(
+        new \RecursiveDirectoryIterator($directory, \RecursiveDirectoryIterator::SKIP_DOTS),
     );
 
     foreach ($iterator as $file) {
@@ -96,7 +96,7 @@ function getClassesInDirectory(string $directory, string $namespace): array
  */
 function getTestFiles(): array
 {
-    $testsDir = dirname(__DIR__) . '/tests';
+    $testsDir = \dirname(__DIR__) . '/tests';
     $testFiles = [];
 
     foreach (['Feature', 'Unit'] as $dir) {
@@ -105,8 +105,8 @@ function getTestFiles(): array
             continue;
         }
 
-        $iterator = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($path, RecursiveDirectoryIterator::SKIP_DOTS),
+        $iterator = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($path, \RecursiveDirectoryIterator::SKIP_DOTS),
         );
 
         foreach ($iterator as $file) {
@@ -126,7 +126,7 @@ function getTestFiles(): array
  */
 function getMigrationFiles(): array
 {
-    $migrationsDir = dirname(__DIR__) . '/database/migrations';
+    $migrationsDir = \dirname(__DIR__) . '/database/migrations';
 
     return glob($migrationsDir . '/*.php') ?: [];
 }

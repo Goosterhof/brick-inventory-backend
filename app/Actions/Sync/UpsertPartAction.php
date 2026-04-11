@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Actions\Sync;
 
@@ -19,7 +19,7 @@ final readonly class UpsertPartAction
     public function execute(LegoPartData $legoPartData): Part
     {
         try {
-            return $this->connection->transaction(function () use ($legoPartData): Part {
+            return $this->connection->transaction(function() use ($legoPartData): Part {
                 $part = $this->part->newQuery()->where('part_num', $legoPartData->partNum)->first();
 
                 if (!$part instanceof Part) {
@@ -36,7 +36,7 @@ final readonly class UpsertPartAction
                 return $part;
             });
         } catch (UniqueConstraintViolationException) {
-            return $this->connection->transaction(function () use ($legoPartData): Part {
+            return $this->connection->transaction(function() use ($legoPartData): Part {
                 /** @var Part */
                 $part = $this->part->newQuery()->where('part_num', $legoPartData->partNum)->firstOrFail();
 

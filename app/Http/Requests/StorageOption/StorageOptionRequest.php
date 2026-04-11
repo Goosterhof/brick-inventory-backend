@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Http\Requests\StorageOption;
 
@@ -30,7 +30,7 @@ final class StorageOptionRequest extends FormRequest
         return [
             self::NAME => ['required', 'string', 'max:255'],
             self::DESCRIPTION => ['nullable', 'string', 'max:65535'],
-            self::PARENT_ID => ['nullable', 'integer', 'exists:storage_options,id', function (string $attribute, mixed $value, Closure $fail): void {
+            self::PARENT_ID => ['nullable', 'integer', 'exists:storage_options,id', function(string $attribute, mixed $value, Closure $fail): void {
                 /** @var User $user */
                 $user = $this->user();
                 /** @var StorageOption|null $parentOption */

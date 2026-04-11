@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 use App\Data\Lego\LegoSetData;
 use App\Data\Lego\LegoSetPartData;
@@ -17,8 +17,8 @@ covers(RebrickableService::class);
 
 const TEST_API_KEY = 'test-api-key';
 const TEST_BASE_URL = 'https://rebrickable.com/api/v3';
-const TEST_CACHE_TTL = 86400;
-const TEST_USER_CACHE_TTL = 3600;
+const TEST_CACHE_TTL = 86_400;
+const TEST_USER_CACHE_TTL = 3_600;
 
 function createRebrickableService(?CacheRepository $cacheRepository = null): RebrickableService
 {
@@ -32,17 +32,17 @@ function createRebrickableService(?CacheRepository $cacheRepository = null): Reb
     );
 }
 
-describe('RebrickableService', function (): void {
-    describe('fetchSet', function (): void {
-        it('should return set data from API', function (): void {
+describe('RebrickableService', function(): void {
+    describe('fetchSet', function(): void {
+        it('should return set data from API', function(): void {
             // arrange
             Http::fake([
                 'https://rebrickable.com/api/v3/lego/sets/75192-1/' => Http::response([
                     'set_num' => '75192-1',
                     'name' => 'Millennium Falcon',
-                    'year' => 2017,
+                    'year' => 2_017,
                     'theme_id' => 158,
-                    'num_parts' => 7541,
+                    'num_parts' => 7_541,
                     'set_img_url' => 'https://example.com/75192.jpg',
                 ]),
             ]);
@@ -56,17 +56,17 @@ describe('RebrickableService', function (): void {
             expect($result)->toBeInstanceOf(LegoSetData::class);
             expect($result->setNum)->toBe('75192-1');
             expect($result->name)->toBe('Millennium Falcon');
-            expect($result->year)->toBe(2017);
+            expect($result->year)->toBe(2_017);
             expect($result->themeId)->toBe(158);
-            expect($result->numParts)->toBe(7541);
+            expect($result->numParts)->toBe(7_541);
             expect($result->imageUrl)->toBe('https://example.com/75192.jpg');
 
-            Http::assertSent(fn ($request): bool => $request->url() === 'https://rebrickable.com/api/v3/lego/sets/75192-1/'
+            Http::assertSent(fn($request): bool => $request->url() === 'https://rebrickable.com/api/v3/lego/sets/75192-1/'
                 && $request->method() === 'GET'
                 && $request->header('Authorization') === ['key ' . TEST_API_KEY]);
         });
 
-        it('should throw SetNotFoundException when set is not found', function (): void {
+        it('should throw SetNotFoundException when set is not found', function(): void {
             // arrange
             Http::fake([
                 'https://rebrickable.com/api/v3/lego/sets/invalid/' => Http::response([], 404),
@@ -75,10 +75,10 @@ describe('RebrickableService', function (): void {
             $service = createRebrickableService();
 
             // act & assert
-            expect(fn (): LegoSetData => $service->fetchSet('invalid'))->toThrow(SetNotFoundException::class);
+            expect(fn(): LegoSetData => $service->fetchSet('invalid'))->toThrow(SetNotFoundException::class);
         });
 
-        it('should throw RebrickableApiException on server error', function (): void {
+        it('should throw RebrickableApiException on server error', function(): void {
             // arrange
             Http::fake([
                 'https://rebrickable.com/api/v3/lego/sets/75192-1/' => Http::response([], 500),
@@ -87,16 +87,16 @@ describe('RebrickableService', function (): void {
             $service = createRebrickableService();
 
             // act & assert
-            expect(fn (): LegoSetData => $service->fetchSet('75192-1'))->toThrow(RebrickableApiException::class);
+            expect(fn(): LegoSetData => $service->fetchSet('75192-1'))->toThrow(RebrickableApiException::class);
         });
 
-        it('should handle null theme_id and set_img_url', function (): void {
+        it('should handle null theme_id and set_img_url', function(): void {
             // arrange
             Http::fake([
                 'https://rebrickable.com/api/v3/lego/sets/10281-1/' => Http::response([
                     'set_num' => '10281-1',
                     'name' => 'Bonsai Tree',
-                    'year' => 2021,
+                    'year' => 2_021,
                     'theme_id' => null,
                     'num_parts' => 878,
                     'set_img_url' => null,
@@ -113,7 +113,7 @@ describe('RebrickableService', function (): void {
             expect($result->imageUrl)->toBeNull();
         });
 
-        it('should throw InvalidApiResponseException when response is missing required fields', function (): void {
+        it('should throw InvalidApiResponseException when response is missing required fields', function(): void {
             // arrange
             Http::fake([
                 'https://rebrickable.com/api/v3/lego/sets/75192-1/' => Http::response([
@@ -125,16 +125,16 @@ describe('RebrickableService', function (): void {
             $service = createRebrickableService();
 
             // act & assert
-            expect(fn (): LegoSetData => $service->fetchSet('75192-1'))->toThrow(InvalidApiResponseException::class);
+            expect(fn(): LegoSetData => $service->fetchSet('75192-1'))->toThrow(InvalidApiResponseException::class);
         });
 
-        it('should handle missing theme_id key in response', function (): void {
+        it('should handle missing theme_id key in response', function(): void {
             // arrange
             Http::fake([
                 'https://rebrickable.com/api/v3/lego/sets/10281-1/' => Http::response([
                     'set_num' => '10281-1',
                     'name' => 'Bonsai Tree',
-                    'year' => 2021,
+                    'year' => 2_021,
                     'num_parts' => 878,
                     'set_img_url' => 'https://example.com/10281.jpg',
                     // theme_id key is completely missing
@@ -151,13 +151,13 @@ describe('RebrickableService', function (): void {
             expect($result->imageUrl)->toBe('https://example.com/10281.jpg');
         });
 
-        it('should handle missing set_img_url key in response', function (): void {
+        it('should handle missing set_img_url key in response', function(): void {
             // arrange
             Http::fake([
                 'https://rebrickable.com/api/v3/lego/sets/10281-1/' => Http::response([
                     'set_num' => '10281-1',
                     'name' => 'Bonsai Tree',
-                    'year' => 2021,
+                    'year' => 2_021,
                     'theme_id' => 158,
                     'num_parts' => 878,
                     // set_img_url key is completely missing
@@ -174,7 +174,7 @@ describe('RebrickableService', function (): void {
             expect($result->imageUrl)->toBeNull();
         });
 
-        it('should throw InvalidApiResponseException when response is not an array', function (): void {
+        it('should throw InvalidApiResponseException when response is not an array', function(): void {
             // arrange
             Http::fake([
                 'https://rebrickable.com/api/v3/lego/sets/75192-1/' => Http::response('invalid'),
@@ -183,12 +183,12 @@ describe('RebrickableService', function (): void {
             $service = createRebrickableService();
 
             // act & assert
-            expect(fn (): LegoSetData => $service->fetchSet('75192-1'))->toThrow(InvalidApiResponseException::class);
+            expect(fn(): LegoSetData => $service->fetchSet('75192-1'))->toThrow(InvalidApiResponseException::class);
         });
     });
 
-    describe('fetchSetByEan', function (): void {
-        it('should return set data when EAN matches a set', function (): void {
+    describe('fetchSetByEan', function(): void {
+        it('should return set data when EAN matches a set', function(): void {
             // arrange
             Http::fake([
                 'https://rebrickable.com/api/v3/lego/sets/*' => Http::response([
@@ -196,9 +196,9 @@ describe('RebrickableService', function (): void {
                         [
                             'set_num' => '75192-1',
                             'name' => 'Millennium Falcon',
-                            'year' => 2017,
+                            'year' => 2_017,
                             'theme_id' => 158,
-                            'num_parts' => 7541,
+                            'num_parts' => 7_541,
                             'set_img_url' => 'https://example.com/75192.jpg',
                         ],
                     ],
@@ -215,18 +215,18 @@ describe('RebrickableService', function (): void {
             expect($result)->toBeInstanceOf(LegoSetData::class);
             expect($result->setNum)->toBe('75192-1');
             expect($result->name)->toBe('Millennium Falcon');
-            expect($result->year)->toBe(2017);
+            expect($result->year)->toBe(2_017);
             expect($result->themeId)->toBe(158);
-            expect($result->numParts)->toBe(7541);
+            expect($result->numParts)->toBe(7_541);
             expect($result->imageUrl)->toBe('https://example.com/75192.jpg');
 
-            Http::assertSent(fn ($request): bool => str_contains((string) $request->url(), '/lego/sets/')
+            Http::assertSent(fn($request): bool => str_contains((string) $request->url(), '/lego/sets/')
                 && str_contains((string) $request->url(), 'search=5702016914177')
                 && $request->method() === 'GET'
                 && $request->header('Authorization') === ['key ' . TEST_API_KEY]);
         });
 
-        it('should throw SetNotFoundException when no results match EAN', function (): void {
+        it('should throw SetNotFoundException when no results match EAN', function(): void {
             // arrange
             Http::fake([
                 'https://rebrickable.com/api/v3/lego/sets/*' => Http::response([
@@ -238,10 +238,10 @@ describe('RebrickableService', function (): void {
             $service = createRebrickableService();
 
             // act & assert
-            expect(fn (): LegoSetData => $service->fetchSetByEan('0000000000000'))->toThrow(SetNotFoundException::class);
+            expect(fn(): LegoSetData => $service->fetchSetByEan('0000000000000'))->toThrow(SetNotFoundException::class);
         });
 
-        it('should throw RebrickableApiException on server error', function (): void {
+        it('should throw RebrickableApiException on server error', function(): void {
             // arrange
             Http::fake([
                 'https://rebrickable.com/api/v3/lego/sets/*' => Http::response([], 500),
@@ -250,10 +250,10 @@ describe('RebrickableService', function (): void {
             $service = createRebrickableService();
 
             // act & assert
-            expect(fn (): LegoSetData => $service->fetchSetByEan('5702016914177'))->toThrow(RebrickableApiException::class);
+            expect(fn(): LegoSetData => $service->fetchSetByEan('5702016914177'))->toThrow(RebrickableApiException::class);
         });
 
-        it('should throw InvalidApiResponseException when response has no results field', function (): void {
+        it('should throw InvalidApiResponseException when response has no results field', function(): void {
             // arrange
             Http::fake([
                 'https://rebrickable.com/api/v3/lego/sets/*' => Http::response([
@@ -264,10 +264,10 @@ describe('RebrickableService', function (): void {
             $service = createRebrickableService();
 
             // act & assert
-            expect(fn (): LegoSetData => $service->fetchSetByEan('5702016914177'))->toThrow(InvalidApiResponseException::class);
+            expect(fn(): LegoSetData => $service->fetchSetByEan('5702016914177'))->toThrow(InvalidApiResponseException::class);
         });
 
-        it('should handle missing theme_id and set_img_url in result', function (): void {
+        it('should handle missing theme_id and set_img_url in result', function(): void {
             // arrange
             Http::fake([
                 'https://rebrickable.com/api/v3/lego/sets/*' => Http::response([
@@ -275,7 +275,7 @@ describe('RebrickableService', function (): void {
                         [
                             'set_num' => '10281-1',
                             'name' => 'Bonsai Tree',
-                            'year' => 2021,
+                            'year' => 2_021,
                             'num_parts' => 878,
                         ],
                     ],
@@ -294,8 +294,8 @@ describe('RebrickableService', function (): void {
         });
     });
 
-    describe('fetchSetParts', function (): void {
-        it('should return parts data from API', function (): void {
+    describe('fetchSetParts', function(): void {
+        it('should return parts data from API', function(): void {
             // arrange
             Http::fake([
                 'https://rebrickable.com/api/v3/lego/sets/75192-1/parts/' => Http::response([
@@ -322,12 +322,12 @@ describe('RebrickableService', function (): void {
             expect($result[0])->toBeInstanceOf(LegoSetPartData::class);
             expect($result[0]->part->partNum)->toBe('3001');
 
-            Http::assertSent(fn ($request): bool => $request->url() === 'https://rebrickable.com/api/v3/lego/sets/75192-1/parts/'
+            Http::assertSent(fn($request): bool => $request->url() === 'https://rebrickable.com/api/v3/lego/sets/75192-1/parts/'
                 && $request->method() === 'GET'
                 && $request->header('Authorization') === ['key ' . TEST_API_KEY]);
         });
 
-        it('should handle pagination', function (): void {
+        it('should handle pagination', function(): void {
             // arrange
             Http::fake([
                 'https://rebrickable.com/api/v3/lego/sets/75192-1/parts/' => Http::response([
@@ -368,15 +368,15 @@ describe('RebrickableService', function (): void {
             Http::assertSentCount(2);
 
             // Verify both requests had proper authorization
-            Http::assertSent(fn ($request): bool => $request->url() === 'https://rebrickable.com/api/v3/lego/sets/75192-1/parts/'
+            Http::assertSent(fn($request): bool => $request->url() === 'https://rebrickable.com/api/v3/lego/sets/75192-1/parts/'
                 && $request->method() === 'GET'
                 && $request->header('Authorization') === ['key ' . TEST_API_KEY]);
-            Http::assertSent(fn ($request): bool => $request->url() === 'https://rebrickable.com/api/v3/lego/sets/75192-1/parts/?page=2'
+            Http::assertSent(fn($request): bool => $request->url() === 'https://rebrickable.com/api/v3/lego/sets/75192-1/parts/?page=2'
                 && $request->method() === 'GET'
                 && $request->header('Authorization') === ['key ' . TEST_API_KEY]);
         });
 
-        it('should throw RebrickableApiException when API fails', function (): void {
+        it('should throw RebrickableApiException when API fails', function(): void {
             // arrange
             Http::fake([
                 'https://rebrickable.com/api/v3/lego/sets/75192-1/parts/' => Http::response([], 500),
@@ -385,10 +385,10 @@ describe('RebrickableService', function (): void {
             $service = createRebrickableService();
 
             // act & assert
-            expect(fn (): array => $service->fetchSetParts('75192-1'))->toThrow(RebrickableApiException::class);
+            expect(fn(): array => $service->fetchSetParts('75192-1'))->toThrow(RebrickableApiException::class);
         });
 
-        it('should throw InvalidApiResponseException when response is not an array', function (): void {
+        it('should throw InvalidApiResponseException when response is not an array', function(): void {
             // arrange
             Http::fake([
                 'https://rebrickable.com/api/v3/lego/sets/75192-1/parts/' => Http::response('invalid'),
@@ -397,10 +397,10 @@ describe('RebrickableService', function (): void {
             $service = createRebrickableService();
 
             // act & assert
-            expect(fn (): array => $service->fetchSetParts('75192-1'))->toThrow(InvalidApiResponseException::class);
+            expect(fn(): array => $service->fetchSetParts('75192-1'))->toThrow(InvalidApiResponseException::class);
         });
 
-        it('should throw InvalidApiResponseException when results field is missing', function (): void {
+        it('should throw InvalidApiResponseException when results field is missing', function(): void {
             // arrange
             Http::fake([
                 'https://rebrickable.com/api/v3/lego/sets/75192-1/parts/' => Http::response([
@@ -412,10 +412,10 @@ describe('RebrickableService', function (): void {
             $service = createRebrickableService();
 
             // act & assert
-            expect(fn (): array => $service->fetchSetParts('75192-1'))->toThrow(InvalidApiResponseException::class);
+            expect(fn(): array => $service->fetchSetParts('75192-1'))->toThrow(InvalidApiResponseException::class);
         });
 
-        it('should throw InvalidApiResponseException when part at index is not an array', function (): void {
+        it('should throw InvalidApiResponseException when part at index is not an array', function(): void {
             // arrange
             Http::fake([
                 'https://rebrickable.com/api/v3/lego/sets/75192-1/parts/' => Http::response([
@@ -429,10 +429,10 @@ describe('RebrickableService', function (): void {
             $service = createRebrickableService();
 
             // act & assert
-            expect(fn (): array => $service->fetchSetParts('75192-1'))->toThrow(InvalidApiResponseException::class);
+            expect(fn(): array => $service->fetchSetParts('75192-1'))->toThrow(InvalidApiResponseException::class);
         });
 
-        it('should throw InvalidApiResponseException when part data is missing required fields', function (): void {
+        it('should throw InvalidApiResponseException when part data is missing required fields', function(): void {
             // arrange
             Http::fake([
                 'https://rebrickable.com/api/v3/lego/sets/75192-1/parts/' => Http::response([
@@ -449,10 +449,10 @@ describe('RebrickableService', function (): void {
             $service = createRebrickableService();
 
             // act & assert
-            expect(fn (): array => $service->fetchSetParts('75192-1'))->toThrow(InvalidApiResponseException::class);
+            expect(fn(): array => $service->fetchSetParts('75192-1'))->toThrow(InvalidApiResponseException::class);
         });
 
-        it('should throw InvalidApiResponseException when nested part data is missing required fields', function (): void {
+        it('should throw InvalidApiResponseException when nested part data is missing required fields', function(): void {
             // arrange
             Http::fake([
                 'https://rebrickable.com/api/v3/lego/sets/75192-1/parts/' => Http::response([
@@ -472,10 +472,10 @@ describe('RebrickableService', function (): void {
             $service = createRebrickableService();
 
             // act & assert
-            expect(fn (): array => $service->fetchSetParts('75192-1'))->toThrow(InvalidApiResponseException::class);
+            expect(fn(): array => $service->fetchSetParts('75192-1'))->toThrow(InvalidApiResponseException::class);
         });
 
-        it('should throw InvalidApiResponseException when nested color data is missing required fields', function (): void {
+        it('should throw InvalidApiResponseException when nested color data is missing required fields', function(): void {
             // arrange
             Http::fake([
                 'https://rebrickable.com/api/v3/lego/sets/75192-1/parts/' => Http::response([
@@ -495,10 +495,10 @@ describe('RebrickableService', function (): void {
             $service = createRebrickableService();
 
             // act & assert
-            expect(fn (): array => $service->fetchSetParts('75192-1'))->toThrow(InvalidApiResponseException::class);
+            expect(fn(): array => $service->fetchSetParts('75192-1'))->toThrow(InvalidApiResponseException::class);
         });
 
-        it('should throw InvalidApiResponseException when part field is not an array', function (): void {
+        it('should throw InvalidApiResponseException when part field is not an array', function(): void {
             // arrange
             Http::fake([
                 'https://rebrickable.com/api/v3/lego/sets/75192-1/parts/' => Http::response([
@@ -518,10 +518,10 @@ describe('RebrickableService', function (): void {
             $service = createRebrickableService();
 
             // act & assert
-            expect(fn (): array => $service->fetchSetParts('75192-1'))->toThrow(InvalidApiResponseException::class);
+            expect(fn(): array => $service->fetchSetParts('75192-1'))->toThrow(InvalidApiResponseException::class);
         });
 
-        it('should throw InvalidApiResponseException when color field is not an array', function (): void {
+        it('should throw InvalidApiResponseException when color field is not an array', function(): void {
             // arrange
             Http::fake([
                 'https://rebrickable.com/api/v3/lego/sets/75192-1/parts/' => Http::response([
@@ -541,10 +541,10 @@ describe('RebrickableService', function (): void {
             $service = createRebrickableService();
 
             // act & assert
-            expect(fn (): array => $service->fetchSetParts('75192-1'))->toThrow(InvalidApiResponseException::class);
+            expect(fn(): array => $service->fetchSetParts('75192-1'))->toThrow(InvalidApiResponseException::class);
         });
 
-        it('should strip host from pagination next URL to prevent SSRF', function (): void {
+        it('should strip host from pagination next URL to prevent SSRF', function(): void {
             // arrange — evil.com next URL should be stripped to path+query and resolved against baseUrl
             Http::fake([
                 'https://rebrickable.com/api/v3/lego/sets/75192-1/parts/' => Http::response([
@@ -574,13 +574,13 @@ describe('RebrickableService', function (): void {
             // assert — the second request should go to the base URL host, not evil.com
             expect($result)->toHaveCount(1);
             Http::assertSentCount(2);
-            Http::assertSent(fn ($request): bool => $request->url() === 'https://rebrickable.com/api/v3/steal?key=leaked');
-            Http::assertNotSent(fn ($request): bool => str_contains((string) $request->url(), 'evil.com'));
+            Http::assertSent(fn($request): bool => $request->url() === 'https://rebrickable.com/api/v3/steal?key=leaked');
+            Http::assertNotSent(fn($request): bool => str_contains((string) $request->url(), 'evil.com'));
         });
     });
 
-    describe('fetchUserSets', function (): void {
-        it('should yield user sets page from API', function (): void {
+    describe('fetchUserSets', function(): void {
+        it('should yield user sets page from API', function(): void {
             // arrange
             Http::fake([
                 'https://rebrickable.com/api/v3/users/user-token-123/sets/' => Http::response([
@@ -589,9 +589,9 @@ describe('RebrickableService', function (): void {
                             'set' => [
                                 'set_num' => '75192-1',
                                 'name' => 'Millennium Falcon',
-                                'year' => 2017,
+                                'year' => 2_017,
                                 'theme_id' => 158,
-                                'num_parts' => 7541,
+                                'num_parts' => 7_541,
                                 'set_img_url' => 'https://example.com/75192.jpg',
                             ],
                             'quantity' => 2,
@@ -614,12 +614,12 @@ describe('RebrickableService', function (): void {
             expect($pages[0][0]->set->name)->toBe('Millennium Falcon');
             expect($pages[0][0]->quantity)->toBe(2);
 
-            Http::assertSent(fn ($request): bool => $request->url() === 'https://rebrickable.com/api/v3/users/user-token-123/sets/'
+            Http::assertSent(fn($request): bool => $request->url() === 'https://rebrickable.com/api/v3/users/user-token-123/sets/'
                 && $request->method() === 'GET'
                 && $request->header('Authorization') === ['key ' . TEST_API_KEY]);
         });
 
-        it('should yield one page per API page', function (): void {
+        it('should yield one page per API page', function(): void {
             // arrange
             Http::fake([
                 'https://rebrickable.com/api/v3/users/user-token-123/sets/' => Http::response([
@@ -628,9 +628,9 @@ describe('RebrickableService', function (): void {
                             'set' => [
                                 'set_num' => '75192-1',
                                 'name' => 'Millennium Falcon',
-                                'year' => 2017,
+                                'year' => 2_017,
                                 'theme_id' => 158,
-                                'num_parts' => 7541,
+                                'num_parts' => 7_541,
                                 'set_img_url' => null,
                             ],
                             'quantity' => 1,
@@ -644,9 +644,9 @@ describe('RebrickableService', function (): void {
                             'set' => [
                                 'set_num' => '10179-1',
                                 'name' => 'Ultimate Collectors Millennium Falcon',
-                                'year' => 2007,
+                                'year' => 2_007,
                                 'theme_id' => 158,
-                                'num_parts' => 5195,
+                                'num_parts' => 5_195,
                                 'set_img_url' => null,
                             ],
                             'quantity' => 2,
@@ -668,7 +668,7 @@ describe('RebrickableService', function (): void {
             Http::assertSentCount(2);
         });
 
-        it('should yield empty page when user has no sets', function (): void {
+        it('should yield empty page when user has no sets', function(): void {
             // arrange
             Http::fake([
                 'https://rebrickable.com/api/v3/users/user-token-123/sets/' => Http::response([
@@ -687,7 +687,7 @@ describe('RebrickableService', function (): void {
             expect($pages[0])->toHaveCount(0);
         });
 
-        it('should throw RebrickableApiException on API error', function (): void {
+        it('should throw RebrickableApiException on API error', function(): void {
             // arrange
             Http::fake([
                 'https://rebrickable.com/api/v3/users/user-token-123/sets/' => Http::response([], 401),
@@ -696,10 +696,10 @@ describe('RebrickableService', function (): void {
             $service = createRebrickableService();
 
             // act & assert
-            expect(fn (): array => iterator_to_array($service->fetchUserSets('user-token-123')))->toThrow(RebrickableApiException::class);
+            expect(fn(): array => iterator_to_array($service->fetchUserSets('user-token-123')))->toThrow(RebrickableApiException::class);
         });
 
-        it('should throw InvalidApiResponseException when response is not an array', function (): void {
+        it('should throw InvalidApiResponseException when response is not an array', function(): void {
             // arrange
             Http::fake([
                 'https://rebrickable.com/api/v3/users/user-token-123/sets/' => Http::response('invalid'),
@@ -708,10 +708,10 @@ describe('RebrickableService', function (): void {
             $service = createRebrickableService();
 
             // act & assert
-            expect(fn (): array => iterator_to_array($service->fetchUserSets('user-token-123')))->toThrow(InvalidApiResponseException::class);
+            expect(fn(): array => iterator_to_array($service->fetchUserSets('user-token-123')))->toThrow(InvalidApiResponseException::class);
         });
 
-        it('should throw InvalidApiResponseException when results field is missing', function (): void {
+        it('should throw InvalidApiResponseException when results field is missing', function(): void {
             // arrange
             Http::fake([
                 'https://rebrickable.com/api/v3/users/user-token-123/sets/' => Http::response([
@@ -723,10 +723,10 @@ describe('RebrickableService', function (): void {
             $service = createRebrickableService();
 
             // act & assert
-            expect(fn (): array => iterator_to_array($service->fetchUserSets('user-token-123')))->toThrow(InvalidApiResponseException::class);
+            expect(fn(): array => iterator_to_array($service->fetchUserSets('user-token-123')))->toThrow(InvalidApiResponseException::class);
         });
 
-        it('should throw InvalidApiResponseException when set data is missing required fields', function (): void {
+        it('should throw InvalidApiResponseException when set data is missing required fields', function(): void {
             // arrange
             Http::fake([
                 'https://rebrickable.com/api/v3/users/user-token-123/sets/' => Http::response([
@@ -742,10 +742,10 @@ describe('RebrickableService', function (): void {
             $service = createRebrickableService();
 
             // act & assert
-            expect(fn (): array => iterator_to_array($service->fetchUserSets('user-token-123')))->toThrow(InvalidApiResponseException::class);
+            expect(fn(): array => iterator_to_array($service->fetchUserSets('user-token-123')))->toThrow(InvalidApiResponseException::class);
         });
 
-        it('should throw InvalidApiResponseException when nested set is not an array', function (): void {
+        it('should throw InvalidApiResponseException when nested set is not an array', function(): void {
             // arrange
             Http::fake([
                 'https://rebrickable.com/api/v3/users/user-token-123/sets/' => Http::response([
@@ -762,10 +762,10 @@ describe('RebrickableService', function (): void {
             $service = createRebrickableService();
 
             // act & assert
-            expect(fn (): array => iterator_to_array($service->fetchUserSets('user-token-123')))->toThrow(InvalidApiResponseException::class);
+            expect(fn(): array => iterator_to_array($service->fetchUserSets('user-token-123')))->toThrow(InvalidApiResponseException::class);
         });
 
-        it('should throw InvalidApiResponseException when nested set is missing required fields', function (): void {
+        it('should throw InvalidApiResponseException when nested set is missing required fields', function(): void {
             // arrange
             Http::fake([
                 'https://rebrickable.com/api/v3/users/user-token-123/sets/' => Http::response([
@@ -785,10 +785,10 @@ describe('RebrickableService', function (): void {
             $service = createRebrickableService();
 
             // act & assert
-            expect(fn (): array => iterator_to_array($service->fetchUserSets('user-token-123')))->toThrow(InvalidApiResponseException::class);
+            expect(fn(): array => iterator_to_array($service->fetchUserSets('user-token-123')))->toThrow(InvalidApiResponseException::class);
         });
 
-        it('should throw InvalidApiResponseException when set at index is not an array', function (): void {
+        it('should throw InvalidApiResponseException when set at index is not an array', function(): void {
             // arrange
             Http::fake([
                 'https://rebrickable.com/api/v3/users/user-token-123/sets/' => Http::response([
@@ -802,10 +802,10 @@ describe('RebrickableService', function (): void {
             $service = createRebrickableService();
 
             // act & assert
-            expect(fn (): array => iterator_to_array($service->fetchUserSets('user-token-123')))->toThrow(InvalidApiResponseException::class);
+            expect(fn(): array => iterator_to_array($service->fetchUserSets('user-token-123')))->toThrow(InvalidApiResponseException::class);
         });
 
-        it('should strip host from pagination next URL to prevent SSRF', function (): void {
+        it('should strip host from pagination next URL to prevent SSRF', function(): void {
             // arrange
             Http::fake([
                 'https://rebrickable.com/api/v3/users/user-token-123/sets/' => Http::response([
@@ -814,9 +814,9 @@ describe('RebrickableService', function (): void {
                             'set' => [
                                 'set_num' => '75192-1',
                                 'name' => 'Millennium Falcon',
-                                'year' => 2017,
+                                'year' => 2_017,
                                 'theme_id' => 158,
-                                'num_parts' => 7541,
+                                'num_parts' => 7_541,
                                 'set_img_url' => null,
                             ],
                             'quantity' => 1,
@@ -838,21 +838,21 @@ describe('RebrickableService', function (): void {
             // assert — the second request should go to the base URL, not evil.com
             expect($pages)->toHaveCount(2);
             Http::assertSentCount(2);
-            Http::assertSent(fn ($request): bool => $request->url() === 'https://rebrickable.com/api/v3/steal?key=leaked');
-            Http::assertNotSent(fn ($request): bool => str_contains((string) $request->url(), 'evil.com'));
+            Http::assertSent(fn($request): bool => $request->url() === 'https://rebrickable.com/api/v3/steal?key=leaked');
+            Http::assertNotSent(fn($request): bool => str_contains((string) $request->url(), 'evil.com'));
         });
     });
 
-    describe('caching', function (): void {
-        it('should return cached fetchSet result without making HTTP call', function (): void {
+    describe('caching', function(): void {
+        it('should return cached fetchSet result without making HTTP call', function(): void {
             // arrange — prime the cache with a previous call
             Http::fake([
                 'https://rebrickable.com/api/v3/lego/sets/75192-1/' => Http::response([
                     'set_num' => '75192-1',
                     'name' => 'Millennium Falcon',
-                    'year' => 2017,
+                    'year' => 2_017,
                     'theme_id' => 158,
-                    'num_parts' => 7541,
+                    'num_parts' => 7_541,
                     'set_img_url' => 'https://example.com/75192.jpg',
                 ]),
             ]);
@@ -872,7 +872,7 @@ describe('RebrickableService', function (): void {
             expect($result->setNum)->toBe('75192-1');
         });
 
-        it('should return cached fetchSetByEan result without making HTTP call', function (): void {
+        it('should return cached fetchSetByEan result without making HTTP call', function(): void {
             // arrange
             Http::fake([
                 'https://rebrickable.com/api/v3/lego/sets/*' => Http::response([
@@ -880,9 +880,9 @@ describe('RebrickableService', function (): void {
                         [
                             'set_num' => '75192-1',
                             'name' => 'Millennium Falcon',
-                            'year' => 2017,
+                            'year' => 2_017,
                             'theme_id' => 158,
-                            'num_parts' => 7541,
+                            'num_parts' => 7_541,
                             'set_img_url' => 'https://example.com/75192.jpg',
                         ],
                     ],
@@ -904,7 +904,7 @@ describe('RebrickableService', function (): void {
             expect($result->setNum)->toBe('75192-1');
         });
 
-        it('should return cached fetchSetParts result without making HTTP call', function (): void {
+        it('should return cached fetchSetParts result without making HTTP call', function(): void {
             // arrange
             Http::fake([
                 'https://rebrickable.com/api/v3/lego/sets/75192-1/parts/' => Http::response([
@@ -936,7 +936,7 @@ describe('RebrickableService', function (): void {
             expect($result[0]->part->partNum)->toBe('3001');
         });
 
-        it('should return cached fetchUserSets pages without making HTTP call', function (): void {
+        it('should return cached fetchUserSets pages without making HTTP call', function(): void {
             // arrange
             Http::fake([
                 'https://rebrickable.com/api/v3/users/user-token-123/sets/' => Http::response([
@@ -945,9 +945,9 @@ describe('RebrickableService', function (): void {
                             'set' => [
                                 'set_num' => '75192-1',
                                 'name' => 'Millennium Falcon',
-                                'year' => 2017,
+                                'year' => 2_017,
                                 'theme_id' => 158,
-                                'num_parts' => 7541,
+                                'num_parts' => 7_541,
                                 'set_img_url' => null,
                             ],
                             'quantity' => 1,
@@ -972,21 +972,21 @@ describe('RebrickableService', function (): void {
             expect($pages[0][0]->set->setNum)->toBe('75192-1');
         });
 
-        it('should use separate cache keys for different set numbers', function (): void {
+        it('should use separate cache keys for different set numbers', function(): void {
             // arrange
             Http::fake([
                 'https://rebrickable.com/api/v3/lego/sets/75192-1/' => Http::response([
                     'set_num' => '75192-1',
                     'name' => 'Millennium Falcon',
-                    'year' => 2017,
+                    'year' => 2_017,
                     'theme_id' => 158,
-                    'num_parts' => 7541,
+                    'num_parts' => 7_541,
                     'set_img_url' => null,
                 ]),
                 'https://rebrickable.com/api/v3/lego/sets/10281-1/' => Http::response([
                     'set_num' => '10281-1',
                     'name' => 'Bonsai Tree',
-                    'year' => 2021,
+                    'year' => 2_021,
                     'theme_id' => null,
                     'num_parts' => 878,
                     'set_img_url' => null,

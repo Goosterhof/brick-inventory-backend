@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Actions\Family;
 
@@ -88,7 +88,7 @@ final readonly class GetBrickDnaAction
             ->limit(10)
             ->toBase()
             ->get()
-            ->map(static fn (stdClass $row): array => [
+            ->map(static fn(stdClass $row): array => [
                 'color_id' => (int) $row->color_id, // @phpstan-ignore cast.int
                 'name' => (string) $row->name, // @phpstan-ignore cast.string
                 'rgb' => (string) $row->rgb, // @phpstan-ignore cast.string
@@ -117,7 +117,7 @@ final readonly class GetBrickDnaAction
             ->limit(10)
             ->toBase()
             ->get()
-            ->map(static fn (stdClass $row): array => [
+            ->map(static fn(stdClass $row): array => [
                 'part_id' => (int) $row->part_id, // @phpstan-ignore cast.int
                 'part_num' => (string) $row->part_num, // @phpstan-ignore cast.string
                 'name' => (string) $row->name, // @phpstan-ignore cast.string
@@ -147,7 +147,7 @@ final readonly class GetBrickDnaAction
             ->limit(10)
             ->toBase()
             ->get()
-            ->map(static fn (stdClass $row): array => [
+            ->map(static fn(stdClass $row): array => [
                 'part_id' => (int) $row->part_id, // @phpstan-ignore cast.int
                 'part_num' => (string) $row->part_num, // @phpstan-ignore cast.string
                 'part_name' => (string) $row->part_name, // @phpstan-ignore cast.string

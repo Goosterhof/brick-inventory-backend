@@ -1,9 +1,8 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 return [
-
     /*
     |--------------------------------------------------------------------------
     | Cross-Origin Resource Sharing (CORS) Configuration
@@ -15,7 +14,7 @@ return [
     |
     | To learn more: https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS
     |
-    */
+     */
 
     'paths' => ['api/*', 'sanctum/csrf-cookie'],
 
@@ -24,7 +23,7 @@ return [
     'allowed_origins' => array_filter([
         env('FRONTEND_URL', 'http://localhost:5173'),
         env('FRONTEND_URL_PRODUCTION'),
-    ], fn (mixed $value): bool => $value !== null),
+    ], fn(mixed $value): bool => $value !== null),
 
     'allowed_origins_patterns' => [],
 
@@ -32,7 +31,7 @@ return [
 
     'exposed_headers' => [],
 
-    'max_age' => 3600,
+    'max_age' => 3_600,
 
     'supports_credentials' => true,
 

@@ -1,11 +1,10 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 use Illuminate\Support\Str;
 
 return [
-
     /*
     |--------------------------------------------------------------------------
     | Default Cache Store
@@ -15,7 +14,7 @@ return [
     | framework. This connection is utilized if another isn't explicitly
     | specified when running a cache operation inside the application.
     |
-    */
+     */
 
     'default' => env('CACHE_STORE', 'database'),
 
@@ -32,7 +31,7 @@ return [
     |                    "redis", "dynamodb", "octane",
     |                    "failover", "null"
     |
-    */
+     */
 
     'stores' => [
 
@@ -68,7 +67,7 @@ return [
             'servers' => [
                 [
                     'host' => env('MEMCACHED_HOST', '127.0.0.1'),
-                    'port' => env('MEMCACHED_PORT', 11211),
+                    'port' => env('MEMCACHED_PORT', 11_211),
                     'weight' => 100,
                 ],
             ],
@@ -112,7 +111,7 @@ return [
     | stores, there might be other applications using the same cache. For
     | that reason, you may prefix every cache key to avoid collisions.
     |
-    */
+     */
 
     'prefix' => env('CACHE_PREFIX', Str::slug((string) env('APP_NAME', 'laravel')) . '-cache-'),
 

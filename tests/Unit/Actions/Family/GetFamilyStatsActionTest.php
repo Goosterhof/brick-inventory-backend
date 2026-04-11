@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 use App\Actions\Family\GetFamilyStatsAction;
 use App\Enums\FamilySetStatus;
@@ -13,13 +13,13 @@ use Illuminate\Support\Collection;
 
 covers(GetFamilyStatsAction::class);
 
-describe('GetFamilyStatsAction', function (): void {
-    it('should query family stats for the given family', function (): void {
+describe('GetFamilyStatsAction', function(): void {
+    it('should query family stats for the given family', function(): void {
         // arrange
-        $family = Mockery::mock(Family::class);
+        $family = \Mockery::mock(Family::class);
         $family->allows('getAttribute')->with('id')->andReturn(3);
 
-        $familySetBuilder = Mockery::mock(Builder::class);
+        $familySetBuilder = \Mockery::mock(Builder::class);
         $familySetBuilder->shouldReceive('where')
             ->with('family_id', 3)
             ->andReturnSelf();
@@ -29,7 +29,7 @@ describe('GetFamilyStatsAction', function (): void {
         $familySetBuilder->shouldReceive('count')->andReturn(5);
         $familySetBuilder->shouldReceive('sum')->with('quantity')->andReturn(12);
 
-        $statusBuilder = Mockery::mock(Builder::class);
+        $statusBuilder = \Mockery::mock(Builder::class);
         $statusBuilder->shouldReceive('where')
             ->with('family_id', 3)
             ->andReturnSelf();
@@ -42,21 +42,21 @@ describe('GetFamilyStatsAction', function (): void {
 
         $statusCollection = new Collection(['sealed' => 2, 'built' => 3]);
 
-        $baseBuilder = Mockery::mock(Illuminate\Database\Query\Builder::class);
+        $baseBuilder = \Mockery::mock(\Illuminate\Database\Query\Builder::class);
         $baseBuilder->shouldReceive('pluck')
             ->with('count', 'status')
             ->andReturn($statusCollection);
 
         $statusBuilder->shouldReceive('toBase')->andReturn($baseBuilder);
 
-        $familySet = Mockery::mock(FamilySet::class);
+        $familySet = \Mockery::mock(FamilySet::class);
         $familySet->shouldReceive('newQuery')
             ->twice()
             ->andReturn($familySetBuilder, $statusBuilder);
 
         $storageOptionIds = new Collection([10, 20]);
 
-        $storageOptionBuilder = Mockery::mock(Builder::class);
+        $storageOptionBuilder = \Mockery::mock(Builder::class);
         $storageOptionBuilder->shouldReceive('where')
             ->with('family_id', 3)
             ->andReturnSelf();
@@ -64,24 +64,24 @@ describe('GetFamilyStatsAction', function (): void {
             ->with('id')
             ->andReturn($storageOptionIds);
 
-        $storageOption = Mockery::mock(StorageOption::class);
+        $storageOption = \Mockery::mock(StorageOption::class);
         $storageOption->shouldReceive('newQuery')
             ->once()
             ->andReturn($storageOptionBuilder);
 
-        $partsCountBuilder = Mockery::mock(Builder::class);
+        $partsCountBuilder = \Mockery::mock(Builder::class);
         $partsCountBuilder->shouldReceive('whereIn')
             ->with('storage_option_id', $storageOptionIds)
             ->andReturnSelf();
         $partsCountBuilder->shouldReceive('count')->andReturn(8);
 
-        $partsSumBuilder = Mockery::mock(Builder::class);
+        $partsSumBuilder = \Mockery::mock(Builder::class);
         $partsSumBuilder->shouldReceive('whereIn')
             ->with('storage_option_id', $storageOptionIds)
             ->andReturnSelf();
         $partsSumBuilder->shouldReceive('sum')->with('quantity')->andReturn(42);
 
-        $storageOptionPart = Mockery::mock(StorageOptionPart::class);
+        $storageOptionPart = \Mockery::mock(StorageOptionPart::class);
         $storageOptionPart->shouldReceive('newQuery')
             ->twice()
             ->andReturn($partsCountBuilder, $partsSumBuilder);
@@ -100,46 +100,46 @@ describe('GetFamilyStatsAction', function (): void {
             ->and($result->totalPartsQuantity)->toBe(42);
     });
 
-    it('should return zeros when family has no data', function (): void {
+    it('should return zeros when family has no data', function(): void {
         // arrange
-        $family = Mockery::mock(Family::class);
+        $family = \Mockery::mock(Family::class);
         $family->allows('getAttribute')->with('id')->andReturn(1);
 
-        $familySetBuilder = Mockery::mock(Builder::class);
+        $familySetBuilder = \Mockery::mock(Builder::class);
         $familySetBuilder->shouldReceive('where')->andReturnSelf();
         $familySetBuilder->shouldReceive('count')->andReturn(0);
         $familySetBuilder->shouldReceive('sum')->andReturn(0);
 
-        $statusBuilder = Mockery::mock(Builder::class);
+        $statusBuilder = \Mockery::mock(Builder::class);
         $statusBuilder->shouldReceive('where')->andReturnSelf();
         $statusBuilder->shouldReceive('selectRaw')->andReturnSelf();
         $statusBuilder->shouldReceive('groupBy')->andReturnSelf();
-        $baseBuilder = Mockery::mock(Illuminate\Database\Query\Builder::class);
+        $baseBuilder = \Mockery::mock(\Illuminate\Database\Query\Builder::class);
         $baseBuilder->shouldReceive('pluck')->andReturn(new Collection);
 
         $statusBuilder->shouldReceive('toBase')->andReturn($baseBuilder);
 
-        $familySet = Mockery::mock(FamilySet::class);
+        $familySet = \Mockery::mock(FamilySet::class);
         $familySet->shouldReceive('newQuery')
             ->twice()
             ->andReturn($familySetBuilder, $statusBuilder);
 
-        $storageOptionBuilder = Mockery::mock(Builder::class);
+        $storageOptionBuilder = \Mockery::mock(Builder::class);
         $storageOptionBuilder->shouldReceive('where')->andReturnSelf();
         $storageOptionBuilder->shouldReceive('pluck')->andReturn(new Collection);
 
-        $storageOption = Mockery::mock(StorageOption::class);
+        $storageOption = \Mockery::mock(StorageOption::class);
         $storageOption->shouldReceive('newQuery')->andReturn($storageOptionBuilder);
 
-        $partsCountBuilder = Mockery::mock(Builder::class);
+        $partsCountBuilder = \Mockery::mock(Builder::class);
         $partsCountBuilder->shouldReceive('whereIn')->andReturnSelf();
         $partsCountBuilder->shouldReceive('count')->andReturn(0);
 
-        $partsSumBuilder = Mockery::mock(Builder::class);
+        $partsSumBuilder = \Mockery::mock(Builder::class);
         $partsSumBuilder->shouldReceive('whereIn')->andReturnSelf();
         $partsSumBuilder->shouldReceive('sum')->andReturn(0);
 
-        $storageOptionPart = Mockery::mock(StorageOptionPart::class);
+        $storageOptionPart = \Mockery::mock(StorageOptionPart::class);
         $storageOptionPart->shouldReceive('newQuery')
             ->twice()
             ->andReturn($partsCountBuilder, $partsSumBuilder);

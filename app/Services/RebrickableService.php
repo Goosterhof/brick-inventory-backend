@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Services;
 
@@ -20,6 +20,10 @@ use Illuminate\Http\Client\Factory as HttpFactory;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
 
+use function array_key_exists;
+use function is_array;
+use function sprintf;
+
 final readonly class RebrickableService implements LegoDataServiceInterface
 {
     private const array SET_REQUIRED_FIELDS = ['set_num', 'name', 'year', 'num_parts'];
@@ -35,10 +39,14 @@ final readonly class RebrickableService implements LegoDataServiceInterface
     public function __construct(
         private HttpFactory $httpFactory,
         private CacheRepository $cacheRepository,
-        #[Config('services.rebrickable.key', '')] private string $apiKey,
-        #[Config('services.rebrickable.base_url', 'https://rebrickable.com/api/v3')] private string $baseUrl,
-        #[Config('services.rebrickable.cache_ttl', 86400)] private int $cacheTtl,
-        #[Config('services.rebrickable.user_cache_ttl', 3600)] private int $userCacheTtl,
+        #[Config('services.rebrickable.key', '')]
+        private string $apiKey,
+        #[Config('services.rebrickable.base_url', 'https://rebrickable.com/api/v3')]
+        private string $baseUrl,
+        #[Config('services.rebrickable.cache_ttl', 86_400)]
+        private int $cacheTtl,
+        #[Config('services.rebrickable.user_cache_ttl', 3_600)]
+        private int $userCacheTtl,
     ) {}
 
     /**
@@ -92,10 +100,7 @@ final readonly class RebrickableService implements LegoDataServiceInterface
         $data = $response->json();
 
         if (!is_array($data) || !array_key_exists('results', $data) || !is_array($data['results'])) {
-            throw InvalidApiResponseException::invalidStructure(
-                sprintf("Searching for set by EAN '%s'", $ean),
-                "Missing or invalid 'results' field",
-            );
+            throw InvalidApiResponseException::invalidStructure(sprintf("Searching for set by EAN '%s'", $ean), "Missing or invalid 'results' field");
         }
 
         if ($data['results'] === []) {
@@ -314,10 +319,7 @@ final readonly class RebrickableService implements LegoDataServiceInterface
     private function validateSetResponse(mixed $data, string $setNum): void
     {
         if (!is_array($data)) {
-            throw InvalidApiResponseException::invalidStructure(
-                sprintf("Fetching set '%s'", $setNum),
-                'Expected array response',
-            );
+            throw InvalidApiResponseException::invalidStructure(sprintf("Fetching set '%s'", $setNum), 'Expected array response');
         }
 
         $missingFields = [];
@@ -338,17 +340,11 @@ final readonly class RebrickableService implements LegoDataServiceInterface
     private function validatePartsResponse(mixed $data, string $setNum): void
     {
         if (!is_array($data)) {
-            throw InvalidApiResponseException::invalidStructure(
-                sprintf("Fetching parts for set '%s'", $setNum),
-                'Expected array response',
-            );
+            throw InvalidApiResponseException::invalidStructure(sprintf("Fetching parts for set '%s'", $setNum), 'Expected array response');
         }
 
         if (!array_key_exists('results', $data) || !is_array($data['results'])) {
-            throw InvalidApiResponseException::invalidStructure(
-                sprintf("Fetching parts for set '%s'", $setNum),
-                "Missing or invalid 'results' field",
-            );
+            throw InvalidApiResponseException::invalidStructure(sprintf("Fetching parts for set '%s'", $setNum), "Missing or invalid 'results' field");
         }
 
         foreach ($data['results'] as $index => $partData) {
@@ -362,10 +358,7 @@ final readonly class RebrickableService implements LegoDataServiceInterface
     private function validatePartData(mixed $partData, string $setNum, int $index): void
     {
         if (!is_array($partData)) {
-            throw InvalidApiResponseException::invalidStructure(
-                sprintf("Fetching parts for set '%s'", $setNum),
-                sprintf('Part at index %d is not an array', $index),
-            );
+            throw InvalidApiResponseException::invalidStructure(sprintf("Fetching parts for set '%s'", $setNum), sprintf('Part at index %d is not an array', $index));
         }
 
         $missingFields = [];
@@ -376,10 +369,7 @@ final readonly class RebrickableService implements LegoDataServiceInterface
         }
 
         if ($missingFields !== []) {
-            throw InvalidApiResponseException::missingFields(
-                $missingFields,
-                sprintf("Part at index %d for set '%s'", $index, $setNum),
-            );
+            throw InvalidApiResponseException::missingFields($missingFields, sprintf("Part at index %d for set '%s'", $index, $setNum));
         }
 
         $this->validateNestedPartData($partData['part'], $setNum, $index);
@@ -392,10 +382,7 @@ final readonly class RebrickableService implements LegoDataServiceInterface
     private function validateNestedPartData(mixed $partData, string $setNum, int $index): void
     {
         if (!is_array($partData)) {
-            throw InvalidApiResponseException::invalidStructure(
-                sprintf("Part at index %d for set '%s'", $index, $setNum),
-                "'part' field is not an array",
-            );
+            throw InvalidApiResponseException::invalidStructure(sprintf("Part at index %d for set '%s'", $index, $setNum), "'part' field is not an array");
         }
 
         $missingFields = [];
@@ -406,10 +393,7 @@ final readonly class RebrickableService implements LegoDataServiceInterface
         }
 
         if ($missingFields !== []) {
-            throw InvalidApiResponseException::missingFields(
-                $missingFields,
-                sprintf("Part at index %d for set '%s'", $index, $setNum),
-            );
+            throw InvalidApiResponseException::missingFields($missingFields, sprintf("Part at index %d for set '%s'", $index, $setNum));
         }
     }
 
@@ -419,10 +403,7 @@ final readonly class RebrickableService implements LegoDataServiceInterface
     private function validateNestedColorData(mixed $colorData, string $setNum, int $index): void
     {
         if (!is_array($colorData)) {
-            throw InvalidApiResponseException::invalidStructure(
-                sprintf("Part at index %d for set '%s'", $index, $setNum),
-                "'color' field is not an array",
-            );
+            throw InvalidApiResponseException::invalidStructure(sprintf("Part at index %d for set '%s'", $index, $setNum), "'color' field is not an array");
         }
 
         $missingFields = [];
@@ -433,10 +414,7 @@ final readonly class RebrickableService implements LegoDataServiceInterface
         }
 
         if ($missingFields !== []) {
-            throw InvalidApiResponseException::missingFields(
-                $missingFields,
-                sprintf("Part at index %d for set '%s'", $index, $setNum),
-            );
+            throw InvalidApiResponseException::missingFields($missingFields, sprintf("Part at index %d for set '%s'", $index, $setNum));
         }
     }
 
@@ -446,17 +424,11 @@ final readonly class RebrickableService implements LegoDataServiceInterface
     private function validateUserSetsResponse(mixed $data): void
     {
         if (!is_array($data)) {
-            throw InvalidApiResponseException::invalidStructure(
-                'Fetching user sets',
-                'Expected array response',
-            );
+            throw InvalidApiResponseException::invalidStructure('Fetching user sets', 'Expected array response');
         }
 
         if (!array_key_exists('results', $data) || !is_array($data['results'])) {
-            throw InvalidApiResponseException::invalidStructure(
-                'Fetching user sets',
-                "Missing or invalid 'results' field",
-            );
+            throw InvalidApiResponseException::invalidStructure('Fetching user sets', "Missing or invalid 'results' field");
         }
 
         foreach ($data['results'] as $index => $setData) {
@@ -470,10 +442,7 @@ final readonly class RebrickableService implements LegoDataServiceInterface
     private function validateUserSetData(mixed $setData, int $index): void
     {
         if (!is_array($setData)) {
-            throw InvalidApiResponseException::invalidStructure(
-                'Fetching user sets',
-                sprintf('Set at index %d is not an array', $index),
-            );
+            throw InvalidApiResponseException::invalidStructure('Fetching user sets', sprintf('Set at index %d is not an array', $index));
         }
 
         $missingFields = [];
@@ -484,10 +453,7 @@ final readonly class RebrickableService implements LegoDataServiceInterface
         }
 
         if ($missingFields !== []) {
-            throw InvalidApiResponseException::missingFields(
-                $missingFields,
-                sprintf('User set at index %d', $index),
-            );
+            throw InvalidApiResponseException::missingFields($missingFields, sprintf('User set at index %d', $index));
         }
 
         $this->validateNestedSetData($setData['set'], $index);
@@ -499,10 +465,7 @@ final readonly class RebrickableService implements LegoDataServiceInterface
     private function validateNestedSetData(mixed $setData, int $index): void
     {
         if (!is_array($setData)) {
-            throw InvalidApiResponseException::invalidStructure(
-                sprintf('User set at index %d', $index),
-                "'set' field is not an array",
-            );
+            throw InvalidApiResponseException::invalidStructure(sprintf('User set at index %d', $index), "'set' field is not an array");
         }
 
         $missingFields = [];
@@ -513,10 +476,7 @@ final readonly class RebrickableService implements LegoDataServiceInterface
         }
 
         if ($missingFields !== []) {
-            throw InvalidApiResponseException::missingFields(
-                $missingFields,
-                sprintf('User set at index %d', $index),
-            );
+            throw InvalidApiResponseException::missingFields($missingFields, sprintf('User set at index %d', $index));
         }
     }
 }

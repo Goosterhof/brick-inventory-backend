@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 use App\Http\Controllers\SetController;
 use App\Models\Color;
@@ -15,23 +15,23 @@ covers(SetController::class);
 
 uses(RefreshDatabase::class);
 
-describe('SetController', function (): void {
-    describe('parts', function (): void {
-        it('should return 401 for unauthenticated requests', function (): void {
+describe('SetController', function(): void {
+    describe('parts', function(): void {
+        it('should return 401 for unauthenticated requests', function(): void {
             $response = $this->getJson('/api/sets/75192-1/parts');
 
             $response->assertStatus(401);
         });
 
-        it('should return parts for a cached set', function (): void {
+        it('should return parts for a cached set', function(): void {
             $user = User::factory()->create();
 
             $set = Set::factory()->create([
                 'set_num' => '75192-1',
                 'name' => 'Millennium Falcon',
-                'year' => 2017,
+                'year' => 2_017,
                 'theme' => 'Star Wars',
-                'num_parts' => 7541,
+                'num_parts' => 7_541,
                 'image_url' => 'https://example.com/falcon.jpg',
             ]);
 
@@ -64,8 +64,8 @@ describe('SetController', function (): void {
                 ->assertJson([
                     'set_num' => '75192-1',
                     'name' => 'Millennium Falcon',
-                    'year' => 2017,
-                    'num_parts' => 7541,
+                    'year' => 2_017,
+                    'num_parts' => 7_541,
                 ])
                 ->assertJsonCount(1, 'parts')
                 ->assertJsonPath('parts.0.part.id', $part->id)
@@ -74,14 +74,14 @@ describe('SetController', function (): void {
                 ->assertJsonPath('parts.0.quantity', 10);
         });
 
-        it('should fetch parts from rebrickable api when not cached', function (): void {
+        it('should fetch parts from rebrickable api when not cached', function(): void {
             $user = User::factory()->create();
 
             Http::fake([
                 'rebrickable.com/api/v3/lego/sets/10281-1/' => Http::response([
                     'set_num' => '10281-1',
                     'name' => 'Bonsai Tree',
-                    'year' => 2021,
+                    'year' => 2_021,
                     'theme_id' => 598,
                     'num_parts' => 878,
                     'set_img_url' => 'https://example.com/bonsai.jpg',
@@ -128,7 +128,7 @@ describe('SetController', function (): void {
                 ->assertJsonPath('parts.0.color.name', 'Green');
         });
 
-        it('should return 404 for non-existent set', function (): void {
+        it('should return 404 for non-existent set', function(): void {
             $user = User::factory()->create();
 
             Http::fake([
@@ -144,7 +144,7 @@ describe('SetController', function (): void {
                 ->assertJson(['error' => 'Set not found']);
         });
 
-        it('should return 502 for invalid api key', function (): void {
+        it('should return 502 for invalid api key', function(): void {
             $user = User::factory()->create();
 
             Http::fake([
@@ -160,16 +160,16 @@ describe('SetController', function (): void {
                 ->assertJson(['error' => 'Invalid API key']);
         });
 
-        it('should handle pagination from rebrickable api', function (): void {
+        it('should handle pagination from rebrickable api', function(): void {
             $user = User::factory()->create();
 
             Http::fake([
                 'rebrickable.com/api/v3/lego/sets/42056-1/' => Http::response([
                     'set_num' => '42056-1',
                     'name' => 'Porsche 911 GT3 RS',
-                    'year' => 2016,
+                    'year' => 2_016,
                     'theme_id' => 1,
-                    'num_parts' => 2704,
+                    'num_parts' => 2_704,
                     'set_img_url' => 'https://example.com/porsche.jpg',
                 ]),
                 'rebrickable.com/api/v3/lego/sets/42056-1/parts/' => Http::response([
@@ -230,22 +230,22 @@ describe('SetController', function (): void {
         });
     });
 
-    describe('storageMap', function (): void {
-        it('should return 401 for unauthenticated requests', function (): void {
+    describe('storageMap', function(): void {
+        it('should return 401 for unauthenticated requests', function(): void {
             $response = $this->getJson('/api/sets/75192-1/storage-map');
 
             $response->assertStatus(401);
         });
 
-        it('should return storage map for a cached set', function (): void {
+        it('should return storage map for a cached set', function(): void {
             $user = User::factory()->create();
 
             $set = Set::factory()->create([
                 'set_num' => '75192-1',
                 'name' => 'Millennium Falcon',
-                'year' => 2017,
+                'year' => 2_017,
                 'theme' => 'Star Wars',
-                'num_parts' => 7541,
+                'num_parts' => 7_541,
                 'image_url' => 'https://example.com/falcon.jpg',
             ]);
 
@@ -278,14 +278,14 @@ describe('SetController', function (): void {
         });
     });
 
-    describe('lookupByEan', function (): void {
-        it('should return 401 for unauthenticated requests', function (): void {
+    describe('lookupByEan', function(): void {
+        it('should return 401 for unauthenticated requests', function(): void {
             $response = $this->getJson('/api/sets/ean/5702016914177');
 
             $response->assertStatus(401);
         });
 
-        it('should return set data when EAN matches via rebrickable api', function (): void {
+        it('should return set data when EAN matches via rebrickable api', function(): void {
             $user = User::factory()->create();
 
             Http::fake([
@@ -294,9 +294,9 @@ describe('SetController', function (): void {
                         [
                             'set_num' => '75192-1',
                             'name' => 'Millennium Falcon',
-                            'year' => 2017,
+                            'year' => 2_017,
                             'theme_id' => 158,
-                            'num_parts' => 7541,
+                            'num_parts' => 7_541,
                             'set_img_url' => 'https://example.com/75192.jpg',
                         ],
                     ],
@@ -310,23 +310,23 @@ describe('SetController', function (): void {
                 ->assertJson([
                     'set_num' => '75192-1',
                     'name' => 'Millennium Falcon',
-                    'year' => 2017,
-                    'num_parts' => 7541,
+                    'year' => 2_017,
+                    'num_parts' => 7_541,
                     'image_url' => 'https://example.com/75192.jpg',
                 ]);
 
             $this->assertDatabaseHas('sets', ['set_num' => '75192-1']);
         });
 
-        it('should return cached set when it already exists in database', function (): void {
+        it('should return cached set when it already exists in database', function(): void {
             $user = User::factory()->create();
 
             $set = Set::factory()->create([
                 'set_num' => '75192-1',
                 'name' => 'Millennium Falcon',
-                'year' => 2017,
+                'year' => 2_017,
                 'theme' => '158',
-                'num_parts' => 7541,
+                'num_parts' => 7_541,
                 'image_url' => 'https://example.com/falcon.jpg',
             ]);
 
@@ -336,9 +336,9 @@ describe('SetController', function (): void {
                         [
                             'set_num' => '75192-1',
                             'name' => 'Millennium Falcon',
-                            'year' => 2017,
+                            'year' => 2_017,
                             'theme_id' => 158,
-                            'num_parts' => 7541,
+                            'num_parts' => 7_541,
                             'set_img_url' => 'https://example.com/75192.jpg',
                         ],
                     ],
@@ -356,7 +356,7 @@ describe('SetController', function (): void {
                 ]);
         });
 
-        it('should return 404 when no set matches the EAN', function (): void {
+        it('should return 404 when no set matches the EAN', function(): void {
             $user = User::factory()->create();
 
             Http::fake([
@@ -372,7 +372,7 @@ describe('SetController', function (): void {
                 ->assertJson(['error' => 'Set not found']);
         });
 
-        it('should return 404 for invalid EAN format', function (): void {
+        it('should return 404 for invalid EAN format', function(): void {
             $user = User::factory()->create();
 
             $response = $this->actingAs($user)->getJson('/api/sets/ean/abc');

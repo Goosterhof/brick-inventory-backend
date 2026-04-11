@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Models;
 
@@ -12,17 +12,17 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property positive-int $id
- * @property int $set_id
- * @property int $part_id
- * @property int $color_id
- * @property int $quantity
- * @property bool $is_spare
- * @property string|null $element_id
- * @property Carbon|null $created_at
- * @property Carbon|null $updated_at
- * @property-read Set $set
- * @property-read Part $part
- * @property-read Color $color
+ * @property int          $set_id
+ * @property int          $part_id
+ * @property int          $color_id
+ * @property int          $quantity
+ * @property bool         $is_spare
+ * @property string|null  $element_id
+ * @property Carbon|null  $created_at
+ * @property Carbon|null  $updated_at
+ * @property Set          $set
+ * @property Part         $part
+ * @property Color        $color
  */
 class SetPart extends Model
 {

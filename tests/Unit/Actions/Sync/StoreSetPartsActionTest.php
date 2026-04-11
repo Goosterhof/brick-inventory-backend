@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 use App\Actions\Sync\StoreSetPartsAction;
 use App\Actions\Sync\UpsertColorAction;
@@ -18,53 +18,53 @@ use Illuminate\Database\UniqueConstraintViolationException;
 
 covers(StoreSetPartsAction::class);
 
-describe('StoreSetPartsAction', function (): void {
-    beforeEach(function (): void {
-        $this->db = Mockery::mock(ConnectionInterface::class);
-        $this->db->allows('transaction')->andReturnUsing(fn (Closure $callback) => $callback());
+describe('StoreSetPartsAction', function(): void {
+    beforeEach(function(): void {
+        $this->db = \Mockery::mock(ConnectionInterface::class);
+        $this->db->allows('transaction')->andReturnUsing(fn(\Closure $callback) => $callback());
     });
 
-    it('should create set parts when they do not exist', function (): void {
+    it('should create set parts when they do not exist', function(): void {
         // arrange
-        $set = Mockery::mock(Set::class);
+        $set = \Mockery::mock(Set::class);
         $set->allows('getAttribute')->with('id')->andReturn(1);
 
-        $color = Mockery::mock(Color::class);
+        $color = \Mockery::mock(Color::class);
         $color->allows('getAttribute')->with('id')->andReturn(1);
 
-        $part = Mockery::mock(Part::class);
+        $part = \Mockery::mock(Part::class);
         $part->allows('getAttribute')->with('id')->andReturn(1);
 
         $colorData = new LegoColorData(id: 1, name: 'White', rgb: 'FFFFFF', isTransparent: false);
         $partData = new LegoPartData(partNum: '3001', name: 'Brick 2 x 4', categoryId: 11, imageUrl: null);
 
-        $upsertColorAction = Mockery::mock(UpsertColorAction::class);
+        $upsertColorAction = \Mockery::mock(UpsertColorAction::class);
         $upsertColorAction->shouldReceive('execute')
             ->once()
-            ->withArgs(fn (LegoColorData $legoColorData): bool => $legoColorData->id === 1 && $legoColorData->name === 'White')
+            ->withArgs(fn(LegoColorData $legoColorData): bool => $legoColorData->id === 1 && $legoColorData->name === 'White')
             ->andReturn($color);
 
-        $upsertPartAction = Mockery::mock(UpsertPartAction::class);
+        $upsertPartAction = \Mockery::mock(UpsertPartAction::class);
         $upsertPartAction->shouldReceive('execute')
             ->once()
-            ->withArgs(fn (LegoPartData $legoPartData): bool => $legoPartData->partNum === '3001' && $legoPartData->name === 'Brick 2 x 4')
+            ->withArgs(fn(LegoPartData $legoPartData): bool => $legoPartData->partNum === '3001' && $legoPartData->name === 'Brick 2 x 4')
             ->andReturn($part);
 
-        $setPartQueryBuilder = Mockery::mock(Builder::class);
+        $setPartQueryBuilder = \Mockery::mock(Builder::class);
         $setPartQueryBuilder->shouldReceive('where')->andReturnSelf();
         $setPartQueryBuilder->shouldReceive('first')->andReturn(null);
 
         $newSetPartSavedValues = [];
-        $newSetPart = Mockery::mock(SetPart::class);
-        $newSetPart->allows('setAttribute')->andReturnUsing(function ($key, $value) use (&$newSetPartSavedValues): void {
+        $newSetPart = \Mockery::mock(SetPart::class);
+        $newSetPart->allows('setAttribute')->andReturnUsing(function($key, $value) use (&$newSetPartSavedValues): void {
             $newSetPartSavedValues[$key] = $value;
         });
-        $newSetPart->allows('getAttribute')->andReturnUsing(function ($key) use (&$newSetPartSavedValues): mixed {
+        $newSetPart->allows('getAttribute')->andReturnUsing(function($key) use (&$newSetPartSavedValues): mixed {
             return $newSetPartSavedValues[$key] ?? null;
         });
         $newSetPart->shouldReceive('save')->once();
 
-        $setPart = Mockery::mock(SetPart::class);
+        $setPart = \Mockery::mock(SetPart::class);
         $setPart->shouldReceive('newQuery')->andReturn($setPartQueryBuilder);
         $setPart->shouldReceive('newInstance')->once()->andReturn($newSetPart);
 
@@ -92,21 +92,21 @@ describe('StoreSetPartsAction', function (): void {
         expect($newSetPartSavedValues['element_id'])->toBe('300101');
     });
 
-    it('should update existing set parts', function (): void {
+    it('should update existing set parts', function(): void {
         // arrange
-        $set = Mockery::mock(Set::class);
+        $set = \Mockery::mock(Set::class);
         $set->allows('getAttribute')->with('id')->andReturn(1);
 
-        $color = Mockery::mock(Color::class);
+        $color = \Mockery::mock(Color::class);
         $color->allows('getAttribute')->with('id')->andReturn(1);
 
-        $part = Mockery::mock(Part::class);
+        $part = \Mockery::mock(Part::class);
         $part->allows('getAttribute')->with('id')->andReturn(1);
 
-        $upsertColorAction = Mockery::mock(UpsertColorAction::class);
+        $upsertColorAction = \Mockery::mock(UpsertColorAction::class);
         $upsertColorAction->shouldReceive('execute')->once()->andReturn($color);
 
-        $upsertPartAction = Mockery::mock(UpsertPartAction::class);
+        $upsertPartAction = \Mockery::mock(UpsertPartAction::class);
         $upsertPartAction->shouldReceive('execute')->once()->andReturn($part);
 
         $existingSavedValues = [
@@ -116,20 +116,20 @@ describe('StoreSetPartsAction', function (): void {
             'is_spare' => false,
             'quantity' => 5,
         ];
-        $existingSetPart = Mockery::mock(SetPart::class);
-        $existingSetPart->allows('setAttribute')->andReturnUsing(function ($key, $value) use (&$existingSavedValues): void {
+        $existingSetPart = \Mockery::mock(SetPart::class);
+        $existingSetPart->allows('setAttribute')->andReturnUsing(function($key, $value) use (&$existingSavedValues): void {
             $existingSavedValues[$key] = $value;
         });
-        $existingSetPart->allows('getAttribute')->andReturnUsing(function ($key) use (&$existingSavedValues): mixed {
+        $existingSetPart->allows('getAttribute')->andReturnUsing(function($key) use (&$existingSavedValues): mixed {
             return $existingSavedValues[$key] ?? null;
         });
         $existingSetPart->shouldReceive('save')->once();
 
-        $setPartQueryBuilder = Mockery::mock(Builder::class);
+        $setPartQueryBuilder = \Mockery::mock(Builder::class);
         $setPartQueryBuilder->shouldReceive('where')->andReturnSelf();
         $setPartQueryBuilder->shouldReceive('first')->andReturn($existingSetPart);
 
-        $setPart = Mockery::mock(SetPart::class);
+        $setPart = \Mockery::mock(SetPart::class);
         $setPart->shouldReceive('newQuery')->andReturn($setPartQueryBuilder);
 
         $action = new StoreSetPartsAction($upsertColorAction, $upsertPartAction, $setPart, $this->db);
@@ -152,54 +152,54 @@ describe('StoreSetPartsAction', function (): void {
         expect($existingSavedValues['element_id'])->toBe('NEW123');
     });
 
-    it('should process multiple parts', function (): void {
+    it('should process multiple parts', function(): void {
         // arrange
-        $set = Mockery::mock(Set::class);
+        $set = \Mockery::mock(Set::class);
         $set->allows('getAttribute')->with('id')->andReturn(1);
 
-        $color1 = Mockery::mock(Color::class);
+        $color1 = \Mockery::mock(Color::class);
         $color1->allows('getAttribute')->with('id')->andReturn(1);
 
-        $color2 = Mockery::mock(Color::class);
+        $color2 = \Mockery::mock(Color::class);
         $color2->allows('getAttribute')->with('id')->andReturn(2);
 
-        $part1 = Mockery::mock(Part::class);
+        $part1 = \Mockery::mock(Part::class);
         $part1->allows('getAttribute')->with('id')->andReturn(1);
 
-        $part2 = Mockery::mock(Part::class);
+        $part2 = \Mockery::mock(Part::class);
         $part2->allows('getAttribute')->with('id')->andReturn(2);
 
-        $upsertColorAction = Mockery::mock(UpsertColorAction::class);
+        $upsertColorAction = \Mockery::mock(UpsertColorAction::class);
         $upsertColorAction->shouldReceive('execute')->twice()->andReturn($color1, $color2);
 
-        $upsertPartAction = Mockery::mock(UpsertPartAction::class);
+        $upsertPartAction = \Mockery::mock(UpsertPartAction::class);
         $upsertPartAction->shouldReceive('execute')->twice()->andReturn($part1, $part2);
 
-        $setPartQueryBuilder = Mockery::mock(Builder::class);
+        $setPartQueryBuilder = \Mockery::mock(Builder::class);
         $setPartQueryBuilder->shouldReceive('where')->andReturnSelf();
         $setPartQueryBuilder->shouldReceive('first')->andReturn(null);
 
         $newSetPart1SavedValues = [];
-        $newSetPart1 = Mockery::mock(SetPart::class);
-        $newSetPart1->allows('setAttribute')->andReturnUsing(function ($key, $value) use (&$newSetPart1SavedValues): void {
+        $newSetPart1 = \Mockery::mock(SetPart::class);
+        $newSetPart1->allows('setAttribute')->andReturnUsing(function($key, $value) use (&$newSetPart1SavedValues): void {
             $newSetPart1SavedValues[$key] = $value;
         });
-        $newSetPart1->allows('getAttribute')->andReturnUsing(function ($key) use (&$newSetPart1SavedValues): mixed {
+        $newSetPart1->allows('getAttribute')->andReturnUsing(function($key) use (&$newSetPart1SavedValues): mixed {
             return $newSetPart1SavedValues[$key] ?? null;
         });
         $newSetPart1->shouldReceive('save')->once();
 
         $newSetPart2SavedValues = [];
-        $newSetPart2 = Mockery::mock(SetPart::class);
-        $newSetPart2->allows('setAttribute')->andReturnUsing(function ($key, $value) use (&$newSetPart2SavedValues): void {
+        $newSetPart2 = \Mockery::mock(SetPart::class);
+        $newSetPart2->allows('setAttribute')->andReturnUsing(function($key, $value) use (&$newSetPart2SavedValues): void {
             $newSetPart2SavedValues[$key] = $value;
         });
-        $newSetPart2->allows('getAttribute')->andReturnUsing(function ($key) use (&$newSetPart2SavedValues): mixed {
+        $newSetPart2->allows('getAttribute')->andReturnUsing(function($key) use (&$newSetPart2SavedValues): mixed {
             return $newSetPart2SavedValues[$key] ?? null;
         });
         $newSetPart2->shouldReceive('save')->once();
 
-        $setPart = Mockery::mock(SetPart::class);
+        $setPart = \Mockery::mock(SetPart::class);
         $setPart->shouldReceive('newQuery')->andReturn($setPartQueryBuilder);
         $setPart->shouldReceive('newInstance')->twice()->andReturn($newSetPart1, $newSetPart2);
 
@@ -232,18 +232,18 @@ describe('StoreSetPartsAction', function (): void {
         expect($newSetPart2SavedValues['is_spare'])->toBeTrue();
     });
 
-    it('should handle empty parts data', function (): void {
+    it('should handle empty parts data', function(): void {
         // arrange
-        $set = Mockery::mock(Set::class);
+        $set = \Mockery::mock(Set::class);
         $set->allows('getAttribute')->with('id')->andReturn(1);
 
-        $upsertColorAction = Mockery::mock(UpsertColorAction::class);
+        $upsertColorAction = \Mockery::mock(UpsertColorAction::class);
         $upsertColorAction->shouldReceive('execute')->never();
 
-        $upsertPartAction = Mockery::mock(UpsertPartAction::class);
+        $upsertPartAction = \Mockery::mock(UpsertPartAction::class);
         $upsertPartAction->shouldReceive('execute')->never();
 
-        $setPart = Mockery::mock(SetPart::class);
+        $setPart = \Mockery::mock(SetPart::class);
 
         $action = new StoreSetPartsAction($upsertColorAction, $upsertPartAction, $setPart, $this->db);
 
@@ -253,43 +253,43 @@ describe('StoreSetPartsAction', function (): void {
         // assert - Mockery verifies expectations automatically
     });
 
-    it('should retry and update set part on unique constraint violation', function (): void {
+    it('should retry and update set part on unique constraint violation', function(): void {
         // arrange
-        $set = Mockery::mock(Set::class);
+        $set = \Mockery::mock(Set::class);
         $set->allows('getAttribute')->with('id')->andReturn(1);
 
-        $color = Mockery::mock(Color::class);
+        $color = \Mockery::mock(Color::class);
         $color->allows('getAttribute')->with('id')->andReturn(1);
 
-        $part = Mockery::mock(Part::class);
+        $part = \Mockery::mock(Part::class);
         $part->allows('getAttribute')->with('id')->andReturn(1);
 
-        $upsertColorAction = Mockery::mock(UpsertColorAction::class);
+        $upsertColorAction = \Mockery::mock(UpsertColorAction::class);
         $upsertColorAction->shouldReceive('execute')->once()->andReturn($color);
 
-        $upsertPartAction = Mockery::mock(UpsertPartAction::class);
+        $upsertPartAction = \Mockery::mock(UpsertPartAction::class);
         $upsertPartAction->shouldReceive('execute')->once()->andReturn($part);
 
         // First attempt: new instance whose save throws
-        $newInstance = Mockery::mock(SetPart::class);
+        $newInstance = \Mockery::mock(SetPart::class);
         $newInstance->allows('setAttribute');
         $newInstance->allows('getAttribute');
         $newInstance->shouldReceive('save')->once()
-            ->andThrow(new UniqueConstraintViolationException('default', 'INSERT', [], new Exception('dup')));
+            ->andThrow(new UniqueConstraintViolationException('default', 'INSERT', [], new \Exception('dup')));
 
         // Retry: existing record found and updated
         $existingValues = [];
-        $existingInstance = Mockery::mock(SetPart::class);
-        $existingInstance->allows('setAttribute')->andReturnUsing(function ($key, $value) use (&$existingValues): void {
+        $existingInstance = \Mockery::mock(SetPart::class);
+        $existingInstance->allows('setAttribute')->andReturnUsing(function($key, $value) use (&$existingValues): void {
             $existingValues[$key] = $value;
         });
-        $existingInstance->allows('getAttribute')->andReturnUsing(function ($key) use (&$existingValues): mixed {
+        $existingInstance->allows('getAttribute')->andReturnUsing(function($key) use (&$existingValues): mixed {
             return $existingValues[$key] ?? null;
         });
         $existingInstance->shouldReceive('save')->once();
 
         // First query: find nothing
-        $builder1 = Mockery::mock(Builder::class);
+        $builder1 = \Mockery::mock(Builder::class);
         $builder1->shouldReceive('where')->with('set_id', 1)->once()->andReturnSelf();
         $builder1->shouldReceive('where')->with('part_id', 1)->once()->andReturnSelf();
         $builder1->shouldReceive('where')->with('color_id', 1)->once()->andReturnSelf();
@@ -297,14 +297,14 @@ describe('StoreSetPartsAction', function (): void {
         $builder1->shouldReceive('first')->once()->andReturn(null);
 
         // Retry query: find existing
-        $builder2 = Mockery::mock(Builder::class);
+        $builder2 = \Mockery::mock(Builder::class);
         $builder2->shouldReceive('where')->with('set_id', 1)->once()->andReturnSelf();
         $builder2->shouldReceive('where')->with('part_id', 1)->once()->andReturnSelf();
         $builder2->shouldReceive('where')->with('color_id', 1)->once()->andReturnSelf();
         $builder2->shouldReceive('where')->with('is_spare', false)->once()->andReturnSelf();
         $builder2->shouldReceive('firstOrFail')->once()->andReturn($existingInstance);
 
-        $setPart = Mockery::mock(SetPart::class);
+        $setPart = \Mockery::mock(SetPart::class);
         $setPart->shouldReceive('newQuery')->twice()->andReturn($builder1, $builder2);
         $setPart->shouldReceive('newInstance')->once()->andReturn($newInstance);
 

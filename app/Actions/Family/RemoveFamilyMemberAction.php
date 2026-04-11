@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Actions\Family;
 
@@ -20,7 +20,7 @@ final readonly class RemoveFamilyMemberAction
 
     public function execute(Family $family, User $member, User $actor): void
     {
-        $this->connection->transaction(function () use ($family, $member, $actor): void {
+        $this->connection->transaction(function() use ($family, $member, $actor): void {
             if ($family->head_id !== $actor->id) {
                 throw NotFamilyHeadException::forUser($actor->id);
             }

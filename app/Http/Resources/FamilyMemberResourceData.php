@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Http\Resources;
 
@@ -39,7 +39,7 @@ final readonly class FamilyMemberResourceData extends ResourceData
     public static function fromFamily(Family $family): array
     {
         return $family->users->map(
-            static fn (User $user): self => new self(
+            static fn(User $user): self => new self(
                 id: $user->id,
                 name: $user->name,
                 email: $user->email,

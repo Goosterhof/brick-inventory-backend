@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Models;
 
@@ -13,14 +13,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property positive-int $id
- * @property string $set_num
- * @property string $name
- * @property int|null $year
- * @property string|null $theme
- * @property int $num_parts
- * @property string|null $image_url
- * @property Carbon|null $created_at
- * @property Carbon|null $updated_at
+ * @property string       $set_num
+ * @property string       $name
+ * @property int|null     $year
+ * @property string|null  $theme
+ * @property int          $num_parts
+ * @property string|null  $image_url
+ * @property Carbon|null  $created_at
+ * @property Carbon|null  $updated_at
  */
 class Set extends Model
 {

@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 use App\Http\Controllers\Auth\LogoutController;
 use App\Models\User;
@@ -10,8 +10,8 @@ covers(LogoutController::class);
 
 uses(RefreshDatabase::class);
 
-describe('LogoutController', function (): void {
-    it('should logout an authenticated user', function (): void {
+describe('LogoutController', function(): void {
+    it('should logout an authenticated user', function(): void {
         $user = User::factory()->create();
 
         $response = $this->actingAs($user)->postJson('/api/logout');
@@ -21,7 +21,7 @@ describe('LogoutController', function (): void {
         $this->assertGuest('web');
     });
 
-    it('should return 401 for unauthenticated user', function (): void {
+    it('should return 401 for unauthenticated user', function(): void {
         $response = $this->postJson('/api/logout');
 
         $response->assertStatus(401);

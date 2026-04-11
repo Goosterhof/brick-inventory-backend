@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Services;
 
@@ -13,13 +13,18 @@ use Illuminate\Http\Client\Factory as HttpFactory;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\UploadedFile;
 
+use function array_key_exists;
+use function is_array;
+use function sprintf;
+
 final readonly class BrickognizeService implements BrickIdentificationServiceInterface
 {
     private const array PREDICTION_REQUIRED_FIELDS = ['id', 'name', 'type', 'score'];
 
     public function __construct(
         private HttpFactory $httpFactory,
-        #[Config('services.brickognize.base_url', 'https://api.brickognize.com')] private string $baseUrl,
+        #[Config('services.brickognize.base_url', 'https://api.brickognize.com')]
+        private string $baseUrl,
     ) {}
 
     /**
@@ -91,10 +96,7 @@ final readonly class BrickognizeService implements BrickIdentificationServiceInt
     private function validatePredictionItem(mixed $item, int $index): void
     {
         if (!is_array($item)) {
-            throw InvalidApiResponseException::invalidStructure(
-                'Identifying brick',
-                sprintf('Prediction at index %d is not an array', $index),
-            );
+            throw InvalidApiResponseException::invalidStructure('Identifying brick', sprintf('Prediction at index %d is not an array', $index));
         }
 
         $missingFields = [];
@@ -105,10 +107,7 @@ final readonly class BrickognizeService implements BrickIdentificationServiceInt
         }
 
         if ($missingFields !== []) {
-            throw InvalidApiResponseException::missingFields(
-                $missingFields,
-                sprintf('Prediction at index %d', $index),
-            );
+            throw InvalidApiResponseException::missingFields($missingFields, sprintf('Prediction at index %d', $index));
         }
     }
 }

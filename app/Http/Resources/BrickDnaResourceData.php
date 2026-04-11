@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Http\Resources;
 
@@ -13,8 +13,8 @@ use App\Data\BrickDnaData;
 final readonly class BrickDnaResourceData extends ComputedResourceData
 {
     /**
-     * @param list<array{color_id: int, name: string, rgb: string, is_transparent: bool, total_quantity: int}> $top_colors
-     * @param list<array{part_id: int, part_num: string, name: string, category: string|null, total_quantity: int}> $top_part_types
+     * @param list<array{color_id: int, name: string, rgb: string, is_transparent: bool, total_quantity: int}>                                                   $top_colors
+     * @param list<array{part_id: int, part_num: string, name: string, category: string|null, total_quantity: int}>                                              $top_part_types
      * @param list<array{part_id: int, part_num: string, part_name: string, color_id: int|null, color_name: string|null, color_rgb: string|null, quantity: int}> $rarest_parts
      */
     public function __construct(

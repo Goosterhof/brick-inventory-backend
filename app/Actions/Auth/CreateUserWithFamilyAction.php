@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Actions\Auth;
 
@@ -10,6 +10,8 @@ use App\Models\Family;
 use App\Models\InviteCode;
 use App\Models\User;
 use Illuminate\Database\ConnectionInterface;
+
+use function assert;
 
 final readonly class CreateUserWithFamilyAction
 {
@@ -22,7 +24,7 @@ final readonly class CreateUserWithFamilyAction
 
     public function execute(RegisterUserData $registerUserData): User
     {
-        return $this->connection->transaction(function () use ($registerUserData): User {
+        return $this->connection->transaction(function() use ($registerUserData): User {
             if ($registerUserData->inviteCode !== null && $registerUserData->inviteCode !== '') {
                 return $this->joinExistingFamily($registerUserData);
             }

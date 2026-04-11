@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Actions\Family;
 
@@ -19,7 +19,7 @@ final readonly class GenerateInviteCodeAction
 
     public function execute(Family $family, User $user): InviteCode
     {
-        return $this->connection->transaction(function () use ($family, $user): InviteCode {
+        return $this->connection->transaction(function() use ($family, $user): InviteCode {
             $this->revokeExistingActiveCode($family);
 
             $code = $this->inviteCode->newInstance();

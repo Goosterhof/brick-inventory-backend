@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace Database\Factories;
 
@@ -29,14 +29,14 @@ class FamilySetFactory extends Factory
 
     public function forFamily(Family $family): static
     {
-        return $this->state(fn (array $attributes): array => [
+        return $this->state(fn(array $attributes): array => [
             'family_id' => $family->id,
         ]);
     }
 
     public function forSet(Set $set): static
     {
-        return $this->state(fn (array $attributes): array => [
+        return $this->state(fn(array $attributes): array => [
             'set_id' => $set->id,
         ]);
     }

@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Providers;
 
@@ -28,7 +28,7 @@ class AppServiceProvider extends ServiceProvider
     {
         $this->app->bind(LegoDataServiceInterface::class, RebrickableService::class);
         $this->app->bind(BrickIdentificationServiceInterface::class, BrickognizeService::class);
-        $this->app->bind(StatefulGuard::class, fn (mixed $app) => Auth::guard('web'));
+        $this->app->bind(StatefulGuard::class, fn(mixed $app) => Auth::guard('web'));
 
         $this->app->when(GenerateInviteCodeAction::class)
             ->needs('$ttlDays')
@@ -47,17 +47,23 @@ class AppServiceProvider extends ServiceProvider
 
         $enabled = !app()->environment('testing');
 
-        RateLimiter::for('auth', fn (): Limit => $enabled
+        RateLimiter::for(
+            'auth',
+            fn(): Limit => $enabled
             ? Limit::perMinute(5)
             : Limit::none(),
         );
 
-        RateLimiter::for('brick-identification', fn (): Limit => $enabled
+        RateLimiter::for(
+            'brick-identification',
+            fn(): Limit => $enabled
             ? Limit::perMinute(10)
             : Limit::none(),
         );
 
-        RateLimiter::for('rebrickable', fn (Request $request): Limit => $enabled
+        RateLimiter::for(
+            'rebrickable',
+            fn(Request $request): Limit => $enabled
             ? Limit::perMinute(30)->by((string) ($request->user()->id ?? $request->ip()))
             : Limit::none(),
         );

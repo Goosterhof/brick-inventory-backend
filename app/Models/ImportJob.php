@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Models;
 
@@ -13,18 +13,18 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * @property positive-int $id
- * @property int $family_id
- * @property ImportJobStatus $status
- * @property int $total_sets
- * @property int $processed_sets
- * @property int $failed_sets
+ * @property positive-int                                           $id
+ * @property int                                                    $family_id
+ * @property ImportJobStatus                                        $status
+ * @property int                                                    $total_sets
+ * @property int                                                    $processed_sets
+ * @property int                                                    $failed_sets
  * @property array<int, array{set_num: string, error: string}>|null $failed_set_details
- * @property Carbon|null $started_at
- * @property Carbon|null $completed_at
- * @property Carbon|null $created_at
- * @property Carbon|null $updated_at
- * @property-read Family $family
+ * @property Carbon|null                                            $started_at
+ * @property Carbon|null                                            $completed_at
+ * @property Carbon|null                                            $created_at
+ * @property Carbon|null                                            $updated_at
+ * @property Family                                                 $family
  */
 class ImportJob extends Model implements BelongsToFamilyInterface
 {

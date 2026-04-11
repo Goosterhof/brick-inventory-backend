@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Http\Resources;
 
@@ -11,6 +11,8 @@ use DateTimeInterface;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
+
+use function is_array;
 
 /**
  * Base class for API responses sourced from Eloquent Models.
@@ -42,7 +44,7 @@ abstract readonly class ResourceData implements ResourceResponseInterface
      *
      * @return array<string, mixed>
      */
-    public function toArray(): array
+    final public function toArray(): array
     {
         /** @var array<string, mixed> */
         return array_map(
@@ -58,24 +60,24 @@ abstract readonly class ResourceData implements ResourceResponseInterface
      *
      * @return array<int, static>
      */
-    public static function collection(Collection $models): array
+    final public static function collection(Collection $models): array
     {
         $models->loadMissing(static::requiredRelations());
 
         return $models->map(
-            static fn (Model $model): static => static::from($model),
+            static fn(Model $model): static => static::from($model),
         )->all();
     }
 
     /**
      * @return array<string, mixed>
      */
-    public function jsonSerialize(): array
+    final public function jsonSerialize(): array
     {
         return $this->toArray();
     }
 
-    public function toResponse(mixed $request = null): JsonResponse
+    final public function toResponse(mixed $request = null): JsonResponse
     {
         return new JsonResponse($this->toArray());
     }
@@ -83,7 +85,7 @@ abstract readonly class ResourceData implements ResourceResponseInterface
     /**
      * Create a JSON response with a specific status code.
      */
-    public function toResponseWithStatus(int $status): JsonResponse
+    final public function toResponseWithStatus(int $status): JsonResponse
     {
         return new JsonResponse($this->toArray(), $status);
     }
@@ -110,7 +112,7 @@ abstract readonly class ResourceData implements ResourceResponseInterface
     {
         $missingRelations = array_filter(
             static::requiredRelations(),
-            static fn (string $relation): bool => !$model->relationLoaded($relation),
+            static fn(string $relation): bool => !$model->relationLoaded($relation),
         );
 
         if ($missingRelations !== []) {

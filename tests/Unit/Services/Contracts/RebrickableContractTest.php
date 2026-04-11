@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 use App\Data\Lego\LegoSetData;
 use App\Data\Lego\LegoSetPartData;
@@ -31,8 +31,8 @@ function createContractRebrickableService(): RebrickableService
         resolve(CacheRepository::class),
         CONTRACT_API_KEY,
         CONTRACT_BASE_URL,
-        86400,
-        3600,
+        86_400,
+        3_600,
     );
 }
 
@@ -40,12 +40,12 @@ function loadFixture(string $name): array
 {
     $path = __DIR__ . '/Fixtures/' . $name;
 
-    return json_decode((string) file_get_contents($path), true, 512, JSON_THROW_ON_ERROR);
+    return json_decode((string) file_get_contents($path), true, 512, \JSON_THROW_ON_ERROR);
 }
 
-describe('Rebrickable API Contract', function (): void {
-    describe('fetchSet contract', function (): void {
-        it('should parse a full realistic set response including extra fields', function (): void {
+describe('Rebrickable API Contract', function(): void {
+    describe('fetchSet contract', function(): void {
+        it('should parse a full realistic set response including extra fields', function(): void {
             $fixture = loadFixture('rebrickable-set.json');
 
             Http::fake([
@@ -58,15 +58,15 @@ describe('Rebrickable API Contract', function (): void {
             expect($result)->toBeInstanceOf(LegoSetData::class);
             expect($result->setNum)->toBe('75192-1');
             expect($result->name)->toBe('Millennium Falcon');
-            expect($result->year)->toBe(2017);
+            expect($result->year)->toBe(2_017);
             expect($result->themeId)->toBe(158);
-            expect($result->numParts)->toBe(7541);
+            expect($result->numParts)->toBe(7_541);
             expect($result->imageUrl)->toBe('https://cdn.rebrickable.com/media/sets/75192-1/12345.jpg');
         });
     });
 
-    describe('fetchSetByEan contract', function (): void {
-        it('should parse a full realistic search response including extra fields', function (): void {
+    describe('fetchSetByEan contract', function(): void {
+        it('should parse a full realistic search response including extra fields', function(): void {
             $fixture = loadFixture('rebrickable-set-search.json');
 
             Http::fake([
@@ -79,14 +79,14 @@ describe('Rebrickable API Contract', function (): void {
             expect($result)->toBeInstanceOf(LegoSetData::class);
             expect($result->setNum)->toBe('75192-1');
             expect($result->name)->toBe('Millennium Falcon');
-            expect($result->year)->toBe(2017);
+            expect($result->year)->toBe(2_017);
             expect($result->themeId)->toBe(158);
-            expect($result->numParts)->toBe(7541);
+            expect($result->numParts)->toBe(7_541);
         });
     });
 
-    describe('fetchSetParts contract', function (): void {
-        it('should parse a full realistic parts response including nested extra fields', function (): void {
+    describe('fetchSetParts contract', function(): void {
+        it('should parse a full realistic parts response including nested extra fields', function(): void {
             $fixture = loadFixture('rebrickable-set-parts.json');
 
             Http::fake([
@@ -121,8 +121,8 @@ describe('Rebrickable API Contract', function (): void {
         });
     });
 
-    describe('fetchUserSets contract', function (): void {
-        it('should parse a full realistic user sets response including extra fields', function (): void {
+    describe('fetchUserSets contract', function(): void {
+        it('should parse a full realistic user sets response including extra fields', function(): void {
             $fixture = loadFixture('rebrickable-user-sets.json');
 
             Http::fake([
@@ -139,9 +139,9 @@ describe('Rebrickable API Contract', function (): void {
             expect($pages[0][0])->toBeInstanceOf(RebrickableUserSetData::class);
             expect($pages[0][0]->set->setNum)->toBe('75192-1');
             expect($pages[0][0]->set->name)->toBe('Millennium Falcon');
-            expect($pages[0][0]->set->year)->toBe(2017);
+            expect($pages[0][0]->set->year)->toBe(2_017);
             expect($pages[0][0]->set->themeId)->toBe(158);
-            expect($pages[0][0]->set->numParts)->toBe(7541);
+            expect($pages[0][0]->set->numParts)->toBe(7_541);
             expect($pages[0][0]->quantity)->toBe(2);
 
             // Second set: nullable imageUrl

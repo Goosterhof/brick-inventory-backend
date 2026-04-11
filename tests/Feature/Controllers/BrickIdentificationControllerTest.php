@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 use App\Http\Controllers\BrickIdentificationController;
 use App\Models\Part;
@@ -15,9 +15,9 @@ covers(BrickIdentificationController::class);
 
 uses(RefreshDatabase::class);
 
-describe('BrickIdentificationController', function (): void {
-    describe('identify', function (): void {
-        it('should identify a brick and return the part', function (): void {
+describe('BrickIdentificationController', function(): void {
+    describe('identify', function(): void {
+        it('should identify a brick and return the part', function(): void {
             // arrange
             $user = User::factory()->create();
             $part = Part::factory()->create([
@@ -53,7 +53,7 @@ describe('BrickIdentificationController', function (): void {
                 ->assertJsonPath('name', 'Brick 2 x 4');
         });
 
-        it('should return 401 when unauthenticated', function (): void {
+        it('should return 401 when unauthenticated', function(): void {
             // arrange
             $image = UploadedFile::fake()->image('brick.jpg');
 
@@ -66,7 +66,7 @@ describe('BrickIdentificationController', function (): void {
             $response->assertStatus(401);
         });
 
-        it('should return 422 when no image provided', function (): void {
+        it('should return 422 when no image provided', function(): void {
             // arrange
             $user = User::factory()->create();
 
@@ -78,7 +78,7 @@ describe('BrickIdentificationController', function (): void {
                 ->assertJsonValidationErrors(['image']);
         });
 
-        it('should return 422 when file is not an image', function (): void {
+        it('should return 422 when file is not an image', function(): void {
             // arrange
             $user = User::factory()->create();
             $file = UploadedFile::fake()->create('document.pdf', 100);
@@ -93,10 +93,10 @@ describe('BrickIdentificationController', function (): void {
                 ->assertJsonValidationErrors(['image']);
         });
 
-        it('should return 422 when image exceeds maximum file size', function (): void {
+        it('should return 422 when image exceeds maximum file size', function(): void {
             // arrange
             $user = User::factory()->create();
-            $file = UploadedFile::fake()->image('large-brick.jpg')->size(10241); // 10241 KB > 10240 KB (10MB) limit
+            $file = UploadedFile::fake()->image('large-brick.jpg')->size(10_241); // 10241 KB > 10240 KB (10MB) limit
 
             // act
             $response = $this->actingAs($user)->postJson('/api/identify-brick', [
@@ -108,7 +108,7 @@ describe('BrickIdentificationController', function (): void {
                 ->assertJsonValidationErrors(['image']);
         });
 
-        it('should create part when identified part not in database', function (): void {
+        it('should create part when identified part not in database', function(): void {
             // arrange
             $user = User::factory()->create();
 
@@ -147,7 +147,7 @@ describe('BrickIdentificationController', function (): void {
             ]);
         });
 
-        it('should return 502 when Brickognize API fails', function (): void {
+        it('should return 502 when Brickognize API fails', function(): void {
             // arrange
             $user = User::factory()->create();
 
@@ -167,7 +167,7 @@ describe('BrickIdentificationController', function (): void {
                 ->assertJsonPath('error', 'Failed to identify brick');
         });
 
-        it('should return 502 when no parts identified in image', function (): void {
+        it('should return 502 when no parts identified in image', function(): void {
             // arrange
             $user = User::factory()->create();
 
@@ -189,7 +189,7 @@ describe('BrickIdentificationController', function (): void {
                 ->assertJsonPath('error', 'Failed to identify brick');
         });
 
-        it('should select best matching part from multiple predictions', function (): void {
+        it('should select best matching part from multiple predictions', function(): void {
             // arrange
             $user = User::factory()->create();
             Part::factory()->create([
@@ -235,8 +235,8 @@ describe('BrickIdentificationController', function (): void {
                 ->assertJsonPath('part_num', '3001');
         });
 
-        it('should rate limit identify-brick requests', function (): void {
-            RateLimiter::for('brick-identification', fn (): Limit => Limit::perMinute(10));
+        it('should rate limit identify-brick requests', function(): void {
+            RateLimiter::for('brick-identification', fn(): Limit => Limit::perMinute(10));
             $this->freezeTime();
             $user = User::factory()->create();
 

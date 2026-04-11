@@ -1,9 +1,8 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 return [
-
     /*
     |--------------------------------------------------------------------------
     | Application Name
@@ -13,7 +12,7 @@ return [
     | framework needs to place the application's name in a notification or
     | other UI elements where an application name needs to be displayed.
     |
-    */
+     */
 
     'name' => env('APP_NAME', 'Laravel'),
 
@@ -26,7 +25,7 @@ return [
     | running in. This may determine how you prefer to configure various
     | services the application utilizes. Set this in your ".env" file.
     |
-    */
+     */
 
     'env' => env('APP_ENV', 'production'),
 
@@ -39,7 +38,7 @@ return [
     | stack traces will be shown on every error that occurs within your
     | application. If disabled, a simple generic error page is shown.
     |
-    */
+     */
 
     'debug' => (bool) env('APP_DEBUG', false),
 
@@ -52,7 +51,7 @@ return [
     | the Artisan command line tool. You should set this to the root of
     | the application so that it's available within Artisan commands.
     |
-    */
+     */
 
     'url' => env('APP_URL', 'http://localhost'),
 
@@ -65,7 +64,7 @@ return [
     | will be used by the PHP date and date-time functions. The timezone
     | is set to "UTC" by default as it is suitable for most use cases.
     |
-    */
+     */
 
     'timezone' => 'UTC',
 
@@ -78,7 +77,7 @@ return [
     | by Laravel's translation / localization methods. This option can be
     | set to any locale for which you plan to have translation strings.
     |
-    */
+     */
 
     'locale' => env('APP_LOCALE', 'en'),
 
@@ -95,7 +94,7 @@ return [
     | to a random, 32 character string to ensure that all encrypted values
     | are secure. You should do this prior to deploying the application.
     |
-    */
+     */
 
     'cipher' => 'AES-256-CBC',
 
@@ -104,7 +103,7 @@ return [
     'previous_keys' => [
         ...array_filter(
             explode(',', (string) env('APP_PREVIOUS_KEYS', '')),
-            fn (string $value): bool => $value !== '',
+            fn(string $value): bool => $value !== '',
         ),
     ],
 
@@ -119,7 +118,7 @@ return [
     |
     | Supported drivers: "file", "cache"
     |
-    */
+     */
 
     'maintenance' => [
         'driver' => env('APP_MAINTENANCE_DRIVER', 'file'),
@@ -134,7 +133,7 @@ return [
     | Configuration for the family invite code system. The TTL controls
     | how long an invite code remains valid after generation, in days.
     |
-    */
+     */
 
     'invite_code_ttl_days' => (int) env('INVITE_CODE_TTL_DAYS', 7),
 

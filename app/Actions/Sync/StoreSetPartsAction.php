@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Actions\Sync;
 
@@ -24,13 +24,13 @@ final readonly class StoreSetPartsAction
      */
     public function execute(Set $set, array $partsData): void
     {
-        $this->connection->transaction(function () use ($set, $partsData): void {
+        $this->connection->transaction(function() use ($set, $partsData): void {
             foreach ($partsData as $partData) {
                 $color = $this->upsertColorAction->execute($partData->color);
                 $part = $this->upsertPartAction->execute($partData->part);
 
                 try {
-                    $this->connection->transaction(function () use ($set, $part, $color, $partData): void {
+                    $this->connection->transaction(function() use ($set, $part, $color, $partData): void {
                         $setPart = $this->setPart->newQuery()
                             ->where('set_id', $set->id)
                             ->where('part_id', $part->id)
@@ -52,7 +52,7 @@ final readonly class StoreSetPartsAction
                         $setPart->save();
                     });
                 } catch (UniqueConstraintViolationException) {
-                    $this->connection->transaction(function () use ($set, $part, $color, $partData): void {
+                    $this->connection->transaction(function() use ($set, $part, $color, $partData): void {
                         /** @var SetPart */
                         $setPart = $this->setPart->newQuery()
                             ->where('set_id', $set->id)

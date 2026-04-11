@@ -1,14 +1,14 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 use App\Data\FamilyStatsData;
 use App\Http\Resources\FamilyStatsResourceData;
 
 covers(FamilyStatsResourceData::class);
 
-describe('FamilyStatsResourceData', function (): void {
-    it('should create resource from FamilyStatsData', function (): void {
+describe('FamilyStatsResourceData', function(): void {
+    it('should create resource from FamilyStatsData', function(): void {
         // arrange
         $data = new FamilyStatsData(
             totalSets: 5,
@@ -16,7 +16,7 @@ describe('FamilyStatsResourceData', function (): void {
             setsByStatus: ['built' => 3, 'sealed' => 2],
             totalStorageLocations: 4,
             totalUniqueParts: 150,
-            totalPartsQuantity: 1200,
+            totalPartsQuantity: 1_200,
         );
 
         // act
@@ -29,10 +29,10 @@ describe('FamilyStatsResourceData', function (): void {
             ->and($resource->sets_by_status)->toBe(['built' => 3, 'sealed' => 2])
             ->and($resource->total_storage_locations)->toBe(4)
             ->and($resource->total_unique_parts)->toBe(150)
-            ->and($resource->total_parts_quantity)->toBe(1200);
+            ->and($resource->total_parts_quantity)->toBe(1_200);
     });
 
-    it('should serialize to array with snake_case keys', function (): void {
+    it('should serialize to array with snake_case keys', function(): void {
         // arrange
         $data = new FamilyStatsData(
             totalSets: 3,
@@ -57,7 +57,7 @@ describe('FamilyStatsResourceData', function (): void {
         ]);
     });
 
-    it('should handle empty sets_by_status', function (): void {
+    it('should handle empty sets_by_status', function(): void {
         // arrange
         $data = new FamilyStatsData(
             totalSets: 0,

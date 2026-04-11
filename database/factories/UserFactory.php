@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace Database\Factories;
 
@@ -15,9 +15,7 @@ use Illuminate\Support\Str;
  */
 class UserFactory extends Factory
 {
-    /**
-     * The current password being used by the factory.
-     */
+    /** The current password being used by the factory. */
     protected static ?string $password;
 
     public function definition(): array
@@ -37,7 +35,7 @@ class UserFactory extends Factory
      */
     public function configure(): static
     {
-        return $this->afterCreating(function (User $user): void {
+        return $this->afterCreating(function(User $user): void {
             // Set the user as family head if no head is set yet
             if ($user->family->head_id === null) {
                 /** @var positive-int $userId */
@@ -53,14 +51,14 @@ class UserFactory extends Factory
      */
     public function unverified(): static
     {
-        return $this->state(fn (array $attributes): array => [
+        return $this->state(fn(array $attributes): array => [
             'email_verified_at' => null,
         ]);
     }
 
     public function forFamily(Family $family): static
     {
-        return $this->state(fn (array $attributes): array => [
+        return $this->state(fn(array $attributes): array => [
             'family_id' => $family->id,
         ]);
     }

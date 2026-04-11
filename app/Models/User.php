@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Models;
 
@@ -11,16 +11,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 
 /**
- * @property positive-int $id
- * @property int $family_id
- * @property string $name
- * @property string $email
+ * @property positive-int         $id
+ * @property int                  $family_id
+ * @property string               $name
+ * @property string               $email
  * @property CarbonImmutable|null $email_verified_at
- * @property string $password
- * @property string|null $remember_token
- * @property CarbonImmutable $created_at
- * @property CarbonImmutable $updated_at
- * @property-read Family $family
+ * @property string               $password
+ * @property string|null          $remember_token
+ * @property CarbonImmutable      $created_at
+ * @property CarbonImmutable      $updated_at
+ * @property Family               $family
  */
 class User extends Authenticatable
 {

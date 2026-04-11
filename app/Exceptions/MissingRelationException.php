@@ -1,10 +1,12 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Exceptions;
 
 use RuntimeException;
+
+use function sprintf;
 
 /**
  * Exception thrown when a required Eloquent relation is not loaded on a model.

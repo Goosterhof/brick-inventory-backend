@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace Database\Factories;
 
@@ -29,28 +29,28 @@ class SetPartFactory extends Factory
 
     public function forSet(Set $set): static
     {
-        return $this->state(fn (array $attributes): array => [
+        return $this->state(fn(array $attributes): array => [
             'set_id' => $set->id,
         ]);
     }
 
     public function forPart(Part $part): static
     {
-        return $this->state(fn (array $attributes): array => [
+        return $this->state(fn(array $attributes): array => [
             'part_id' => $part->id,
         ]);
     }
 
     public function withColor(Color $color): static
     {
-        return $this->state(fn (array $attributes): array => [
+        return $this->state(fn(array $attributes): array => [
             'color_id' => $color->id,
         ]);
     }
 
     public function spare(): static
     {
-        return $this->state(fn (array $attributes): array => [
+        return $this->state(fn(array $attributes): array => [
             'is_spare' => true,
         ]);
     }

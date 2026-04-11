@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Models;
 
@@ -13,17 +13,17 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * @property positive-int $id
- * @property int $family_id
- * @property int $set_id
- * @property int $quantity
+ * @property positive-int    $id
+ * @property int             $family_id
+ * @property int             $set_id
+ * @property int             $quantity
  * @property FamilySetStatus $status
- * @property Carbon|null $purchase_date
- * @property string|null $notes
- * @property Carbon|null $created_at
- * @property Carbon|null $updated_at
- * @property-read Family $family
- * @property-read Set $set
+ * @property Carbon|null     $purchase_date
+ * @property string|null     $notes
+ * @property Carbon|null     $created_at
+ * @property Carbon|null     $updated_at
+ * @property Family          $family
+ * @property Set             $set
  */
 class FamilySet extends Model implements BelongsToFamilyInterface
 {

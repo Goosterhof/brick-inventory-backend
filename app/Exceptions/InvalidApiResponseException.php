@@ -1,8 +1,10 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Exceptions;
+
+use function sprintf;
 
 /**
  * Exception thrown when an external API returns an unexpected response structure.

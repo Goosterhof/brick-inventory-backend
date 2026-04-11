@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 use Illuminate\Foundation\Http\FormRequest;
 
@@ -12,11 +12,11 @@ arch('requests should extend FormRequest')
     ->expect('App\Http\Requests')
     ->toExtend(FormRequest::class);
 
-it('should have all form request classes as final', function (): void {
+it('should have all form request classes as final', function(): void {
     $nonFinal = [];
 
-    foreach (getClassesInDirectory(dirname(__DIR__, 2) . '/app/Http/Requests', 'App\\Http\\Requests\\') as $className) {
-        $file = new ReflectionClass($className)->getFileName();
+    foreach (getClassesInDirectory(\dirname(__DIR__, 2) . '/app/Http/Requests', 'App\Http\Requests\\') as $className) {
+        $file = new \ReflectionClass($className)->getFileName();
         $content = (string) shell_exec('cat ' . escapeshellarg($file));
 
         if (!str_contains($content, 'final class')) {
@@ -29,11 +29,11 @@ it('should have all form request classes as final', function (): void {
     );
 });
 
-it('should not have public constants in form requests', function (): void {
+it('should not have public constants in form requests', function(): void {
     $violations = [];
 
-    foreach (getClassesInDirectory(dirname(__DIR__, 2) . '/app/Http/Requests', 'App\\Http\\Requests\\') as $className) {
-        $file = new ReflectionClass($className)->getFileName();
+    foreach (getClassesInDirectory(\dirname(__DIR__, 2) . '/app/Http/Requests', 'App\Http\Requests\\') as $className) {
+        $file = new \ReflectionClass($className)->getFileName();
         $content = (string) shell_exec('cat ' . escapeshellarg($file));
 
         if (preg_match('/public\s+const\s+/', $content)) {

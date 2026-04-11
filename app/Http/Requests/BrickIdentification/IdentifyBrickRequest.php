@@ -1,12 +1,14 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Http\Requests\BrickIdentification;
 
 use App\DataTransferObjects\BrickIdentification\IdentifyBrickData;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\UploadedFile;
+
+use function assert;
 
 final class IdentifyBrickRequest extends FormRequest
 {

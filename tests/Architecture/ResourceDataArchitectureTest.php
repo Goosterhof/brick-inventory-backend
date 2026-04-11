@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 use App\Http\Resources\ComputedResourceData;
 use App\Http\Resources\ResourceData;
@@ -16,7 +16,7 @@ use App\Http\Resources\ResourceData;
 | - Are final (concrete classes) or abstract (base class only)
 | - Extend either ResourceData (Model-sourced) or ComputedResourceData (DTO-sourced)
 |
-*/
+ */
 
 arch('resource data classes should end with ResourceData')
     ->expect('App\Http\Resources')
@@ -26,23 +26,23 @@ arch('resource data classes should be readonly')
     ->expect('App\Http\Resources')
     ->toBeReadonly();
 
-it('should have ResourceData as abstract readonly base class', function (): void {
-    $reflection = new ReflectionClass(ResourceData::class);
+it('should have ResourceData as abstract readonly base class', function(): void {
+    $reflection = new \ReflectionClass(ResourceData::class);
 
     expect($reflection->isAbstract())->toBeTrue('ResourceData base class should be abstract')
         ->and($reflection->isReadOnly())->toBeTrue('ResourceData base class should be readonly');
 });
 
-it('should have ComputedResourceData as abstract readonly base class', function (): void {
-    $reflection = new ReflectionClass(ComputedResourceData::class);
+it('should have ComputedResourceData as abstract readonly base class', function(): void {
+    $reflection = new \ReflectionClass(ComputedResourceData::class);
 
     expect($reflection->isAbstract())->toBeTrue('ComputedResourceData base class should be abstract')
         ->and($reflection->isReadOnly())->toBeTrue('ComputedResourceData base class should be readonly');
 });
 
-it('should have all concrete resource data classes extending ResourceData or ComputedResourceData', function (): void {
-    foreach (getClassesInDirectory(dirname(__DIR__, 2) . '/app/Http/Resources', 'App\\Http\\Resources\\') as $className) {
-        $reflection = new ReflectionClass($className);
+it('should have all concrete resource data classes extending ResourceData or ComputedResourceData', function(): void {
+    foreach (getClassesInDirectory(\dirname(__DIR__, 2) . '/app/Http/Resources', 'App\Http\Resources\\') as $className) {
+        $reflection = new \ReflectionClass($className);
 
         // Skip abstract classes (like ResourceData and ComputedResourceData base classes)
         if ($reflection->isAbstract()) {
@@ -53,7 +53,7 @@ it('should have all concrete resource data classes extending ResourceData or Com
         $extendsComputedResourceData = is_subclass_of($className, ComputedResourceData::class);
 
         expect($extendsResourceData || $extendsComputedResourceData)->toBeTrue(
-            sprintf(
+            \sprintf(
                 'Resource class %s must extend either ResourceData or ComputedResourceData',
                 $className,
             ),
@@ -61,9 +61,9 @@ it('should have all concrete resource data classes extending ResourceData or Com
     }
 });
 
-it('should have all concrete resource data classes as final', function (): void {
-    foreach (getClassesInDirectory(dirname(__DIR__, 2) . '/app/Http/Resources', 'App\\Http\\Resources\\') as $className) {
-        $reflection = new ReflectionClass($className);
+it('should have all concrete resource data classes as final', function(): void {
+    foreach (getClassesInDirectory(\dirname(__DIR__, 2) . '/app/Http/Resources', 'App\Http\Resources\\') as $className) {
+        $reflection = new \ReflectionClass($className);
 
         // Skip abstract classes (like ResourceData base class)
         if ($reflection->isAbstract()) {
@@ -71,14 +71,14 @@ it('should have all concrete resource data classes as final', function (): void 
         }
 
         expect($reflection->isFinal())->toBeTrue(
-            sprintf('Resource class %s should be final', $className),
+            \sprintf('Resource class %s should be final', $className),
         );
     }
 });
 
-it('should have from method in concrete resource data classes', function (): void {
-    foreach (getClassesInDirectory(dirname(__DIR__, 2) . '/app/Http/Resources', 'App\\Http\\Resources\\') as $className) {
-        $reflection = new ReflectionClass($className);
+it('should have from method in concrete resource data classes', function(): void {
+    foreach (getClassesInDirectory(\dirname(__DIR__, 2) . '/app/Http/Resources', 'App\Http\Resources\\') as $className) {
+        $reflection = new \ReflectionClass($className);
 
         // Skip abstract classes (like ResourceData base class)
         if ($reflection->isAbstract()) {
@@ -86,14 +86,14 @@ it('should have from method in concrete resource data classes', function (): voi
         }
 
         expect($reflection->hasMethod('from'))->toBeTrue(
-            sprintf('ResourceData class %s should have a from() method', $className),
+            \sprintf('ResourceData class %s should have a from() method', $className),
         );
     }
 });
 
-it('should define EAGER_LOAD constant when using nested ResourceData', function (): void {
-    foreach (getClassesInDirectory(dirname(__DIR__, 2) . '/app/Http/Resources', 'App\\Http\\Resources\\') as $className) {
-        $reflection = new ReflectionClass($className);
+it('should define EAGER_LOAD constant when using nested ResourceData', function(): void {
+    foreach (getClassesInDirectory(\dirname(__DIR__, 2) . '/app/Http/Resources', 'App\Http\Resources\\') as $className) {
+        $reflection = new \ReflectionClass($className);
 
         // Skip abstract classes (like ResourceData base class)
         if ($reflection->isAbstract()) {
@@ -109,10 +109,11 @@ it('should define EAGER_LOAD constant when using nested ResourceData', function 
         $hasNestedResourceData = false;
         foreach ($constructor->getParameters() as $parameter) {
             $type = $parameter->getType();
-            if ($type instanceof ReflectionNamedType && !$type->isBuiltin()) {
+            if ($type instanceof \ReflectionNamedType && !$type->isBuiltin()) {
                 $typeName = $type->getName();
                 if (is_subclass_of($typeName, ResourceData::class)) {
                     $hasNestedResourceData = true;
+
                     break;
                 }
             }
@@ -125,6 +126,7 @@ it('should define EAGER_LOAD constant when using nested ResourceData', function 
             $docComment = $property->getDocComment();
             if ($docComment && preg_match('/@var\s+(\w+ResourceData)\[\]/', $docComment)) {
                 $hasNestedResourceData = true;
+
                 break;
             }
         }
@@ -137,7 +139,7 @@ it('should define EAGER_LOAD constant when using nested ResourceData', function 
         $eagerLoadConstant = $reflection->getReflectionConstant('EAGER_LOAD');
 
         expect($eagerLoadConstant)->not->toBeFalse(
-            sprintf(
+            \sprintf(
                 'ResourceData class %s has nested ResourceData but does not define EAGER_LOAD constant',
                 $className,
             ),
@@ -145,7 +147,7 @@ it('should define EAGER_LOAD constant when using nested ResourceData', function 
 
         expect($eagerLoadConstant->getDeclaringClass()->getName())->toBe(
             $className,
-            sprintf(
+            \sprintf(
                 'ResourceData class %s has nested ResourceData but does not define its own EAGER_LOAD constant',
                 $className,
             ),

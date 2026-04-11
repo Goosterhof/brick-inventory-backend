@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Models;
 
@@ -12,12 +12,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property positive-int $id
- * @property int $rebrickable_id
- * @property string $name
- * @property string $rgb
- * @property bool $is_transparent
- * @property Carbon|null $created_at
- * @property Carbon|null $updated_at
+ * @property int          $rebrickable_id
+ * @property string       $name
+ * @property string       $rgb
+ * @property bool         $is_transparent
+ * @property Carbon|null  $created_at
+ * @property Carbon|null  $updated_at
  */
 class Color extends Model
 {

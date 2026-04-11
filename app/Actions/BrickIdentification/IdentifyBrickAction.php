@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Actions\BrickIdentification;
 
@@ -32,7 +32,7 @@ final readonly class IdentifyBrickAction
         // Filter for part predictions only (exclude minifigs, sets, etc.)
         $partPredictions = array_filter(
             $predictions,
-            static fn (BrickognizePredictionData $brickognizePredictionData): bool => $brickognizePredictionData->type === 'part',
+            static fn(BrickognizePredictionData $brickognizePredictionData): bool => $brickognizePredictionData->type === 'part',
         );
 
         if ($partPredictions === []) {
@@ -42,7 +42,7 @@ final readonly class IdentifyBrickAction
         // Get the highest scoring part prediction
         $bestPrediction = array_reduce(
             $partPredictions,
-            static function (?BrickognizePredictionData $carry, BrickognizePredictionData $item): BrickognizePredictionData {
+            static function(?BrickognizePredictionData $carry, BrickognizePredictionData $item): BrickognizePredictionData {
                 if ($carry === null || $item->score > $carry->score) {
                     return $item;
                 }

@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Actions\StorageOption;
 
@@ -21,7 +21,7 @@ final readonly class CreateStorageOptionAction
 
     public function execute(StorageOptionData $storageOptionData): StorageOption
     {
-        return $this->connection->transaction(function () use ($storageOptionData): StorageOption {
+        return $this->connection->transaction(function() use ($storageOptionData): StorageOption {
             $storageOption = $this->storageOption->newInstance();
             $storageOption->family_id = $this->user->family_id;
             $storageOption->name = $storageOptionData->name;

@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Actions\FamilySet;
 
@@ -23,7 +23,7 @@ final readonly class CreateFamilySetAction
     public function execute(Family $family, CreateFamilySetData $createFamilySetData): FamilySet
     {
         /** @var FamilySet */
-        return $this->connection->transaction(function () use ($family, $createFamilySetData): FamilySet {
+        return $this->connection->transaction(function() use ($family, $createFamilySetData): FamilySet {
             $set = $this->getSetAction->execute($createFamilySetData->setNum);
 
             /** @var FamilySet $familySet */

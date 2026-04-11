@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Http\Controllers;
 
@@ -38,7 +38,8 @@ class FamilySetController extends Controller
      * @return array<int, FamilySetCompletionResourceData>
      */
     public function completion(
-        #[CurrentUser] User $user,
+        #[CurrentUser]
+        User $user,
         GetFamilySetCompletionAction $getFamilySetCompletionAction,
     ): array {
         $completionData = $getFamilySetCompletionAction->execute($user->family);
@@ -51,7 +52,8 @@ class FamilySetController extends Controller
 
     public function store(
         StoreFamilySetRequest $storeFamilySetRequest,
-        #[CurrentUser] User $user,
+        #[CurrentUser]
+        User $user,
         CreateFamilySetAction $createFamilySetAction,
     ): JsonResponse {
         $familySet = $createFamilySetAction->execute($user->family, $storeFamilySetRequest->toDto());
@@ -82,7 +84,8 @@ class FamilySetController extends Controller
     }
 
     public function importFromRebrickable(
-        #[CurrentUser] User $user,
+        #[CurrentUser]
+        User $user,
         StartImportAction $startImportAction,
     ): JsonResponse {
         $importJob = $startImportAction->execute($user->family);
@@ -91,7 +94,8 @@ class FamilySetController extends Controller
     }
 
     public function importStatus(
-        #[CurrentUser] User $user,
+        #[CurrentUser]
+        User $user,
         GetImportStatusAction $getImportStatusAction,
     ): JsonResponse {
         $importJob = $getImportStatusAction->execute($user->family);

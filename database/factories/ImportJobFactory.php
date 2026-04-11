@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace Database\Factories;
 
@@ -30,14 +30,14 @@ class ImportJobFactory extends Factory
 
     public function forFamily(Family $family): static
     {
-        return $this->state(fn (array $attributes): array => [
+        return $this->state(fn(array $attributes): array => [
             'family_id' => $family->id,
         ]);
     }
 
     public function inProgress(): static
     {
-        return $this->state(fn (array $attributes): array => [
+        return $this->state(fn(array $attributes): array => [
             'status' => ImportJobStatus::InProgress,
             'started_at' => now(),
         ]);
@@ -45,7 +45,7 @@ class ImportJobFactory extends Factory
 
     public function completed(): static
     {
-        return $this->state(fn (array $attributes): array => [
+        return $this->state(fn(array $attributes): array => [
             'status' => ImportJobStatus::Completed,
             'started_at' => now()->subMinutes(5),
             'completed_at' => now(),
@@ -54,7 +54,7 @@ class ImportJobFactory extends Factory
 
     public function failed(): static
     {
-        return $this->state(fn (array $attributes): array => [
+        return $this->state(fn(array $attributes): array => [
             'status' => ImportJobStatus::Failed,
             'started_at' => now()->subMinutes(5),
             'completed_at' => now(),

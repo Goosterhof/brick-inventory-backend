@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 use App\Http\Middleware\SetCacheHeaders;
 use App\Http\Middleware\SetEtagHeaders;
@@ -16,17 +16,17 @@ covers(SetEtagHeaders::class, SetCacheHeaders::class);
 
 uses(RefreshDatabase::class);
 
-describe('Response Caching', function (): void {
-    describe('Catalog endpoints (max-age=3600)', function (): void {
-        it('should return ETag and Cache-Control on set parts endpoint', function (): void {
+describe('Response Caching', function(): void {
+    describe('Catalog endpoints (max-age=3600)', function(): void {
+        it('should return ETag and Cache-Control on set parts endpoint', function(): void {
             $user = User::factory()->create();
 
             $set = Set::factory()->create([
                 'set_num' => '75192-1',
                 'name' => 'Millennium Falcon',
-                'year' => 2017,
+                'year' => 2_017,
                 'theme' => 'Star Wars',
-                'num_parts' => 7541,
+                'num_parts' => 7_541,
                 'image_url' => 'https://example.com/falcon.jpg',
             ]);
 
@@ -60,15 +60,15 @@ describe('Response Caching', function (): void {
             $response->assertHeader('Cache-Control', 'max-age=3600, public');
         });
 
-        it('should return 304 when If-None-Match matches on set parts endpoint', function (): void {
+        it('should return 304 when If-None-Match matches on set parts endpoint', function(): void {
             $user = User::factory()->create();
 
             $set = Set::factory()->create([
                 'set_num' => '75192-1',
                 'name' => 'Millennium Falcon',
-                'year' => 2017,
+                'year' => 2_017,
                 'theme' => 'Star Wars',
-                'num_parts' => 7541,
+                'num_parts' => 7_541,
                 'image_url' => 'https://example.com/falcon.jpg',
             ]);
 
@@ -107,7 +107,7 @@ describe('Response Caching', function (): void {
             $response->assertStatus(304);
         });
 
-        it('should return ETag and Cache-Control on EAN lookup endpoint', function (): void {
+        it('should return ETag and Cache-Control on EAN lookup endpoint', function(): void {
             $user = User::factory()->create();
 
             Http::fake([
@@ -116,9 +116,9 @@ describe('Response Caching', function (): void {
                         [
                             'set_num' => '75192-1',
                             'name' => 'Millennium Falcon',
-                            'year' => 2017,
+                            'year' => 2_017,
                             'theme_id' => 158,
-                            'num_parts' => 7541,
+                            'num_parts' => 7_541,
                             'set_img_url' => 'https://example.com/75192.jpg',
                         ],
                     ],
@@ -134,16 +134,16 @@ describe('Response Caching', function (): void {
         });
     });
 
-    describe('Tenant-scoped catalog endpoints (private, max-age=3600)', function (): void {
-        it('should return private Cache-Control on storage map endpoint', function (): void {
+    describe('Tenant-scoped catalog endpoints (private, max-age=3600)', function(): void {
+        it('should return private Cache-Control on storage map endpoint', function(): void {
             $user = User::factory()->create();
 
             $set = Set::factory()->create([
                 'set_num' => '75192-1',
                 'name' => 'Millennium Falcon',
-                'year' => 2017,
+                'year' => 2_017,
                 'theme' => 'Star Wars',
-                'num_parts' => 7541,
+                'num_parts' => 7_541,
                 'image_url' => 'https://example.com/falcon.jpg',
             ]);
 
@@ -178,8 +178,8 @@ describe('Response Caching', function (): void {
         });
     });
 
-    describe('Family-scoped endpoints (private, max-age=60)', function (): void {
-        it('should return private Cache-Control on family sets index', function (): void {
+    describe('Family-scoped endpoints (private, max-age=60)', function(): void {
+        it('should return private Cache-Control on family sets index', function(): void {
             $user = User::factory()->create();
 
             $response = $this->actingAs($user)->getJson('/api/family-sets');
@@ -189,7 +189,7 @@ describe('Response Caching', function (): void {
             $response->assertHeader('Cache-Control', 'max-age=60, private');
         });
 
-        it('should return private Cache-Control on storage options index', function (): void {
+        it('should return private Cache-Control on storage options index', function(): void {
             $user = User::factory()->create();
 
             $response = $this->actingAs($user)->getJson('/api/storage-options');
@@ -199,7 +199,7 @@ describe('Response Caching', function (): void {
             $response->assertHeader('Cache-Control', 'max-age=60, private');
         });
 
-        it('should return private Cache-Control on family members', function (): void {
+        it('should return private Cache-Control on family members', function(): void {
             $user = User::factory()->create();
 
             $response = $this->actingAs($user)->getJson('/api/family/members');
@@ -209,7 +209,7 @@ describe('Response Caching', function (): void {
             $response->assertHeader('Cache-Control', 'max-age=60, private');
         });
 
-        it('should return private Cache-Control on family stats', function (): void {
+        it('should return private Cache-Control on family stats', function(): void {
             $user = User::factory()->create();
 
             $response = $this->actingAs($user)->getJson('/api/family/stats');
@@ -219,7 +219,7 @@ describe('Response Caching', function (): void {
             $response->assertHeader('Cache-Control', 'max-age=60, private');
         });
 
-        it('should return 304 on family-scoped endpoint when ETag matches', function (): void {
+        it('should return 304 on family-scoped endpoint when ETag matches', function(): void {
             $user = User::factory()->create();
 
             // First request to get ETag
@@ -235,17 +235,17 @@ describe('Response Caching', function (): void {
         });
     });
 
-    describe('Mutation endpoints (no caching)', function (): void {
-        it('should not return ETag or cache headers on POST family-set', function (): void {
+    describe('Mutation endpoints (no caching)', function(): void {
+        it('should not return ETag or cache headers on POST family-set', function(): void {
             $user = User::factory()->create();
 
             Http::fake([
                 'rebrickable.com/api/v3/lego/sets/75192-1/' => Http::response([
                     'set_num' => '75192-1',
                     'name' => 'Millennium Falcon',
-                    'year' => 2017,
+                    'year' => 2_017,
                     'theme_id' => 158,
-                    'num_parts' => 7541,
+                    'num_parts' => 7_541,
                     'set_img_url' => 'https://example.com/75192.jpg',
                 ]),
                 'rebrickable.com/api/v3/lego/sets/75192-1/parts/*' => Http::response([

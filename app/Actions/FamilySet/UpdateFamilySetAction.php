@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Actions\FamilySet;
 
@@ -19,7 +19,7 @@ final readonly class UpdateFamilySetAction
 
     public function execute(FamilySet $familySet, UpdateFamilySetData $updateFamilySetData): FamilySet
     {
-        return $this->connection->transaction(function () use ($familySet, $updateFamilySetData): FamilySet {
+        return $this->connection->transaction(function() use ($familySet, $updateFamilySetData): FamilySet {
             $familySet->quantity = $updateFamilySetData->quantity;
             $familySet->status = $updateFamilySetData->status;
             $familySet->purchase_date = $updateFamilySetData->purchaseDate instanceof DateTimeInterface

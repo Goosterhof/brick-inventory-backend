@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Http\Middleware;
 
@@ -60,6 +60,6 @@ final readonly class SetEtagHeaders
             return true;
         }
 
-        return array_any(explode(',', $ifNoneMatch), fn (string $candidate): bool => mb_trim($candidate) === $etag);
+        return array_any(explode(',', $ifNoneMatch), fn(string $candidate): bool => mb_trim($candidate) === $etag);
     }
 }

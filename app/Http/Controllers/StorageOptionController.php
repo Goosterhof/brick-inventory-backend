@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Http\Controllers;
 
@@ -27,7 +27,8 @@ class StorageOptionController extends Controller
      * @return array<int, StorageOptionResourceData>
      */
     public function index(
-        #[CurrentUser] User $user,
+        #[CurrentUser]
+        User $user,
         GetStorageOptionsAction $getStorageOptionsAction,
     ): array {
         $storageOptions = $getStorageOptionsAction->execute(user: $user);

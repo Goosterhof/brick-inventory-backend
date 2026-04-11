@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Actions\Family;
 
@@ -36,7 +36,7 @@ final readonly class GetFamilyStatsAction
             ->groupBy('status')
             ->toBase()
             ->pluck('count', 'status')
-            ->map(static fn (mixed $count): int => (int) $count) // @phpstan-ignore cast.int
+            ->map(static fn(mixed $count): int => (int) $count) // @phpstan-ignore cast.int
             ->all();
 
         $storageOptionIds = $this->storageOption->newQuery()

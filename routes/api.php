@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 use App\Http\Controllers\Auth\LoginController;
 use App\Http\Controllers\Auth\LogoutController;
@@ -17,11 +17,11 @@ use App\Models\FamilySet;
 use App\Models\StorageOption;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', fn () => response()->json([
+Route::get('/', fn() => response()->json([
     'message' => 'Welcome to the API',
 ]));
 
-Route::get('/health', fn () => response()->json([
+Route::get('/health', fn() => response()->json([
     'status' => 'ok',
     'timestamp' => now()->toIso8601String(),
 ]));
@@ -46,7 +46,7 @@ Route::get('/sets/{setNum}/storage-map', [SetController::class, 'storageMap'])
     ->middleware(['auth:sanctum', 'throttle:rebrickable', 'etag', 'cache.headers:private;max_age=3600'])
     ->can('viewStorageMap');
 
-Route::middleware(['auth:sanctum', 'family.ownership'])->group(function (): void {
+Route::middleware(['auth:sanctum', 'family.ownership'])->group(function(): void {
     // Storage Options
     Route::get('/storage-options', [StorageOptionController::class, 'index'])
         ->middleware(['etag', 'cache.headers:private;max_age=60'])

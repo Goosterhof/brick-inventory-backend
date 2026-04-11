@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Actions\Family;
 
@@ -18,7 +18,7 @@ final readonly class RevokeInviteCodeAction
 
     public function execute(Family $family): void
     {
-        $this->connection->transaction(function () use ($family): void {
+        $this->connection->transaction(function() use ($family): void {
             /** @var InviteCode|null $activeCode */
             $activeCode = $this->inviteCode->newQuery()
                 ->where('family_id', $family->id)

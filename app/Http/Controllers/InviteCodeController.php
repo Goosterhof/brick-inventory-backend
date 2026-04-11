@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Http\Controllers;
 
@@ -15,7 +15,8 @@ use Illuminate\Http\JsonResponse;
 class InviteCodeController extends Controller
 {
     public function store(
-        #[CurrentUser] User $user,
+        #[CurrentUser]
+        User $user,
         GenerateInviteCodeAction $generateInviteCodeAction,
     ): JsonResponse {
         $inviteCode = $generateInviteCodeAction->execute($user->family, $user);
@@ -24,7 +25,8 @@ class InviteCodeController extends Controller
     }
 
     public function show(
-        #[CurrentUser] User $user,
+        #[CurrentUser]
+        User $user,
         GetActiveInviteCodeAction $getActiveInviteCodeAction,
     ): JsonResponse {
         $inviteCode = $getActiveInviteCodeAction->execute($user->family);
@@ -33,7 +35,8 @@ class InviteCodeController extends Controller
     }
 
     public function destroy(
-        #[CurrentUser] User $user,
+        #[CurrentUser]
+        User $user,
         RevokeInviteCodeAction $revokeInviteCodeAction,
     ): JsonResponse {
         $revokeInviteCodeAction->execute($user->family);

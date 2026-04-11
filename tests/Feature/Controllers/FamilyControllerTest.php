@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 use App\Enums\FamilySetStatus;
 use App\Http\Controllers\FamilyController;
@@ -14,9 +14,9 @@ covers(FamilyController::class);
 
 uses(RefreshDatabase::class);
 
-describe('FamilyController', function (): void {
-    describe('members', function (): void {
-        it('should return family members with head flag', function (): void {
+describe('FamilyController', function(): void {
+    describe('members', function(): void {
+        it('should return family members with head flag', function(): void {
             $headUser = User::factory()->create();
             $member = User::factory()->forFamily($headUser->family)->create();
 
@@ -30,7 +30,7 @@ describe('FamilyController', function (): void {
                 ->assertJsonPath('1.is_head', false);
         });
 
-        it('should not include other families members', function (): void {
+        it('should not include other families members', function(): void {
             $user = User::factory()->create();
             User::factory()->create(); // different family
 
@@ -40,15 +40,15 @@ describe('FamilyController', function (): void {
                 ->assertJsonCount(1);
         });
 
-        it('should return 401 when unauthenticated', function (): void {
+        it('should return 401 when unauthenticated', function(): void {
             $response = $this->getJson('/api/family/members');
 
             $response->assertStatus(401);
         });
     });
 
-    describe('parts', function (): void {
-        it('should return parts for authenticated user', function (): void {
+    describe('parts', function(): void {
+        it('should return parts for authenticated user', function(): void {
             $user = User::factory()->create();
             $family = $user->family;
 
@@ -62,13 +62,13 @@ describe('FamilyController', function (): void {
                 ->assertJsonStructure(['data', 'path', 'per_page', 'next_cursor', 'next_page_url', 'prev_cursor', 'prev_page_url']);
         });
 
-        it('should return 401 when unauthenticated', function (): void {
+        it('should return 401 when unauthenticated', function(): void {
             $response = $this->getJson('/api/family/parts');
 
             $response->assertStatus(401);
         });
 
-        it('should not return parts from another family', function (): void {
+        it('should not return parts from another family', function(): void {
             $user = User::factory()->create();
             $otherUser = User::factory()->create();
 
@@ -81,7 +81,7 @@ describe('FamilyController', function (): void {
                 ->assertJsonCount(0, 'data');
         });
 
-        it('should use default per_page of 25', function (): void {
+        it('should use default per_page of 25', function(): void {
             $user = User::factory()->create();
 
             $response = $this->actingAs($user)->getJson('/api/family/parts');
@@ -90,7 +90,7 @@ describe('FamilyController', function (): void {
                 ->assertJsonPath('per_page', 25);
         });
 
-        it('should cap per_page at 100', function (): void {
+        it('should cap per_page at 100', function(): void {
             $user = User::factory()->create();
 
             $response = $this->actingAs($user)->getJson('/api/family/parts?per_page=200');
@@ -99,7 +99,7 @@ describe('FamilyController', function (): void {
                 ->assertJsonPath('per_page', 100);
         });
 
-        it('should paginate results with cursor navigation', function (): void {
+        it('should paginate results with cursor navigation', function(): void {
             $user = User::factory()->create();
             $family = $user->family;
 
@@ -122,8 +122,8 @@ describe('FamilyController', function (): void {
         });
     });
 
-    describe('stats', function (): void {
-        it('should return family stats', function (): void {
+    describe('stats', function(): void {
+        it('should return family stats', function(): void {
             $user = User::factory()->create();
             $family = $user->family;
 
@@ -158,7 +158,7 @@ describe('FamilyController', function (): void {
                 ->assertJsonPath('total_parts_quantity', 15);
         });
 
-        it('should return zeros when family has no data', function (): void {
+        it('should return zeros when family has no data', function(): void {
             $user = User::factory()->create();
 
             $response = $this->actingAs($user)->getJson('/api/family/stats');
@@ -172,7 +172,7 @@ describe('FamilyController', function (): void {
                 ->assertJsonPath('total_parts_quantity', 0);
         });
 
-        it('should not include other families data', function (): void {
+        it('should not include other families data', function(): void {
             $user = User::factory()->create();
             $otherUser = User::factory()->create();
 
@@ -186,15 +186,15 @@ describe('FamilyController', function (): void {
                 ->assertJsonPath('total_storage_locations', 0);
         });
 
-        it('should return 401 when unauthenticated', function (): void {
+        it('should return 401 when unauthenticated', function(): void {
             $response = $this->getJson('/api/family/stats');
 
             $response->assertStatus(401);
         });
     });
 
-    describe('setRebrickableToken', function (): void {
-        it('should set the rebrickable user token', function (): void {
+    describe('setRebrickableToken', function(): void {
+        it('should set the rebrickable user token', function(): void {
             $user = User::factory()->create();
 
             $response = $this->actingAs($user)->putJson('/api/family/rebrickable-token', [
@@ -207,7 +207,7 @@ describe('FamilyController', function (): void {
             expect($user->family->rebrickable_user_token)->toBe('my-secret-token');
         });
 
-        it('should update existing rebrickable token', function (): void {
+        it('should update existing rebrickable token', function(): void {
             $user = User::factory()->create();
             $user->family->rebrickable_user_token = 'old-token';
             $user->family->save();
@@ -222,7 +222,7 @@ describe('FamilyController', function (): void {
             expect($user->family->rebrickable_user_token)->toBe('new-token');
         });
 
-        it('should return 401 when unauthenticated', function (): void {
+        it('should return 401 when unauthenticated', function(): void {
             $response = $this->putJson('/api/family/rebrickable-token', [
                 'rebrickable_user_token' => 'my-token',
             ]);
@@ -230,7 +230,7 @@ describe('FamilyController', function (): void {
             $response->assertStatus(401);
         });
 
-        it('should require rebrickable_user_token', function (): void {
+        it('should require rebrickable_user_token', function(): void {
             $user = User::factory()->create();
 
             $response = $this->actingAs($user)->putJson('/api/family/rebrickable-token', []);
@@ -239,18 +239,18 @@ describe('FamilyController', function (): void {
                 ->assertJsonValidationErrors(['rebrickable_user_token']);
         });
 
-        it('should validate rebrickable_user_token is a string', function (): void {
+        it('should validate rebrickable_user_token is a string', function(): void {
             $user = User::factory()->create();
 
             $response = $this->actingAs($user)->putJson('/api/family/rebrickable-token', [
-                'rebrickable_user_token' => 12345,
+                'rebrickable_user_token' => 12_345,
             ]);
 
             $response->assertStatus(422)
                 ->assertJsonValidationErrors(['rebrickable_user_token']);
         });
 
-        it('should validate rebrickable_user_token max length', function (): void {
+        it('should validate rebrickable_user_token max length', function(): void {
             $user = User::factory()->create();
 
             $response = $this->actingAs($user)->putJson('/api/family/rebrickable-token', [
@@ -261,7 +261,7 @@ describe('FamilyController', function (): void {
                 ->assertJsonValidationErrors(['rebrickable_user_token']);
         });
 
-        it('should return 403 when non-head user tries to set token', function (): void {
+        it('should return 403 when non-head user tries to set token', function(): void {
             // Create first user who becomes the family head
             $headUser = User::factory()->create();
 
@@ -276,7 +276,7 @@ describe('FamilyController', function (): void {
                 ->assertJson(['message' => 'This action is unauthorized.']);
         });
 
-        it('should allow family head to set token when other users exist', function (): void {
+        it('should allow family head to set token when other users exist', function(): void {
             // Create first user who becomes the family head
             $headUser = User::factory()->create();
 

@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 use App\Enums\FamilySetStatus;
 use App\Http\Resources\FamilySetResourceData;
@@ -10,21 +10,21 @@ use App\Models\Set;
 
 covers(FamilySetResourceData::class);
 
-describe('FamilySetResourceData', function (): void {
-    it('should convert family set model to resource data with nested set', function (): void {
+describe('FamilySetResourceData', function(): void {
+    it('should convert family set model to resource data with nested set', function(): void {
         // arrange
-        $set = Mockery::mock(Set::class);
+        $set = \Mockery::mock(Set::class);
         $set->allows('getAttribute')->with('id')->andReturn(100);
         $set->allows('getAttribute')->with('set_num')->andReturn('75192-1');
         $set->allows('getAttribute')->with('name')->andReturn('Millennium Falcon');
-        $set->allows('getAttribute')->with('year')->andReturn(2017);
+        $set->allows('getAttribute')->with('year')->andReturn(2_017);
         $set->allows('getAttribute')->with('theme')->andReturn('Star Wars');
-        $set->allows('getAttribute')->with('num_parts')->andReturn(7541);
+        $set->allows('getAttribute')->with('num_parts')->andReturn(7_541);
         $set->allows('getAttribute')->with('image_url')->andReturn('https://example.com/falcon.jpg');
 
-        $purchaseDate = new DateTimeImmutable('2025-01-15');
+        $purchaseDate = new \DateTimeImmutable('2025-01-15');
 
-        $familySet = Mockery::mock(FamilySet::class);
+        $familySet = \Mockery::mock(FamilySet::class);
         $familySet->allows('getAttribute')->with('id')->andReturn(1);
         $familySet->allows('getAttribute')->with('set_id')->andReturn(100);
         $familySet->allows('getAttribute')->with('quantity')->andReturn(2);
@@ -50,18 +50,18 @@ describe('FamilySetResourceData', function (): void {
             ->and($resource->set->set_num)->toBe('75192-1');
     });
 
-    it('should serialize enum status to its backing value in array output', function (): void {
+    it('should serialize enum status to its backing value in array output', function(): void {
         // arrange
-        $set = Mockery::mock(Set::class);
+        $set = \Mockery::mock(Set::class);
         $set->allows('getAttribute')->with('id')->andReturn(100);
         $set->allows('getAttribute')->with('set_num')->andReturn('10281-1');
         $set->allows('getAttribute')->with('name')->andReturn('Bonsai Tree');
-        $set->allows('getAttribute')->with('year')->andReturn(2021);
+        $set->allows('getAttribute')->with('year')->andReturn(2_021);
         $set->allows('getAttribute')->with('theme')->andReturn('Botanical');
         $set->allows('getAttribute')->with('num_parts')->andReturn(878);
         $set->allows('getAttribute')->with('image_url')->andReturn(null);
 
-        $familySet = Mockery::mock(FamilySet::class);
+        $familySet = \Mockery::mock(FamilySet::class);
         $familySet->allows('getAttribute')->with('id')->andReturn(2);
         $familySet->allows('getAttribute')->with('set_id')->andReturn(100);
         $familySet->allows('getAttribute')->with('quantity')->andReturn(1);
@@ -81,18 +81,18 @@ describe('FamilySetResourceData', function (): void {
             ->and($array['set']['set_num'])->toBe('10281-1');
     });
 
-    it('should handle nullable purchase_date and notes', function (): void {
+    it('should handle nullable purchase_date and notes', function(): void {
         // arrange
-        $set = Mockery::mock(Set::class);
+        $set = \Mockery::mock(Set::class);
         $set->allows('getAttribute')->with('id')->andReturn(100);
         $set->allows('getAttribute')->with('set_num')->andReturn('42151-1');
         $set->allows('getAttribute')->with('name')->andReturn('Transformers Optimus Prime');
-        $set->allows('getAttribute')->with('year')->andReturn(2023);
+        $set->allows('getAttribute')->with('year')->andReturn(2_023);
         $set->allows('getAttribute')->with('theme')->andReturn(null);
-        $set->allows('getAttribute')->with('num_parts')->andReturn(1508);
+        $set->allows('getAttribute')->with('num_parts')->andReturn(1_508);
         $set->allows('getAttribute')->with('image_url')->andReturn(null);
 
-        $familySet = Mockery::mock(FamilySet::class);
+        $familySet = \Mockery::mock(FamilySet::class);
         $familySet->allows('getAttribute')->with('id')->andReturn(3);
         $familySet->allows('getAttribute')->with('set_id')->andReturn(100);
         $familySet->allows('getAttribute')->with('quantity')->andReturn(1);

@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Models;
 
@@ -11,16 +11,16 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * @property positive-int $id
- * @property int $storage_option_id
- * @property int $part_id
- * @property int|null $color_id
- * @property int $quantity
- * @property Carbon|null $created_at
- * @property Carbon|null $updated_at
- * @property-read StorageOption|null $storageOption
- * @property-read Part $part
- * @property-read Color|null $color
+ * @property positive-int       $id
+ * @property int                $storage_option_id
+ * @property int                $part_id
+ * @property int|null           $color_id
+ * @property int                $quantity
+ * @property Carbon|null        $created_at
+ * @property Carbon|null        $updated_at
+ * @property StorageOption|null $storageOption
+ * @property Part               $part
+ * @property Color|null         $color
  */
 class StorageOptionPart extends Model
 {
