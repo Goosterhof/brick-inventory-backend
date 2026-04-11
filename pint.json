@@ -84,7 +84,7 @@
 
         "final_class": false,
         "final_internal_class": false,
-        "final_public_method_for_abstract_class": true,
+        "final_public_method_for_abstract_class": false,
         "fopen_flag_order": true,
         "fopen_flags": false,
         "full_opening_tag": true,
@@ -272,7 +272,7 @@
             "tags": ["example", "id", "internal", "inheritdoc", "inheritdocs", "link", "source", "toc", "tutorial"]
         },
         "phpdoc_line_span": {"const": "single", "method": "multi", "property": "single"},
-        "phpdoc_list_type": true,
+        "phpdoc_list_type": false,
         "phpdoc_no_access": true,
         "phpdoc_no_alias_tag": {
             "replacements": {
@@ -338,9 +338,9 @@
             }
         },
         "phpdoc_to_comment": false,
-        "phpdoc_to_param_type": {"scalar_types": true, "union_types": true},
+        "phpdoc_to_param_type": false,
         "phpdoc_to_property_type": false,
-        "phpdoc_to_return_type": {"scalar_types": true, "union_types": true},
+        "phpdoc_to_return_type": false,
         "phpdoc_trim": true,
         "phpdoc_trim_consecutive_blank_line_separation": true,
         "phpdoc_types": false,
