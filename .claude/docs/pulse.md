@@ -14,9 +14,9 @@ A consolidated, current-state assessment of the backend codebase. Updated by the
 ## Overall Health
 
 **Rating:** 8.5/10
-**Assessed:** 2026-03-31
+**Assessed:** 2026-04-11
 
-Architecture is sound — PHPStan at max with zero errors (291 files), Deptrac with zero violations, 512 tests passing (1801 assertions), 10 coherent ADRs. All high-severity findings resolved. Recent deliveries: queue-based imports with race condition hardening, response caching (ETag + application-level), cursor pagination (partial — `/family/parts` only), test gap sweep, and job layer hardening. Coverage and mutation testing cannot be measured without a PHP coverage driver in the environment.
+Architecture is sound — PHPStan at max with zero errors (291 files), Deptrac with zero violations, 516 tests passing (1822 assertions), 11 coherent ADRs. All high-severity findings resolved. Recent deliveries: security hardening (error leakage remediation, cache header privacy, Scramble to require-dev), GetFamilyPartsAction `family_set_id` fix, Log facade remediation in ImportOwnedSetsJob, and audit remediation rounds 3-4. Coverage and mutation testing cannot be measured without a PHP coverage driver in the environment.
 
 ## Active Concerns
 
@@ -33,7 +33,7 @@ Architecture is sound — PHPStan at max with zero errors (291 files), Deptrac w
 
 ## In-Progress Work
 
-**Assessed:** 2026-03-31
+**Assessed:** 2026-04-11
 
 | Work Item | Status | Next Step |
 |---|---|---|
@@ -47,15 +47,16 @@ Architecture is sound — PHPStan at max with zero errors (291 files), Deptrac w
 | Cursor pagination | Complete (partial) | Only `/family/parts` retains cursor pagination; three other list endpoints reverted to unbounded |
 | Test gap sweep | Complete | Policy, factory, and resource test gaps closed |
 | Job layer hardening | Complete | JobArchitectureTest added; conventions documented |
-| Audit remediation (round 3) | In Progress | 2026-03-30 full sweep — 6 findings being remediated |
+| Audit remediation (round 3) | Complete | 2026-03-30 full sweep — 6 findings resolved |
+| Audit remediation (round 4) | Complete | 2026-04-11 post-delivery sweep — ADR-0003, CLAUDE.md, CI, pulse |
 
 ## Pattern Maturity
 
-**Assessed:** 2026-03-31
+**Assessed:** 2026-04-11
 
 | Pattern | Maturity | Evidence |
 |---|---|---|
-| Action layer (31 classes) | Battle-tested | Architecture tests guard it; all pass. Two approved try-catch exceptions documented in ADR-0003: partial-failure (ImportOwnedSetsAction) and UniqueConstraintViolationException upsert (5 Actions) |
+| Action layer (31 classes) | Battle-tested | Architecture tests guard it; all pass. Three approved try-catch exceptions documented in ADR-0003: partial-failure (ImportOwnedSetsAction), UniqueConstraintViolationException upsert (5 Actions), and race-condition guard (StartImportAction) |
 | Service layer (2 classes) | Battle-tested | Contract interfaces, Deptrac boundaries hold, no facade or model leakage |
 | ResourceData pattern (17 classes) | Battle-tested | All have `from()` factories, EAGER_LOAD where needed. ComputedResourceData (ADR-0010) handles DTO-sourced responses |
 | Explicit cascade deletion | Battle-tested | MigrationArchitectureTest + CascadeRelationArchitectureTest confirm compliance |
@@ -87,7 +88,7 @@ Architecture is sound — PHPStan at max with zero errors (291 files), Deptrac w
 
 ## Quality Metrics
 
-**Assessed:** 2026-03-31
+**Assessed:** 2026-04-11
 
 | Metric | Value | Threshold |
 |---|---|---|
@@ -97,4 +98,4 @@ Architecture is sound — PHPStan at max with zero errors (291 files), Deptrac w
 | Architecture tests | 19 files, 88 passed, 0 risky (1186 assertions) | All passing |
 | PHPStan | Level max, 0 errors (291 files) | Level max, zero errors |
 | Deptrac | 0 violations (607 allowed, 476 uncovered) | Zero violations |
-| Full test suite | 512 tests, 1801 assertions | All passing |
+| Full test suite | 516 tests, 1822 assertions | All passing |

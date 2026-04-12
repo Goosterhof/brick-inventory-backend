@@ -123,6 +123,7 @@ Does the documentation match the warehouse floor?
 4. **Cascade declarations** — does every model's `cascadeRelations()` match its actual relationships?
 5. **Exception rendering** (`bootstrap/app.php`) — are all custom exceptions handled?
 6. **Quality thresholds** — compare CLAUDE.md stated thresholds (coverage %, mutation %) against `composer.json` script flags (`--min=N`). Flag any mismatch — the crew reference document must match what the gauntlet actually enforces.
+7. **Shift log vs git cross-reference** — compare recent shift log claims against `git log --since` for the relevant period. Also check for commits that have no corresponding shipping order or shift log. Flag both categories: inaccurate claims (shift log says X, git shows Y) and missing documentation (git shows work, no paper trail exists).
 
 ### SOP 4: Audit Pattern Maturity
 
@@ -294,7 +295,8 @@ Training proposals from audit reports are tracked here. A proposal must prove it
 | SOP 3: verify all FormRequests use `$this->safe()` not `$this->input()` in toDto() | 2026-03-25 | 2026-03-25-full-sweep-baseline | ADR-0006 specifies this; no architecture test enforces it; spot-check was incomplete |
 | SOP 1: document fallback procedure when coverage driver is absent | 2026-03-25 | 2026-03-25-full-sweep-baseline | Coverage driver absent; SOP had no guidance for "unable to measure" scenario |
 | When filing a finding about enforcement drift, ask: can the enforcement be made self-maintaining instead? Recommend the structural fix, not a human-memory fix | 2026-03-26 | 2026-03-26-route-test-auto-detect | Filed Finding 2 recommending "add routes to hardcoded list" — the real fix was making the test auto-detect routes. CEO identified the structural solution. |
-| SOP 3: cross-reference recent shift log claims against git log to detect undocumented reverts or scope changes | 2026-03-30 | 2026-03-30-full-sweep-post-delivery | Cursor pagination shift log claimed full conversion; git log revealed partial revert with no paper trail |
+| SOP 2 step 6: when a try-catch hits a documented exception type, verify the implementation matches the documented pattern (not just the exception class) | 2026-04-11 | 2026-04-11-post-delivery-sweep | `StartImportAction` catches `UniqueConstraintViolationException` (documented type) but implements re-throw, not upsert retry — a different pattern needing separate documentation |
+| SOP 3: check all prose count references in CLAUDE.md, not just tables | 2026-04-11 | 2026-04-11-post-delivery-sweep | "Ten decisions" prose was stale while the table beneath it had 11 entries; existing SOP focuses on threshold tables |
 
 ### Graduated
 
@@ -303,6 +305,7 @@ Training proposals from audit reports are tracked here. A proposal must prove it
 | SOP 2: scan Actions for try-catch blocks | 2026-03-26 | 2026-03-25-full-sweep-baseline, 2026-03-26-routine-sweep | SOP 2 step 6 |
 | SOP 4: count Policy public methods and compare to unit test describe blocks | 2026-03-27 | 2026-03-26-routine-sweep, 2026-03-27-post-delivery-audit | SOP 4 step 6 |
 | SOP 3: compare CLAUDE.md quality thresholds against composer.json script values | 2026-03-30 | 2026-03-27-post-delivery-audit, 2026-03-30-full-sweep-post-delivery | SOP 3 (new step) |
+| SOP 3: cross-reference recent shift log claims against git log to detect undocumented reverts or scope changes | 2026-04-11 | 2026-03-30-full-sweep-post-delivery, 2026-04-11-post-delivery-sweep | SOP 3 (new step) |
 
 ### Dropped
 

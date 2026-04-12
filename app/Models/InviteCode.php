@@ -7,6 +7,7 @@ namespace App\Models;
 use App\Contracts\BelongsToFamilyInterface;
 use Carbon\Carbon;
 use Database\Factories\InviteCodeFactory;
+use Illuminate\Database\Eloquent\Attributes\Scope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -67,7 +68,8 @@ class InviteCode extends Model implements BelongsToFamilyInterface
      *
      * @return Builder<InviteCode>
      */
-    protected function scopeActive(Builder $builder): Builder
+    #[Scope]
+    protected function active(Builder $builder): Builder
     {
         return $builder->whereNull('revoked_at')
             ->where(function(Builder $builder): void {

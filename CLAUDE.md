@@ -232,7 +232,7 @@ CaptainHook enforces on every commit (PHP files only): **lint:test → phpstan �
 
 ### The Boundary Fences (Deptrac)
 
-Nine layers with strict one-way dependencies. The warehouse aisles do not cross.
+Eleven functional rows with strict one-way dependencies. The warehouse aisles do not cross.
 
 ```
 Leaf Layers (no dependencies):     Model, Data, DTO, Enum, Exception
@@ -242,14 +242,15 @@ Input Processing:                   FormRequest → DTO, Enum, Model
 Output Shaping:                     ResourceData → Model, Enum, Data, Exception
 Authorization:                      Policy → Model
 Security:                           Middleware → Model, Contract
-Orchestration:                      Action → Action, Contract, Model, Data, DTO, Enum, Exception
+Orchestration:                      Action → Action, Job, Contract, Model, Data, DTO, Enum, Exception
+Async Execution:                    Job → Action, Model, Enum
 Entry Point:                        Controller → Action, FormRequest, ResourceData, Model
 Wiring:                             Provider → Contract, Service, Policy
 ```
 
 ### Architecture Decision Ledger
 
-Ten decisions that shaped the warehouse (consolidated from sixteen — implementation details merged into their parent ADRs). Each records what was chosen, what was rejected, and what machine enforces it. Full records in `docs/adr/`.
+Eleven decisions that shaped the warehouse (consolidated from sixteen — implementation details merged into their parent ADRs). Each records what was chosen, what was rejected, and what machine enforces it. Full records in `docs/adr/`.
 
 | ADR | Decision | Enforcement |
 |---|---|---|
