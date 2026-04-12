@@ -16,7 +16,7 @@ A consolidated, current-state assessment of the backend codebase. Updated by the
 **Rating:** 8.5/10
 **Assessed:** 2026-04-11
 
-Architecture is sound — PHPStan at max with zero errors (291 files), Deptrac with zero violations, 513+ tests passing (1802+ assertions), 11 coherent ADRs. All high-severity findings resolved. Recent deliveries: security hardening (error leakage remediation, cache header privacy, Scramble to require-dev), GetFamilyPartsAction `family_set_id` fix, Log facade remediation in ImportOwnedSetsJob, and audit remediation rounds 3-4. Coverage and mutation testing cannot be measured without a PHP coverage driver in the environment.
+Architecture is sound — PHPStan at max with zero errors (291 files), Deptrac with zero violations, 516 tests passing (1822 assertions), 11 coherent ADRs. All high-severity findings resolved. Recent deliveries: security hardening (error leakage remediation, cache header privacy, Scramble to require-dev), GetFamilyPartsAction `family_set_id` fix, Log facade remediation in ImportOwnedSetsJob, and audit remediation rounds 3-4. Coverage and mutation testing cannot be measured without a PHP coverage driver in the environment.
 
 ## Active Concerns
 
@@ -98,4 +98,4 @@ Architecture is sound — PHPStan at max with zero errors (291 files), Deptrac w
 | Architecture tests | 19 files, 88 passed, 0 risky (1186 assertions) | All passing |
 | PHPStan | Level max, 0 errors (291 files) | Level max, zero errors |
 | Deptrac | 0 violations (607 allowed, 476 uncovered) | Zero violations |
-| Full test suite | 513+ tests, 1802+ assertions (CI-verified) | All passing |
+| Full test suite | 516 tests, 1822 assertions | All passing |
