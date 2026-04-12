@@ -7,6 +7,7 @@ use App\Models\Family;
 use App\Models\InviteCode;
 use App\Models\User;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Contracts\Auth\Factory;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\RateLimiter;
 
@@ -227,7 +228,7 @@ describe('RegisterController', function(): void {
 
             // Reset auth state so next request is unauthenticated (same rate limiter key)
             auth()->guard('web')->logout();
-            resolve('auth')->forgetGuards();
+            resolve(Factory::class)->forgetGuards();
         }
 
         $response = $this->postJson('/api/register', [

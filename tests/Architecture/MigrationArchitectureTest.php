@@ -48,7 +48,7 @@ it('should use strict types in migrations', function(): void {
         $content = file_get_contents($file);
         $filename = basename((string) $file);
 
-        expect(str_contains($content, 'declare(strict_types=1)'))
-            ->toBeTrue(\sprintf('Migration %s should declare strict types', $filename));
+        expect(preg_match('/declare\(strict_types\s*=\s*1\)/', $content))
+            ->toBe(1, \sprintf('Migration %s should declare strict types', $filename));
     }
 });
