@@ -166,6 +166,19 @@ This pattern handles the race condition where two concurrent requests attempt to
 - `UpsertSetAction` — upsert set by unique set_num
 - `StoreSetPartsAction` — upsert set-part relationship by unique (set_num, part_id, color_id) constraint
 
+**Approved exception — race-condition guard (amended 2026-04-11).** Actions that guard against concurrent duplicate creation may use try-catch on `UniqueConstraintViolationException` to detect that a concurrent insert won the race, re-throwing as a typed domain exception. This pattern does NOT retry — it signals the conflict to the caller via a domain exception.
+
+This differs from the optimistic-locking upsert pattern above: upsert catches the violation and retries as an update (the operation succeeds either way). The race-condition guard catches the violation and re-throws as a domain exception (the caller decides how to handle the conflict — e.g., returning a 409).
+
+Conditions:
+
+1. The catch block only handles `Illuminate\Database\UniqueConstraintViolationException` — never generic `\Exception` or `\Throwable`
+2. The catch block re-throws as a typed domain exception — it does not swallow the error, does not retry, and does not return a default value
+3. The behavior is covered by unit tests
+
+**Current Actions using this pattern:**
+- `StartImportAction` — race-condition guard against duplicate in-flight import jobs (catches `UniqueConstraintViolationException`, re-throws as `ImportAlreadyInProgressException`)
+
 ## Open Questions
 
 - Should retry count and delay be configurable via `#[Config]` attributes instead of hardcoded? Current values work for both APIs, but a third integration with different rate limits might need flexibility.
