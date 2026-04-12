@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Models;
 
@@ -13,12 +13,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property positive-int $id
- * @property string $part_num
- * @property string $name
- * @property string|null $category
- * @property string|null $image_url
- * @property Carbon|null $created_at
- * @property Carbon|null $updated_at
+ * @property string       $part_num
+ * @property string       $name
+ * @property string|null  $category
+ * @property string|null  $image_url
+ * @property Carbon|null  $created_at
+ * @property Carbon|null  $updated_at
  */
 class Part extends Model
 {

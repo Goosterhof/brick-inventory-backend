@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Http\Resources;
 
@@ -9,6 +9,8 @@ use App\Contracts\ResourceResponseInterface;
 use BackedEnum;
 use DateTimeInterface;
 use Illuminate\Http\JsonResponse;
+
+use function is_array;
 
 /**
  * Base class for API responses sourced from computed/aggregated Data DTOs.
@@ -32,7 +34,7 @@ abstract readonly class ComputedResourceData implements ResourceResponseInterfac
      *
      * @return array<string, mixed>
      */
-    public function toArray(): array
+    final public function toArray(): array
     {
         /** @var array<string, mixed> */
         return array_map(
@@ -44,12 +46,12 @@ abstract readonly class ComputedResourceData implements ResourceResponseInterfac
     /**
      * @return array<string, mixed>
      */
-    public function jsonSerialize(): array
+    final public function jsonSerialize(): array
     {
         return $this->toArray();
     }
 
-    public function toResponse(mixed $request = null): JsonResponse
+    final public function toResponse(mixed $request = null): JsonResponse
     {
         return new JsonResponse($this->toArray());
     }
@@ -57,7 +59,7 @@ abstract readonly class ComputedResourceData implements ResourceResponseInterfac
     /**
      * Create a JSON response with a specific status code.
      */
-    public function toResponseWithStatus(int $status): JsonResponse
+    final public function toResponseWithStatus(int $status): JsonResponse
     {
         return new JsonResponse($this->toArray(), $status);
     }

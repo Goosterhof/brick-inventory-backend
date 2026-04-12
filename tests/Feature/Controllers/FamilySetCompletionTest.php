@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 use App\Enums\FamilySetStatus;
 use App\Http\Controllers\FamilySetController;
@@ -18,14 +18,14 @@ uses(RefreshDatabase::class);
 
 covers(FamilySetController::class);
 
-describe('FamilySetController completion', function (): void {
-    it('should return 401 when unauthenticated', function (): void {
+describe('FamilySetController completion', function(): void {
+    it('should return 401 when unauthenticated', function(): void {
         $response = $this->getJson('/api/family-sets/completion');
 
         $response->assertStatus(401);
     });
 
-    it('should return empty array when family has no sets', function (): void {
+    it('should return empty array when family has no sets', function(): void {
         $user = User::factory()->create();
 
         $response = $this->actingAs($user)->getJson('/api/family-sets/completion');
@@ -34,7 +34,7 @@ describe('FamilySetController completion', function (): void {
             ->assertJson([]);
     });
 
-    it('should exclude wishlist sets from completion', function (): void {
+    it('should exclude wishlist sets from completion', function(): void {
         $user = User::factory()->create();
         $family = $user->family;
 
@@ -48,7 +48,7 @@ describe('FamilySetController completion', function (): void {
             ->assertJsonCount(0);
     });
 
-    it('should return null completion for sets with no parts loaded', function (): void {
+    it('should return null completion for sets with no parts loaded', function(): void {
         $user = User::factory()->create();
         $family = $user->family;
 
@@ -68,7 +68,7 @@ describe('FamilySetController completion', function (): void {
             ->assertJsonPath('0.percentage', null);
     });
 
-    it('should compute partial completion correctly', function (): void {
+    it('should compute partial completion correctly', function(): void {
         $user = User::factory()->create();
         $family = $user->family;
 
@@ -115,7 +115,7 @@ describe('FamilySetController completion', function (): void {
             ->assertJsonPath('0.percentage', 50);
     });
 
-    it('should compute 100% for a fully complete set', function (): void {
+    it('should compute 100% for a fully complete set', function(): void {
         $user = User::factory()->create();
         $family = $user->family;
 
@@ -147,7 +147,7 @@ describe('FamilySetController completion', function (): void {
             ->assertJsonPath('0.percentage', 100);
     });
 
-    it('should not include other family sets in response', function (): void {
+    it('should not include other family sets in response', function(): void {
         $user = User::factory()->create();
         $otherUser = User::factory()->create();
 
@@ -162,7 +162,7 @@ describe('FamilySetController completion', function (): void {
             ->assertJsonCount(0);
     });
 
-    it('should exclude spare parts from total count', function (): void {
+    it('should exclude spare parts from total count', function(): void {
         $user = User::factory()->create();
         $family = $user->family;
 
@@ -199,7 +199,7 @@ describe('FamilySetController completion', function (): void {
             ->assertJsonPath('0.total_parts', 1);
     });
 
-    it('should handle multiple sets with mixed completion', function (): void {
+    it('should handle multiple sets with mixed completion', function(): void {
         $user = User::factory()->create();
         $family = $user->family;
 

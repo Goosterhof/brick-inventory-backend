@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 use App\Http\Controllers\FamilyController;
 use App\Models\Color;
@@ -14,8 +14,8 @@ covers(FamilyController::class);
 
 uses(RefreshDatabase::class);
 
-describe('FamilyController brickDna', function (): void {
-    it('should return brick DNA analytics for authenticated user', function (): void {
+describe('FamilyController brickDna', function(): void {
+    it('should return brick DNA analytics for authenticated user', function(): void {
         $user = User::factory()->create();
         $family = $user->family;
 
@@ -70,7 +70,7 @@ describe('FamilyController brickDna', function (): void {
             ->and($diversityScore)->toBeLessThanOrEqual(1.0);
     });
 
-    it('should return empty data when family has no stored parts', function (): void {
+    it('should return empty data when family has no stored parts', function(): void {
         $user = User::factory()->create();
 
         $response = $this->actingAs($user)->getJson('/api/family/brick-dna');
@@ -84,7 +84,7 @@ describe('FamilyController brickDna', function (): void {
             ->assertJsonPath('total_parts_quantity', 0);
     });
 
-    it('should not include parts from other families', function (): void {
+    it('should not include parts from other families', function(): void {
         $user = User::factory()->create();
         $otherUser = User::factory()->create();
 
@@ -98,7 +98,7 @@ describe('FamilyController brickDna', function (): void {
             ->assertJsonPath('total_parts_quantity', 0);
     });
 
-    it('should return 401 when unauthenticated', function (): void {
+    it('should return 401 when unauthenticated', function(): void {
         $response = $this->getJson('/api/family/brick-dna');
 
         $response->assertStatus(401);

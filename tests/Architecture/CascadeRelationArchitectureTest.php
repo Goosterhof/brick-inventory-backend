@@ -1,50 +1,51 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 
-it('should have cascadeRelations method on all models', function (): void {
-    foreach (getClassesInDirectory(dirname(__DIR__, 2) . '/app/Models', 'App\\Models\\') as $className) {
-        $reflection = new ReflectionClass($className);
+it('should have cascadeRelations method on all models', function(): void {
+    foreach (getClassesInDirectory(\dirname(__DIR__, 2) . '/app/Models', 'App\Models\\') as $className) {
+        $reflection = new \ReflectionClass($className);
 
         expect($reflection->hasMethod('cascadeRelations'))->toBeTrue(
-            sprintf('Model %s must have a cascadeRelations() method', $className),
+            \sprintf('Model %s must have a cascadeRelations() method', $className),
         );
 
         $method = $reflection->getMethod('cascadeRelations');
 
         expect($method->isPublic())->toBeTrue(
-            sprintf('Model %s::cascadeRelations() must be public', $className),
+            \sprintf('Model %s::cascadeRelations() must be public', $className),
         );
 
         expect($method->isStatic())->toBeTrue(
-            sprintf('Model %s::cascadeRelations() must be static', $className),
+            \sprintf('Model %s::cascadeRelations() must be static', $className),
         );
 
         $returnType = $method->getReturnType();
 
         expect($returnType)->not->toBeNull(
-            sprintf('Model %s::cascadeRelations() must have a return type', $className),
+            \sprintf('Model %s::cascadeRelations() must have a return type', $className),
         );
 
-        expect($returnType->getName())->toBe('array',
-            sprintf('Model %s::cascadeRelations() must return array', $className),
+        expect($returnType->getName())->toBe(
+            'array',
+            \sprintf('Model %s::cascadeRelations() must return array', $className),
         );
     }
 });
 
-it('should declare all HasMany and HasOne relationships in cascadeRelations', function (): void {
+it('should declare all HasMany and HasOne relationships in cascadeRelations', function(): void {
     $allowedReturnTypes = [HasMany::class, HasOne::class];
 
-    foreach (getClassesInDirectory(dirname(__DIR__, 2) . '/app/Models', 'App\\Models\\') as $className) {
-        $reflection = new ReflectionClass($className);
+    foreach (getClassesInDirectory(\dirname(__DIR__, 2) . '/app/Models', 'App\Models\\') as $className) {
+        $reflection = new \ReflectionClass($className);
         $cascadeRelations = $className::cascadeRelations();
 
         $ownPublicMethods = array_filter(
-            $reflection->getMethods(ReflectionMethod::IS_PUBLIC),
-            fn (ReflectionMethod $reflectionMethod): bool => $reflectionMethod->getDeclaringClass()->getName() === $className,
+            $reflection->getMethods(\ReflectionMethod::IS_PUBLIC),
+            fn(\ReflectionMethod $reflectionMethod): bool => $reflectionMethod->getDeclaringClass()->getName() === $className,
         );
 
         foreach ($ownPublicMethods as $ownPublicMethod) {
@@ -54,12 +55,12 @@ it('should declare all HasMany and HasOne relationships in cascadeRelations', fu
                 continue;
             }
 
-            if (!in_array($returnType->getName(), $allowedReturnTypes, true)) {
+            if (!\in_array($returnType->getName(), $allowedReturnTypes, true)) {
                 continue;
             }
 
-            expect(in_array($ownPublicMethod->getName(), $cascadeRelations, true))->toBeTrue(
-                sprintf(
+            expect(\in_array($ownPublicMethod->getName(), $cascadeRelations, true))->toBeTrue(
+                \sprintf(
                     'Model %s has %s relationship %s() that is not declared in cascadeRelations()',
                     $className,
                     $returnType->getName() === HasMany::class ? 'HasMany' : 'HasOne',
@@ -70,16 +71,16 @@ it('should declare all HasMany and HasOne relationships in cascadeRelations', fu
     }
 });
 
-it('should only reference valid HasMany or HasOne relationships in cascadeRelations', function (): void {
+it('should only reference valid HasMany or HasOne relationships in cascadeRelations', function(): void {
     $allowedReturnTypes = [HasMany::class, HasOne::class];
 
-    foreach (getClassesInDirectory(dirname(__DIR__, 2) . '/app/Models', 'App\\Models\\') as $className) {
-        $reflection = new ReflectionClass($className);
+    foreach (getClassesInDirectory(\dirname(__DIR__, 2) . '/app/Models', 'App\Models\\') as $className) {
+        $reflection = new \ReflectionClass($className);
         $cascadeRelations = $className::cascadeRelations();
 
         foreach ($cascadeRelations as $cascadeRelation) {
             expect($reflection->hasMethod($cascadeRelation))->toBeTrue(
-                sprintf(
+                \sprintf(
                     'Model %s declares "%s" in cascadeRelations() but no such method exists',
                     $className,
                     $cascadeRelation,
@@ -90,15 +91,15 @@ it('should only reference valid HasMany or HasOne relationships in cascadeRelati
             $returnType = $method->getReturnType();
 
             expect($returnType)->not->toBeNull(
-                sprintf(
+                \sprintf(
                     'Model %s::%s() must have a return type to be in cascadeRelations()',
                     $className,
                     $cascadeRelation,
                 ),
             );
 
-            expect(in_array($returnType->getName(), $allowedReturnTypes, true))->toBeTrue(
-                sprintf(
+            expect(\in_array($returnType->getName(), $allowedReturnTypes, true))->toBeTrue(
+                \sprintf(
                     'Model %s::%s() returns %s but only HasMany and HasOne are allowed in cascadeRelations()',
                     $className,
                     $cascadeRelation,
@@ -109,11 +110,11 @@ it('should only reference valid HasMany or HasOne relationships in cascadeRelati
     }
 });
 
-it('delete actions should handle all declared cascade relations', function (): void {
-    $actionsDir = dirname(__DIR__, 2) . '/app/Actions';
+it('delete actions should handle all declared cascade relations', function(): void {
+    $actionsDir = \dirname(__DIR__, 2) . '/app/Actions';
 
-    foreach (getClassesInDirectory($actionsDir, 'App\\Actions\\') as $className) {
-        $reflection = new ReflectionClass($className);
+    foreach (getClassesInDirectory($actionsDir, 'App\Actions\\') as $className) {
+        $reflection = new \ReflectionClass($className);
         $shortName = $reflection->getShortName();
         if (!str_starts_with($shortName, 'Delete')) {
             continue;
@@ -124,7 +125,7 @@ it('delete actions should handle all declared cascade relations', function (): v
         }
 
         $modelName = mb_substr($shortName, mb_strlen('Delete'), -mb_strlen('Action'));
-        $modelClass = 'App\\Models\\' . $modelName;
+        $modelClass = 'App\Models\\' . $modelName;
 
         if (!class_exists($modelClass)) {
             continue;
@@ -141,7 +142,7 @@ it('delete actions should handle all declared cascade relations', function (): v
 
         foreach ($cascadeRelations as $cascadeRelation) {
             expect(str_contains($source, $cascadeRelation))->toBeTrue(
-                sprintf(
+                \sprintf(
                     'Delete action %s must handle cascade relation "%s" declared by %s',
                     $className,
                     $cascadeRelation,

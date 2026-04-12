@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 use App\Http\Controllers\FamilyController;
 use App\Models\Family;
@@ -11,8 +11,8 @@ covers(FamilyController::class);
 
 uses(RefreshDatabase::class);
 
-describe('FamilyController removeMember', function (): void {
-    it('should remove a member from the family and create a new family for them', function (): void {
+describe('FamilyController removeMember', function(): void {
+    it('should remove a member from the family and create a new family for them', function(): void {
         $headUser = User::factory()->create();
         $member = User::factory()->forFamily($headUser->family)->create();
 
@@ -30,7 +30,7 @@ describe('FamilyController removeMember', function (): void {
             ->and($newFamily->name)->toBe($member->name . "'s Family");
     });
 
-    it('should preserve original family data after member removal', function (): void {
+    it('should preserve original family data after member removal', function(): void {
         $headUser = User::factory()->create();
         $member = User::factory()->forFamily($headUser->family)->create();
         $originalFamilyId = $headUser->family_id;
@@ -45,7 +45,7 @@ describe('FamilyController removeMember', function (): void {
             ->and($originalFamily->head_id)->toBe($headUser->id);
     });
 
-    it('should return 422 when family head tries to remove themselves', function (): void {
+    it('should return 422 when family head tries to remove themselves', function(): void {
         $headUser = User::factory()->create();
 
         $response = $this->actingAs($headUser)->deleteJson('/api/family/members/' . $headUser->id);
@@ -54,7 +54,7 @@ describe('FamilyController removeMember', function (): void {
             ->assertJsonPath('error', 'Cannot remove yourself from the family');
     });
 
-    it('should return 403 when non-head member tries to remove someone', function (): void {
+    it('should return 403 when non-head member tries to remove someone', function(): void {
         $headUser = User::factory()->create();
         $nonHeadUser = User::factory()->forFamily($headUser->family)->create();
         $anotherMember = User::factory()->forFamily($headUser->family)->create();
@@ -64,7 +64,7 @@ describe('FamilyController removeMember', function (): void {
         $response->assertStatus(403);
     });
 
-    it('should return 404 when trying to remove a user not in the family', function (): void {
+    it('should return 404 when trying to remove a user not in the family', function(): void {
         $headUser = User::factory()->create();
         $otherFamilyUser = User::factory()->create(); // different family
 
@@ -74,7 +74,7 @@ describe('FamilyController removeMember', function (): void {
             ->assertJsonPath('error', 'User is not a member of this family');
     });
 
-    it('should return 401 when unauthenticated', function (): void {
+    it('should return 401 when unauthenticated', function(): void {
         $user = User::factory()->create();
 
         $response = $this->deleteJson('/api/family/members/' . $user->id);
@@ -82,7 +82,7 @@ describe('FamilyController removeMember', function (): void {
         $response->assertStatus(401);
     });
 
-    it('should handle removal atomically — new family and user update together', function (): void {
+    it('should handle removal atomically — new family and user update together', function(): void {
         $headUser = User::factory()->create();
         $member = User::factory()->forFamily($headUser->family)->create();
 

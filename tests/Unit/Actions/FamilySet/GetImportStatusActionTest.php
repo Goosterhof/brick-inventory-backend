@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 use App\Actions\FamilySet\GetImportStatusAction;
 use App\Models\Family;
@@ -9,20 +9,20 @@ use Illuminate\Database\Eloquent\Builder;
 
 covers(GetImportStatusAction::class);
 
-describe('GetImportStatusAction', function (): void {
-    it('should return the latest import job for the family', function (): void {
+describe('GetImportStatusAction', function(): void {
+    it('should return the latest import job for the family', function(): void {
         // arrange
-        $family = Mockery::mock(Family::class);
+        $family = \Mockery::mock(Family::class);
         $family->allows('getAttribute')->with('id')->andReturn(42);
 
-        $latestJob = Mockery::mock(ImportJob::class);
+        $latestJob = \Mockery::mock(ImportJob::class);
 
-        $queryBuilder = Mockery::mock(Builder::class);
+        $queryBuilder = \Mockery::mock(Builder::class);
         $queryBuilder->shouldReceive('where')->with('family_id', 42)->andReturnSelf();
         $queryBuilder->shouldReceive('latest')->andReturnSelf();
         $queryBuilder->shouldReceive('first')->andReturn($latestJob);
 
-        $importJobModel = Mockery::mock(ImportJob::class);
+        $importJobModel = \Mockery::mock(ImportJob::class);
         $importJobModel->shouldReceive('newQuery')->once()->andReturn($queryBuilder);
 
         $action = new GetImportStatusAction($importJobModel);
@@ -34,17 +34,17 @@ describe('GetImportStatusAction', function (): void {
         expect($result)->toBe($latestJob);
     });
 
-    it('should return null when no import jobs exist for the family', function (): void {
+    it('should return null when no import jobs exist for the family', function(): void {
         // arrange
-        $family = Mockery::mock(Family::class);
+        $family = \Mockery::mock(Family::class);
         $family->allows('getAttribute')->with('id')->andReturn(42);
 
-        $queryBuilder = Mockery::mock(Builder::class);
+        $queryBuilder = \Mockery::mock(Builder::class);
         $queryBuilder->shouldReceive('where')->with('family_id', 42)->andReturnSelf();
         $queryBuilder->shouldReceive('latest')->andReturnSelf();
         $queryBuilder->shouldReceive('first')->andReturnNull();
 
-        $importJobModel = Mockery::mock(ImportJob::class);
+        $importJobModel = \Mockery::mock(ImportJob::class);
         $importJobModel->shouldReceive('newQuery')->once()->andReturn($queryBuilder);
 
         $action = new GetImportStatusAction($importJobModel);

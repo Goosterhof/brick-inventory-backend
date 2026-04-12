@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 use Monolog\Handler\NullHandler;
 use Monolog\Handler\StreamHandler;
@@ -8,7 +8,6 @@ use Monolog\Handler\SyslogUdpHandler;
 use Monolog\Processor\PsrLogMessageProcessor;
 
 return [
-
     /*
     |--------------------------------------------------------------------------
     | Default Log Channel
@@ -18,7 +17,7 @@ return [
     | messages to your logs. The value provided here should match one of
     | the channels present in the list of "channels" configured below.
     |
-    */
+     */
 
     'default' => env('LOG_CHANNEL', 'stack'),
 
@@ -31,7 +30,7 @@ return [
     | regarding deprecated PHP and library features. This allows you to get
     | your application ready for upcoming major versions of dependencies.
     |
-    */
+     */
 
     'deprecations' => [
         'channel' => env('LOG_DEPRECATIONS_CHANNEL', 'null'),
@@ -50,7 +49,7 @@ return [
     | Available drivers: "single", "daily", "slack", "syslog",
     |                    "errorlog", "monolog", "custom", "stack"
     |
-    */
+     */
 
     'channels' => [
 
@@ -110,7 +109,7 @@ return [
         'syslog' => [
             'driver' => 'syslog',
             'level' => env('LOG_LEVEL', 'debug'),
-            'facility' => env('LOG_SYSLOG_FACILITY', LOG_USER),
+            'facility' => env('LOG_SYSLOG_FACILITY', \LOG_USER),
             'replace_placeholders' => true,
         ],
 

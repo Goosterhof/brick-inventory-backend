@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 use Illuminate\Support\Facades\DB;
 
@@ -10,11 +10,11 @@ arch('services should end with Service')
 
 // Custom test: BypassFinals strips `final` and `readonly` via a stream wrapper,
 // so we read raw file content via subprocess to bypass it.
-it('should have all service classes as final readonly', function (): void {
+it('should have all service classes as final readonly', function(): void {
     $nonFinalReadonly = [];
 
-    foreach (getClassesInDirectory(dirname(__DIR__, 2) . '/app/Services', 'App\\Services\\') as $className) {
-        $file = new ReflectionClass($className)->getFileName();
+    foreach (getClassesInDirectory(\dirname(__DIR__, 2) . '/app/Services', 'App\Services\\') as $className) {
+        $file = new \ReflectionClass($className)->getFileName();
         $content = (string) shell_exec('cat ' . escapeshellarg($file));
 
         if (!str_contains($content, 'final readonly class')) {
@@ -31,16 +31,16 @@ arch('services should not extend anything')
     ->expect('App\Services')
     ->toExtendNothing();
 
-it('should have all services implement a contract interface', function (): void {
+it('should have all services implement a contract interface', function(): void {
     $violations = [];
 
-    foreach (getClassesInDirectory(dirname(__DIR__, 2) . '/app/Services', 'App\\Services\\') as $className) {
-        $reflection = new ReflectionClass($className);
+    foreach (getClassesInDirectory(\dirname(__DIR__, 2) . '/app/Services', 'App\Services\\') as $className) {
+        $reflection = new \ReflectionClass($className);
         $interfaces = $reflection->getInterfaceNames();
 
         $contractInterfaces = array_filter(
             $interfaces,
-            fn (string $interface): bool => str_starts_with($interface, 'App\\Contracts\\'),
+            fn(string $interface): bool => str_starts_with($interface, 'App\Contracts\\'),
         );
 
         if ($contractInterfaces === []) {
@@ -49,7 +49,7 @@ it('should have all services implement a contract interface', function (): void 
     }
 
     expect($violations)->toBeEmpty(
-        'These services do not implement a contract interface from App\\Contracts\\: ' . implode(', ', $violations),
+        'These services do not implement a contract interface from App\Contracts\: ' . implode(', ', $violations),
     );
 });
 

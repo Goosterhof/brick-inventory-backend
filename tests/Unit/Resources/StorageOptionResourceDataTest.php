@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 use App\Http\Resources\StorageOptionResourceData;
 use App\Models\StorageOption;
@@ -8,20 +8,20 @@ use Illuminate\Support\Collection;
 
 covers(StorageOptionResourceData::class);
 
-describe('StorageOptionResourceData', function (): void {
-    it('should convert storage option model to resource data with child_ids', function (): void {
+describe('StorageOptionResourceData', function(): void {
+    it('should convert storage option model to resource data with child_ids', function(): void {
         // arrange
-        $child1 = Mockery::mock(StorageOption::class);
+        $child1 = \Mockery::mock(StorageOption::class);
         $child1->allows('getAttribute')->with('id')->andReturn(10);
         $child1->allows('offsetExists')->with('id')->andReturnTrue();
         $child1->allows('offsetGet')->with('id')->andReturn(10);
 
-        $child2 = Mockery::mock(StorageOption::class);
+        $child2 = \Mockery::mock(StorageOption::class);
         $child2->allows('getAttribute')->with('id')->andReturn(11);
         $child2->allows('offsetExists')->with('id')->andReturnTrue();
         $child2->allows('offsetGet')->with('id')->andReturn(11);
 
-        $storageOption = Mockery::mock(StorageOption::class);
+        $storageOption = \Mockery::mock(StorageOption::class);
         $storageOption->allows('getAttribute')->with('id')->andReturn(1);
         $storageOption->allows('getAttribute')->with('name')->andReturn('Drawer A1');
         $storageOption->allows('getAttribute')->with('description')->andReturn('Top left drawer');
@@ -46,9 +46,9 @@ describe('StorageOptionResourceData', function (): void {
             ->and($resource->child_ids)->toBe([10, 11]);
     });
 
-    it('should handle empty children', function (): void {
+    it('should handle empty children', function(): void {
         // arrange
-        $storageOption = Mockery::mock(StorageOption::class);
+        $storageOption = \Mockery::mock(StorageOption::class);
         $storageOption->allows('getAttribute')->with('id')->andReturn(2);
         $storageOption->allows('getAttribute')->with('name')->andReturn('Box B');
         $storageOption->allows('getAttribute')->with('description')->andReturn(null);
@@ -71,14 +71,14 @@ describe('StorageOptionResourceData', function (): void {
             ->and($resource->column)->toBeNull();
     });
 
-    it('should pass through child_ids as plain ints in array output', function (): void {
+    it('should pass through child_ids as plain ints in array output', function(): void {
         // arrange
-        $child = Mockery::mock(StorageOption::class);
+        $child = \Mockery::mock(StorageOption::class);
         $child->allows('getAttribute')->with('id')->andReturn(5);
         $child->allows('offsetExists')->with('id')->andReturnTrue();
         $child->allows('offsetGet')->with('id')->andReturn(5);
 
-        $storageOption = Mockery::mock(StorageOption::class);
+        $storageOption = \Mockery::mock(StorageOption::class);
         $storageOption->allows('getAttribute')->with('id')->andReturn(1);
         $storageOption->allows('getAttribute')->with('name')->andReturn('Shelf');
         $storageOption->allows('getAttribute')->with('description')->andReturn(null);
@@ -96,7 +96,7 @@ describe('StorageOptionResourceData', function (): void {
         expect($array['child_ids'])->toBe([5]);
     });
 
-    it('should declare children in EAGER_LOAD', function (): void {
+    it('should declare children in EAGER_LOAD', function(): void {
         expect(StorageOptionResourceData::EAGER_LOAD)->toBe(['children']);
     });
 });

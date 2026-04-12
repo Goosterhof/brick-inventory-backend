@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Actions;
 
@@ -39,7 +39,7 @@ final readonly class GetSetStorageMapAction
                 'storage_option_parts.quantity',
             ])
             ->get()
-            ->map(function (StorageOptionPart $storageOptionPart): array {
+            ->map(function(StorageOptionPart $storageOptionPart): array {
                 /** @var string $name */
                 $name = $storageOptionPart->getAttribute('storage_option_name');
 

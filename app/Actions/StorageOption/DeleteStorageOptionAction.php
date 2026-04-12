@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Actions\StorageOption;
 
@@ -17,7 +17,7 @@ final readonly class DeleteStorageOptionAction
     {
         $storageOption->load('children.storageOptionParts', 'storageOptionParts');
 
-        $this->connection->transaction(function () use ($storageOption): void {
+        $this->connection->transaction(function() use ($storageOption): void {
             $this->deleteRecursive($storageOption);
         });
     }

@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Actions\Sync;
 
@@ -19,7 +19,7 @@ final readonly class UpsertColorAction
     public function execute(LegoColorData $legoColorData): Color
     {
         try {
-            return $this->connection->transaction(function () use ($legoColorData): Color {
+            return $this->connection->transaction(function() use ($legoColorData): Color {
                 $color = $this->color->newQuery()->where('rebrickable_id', $legoColorData->id)->first();
 
                 if (!$color instanceof Color) {
@@ -36,7 +36,7 @@ final readonly class UpsertColorAction
                 return $color;
             });
         } catch (UniqueConstraintViolationException) {
-            return $this->connection->transaction(function () use ($legoColorData): Color {
+            return $this->connection->transaction(function() use ($legoColorData): Color {
                 /** @var Color */
                 $color = $this->color->newQuery()->where('rebrickable_id', $legoColorData->id)->firstOrFail();
 

@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Actions\StorageOption;
 
@@ -20,7 +20,7 @@ final readonly class AssignPartToStorageAction
     public function execute(StorageOption $storageOption, AssignPartToStorageData $assignPartToStorageData): StorageOptionPart
     {
         try {
-            return $this->connection->transaction(function () use ($storageOption, $assignPartToStorageData): StorageOptionPart {
+            return $this->connection->transaction(function() use ($storageOption, $assignPartToStorageData): StorageOptionPart {
                 $storageOptionPart = $this->storageOptionPart->newQuery()
                     ->where('storage_option_id', $storageOption->id)
                     ->where('part_id', $assignPartToStorageData->partId)
@@ -40,7 +40,7 @@ final readonly class AssignPartToStorageAction
                 return $storageOptionPart;
             });
         } catch (UniqueConstraintViolationException) {
-            return $this->connection->transaction(function () use ($storageOption, $assignPartToStorageData): StorageOptionPart {
+            return $this->connection->transaction(function() use ($storageOption, $assignPartToStorageData): StorageOptionPart {
                 /** @var StorageOptionPart */
                 $storageOptionPart = $this->storageOptionPart->newQuery()
                     ->where('storage_option_id', $storageOption->id)

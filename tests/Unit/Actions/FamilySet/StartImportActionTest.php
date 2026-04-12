@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 use App\Actions\FamilySet\StartImportAction;
 use App\Enums\ImportJobStatus;
@@ -14,33 +14,33 @@ use Illuminate\Database\UniqueConstraintViolationException;
 
 covers(StartImportAction::class);
 
-describe('StartImportAction', function (): void {
-    it('should create a pending import job and dispatch the queue job', function (): void {
+describe('StartImportAction', function(): void {
+    it('should create a pending import job and dispatch the queue job', function(): void {
         // arrange
-        $family = Mockery::mock(Family::class);
+        $family = \Mockery::mock(Family::class);
         $family->allows('getAttribute')->with('id')->andReturn(42);
 
         $savedValues = ['id' => 99];
-        $newImportJob = Mockery::mock(ImportJob::class);
-        $newImportJob->allows('setAttribute')->andReturnUsing(function ($key, $value) use (&$savedValues): void {
+        $newImportJob = \Mockery::mock(ImportJob::class);
+        $newImportJob->allows('setAttribute')->andReturnUsing(function($key, $value) use (&$savedValues): void {
             $savedValues[$key] = $value;
         });
-        $newImportJob->allows('getAttribute')->andReturnUsing(function ($key) use (&$savedValues): mixed {
+        $newImportJob->allows('getAttribute')->andReturnUsing(function($key) use (&$savedValues): mixed {
             return $savedValues[$key] ?? null;
         });
         $newImportJob->shouldReceive('save')->once();
 
-        $queryBuilder = Mockery::mock(Builder::class);
+        $queryBuilder = \Mockery::mock(Builder::class);
         $queryBuilder->shouldReceive('where')->with('family_id', 42)->andReturnSelf();
         $queryBuilder->shouldReceive('whereIn')->with('status', [ImportJobStatus::Pending, ImportJobStatus::InProgress])->andReturnSelf();
         $queryBuilder->shouldReceive('first')->andReturnNull();
 
-        $importJobModel = Mockery::mock(ImportJob::class);
+        $importJobModel = \Mockery::mock(ImportJob::class);
         $importJobModel->shouldReceive('newQuery')->once()->andReturn($queryBuilder);
         $importJobModel->shouldReceive('newInstance')->once()->andReturn($newImportJob);
 
-        $dispatcher = Mockery::mock(Dispatcher::class);
-        $dispatcher->shouldReceive('dispatch')->once()->withArgs(fn (ImportOwnedSetsJob $importOwnedSetsJob): bool => $importOwnedSetsJob->familyId === 42);
+        $dispatcher = \Mockery::mock(Dispatcher::class);
+        $dispatcher->shouldReceive('dispatch')->once()->withArgs(fn(ImportOwnedSetsJob $importOwnedSetsJob): bool => $importOwnedSetsJob->familyId === 42);
 
         $action = new StartImportAction($importJobModel, $dispatcher);
 
@@ -56,84 +56,84 @@ describe('StartImportAction', function (): void {
         expect($savedValues['failed_sets'])->toBe(0);
     });
 
-    it('should throw ImportAlreadyInProgressException when pending import exists', function (): void {
+    it('should throw ImportAlreadyInProgressException when pending import exists', function(): void {
         // arrange
-        $family = Mockery::mock(Family::class);
+        $family = \Mockery::mock(Family::class);
         $family->allows('getAttribute')->with('id')->andReturn(42);
 
-        $existingJob = Mockery::mock(ImportJob::class);
+        $existingJob = \Mockery::mock(ImportJob::class);
 
-        $queryBuilder = Mockery::mock(Builder::class);
+        $queryBuilder = \Mockery::mock(Builder::class);
         $queryBuilder->shouldReceive('where')->with('family_id', 42)->andReturnSelf();
         $queryBuilder->shouldReceive('whereIn')->with('status', [ImportJobStatus::Pending, ImportJobStatus::InProgress])->andReturnSelf();
         $queryBuilder->shouldReceive('first')->andReturn($existingJob);
 
-        $importJobModel = Mockery::mock(ImportJob::class);
+        $importJobModel = \Mockery::mock(ImportJob::class);
         $importJobModel->shouldReceive('newQuery')->once()->andReturn($queryBuilder);
 
-        $dispatcher = Mockery::mock(Dispatcher::class);
+        $dispatcher = \Mockery::mock(Dispatcher::class);
         $dispatcher->shouldNotReceive('dispatch');
 
         $action = new StartImportAction($importJobModel, $dispatcher);
 
         // act & assert
-        expect(fn (): ImportJob => $action->execute($family))
+        expect(fn(): ImportJob => $action->execute($family))
             ->toThrow(ImportAlreadyInProgressException::class);
     });
 
-    it('should throw ImportAlreadyInProgressException when in-progress import exists', function (): void {
+    it('should throw ImportAlreadyInProgressException when in-progress import exists', function(): void {
         // arrange
-        $family = Mockery::mock(Family::class);
+        $family = \Mockery::mock(Family::class);
         $family->allows('getAttribute')->with('id')->andReturn(42);
 
-        $existingJob = Mockery::mock(ImportJob::class);
+        $existingJob = \Mockery::mock(ImportJob::class);
 
-        $queryBuilder = Mockery::mock(Builder::class);
+        $queryBuilder = \Mockery::mock(Builder::class);
         $queryBuilder->shouldReceive('where')->with('family_id', 42)->andReturnSelf();
         $queryBuilder->shouldReceive('whereIn')->with('status', [ImportJobStatus::Pending, ImportJobStatus::InProgress])->andReturnSelf();
         $queryBuilder->shouldReceive('first')->andReturn($existingJob);
 
-        $importJobModel = Mockery::mock(ImportJob::class);
+        $importJobModel = \Mockery::mock(ImportJob::class);
         $importJobModel->shouldReceive('newQuery')->once()->andReturn($queryBuilder);
 
-        $dispatcher = Mockery::mock(Dispatcher::class);
+        $dispatcher = \Mockery::mock(Dispatcher::class);
         $dispatcher->shouldNotReceive('dispatch');
 
         $action = new StartImportAction($importJobModel, $dispatcher);
 
         // act & assert
-        expect(fn (): ImportJob => $action->execute($family))
+        expect(fn(): ImportJob => $action->execute($family))
             ->toThrow(ImportAlreadyInProgressException::class);
     });
 
-    it('should throw ImportAlreadyInProgressException when database unique constraint catches race condition', function (): void {
+    it('should throw ImportAlreadyInProgressException when database unique constraint catches race condition', function(): void {
         // arrange
-        $family = Mockery::mock(Family::class);
+        $family = \Mockery::mock(Family::class);
         $family->allows('getAttribute')->with('id')->andReturn(42);
 
-        $newImportJob = Mockery::mock(ImportJob::class);
+        $newImportJob = \Mockery::mock(ImportJob::class);
         $newImportJob->allows('setAttribute');
         $newImportJob->allows('getAttribute')->andReturnNull();
         $newImportJob->shouldReceive('save')->once()->andThrow(
-            new UniqueConstraintViolationException('default', 'INSERT', [], new Exception('dup')),
+            new UniqueConstraintViolationException('default', 'INSERT', [], new \Exception('dup')),
         );
 
-        $queryBuilder = Mockery::mock(Builder::class);
+        $queryBuilder = \Mockery::mock(Builder::class);
         $queryBuilder->shouldReceive('where')->with('family_id', 42)->andReturnSelf();
         $queryBuilder->shouldReceive('whereIn')->with('status', [ImportJobStatus::Pending, ImportJobStatus::InProgress])->andReturnSelf();
         $queryBuilder->shouldReceive('first')->andReturnNull();
 
-        $importJobModel = Mockery::mock(ImportJob::class);
+        $importJobModel = \Mockery::mock(ImportJob::class);
         $importJobModel->shouldReceive('newQuery')->once()->andReturn($queryBuilder);
         $importJobModel->shouldReceive('newInstance')->once()->andReturn($newImportJob);
 
-        $dispatcher = Mockery::mock(Dispatcher::class);
+        $dispatcher = \Mockery::mock(Dispatcher::class);
         $dispatcher->shouldNotReceive('dispatch');
 
         $action = new StartImportAction($importJobModel, $dispatcher);
 
         // act & assert
-        expect(fn (): ImportJob => $action->execute($family))
+        expect(fn(): ImportJob => $action->execute($family))
             ->toThrow(ImportAlreadyInProgressException::class);
     });
 });

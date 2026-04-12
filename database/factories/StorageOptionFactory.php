@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace Database\Factories;
 
@@ -27,14 +27,14 @@ class StorageOptionFactory extends Factory
 
     public function forFamily(Family $family): static
     {
-        return $this->state(fn (array $attributes): array => [
+        return $this->state(fn(array $attributes): array => [
             'family_id' => $family->id,
         ]);
     }
 
     public function withParent(StorageOption $storageOption): static
     {
-        return $this->state(fn (array $attributes): array => [
+        return $this->state(fn(array $attributes): array => [
             'family_id' => $storageOption->family_id,
             'parent_id' => $storageOption->id,
         ]);
@@ -42,7 +42,7 @@ class StorageOptionFactory extends Factory
 
     public function atPosition(int $row, int $column): static
     {
-        return $this->state(fn (array $attributes): array => [
+        return $this->state(fn(array $attributes): array => [
             'row' => $row,
             'column' => $column,
         ]);

@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 use App\Enums\FamilySetStatus;
 use App\Enums\ImportJobStatus;
@@ -20,9 +20,9 @@ covers(FamilySetController::class);
 
 uses(RefreshDatabase::class);
 
-describe('FamilySetController', function (): void {
-    describe('index', function (): void {
-        it('should return empty list when family has no sets', function (): void {
+describe('FamilySetController', function(): void {
+    describe('index', function(): void {
+        it('should return empty list when family has no sets', function(): void {
             $user = User::factory()->create();
 
             $response = $this->actingAs($user)->getJson('/api/family-sets');
@@ -31,7 +31,7 @@ describe('FamilySetController', function (): void {
                 ->assertJsonCount(0);
         });
 
-        it('should return family sets for authenticated user', function (): void {
+        it('should return family sets for authenticated user', function(): void {
             $user = User::factory()->create();
             $set = Set::factory()->create(['set_num' => '75192-1', 'name' => 'Millennium Falcon']);
 
@@ -54,7 +54,7 @@ describe('FamilySetController', function (): void {
                 ->assertJsonPath('0.set.name', 'Millennium Falcon');
         });
 
-        it('should not return sets from other families', function (): void {
+        it('should not return sets from other families', function(): void {
             $user = User::factory()->create();
             $otherFamily = Family::factory()->create();
             $set = Set::factory()->create();
@@ -70,15 +70,15 @@ describe('FamilySetController', function (): void {
                 ->assertJsonCount(0);
         });
 
-        it('should return 401 when unauthenticated', function (): void {
+        it('should return 401 when unauthenticated', function(): void {
             $response = $this->getJson('/api/family-sets');
 
             $response->assertStatus(401);
         });
     });
 
-    describe('store', function (): void {
-        it('should add an existing set to family', function (): void {
+    describe('store', function(): void {
+        it('should add an existing set to family', function(): void {
             $user = User::factory()->create();
             $set = Set::factory()->create(['set_num' => '75192-1', 'name' => 'Millennium Falcon']);
 
@@ -107,12 +107,12 @@ describe('FamilySetController', function (): void {
             ]);
         });
 
-        it('should fetch set from rebrickable if not in database', function (): void {
+        it('should fetch set from rebrickable if not in database', function(): void {
             Http::fake([
                 'rebrickable.com/api/v3/lego/sets/10281-1/' => Http::response([
                     'set_num' => '10281-1',
                     'name' => 'Bonsai Tree',
-                    'year' => 2021,
+                    'year' => 2_021,
                     'theme_id' => 598,
                     'num_parts' => 878,
                     'set_img_url' => 'https://example.com/bonsai.jpg',
@@ -136,7 +136,7 @@ describe('FamilySetController', function (): void {
             ]);
         });
 
-        it('should use default values when not provided', function (): void {
+        it('should use default values when not provided', function(): void {
             $user = User::factory()->create();
             Set::factory()->create(['set_num' => '75192-1']);
 
@@ -151,7 +151,7 @@ describe('FamilySetController', function (): void {
                 ->assertJsonPath('notes', null);
         });
 
-        it('should return 404 for non-existent set from rebrickable', function (): void {
+        it('should return 404 for non-existent set from rebrickable', function(): void {
             Http::fake([
                 'rebrickable.com/api/v3/lego/sets/99999-1/' => Http::response(
                     ['detail' => 'Not found.'],
@@ -169,7 +169,7 @@ describe('FamilySetController', function (): void {
                 ->assertJson(['error' => 'Set not found']);
         });
 
-        it('should return 401 when unauthenticated', function (): void {
+        it('should return 401 when unauthenticated', function(): void {
             $response = $this->postJson('/api/family-sets', [
                 'set_num' => '75192-1',
             ]);
@@ -177,7 +177,7 @@ describe('FamilySetController', function (): void {
             $response->assertStatus(401);
         });
 
-        it('should require set_num', function (): void {
+        it('should require set_num', function(): void {
             $user = User::factory()->create();
 
             $response = $this->actingAs($user)->postJson('/api/family-sets', []);
@@ -186,7 +186,7 @@ describe('FamilySetController', function (): void {
                 ->assertJsonValidationErrors(['set_num']);
         });
 
-        it('should validate status enum', function (): void {
+        it('should validate status enum', function(): void {
             $user = User::factory()->create();
 
             $response = $this->actingAs($user)->postJson('/api/family-sets', [
@@ -198,7 +198,7 @@ describe('FamilySetController', function (): void {
                 ->assertJsonValidationErrors(['status']);
         });
 
-        it('should allow adding the same set multiple times', function (): void {
+        it('should allow adding the same set multiple times', function(): void {
             $user = User::factory()->create();
             $set = Set::factory()->create(['set_num' => '75192-1']);
 
@@ -217,8 +217,8 @@ describe('FamilySetController', function (): void {
         });
     });
 
-    describe('show', function (): void {
-        it('should return a family set', function (): void {
+    describe('show', function(): void {
+        it('should return a family set', function(): void {
             $user = User::factory()->create();
             $set = Set::factory()->create(['set_num' => '75192-1', 'name' => 'Millennium Falcon']);
             $familySet = FamilySet::factory()->create([
@@ -238,7 +238,7 @@ describe('FamilySetController', function (): void {
                 ->assertJsonPath('set.name', 'Millennium Falcon');
         });
 
-        it('should return 404 for family set from another family', function (): void {
+        it('should return 404 for family set from another family', function(): void {
             $user = User::factory()->create();
             $otherFamily = Family::factory()->create();
             $set = Set::factory()->create();
@@ -252,7 +252,7 @@ describe('FamilySetController', function (): void {
             $response->assertStatus(404);
         });
 
-        it('should return 401 when unauthenticated', function (): void {
+        it('should return 401 when unauthenticated', function(): void {
             $set = Set::factory()->create();
             $familySet = FamilySet::factory()->create([
                 'set_id' => $set->id,
@@ -264,8 +264,8 @@ describe('FamilySetController', function (): void {
         });
     });
 
-    describe('update', function (): void {
-        it('should update a family set', function (): void {
+    describe('update', function(): void {
+        it('should update a family set', function(): void {
             $user = User::factory()->create();
             $set = Set::factory()->create();
             $familySet = FamilySet::factory()->create([
@@ -295,7 +295,7 @@ describe('FamilySetController', function (): void {
             ]);
         });
 
-        it('should return 404 for family set from another family', function (): void {
+        it('should return 404 for family set from another family', function(): void {
             $user = User::factory()->create();
             $otherFamily = Family::factory()->create();
             $set = Set::factory()->create();
@@ -312,7 +312,7 @@ describe('FamilySetController', function (): void {
             $response->assertStatus(404);
         });
 
-        it('should return 401 when unauthenticated', function (): void {
+        it('should return 401 when unauthenticated', function(): void {
             $set = Set::factory()->create();
             $familySet = FamilySet::factory()->create([
                 'set_id' => $set->id,
@@ -326,7 +326,7 @@ describe('FamilySetController', function (): void {
             $response->assertStatus(401);
         });
 
-        it('should require quantity and status', function (): void {
+        it('should require quantity and status', function(): void {
             $user = User::factory()->create();
             $set = Set::factory()->create();
             $familySet = FamilySet::factory()->create([
@@ -343,8 +343,8 @@ describe('FamilySetController', function (): void {
         });
     });
 
-    describe('destroy', function (): void {
-        it('should delete a family set', function (): void {
+    describe('destroy', function(): void {
+        it('should delete a family set', function(): void {
             $user = User::factory()->create();
             $set = Set::factory()->create();
             $familySet = FamilySet::factory()->create([
@@ -359,7 +359,7 @@ describe('FamilySetController', function (): void {
             $this->assertDatabaseMissing('family_sets', ['id' => $familySet->id]);
         });
 
-        it('should return 404 for family set from another family', function (): void {
+        it('should return 404 for family set from another family', function(): void {
             $user = User::factory()->create();
             $otherFamily = Family::factory()->create();
             $set = Set::factory()->create();
@@ -375,7 +375,7 @@ describe('FamilySetController', function (): void {
             $this->assertDatabaseHas('family_sets', ['id' => $familySet->id]);
         });
 
-        it('should return 401 when unauthenticated', function (): void {
+        it('should return 401 when unauthenticated', function(): void {
             $set = Set::factory()->create();
             $familySet = FamilySet::factory()->create([
                 'set_id' => $set->id,
@@ -387,8 +387,8 @@ describe('FamilySetController', function (): void {
         });
     });
 
-    describe('importFromRebrickable', function (): void {
-        it('should dispatch import job and return 202 with pending status', function (): void {
+    describe('importFromRebrickable', function(): void {
+        it('should dispatch import job and return 202 with pending status', function(): void {
             Queue::fake();
 
             $user = User::factory()->create();
@@ -402,7 +402,7 @@ describe('FamilySetController', function (): void {
                 ->assertJsonPath('failed_sets', 0)
                 ->assertJsonStructure(['id', 'status', 'total_sets', 'processed_sets', 'failed_sets', 'created_at']);
 
-            Queue::assertPushed(ImportOwnedSetsJob::class, fn (ImportOwnedSetsJob $importOwnedSetsJob): bool => $importOwnedSetsJob->familyId === $user->family_id);
+            Queue::assertPushed(ImportOwnedSetsJob::class, fn(ImportOwnedSetsJob $importOwnedSetsJob): bool => $importOwnedSetsJob->familyId === $user->family_id);
 
             $this->assertDatabaseHas('import_jobs', [
                 'family_id' => $user->family_id,
@@ -410,7 +410,7 @@ describe('FamilySetController', function (): void {
             ]);
         });
 
-        it('should return 409 when import is already in progress', function (): void {
+        it('should return 409 when import is already in progress', function(): void {
             Queue::fake();
 
             $user = User::factory()->create();
@@ -424,7 +424,7 @@ describe('FamilySetController', function (): void {
             Queue::assertNothingPushed();
         });
 
-        it('should return 409 when import is pending', function (): void {
+        it('should return 409 when import is pending', function(): void {
             Queue::fake();
 
             $user = User::factory()->create();
@@ -435,7 +435,7 @@ describe('FamilySetController', function (): void {
             $response->assertStatus(409);
         });
 
-        it('should allow new import after previous one completed', function (): void {
+        it('should allow new import after previous one completed', function(): void {
             Queue::fake();
 
             $user = User::factory()->create();
@@ -447,7 +447,7 @@ describe('FamilySetController', function (): void {
             Queue::assertPushed(ImportOwnedSetsJob::class);
         });
 
-        it('should allow new import after previous one failed', function (): void {
+        it('should allow new import after previous one failed', function(): void {
             Queue::fake();
 
             $user = User::factory()->create();
@@ -459,7 +459,7 @@ describe('FamilySetController', function (): void {
             Queue::assertPushed(ImportOwnedSetsJob::class);
         });
 
-        it('should return 403 when non-head family member tries to import', function (): void {
+        it('should return 403 when non-head family member tries to import', function(): void {
             Queue::fake();
 
             $headUser = User::factory()->create();
@@ -471,13 +471,13 @@ describe('FamilySetController', function (): void {
             Queue::assertNothingPushed();
         });
 
-        it('should return 401 when unauthenticated', function (): void {
+        it('should return 401 when unauthenticated', function(): void {
             $response = $this->postJson('/api/family-sets/import-from-rebrickable');
 
             $response->assertStatus(401);
         });
 
-        it('should execute import synchronously when job is processed', function (): void {
+        it('should execute import synchronously when job is processed', function(): void {
             Http::fake([
                 'rebrickable.com/api/v3/users/test-user-token/sets/' => Http::response([
                     'results' => [
@@ -485,9 +485,9 @@ describe('FamilySetController', function (): void {
                             'set' => [
                                 'set_num' => '75192-1',
                                 'name' => 'Millennium Falcon',
-                                'year' => 2017,
+                                'year' => 2_017,
                                 'theme_id' => 158,
-                                'num_parts' => 7541,
+                                'num_parts' => 7_541,
                                 'set_img_url' => 'https://example.com/75192.jpg',
                             ],
                             'quantity' => 2,
@@ -526,7 +526,7 @@ describe('FamilySetController', function (): void {
             ]);
         });
 
-        it('should prevent duplicate pending import jobs at the database level (race condition guard)', function (): void {
+        it('should prevent duplicate pending import jobs at the database level (race condition guard)', function(): void {
             Queue::fake();
 
             $user = User::factory()->create();
@@ -545,7 +545,7 @@ describe('FamilySetController', function (): void {
             $duplicateJob->processed_sets = 0;
             $duplicateJob->failed_sets = 0;
 
-            expect(fn () => $duplicateJob->save())
+            expect(fn() => $duplicateJob->save())
                 ->toThrow(UniqueConstraintViolationException::class);
 
             // Only one pending import job should exist
@@ -558,8 +558,8 @@ describe('FamilySetController', function (): void {
         });
     });
 
-    describe('importStatus', function (): void {
-        it('should return latest import job status', function (): void {
+    describe('importStatus', function(): void {
+        it('should return latest import job status', function(): void {
             $user = User::factory()->create();
             $importJob = ImportJob::factory()->forFamily($user->family)->inProgress()->create([
                 'total_sets' => 10,
@@ -577,7 +577,7 @@ describe('FamilySetController', function (): void {
                 ->assertJsonPath('failed_sets', 1);
         });
 
-        it('should return completed import job with details', function (): void {
+        it('should return completed import job with details', function(): void {
             $user = User::factory()->create();
             ImportJob::factory()->forFamily($user->family)->completed()->create([
                 'total_sets' => 15,
@@ -598,7 +598,7 @@ describe('FamilySetController', function (): void {
                 ->assertJsonPath('failed_set_details.0.set_num', '75192-1');
         });
 
-        it('should return 404 when no import jobs exist', function (): void {
+        it('should return 404 when no import jobs exist', function(): void {
             $user = User::factory()->create();
 
             $response = $this->actingAs($user)->getJson('/api/family-sets/import-status');
@@ -607,7 +607,7 @@ describe('FamilySetController', function (): void {
                 ->assertJsonPath('message', 'No import jobs found');
         });
 
-        it('should return most recent import job', function (): void {
+        it('should return most recent import job', function(): void {
             $user = User::factory()->create();
 
             // Create older completed job
@@ -629,7 +629,7 @@ describe('FamilySetController', function (): void {
                 ->assertJsonPath('total_sets', 20);
         });
 
-        it('should not return import jobs from other families', function (): void {
+        it('should not return import jobs from other families', function(): void {
             $user = User::factory()->create();
             $otherFamily = Family::factory()->create();
             ImportJob::factory()->forFamily($otherFamily)->inProgress()->create();
@@ -639,7 +639,7 @@ describe('FamilySetController', function (): void {
             $response->assertStatus(404);
         });
 
-        it('should return 401 when unauthenticated', function (): void {
+        it('should return 401 when unauthenticated', function(): void {
             $response = $this->getJson('/api/family-sets/import-status');
 
             $response->assertStatus(401);

@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace Database\Factories;
 
@@ -19,7 +19,7 @@ class SetFactory extends Factory
             'name' => fake()->words(3, true),
             'year' => fake()->year(),
             'theme' => fake()->word(),
-            'num_parts' => fake()->numberBetween(100, 5000),
+            'num_parts' => fake()->numberBetween(100, 5_000),
             'image_url' => fake()->optional()->imageUrl(),
         ];
     }

@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Http\Controllers;
 
@@ -21,13 +21,15 @@ use Illuminate\Http\Request;
 class FamilyController extends Controller
 {
     public function members(
-        #[CurrentUser] User $user,
+        #[CurrentUser]
+        User $user,
     ): JsonResponse {
         return new JsonResponse(FamilyMemberResourceData::fromFamily($user->family));
     }
 
     public function parts(
-        #[CurrentUser] User $user,
+        #[CurrentUser]
+        User $user,
         GetFamilyPartsAction $getFamilyPartsAction,
         Request $request,
     ): JsonResponse {
@@ -41,7 +43,8 @@ class FamilyController extends Controller
     }
 
     public function stats(
-        #[CurrentUser] User $user,
+        #[CurrentUser]
+        User $user,
         GetFamilyStatsAction $getFamilyStatsAction,
     ): JsonResponse {
         $familyStatsData = $getFamilyStatsAction->execute($user->family);
@@ -50,7 +53,8 @@ class FamilyController extends Controller
     }
 
     public function brickDna(
-        #[CurrentUser] User $user,
+        #[CurrentUser]
+        User $user,
         GetBrickDnaAction $getBrickDnaAction,
     ): JsonResponse {
         $brickDnaData = $getBrickDnaAction->execute($user->family);
@@ -60,7 +64,8 @@ class FamilyController extends Controller
 
     public function setRebrickableToken(
         SetRebrickableTokenRequest $setRebrickableTokenRequest,
-        #[CurrentUser] User $user,
+        #[CurrentUser]
+        User $user,
         SetRebrickableTokenAction $setRebrickableTokenAction,
     ): JsonResponse {
         $setRebrickableTokenAction->execute($user->family, $setRebrickableTokenRequest->toDto(), $user);
@@ -70,7 +75,8 @@ class FamilyController extends Controller
 
     public function removeMember(
         User $user,
-        #[CurrentUser] User $currentUser,
+        #[CurrentUser]
+        User $currentUser,
         RemoveFamilyMemberAction $removeFamilyMemberAction,
     ): JsonResponse {
         $removeFamilyMemberAction->execute($currentUser->family, $user, $currentUser);

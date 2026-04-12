@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Models;
 
@@ -12,13 +12,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * @property positive-int $id
- * @property string $name
+ * @property positive-int      $id
+ * @property string            $name
  * @property positive-int|null $head_id
- * @property string|null $rebrickable_user_token
- * @property Carbon|null $created_at
- * @property Carbon|null $updated_at
- * @property-read User|null $headUser
+ * @property string|null       $rebrickable_user_token
+ * @property Carbon|null       $created_at
+ * @property Carbon|null       $updated_at
+ * @property User|null         $headUser
  */
 class Family extends Model
 {

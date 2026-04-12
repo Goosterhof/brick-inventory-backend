@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 use App\Actions\FamilySet\ImportOwnedSetsAction;
 use App\Data\ImportOwnedSetsResultData;
@@ -15,8 +15,8 @@ covers(ImportOwnedSetsJob::class);
 
 uses(RefreshDatabase::class);
 
-describe('ImportOwnedSetsJob', function (): void {
-    it('should update import job to completed on successful import', function (): void {
+describe('ImportOwnedSetsJob', function(): void {
+    it('should update import job to completed on successful import', function(): void {
         // arrange
         $family = Family::factory()->create(['rebrickable_user_token' => 'test-token']);
 
@@ -31,7 +31,7 @@ describe('ImportOwnedSetsJob', function (): void {
             complete: true,
         );
 
-        $importOwnedSetsAction = Mockery::mock(ImportOwnedSetsAction::class);
+        $importOwnedSetsAction = \Mockery::mock(ImportOwnedSetsAction::class);
         $importOwnedSetsAction->shouldReceive('execute')
             ->once()
             ->andReturn($result);
@@ -51,7 +51,7 @@ describe('ImportOwnedSetsJob', function (): void {
         expect($importJob->completed_at)->not->toBeNull();
     });
 
-    it('should record skipped sets as failed set details', function (): void {
+    it('should record skipped sets as failed set details', function(): void {
         // arrange
         $family = Family::factory()->create(['rebrickable_user_token' => 'test-token']);
 
@@ -67,7 +67,7 @@ describe('ImportOwnedSetsJob', function (): void {
             skippedSetNums: ['75192-1', '10281-1'],
         );
 
-        $importOwnedSetsAction = Mockery::mock(ImportOwnedSetsAction::class);
+        $importOwnedSetsAction = \Mockery::mock(ImportOwnedSetsAction::class);
         $importOwnedSetsAction->shouldReceive('execute')
             ->once()
             ->andReturn($result);
@@ -81,13 +81,13 @@ describe('ImportOwnedSetsJob', function (): void {
         $importJob->refresh();
         expect($importJob->status)->toBe(ImportJobStatus::Completed);
         expect($importJob->failed_sets)->toBe(2);
-        assert($importJob->failed_set_details !== null);
+        \assert($importJob->failed_set_details !== null);
         expect($importJob->failed_set_details)->toHaveCount(2);
         expect($importJob->failed_set_details[0]['set_num'])->toBe('75192-1');
         expect($importJob->failed_set_details[1]['set_num'])->toBe('10281-1');
     });
 
-    it('should mark import as failed when result is incomplete', function (): void {
+    it('should mark import as failed when result is incomplete', function(): void {
         // arrange
         $family = Family::factory()->create(['rebrickable_user_token' => 'test-token']);
 
@@ -103,7 +103,7 @@ describe('ImportOwnedSetsJob', function (): void {
             error: 'Import incomplete: API error. 3 sets were imported successfully. Retry to fetch remaining sets.',
         );
 
-        $importOwnedSetsAction = Mockery::mock(ImportOwnedSetsAction::class);
+        $importOwnedSetsAction = \Mockery::mock(ImportOwnedSetsAction::class);
         $importOwnedSetsAction->shouldReceive('execute')
             ->once()
             ->andReturn($result);
@@ -116,12 +116,12 @@ describe('ImportOwnedSetsJob', function (): void {
         // assert
         $importJob->refresh();
         expect($importJob->status)->toBe(ImportJobStatus::Failed);
-        assert($importJob->failed_set_details !== null);
+        \assert($importJob->failed_set_details !== null);
         expect($importJob->failed_set_details)->toHaveCount(1);
         expect($importJob->failed_set_details[0]['error'])->toContain('Import incomplete');
     });
 
-    it('should mark import as failed with generic message when job fails with exception', function (): void {
+    it('should mark import as failed with generic message when job fails with exception', function(): void {
         // arrange
         $family = Family::factory()->create();
 
@@ -132,23 +132,23 @@ describe('ImportOwnedSetsJob', function (): void {
 
         Log::shouldReceive('error')
             ->once()
-            ->withArgs(fn (string $message, array $context): bool => $message === 'ImportOwnedSetsJob failed'
+            ->withArgs(fn(string $message, array $context): bool => $message === 'ImportOwnedSetsJob failed'
                 && $context['exception'] === 'Connection timeout: pgsql://user:pass@host/db'
-                && array_key_exists('trace', $context));
+                && \array_key_exists('trace', $context));
 
         // act
-        $job->failed(new RuntimeException('Connection timeout: pgsql://user:pass@host/db'));
+        $job->failed(new \RuntimeException('Connection timeout: pgsql://user:pass@host/db'));
 
         // assert
         $importJob->refresh();
         expect($importJob->status)->toBe(ImportJobStatus::Failed);
         expect($importJob->completed_at)->not->toBeNull();
-        assert($importJob->failed_set_details !== null);
+        \assert($importJob->failed_set_details !== null);
         expect($importJob->failed_set_details)->toHaveCount(1);
         expect($importJob->failed_set_details[0]['error'])->toBe('Import failed due to an unexpected error');
     });
 
-    it('should not log when job fails with null throwable', function (): void {
+    it('should not log when job fails with null throwable', function(): void {
         // arrange
         $family = Family::factory()->create();
 
@@ -166,23 +166,23 @@ describe('ImportOwnedSetsJob', function (): void {
         $importJob->refresh();
         expect($importJob->status)->toBe(ImportJobStatus::Failed);
         expect($importJob->completed_at)->not->toBeNull();
-        assert($importJob->failed_set_details !== null);
+        \assert($importJob->failed_set_details !== null);
         expect($importJob->failed_set_details)->toHaveCount(1);
         expect($importJob->failed_set_details[0]['error'])->toBe('Import failed due to an unexpected error');
     });
 
-    it('should handle failed() gracefully when import job does not exist', function (): void {
+    it('should handle failed() gracefully when import job does not exist', function(): void {
         // arrange
-        $job = new ImportOwnedSetsJob(importJobId: 999999, familyId: 1);
+        $job = new ImportOwnedSetsJob(importJobId: 999_999, familyId: 1);
 
         // act - should not throw
-        $job->failed(new RuntimeException('Some error'));
+        $job->failed(new \RuntimeException('Some error'));
 
         // assert - no import job was created or modified
-        expect(ImportJob::query()->where('id', 999999)->exists())->toBeFalse();
+        expect(ImportJob::query()->where('id', 999_999)->exists())->toBeFalse();
     });
 
-    it('should set status to in_progress before executing import', function (): void {
+    it('should set status to in_progress before executing import', function(): void {
         // arrange
         $family = Family::factory()->create(['rebrickable_user_token' => 'test-token']);
 
@@ -190,10 +190,10 @@ describe('ImportOwnedSetsJob', function (): void {
         $importJob = ImportJob::factory()->forFamily($family)->create();
 
         $statusDuringExecution = null;
-        $importOwnedSetsAction = Mockery::mock(ImportOwnedSetsAction::class);
+        $importOwnedSetsAction = \Mockery::mock(ImportOwnedSetsAction::class);
         $importOwnedSetsAction->shouldReceive('execute')
             ->once()
-            ->andReturnUsing(function () use ($importJob, &$statusDuringExecution): ImportOwnedSetsResultData {
+            ->andReturnUsing(function() use ($importJob, &$statusDuringExecution): ImportOwnedSetsResultData {
                 $importJob->refresh();
                 $statusDuringExecution = $importJob->status;
 

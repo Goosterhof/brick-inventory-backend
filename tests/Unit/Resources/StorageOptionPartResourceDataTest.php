@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 use App\Http\Resources\ColorResourceData;
 use App\Http\Resources\PartResourceData;
@@ -14,7 +14,7 @@ covers(StorageOptionPartResourceData::class);
 
 function mockStorageOptionPart(array $overrides = []): MockInterface&StorageOptionPart
 {
-    $part = Mockery::mock(Part::class);
+    $part = \Mockery::mock(Part::class);
     $part->allows('getAttribute')->with('id')->andReturn($overrides['part_id'] ?? 20);
     $part->allows('getAttribute')->with('part_num')->andReturn($overrides['part_num'] ?? '3001');
     $part->allows('getAttribute')->with('name')->andReturn($overrides['part_name'] ?? 'Brick 2 x 4');
@@ -23,14 +23,14 @@ function mockStorageOptionPart(array $overrides = []): MockInterface&StorageOpti
 
     $color = null;
     if (($overrides['has_color'] ?? true) === true) {
-        $color = Mockery::mock(Color::class);
+        $color = \Mockery::mock(Color::class);
         $color->allows('getAttribute')->with('id')->andReturn($overrides['color_id'] ?? 5);
         $color->allows('getAttribute')->with('name')->andReturn($overrides['color_name'] ?? 'Red');
         $color->allows('getAttribute')->with('rgb')->andReturn($overrides['color_rgb'] ?? 'CC0000');
         $color->allows('getAttribute')->with('is_transparent')->andReturn($overrides['color_transparent'] ?? false);
     }
 
-    $storageOptionPart = Mockery::mock(StorageOptionPart::class);
+    $storageOptionPart = \Mockery::mock(StorageOptionPart::class);
     $storageOptionPart->allows('getAttribute')->with('id')->andReturn($overrides['id'] ?? 1);
     $storageOptionPart->allows('getAttribute')->with('storage_option_id')->andReturn($overrides['storage_option_id'] ?? 10);
     $storageOptionPart->allows('getAttribute')->with('quantity')->andReturn($overrides['quantity'] ?? 15);
@@ -41,8 +41,8 @@ function mockStorageOptionPart(array $overrides = []): MockInterface&StorageOpti
     return $storageOptionPart;
 }
 
-describe('StorageOptionPartResourceData', function (): void {
-    it('should convert storage option part model to resource data with nested part and color', function (): void {
+describe('StorageOptionPartResourceData', function(): void {
+    it('should convert storage option part model to resource data with nested part and color', function(): void {
         // arrange
         $storageOptionPart = mockStorageOptionPart();
 
@@ -61,7 +61,7 @@ describe('StorageOptionPartResourceData', function (): void {
             ->and($resource->color->name)->toBe('Red');
     });
 
-    it('should handle nullable color', function (): void {
+    it('should handle nullable color', function(): void {
         // arrange
         $storageOptionPart = mockStorageOptionPart(['has_color' => false]);
 
@@ -72,7 +72,7 @@ describe('StorageOptionPartResourceData', function (): void {
         expect($resource->color)->toBeNull();
     });
 
-    it('should convert to array format with nested objects', function (): void {
+    it('should convert to array format with nested objects', function(): void {
         // arrange
         $storageOptionPart = mockStorageOptionPart();
 
@@ -90,7 +90,7 @@ describe('StorageOptionPartResourceData', function (): void {
             ->and($array['color']['name'])->toBe('Red');
     });
 
-    it('should serialize null color as null in array output', function (): void {
+    it('should serialize null color as null in array output', function(): void {
         // arrange
         $storageOptionPart = mockStorageOptionPart(['has_color' => false]);
 

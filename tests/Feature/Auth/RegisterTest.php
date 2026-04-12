@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 use App\Http\Controllers\Auth\RegisterController;
 use App\Models\Family;
@@ -14,8 +14,8 @@ covers(RegisterController::class);
 
 uses(RefreshDatabase::class);
 
-describe('RegisterController', function (): void {
-    it('should register a user with a family', function (): void {
+describe('RegisterController', function(): void {
+    it('should register a user with a family', function(): void {
         $response = $this->postJson('/api/register', [
             'family_name' => 'Smith Family',
             'name' => 'John Smith',
@@ -38,7 +38,7 @@ describe('RegisterController', function (): void {
             ->and($user->family->name)->toBe('Smith Family');
     });
 
-    it('should register a user with an invite code and join existing family', function (): void {
+    it('should register a user with an invite code and join existing family', function(): void {
         $headUser = User::factory()->create();
         $inviteCode = InviteCode::factory()
             ->forFamily($headUser->family)
@@ -61,7 +61,7 @@ describe('RegisterController', function (): void {
             ->and($user->family->head_id)->toBe($headUser->id);
     });
 
-    it('should not set invite code user as family head', function (): void {
+    it('should not set invite code user as family head', function(): void {
         $headUser = User::factory()->create();
         $inviteCode = InviteCode::factory()
             ->forFamily($headUser->family)
@@ -80,7 +80,7 @@ describe('RegisterController', function (): void {
         expect($headUser->family->head_id)->toBe($headUser->id);
     });
 
-    it('should return 422 for invalid invite code', function (): void {
+    it('should return 422 for invalid invite code', function(): void {
         $response = $this->postJson('/api/register', [
             'name' => 'Jane Smith',
             'email' => 'jane@example.com',
@@ -93,7 +93,7 @@ describe('RegisterController', function (): void {
             ->assertJsonPath('error', 'The invite code is invalid, expired, or revoked');
     });
 
-    it('should return 422 for expired invite code', function (): void {
+    it('should return 422 for expired invite code', function(): void {
         $headUser = User::factory()->create();
         $inviteCode = InviteCode::factory()
             ->forFamily($headUser->family)
@@ -113,7 +113,7 @@ describe('RegisterController', function (): void {
             ->assertJsonPath('error', 'The invite code is invalid, expired, or revoked');
     });
 
-    it('should return 422 for revoked invite code', function (): void {
+    it('should return 422 for revoked invite code', function(): void {
         $headUser = User::factory()->create();
         $inviteCode = InviteCode::factory()
             ->forFamily($headUser->family)
@@ -133,7 +133,7 @@ describe('RegisterController', function (): void {
             ->assertJsonPath('error', 'The invite code is invalid, expired, or revoked');
     });
 
-    it('should not require family_name when invite_code is provided', function (): void {
+    it('should not require family_name when invite_code is provided', function(): void {
         $headUser = User::factory()->create();
         $inviteCode = InviteCode::factory()
             ->forFamily($headUser->family)
@@ -151,14 +151,14 @@ describe('RegisterController', function (): void {
         $response->assertStatus(201);
     });
 
-    it('should require all fields for registration', function (): void {
+    it('should require all fields for registration', function(): void {
         $response = $this->postJson('/api/register', []);
 
         $response->assertStatus(422)
             ->assertJsonValidationErrors(['family_name', 'name', 'email', 'password']);
     });
 
-    it('should require a valid email', function (): void {
+    it('should require a valid email', function(): void {
         $response = $this->postJson('/api/register', [
             'family_name' => 'Smith Family',
             'name' => 'John Smith',
@@ -171,7 +171,7 @@ describe('RegisterController', function (): void {
             ->assertJsonValidationErrors(['email']);
     });
 
-    it('should require a unique email', function (): void {
+    it('should require a unique email', function(): void {
         User::factory()->create(['email' => 'john@example.com']);
 
         $response = $this->postJson('/api/register', [
@@ -186,7 +186,7 @@ describe('RegisterController', function (): void {
             ->assertJsonValidationErrors(['email']);
     });
 
-    it('should require password confirmation', function (): void {
+    it('should require password confirmation', function(): void {
         $response = $this->postJson('/api/register', [
             'family_name' => 'Smith Family',
             'name' => 'John Smith',
@@ -199,7 +199,7 @@ describe('RegisterController', function (): void {
             ->assertJsonValidationErrors(['password']);
     });
 
-    it('should require minimum password length', function (): void {
+    it('should require minimum password length', function(): void {
         $response = $this->postJson('/api/register', [
             'family_name' => 'Smith Family',
             'name' => 'John Smith',
@@ -212,15 +212,15 @@ describe('RegisterController', function (): void {
             ->assertJsonValidationErrors(['password']);
     });
 
-    it('should rate limit registration attempts', function (): void {
-        RateLimiter::for('auth', fn (): Limit => Limit::perMinute(5));
+    it('should rate limit registration attempts', function(): void {
+        RateLimiter::for('auth', fn(): Limit => Limit::perMinute(5));
         $this->freezeTime();
 
         for ($i = 1; $i <= 5; $i++) {
             $this->postJson('/api/register', [
                 'family_name' => 'Family ' . $i,
                 'name' => 'User ' . $i,
-                'email' => sprintf('user%d@example.com', $i),
+                'email' => \sprintf('user%d@example.com', $i),
                 'password' => 'password123',
                 'password_confirmation' => 'password123',
             ])->assertStatus(201);

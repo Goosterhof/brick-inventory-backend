@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 /*
 |--------------------------------------------------------------------------
@@ -17,30 +17,30 @@ declare(strict_types=1);
 | - Exception — domain / business rule violations
 | - App\Exceptions\* — project-specific base classes (e.g. ExternalApiException)
 |
-*/
+ */
 
 arch('exceptions should live in the Exceptions namespace')
     ->expect('App\Exceptions')
     ->toBeClasses();
 
-it('should have all leaf exception classes as final', function (): void {
-    $exceptionsDir = dirname(__DIR__, 2) . '/app/Exceptions';
-    $classes = getClassesInDirectory($exceptionsDir, 'App\\Exceptions\\');
+it('should have all leaf exception classes as final', function(): void {
+    $exceptionsDir = \dirname(__DIR__, 2) . '/app/Exceptions';
+    $classes = getClassesInDirectory($exceptionsDir, 'App\Exceptions\\');
 
     // Build parent-child map to identify which classes have subclasses
     $hasSubclass = [];
     foreach ($classes as $className) {
-        $reflection = new ReflectionClass($className);
+        $reflection = new \ReflectionClass($className);
         $parent = $reflection->getParentClass();
 
-        if ($parent !== false && str_starts_with($parent->getName(), 'App\\Exceptions\\')) {
+        if ($parent !== false && str_starts_with($parent->getName(), 'App\Exceptions\\')) {
             $hasSubclass[$parent->getName()] = true;
         }
     }
 
     $nonFinalLeaves = [];
     foreach ($classes as $class) {
-        $reflection = new ReflectionClass($class);
+        $reflection = new \ReflectionClass($class);
 
         // Skip abstract classes — they cannot be final
         if ($reflection->isAbstract()) {
@@ -66,18 +66,18 @@ it('should have all leaf exception classes as final', function (): void {
     );
 });
 
-it('should only extend allowed base exception classes', function (): void {
-    $exceptionsDir = dirname(__DIR__, 2) . '/app/Exceptions';
-    $classes = getClassesInDirectory($exceptionsDir, 'App\\Exceptions\\');
+it('should only extend allowed base exception classes', function(): void {
+    $exceptionsDir = \dirname(__DIR__, 2) . '/app/Exceptions';
+    $classes = getClassesInDirectory($exceptionsDir, 'App\Exceptions\\');
 
     $allowedBases = [
-        'Exception',
-        'RuntimeException',
+        \Exception::class,
+        \RuntimeException::class,
     ];
 
     $violations = [];
     foreach ($classes as $class) {
-        $reflection = new ReflectionClass($class);
+        $reflection = new \ReflectionClass($class);
         $parent = $reflection->getParentClass();
 
         if ($parent === false) {
@@ -87,19 +87,19 @@ it('should only extend allowed base exception classes', function (): void {
         $parentName = $parent->getName();
 
         // Allow extending another App\Exceptions class
-        if (str_starts_with($parentName, 'App\\Exceptions\\')) {
+        if (str_starts_with($parentName, 'App\Exceptions\\')) {
             continue;
         }
 
         // Allow extending Exception or RuntimeException directly
-        if (in_array($parentName, $allowedBases, true)) {
+        if (\in_array($parentName, $allowedBases, true)) {
             continue;
         }
 
-        $violations[] = sprintf('%s extends %s', $class, $parentName);
+        $violations[] = \sprintf('%s extends %s', $class, $parentName);
     }
 
     expect($violations)->toBeEmpty(
-        'Exceptions must extend Exception, RuntimeException, or an App\\Exceptions class. Violations: ' . implode(', ', $violations),
+        'Exceptions must extend Exception, RuntimeException, or an App\Exceptions class. Violations: ' . implode(', ', $violations),
     );
 });

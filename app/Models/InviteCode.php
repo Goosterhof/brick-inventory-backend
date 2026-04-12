@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Models;
 
@@ -14,15 +14,15 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property positive-int $id
- * @property int $family_id
- * @property string $code
- * @property int $generated_by
- * @property Carbon|null $expires_at
- * @property Carbon|null $revoked_at
- * @property Carbon|null $created_at
- * @property Carbon|null $updated_at
- * @property-read Family $family
- * @property-read User $generatedBy
+ * @property int          $family_id
+ * @property string       $code
+ * @property int          $generated_by
+ * @property Carbon|null  $expires_at
+ * @property Carbon|null  $revoked_at
+ * @property Carbon|null  $created_at
+ * @property Carbon|null  $updated_at
+ * @property Family       $family
+ * @property User         $generatedBy
  */
 class InviteCode extends Model implements BelongsToFamilyInterface
 {
@@ -70,7 +70,7 @@ class InviteCode extends Model implements BelongsToFamilyInterface
     protected function scopeActive(Builder $builder): Builder
     {
         return $builder->whereNull('revoked_at')
-            ->where(function (Builder $builder): void {
+            ->where(function(Builder $builder): void {
                 $builder->whereNull('expires_at')
                     ->orWhere('expires_at', '>', now());
             });

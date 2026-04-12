@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Models;
 
@@ -14,14 +14,14 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * @property positive-int $id
- * @property int $family_id
- * @property int|null $parent_id
- * @property string $name
- * @property string|null $description
- * @property int|null $row
- * @property int|null $column
- * @property Carbon|null $created_at
- * @property Carbon|null $updated_at
+ * @property int          $family_id
+ * @property int|null     $parent_id
+ * @property string       $name
+ * @property string|null  $description
+ * @property int|null     $row
+ * @property int|null     $column
+ * @property Carbon|null  $created_at
+ * @property Carbon|null  $updated_at
  */
 class StorageOption extends Model implements BelongsToFamilyInterface
 {

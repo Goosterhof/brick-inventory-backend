@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace Database\Factories;
 
@@ -27,21 +27,21 @@ class StorageOptionPartFactory extends Factory
 
     public function forStorageOption(StorageOption $storageOption): static
     {
-        return $this->state(fn (array $attributes): array => [
+        return $this->state(fn(array $attributes): array => [
             'storage_option_id' => $storageOption->id,
         ]);
     }
 
     public function forPart(Part $part): static
     {
-        return $this->state(fn (array $attributes): array => [
+        return $this->state(fn(array $attributes): array => [
             'part_id' => $part->id,
         ]);
     }
 
     public function withColor(Color $color): static
     {
-        return $this->state(fn (array $attributes): array => [
+        return $this->state(fn(array $attributes): array => [
             'color_id' => $color->id,
         ]);
     }

@@ -1,16 +1,16 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 use App\Http\Resources\ColorResourceData;
 use App\Models\Color;
 
 covers(ColorResourceData::class);
 
-describe('ColorResourceData', function (): void {
-    it('should convert color model to resource data', function (): void {
+describe('ColorResourceData', function(): void {
+    it('should convert color model to resource data', function(): void {
         // arrange
-        $color = Mockery::mock(Color::class);
+        $color = \Mockery::mock(Color::class);
         $color->allows('getAttribute')->with('id')->andReturn(1);
         $color->allows('getAttribute')->with('name')->andReturn('Red');
         $color->allows('getAttribute')->with('rgb')->andReturn('CC0000');
@@ -27,9 +27,9 @@ describe('ColorResourceData', function (): void {
             ->and($resource->is_transparent)->toBeFalse();
     });
 
-    it('should handle transparent colors', function (): void {
+    it('should handle transparent colors', function(): void {
         // arrange
-        $color = Mockery::mock(Color::class);
+        $color = \Mockery::mock(Color::class);
         $color->allows('getAttribute')->with('id')->andReturn(2);
         $color->allows('getAttribute')->with('name')->andReturn('Trans-Clear');
         $color->allows('getAttribute')->with('rgb')->andReturn('FFFFFF');
@@ -42,9 +42,9 @@ describe('ColorResourceData', function (): void {
         expect($resource->is_transparent)->toBeTrue();
     });
 
-    it('should convert to array format', function (): void {
+    it('should convert to array format', function(): void {
         // arrange
-        $color = Mockery::mock(Color::class);
+        $color = \Mockery::mock(Color::class);
         $color->allows('getAttribute')->with('id')->andReturn(1);
         $color->allows('getAttribute')->with('name')->andReturn('Red');
         $color->allows('getAttribute')->with('rgb')->andReturn('CC0000');

@@ -1,10 +1,12 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Exceptions;
 
 use Illuminate\Http\Client\Response;
+
+use function sprintf;
 
 /**
  * Exception thrown when the Rebrickable API returns an error.

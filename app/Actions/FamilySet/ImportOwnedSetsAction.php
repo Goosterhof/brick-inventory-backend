@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Actions\FamilySet;
 
@@ -16,6 +16,9 @@ use App\Models\Family;
 use App\Models\FamilySet;
 use App\Models\Set;
 use Illuminate\Database\ConnectionInterface;
+
+use function count;
+use function sprintf;
 
 final readonly class ImportOwnedSetsAction
 {
@@ -40,7 +43,7 @@ final readonly class ImportOwnedSetsAction
         $created = 0;
         $updated = 0;
         $skipped = 0;
-        /** @var array<string> $skippedSetNums */
+        /** @var list<string> $skippedSetNums */
         $skippedSetNums = [];
         $complete = true;
         $error = null;
@@ -48,16 +51,20 @@ final readonly class ImportOwnedSetsAction
 
         try {
             foreach ($this->legoDataService->fetchUserSets($family->rebrickable_user_token) as $pageUserSets) {
-                $this->connection->transaction(function () use (
-                    $pageUserSets, $family,
-                    &$created, &$updated, &$skipped, &$skippedSetNums,
+                $this->connection->transaction(function() use (
+                    $pageUserSets,
+                    $family,
+                    &$created,
+                    &$updated,
+                    &$skipped,
+                    &$skippedSetNums,
                 ): void {
                     $this->processPage($pageUserSets, $family, $created, $updated, $skipped, $skippedSetNums);
                 });
 
                 $pagesProcessed++;
             }
-        } catch (RebrickableApiException|InvalidApiResponseException $e) {
+        } catch (InvalidApiResponseException|RebrickableApiException $e) {
             if ($pagesProcessed === 0) {
                 throw $e;
             }
@@ -83,7 +90,7 @@ final readonly class ImportOwnedSetsAction
 
     /**
      * @param list<RebrickableUserSetData> $pageUserSets
-     * @param array<string> $skippedSetNums
+     * @param list<string>                 $skippedSetNums
      */
     private function processPage(
         array $pageUserSets,
@@ -109,8 +116,8 @@ final readonly class ImportOwnedSetsAction
     }
 
     /**
-     * @param array<FamilySet> $existingForSet
-     * @param array<string> $skippedSetNums
+     * @param list<FamilySet> $existingForSet
+     * @param list<string>    $skippedSetNums
      */
     private function syncFamilySet(
         Family $family,
@@ -155,11 +162,11 @@ final readonly class ImportOwnedSetsAction
     /**
      * @param array<string, Set> $setsByNum
      *
-     * @return array<int, array<FamilySet>>
+     * @return array<int, list<FamilySet>>
      */
     private function loadExistingFamilySetsGroupedBySetId(Family $family, array $setsByNum): array
     {
-        $setIds = array_values(array_map(fn (Set $set) => $set->id, $setsByNum));
+        $setIds = array_values(array_map(fn(Set $set) => $set->id, $setsByNum));
 
         $existingFamilySets = $this->familySet->newQuery()
             ->where('family_id', $family->id)

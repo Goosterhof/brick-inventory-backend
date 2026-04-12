@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 use App\Actions\FamilySet\UpdateFamilySetAction;
 use App\DataTransferObjects\FamilySet\UpdateFamilySetData;
@@ -13,25 +13,25 @@ use Illuminate\Support\Facades\Date;
 
 covers(UpdateFamilySetAction::class);
 
-describe('UpdateFamilySetAction', function (): void {
-    beforeEach(function (): void {
-        $this->db = Mockery::mock(ConnectionInterface::class);
-        $this->db->allows('transaction')->andReturnUsing(fn (Closure $callback) => $callback());
+describe('UpdateFamilySetAction', function(): void {
+    beforeEach(function(): void {
+        $this->db = \Mockery::mock(ConnectionInterface::class);
+        $this->db->allows('transaction')->andReturnUsing(fn(\Closure $callback) => $callback());
 
-        $this->dateFactory = Mockery::mock(DateFactory::class);
+        $this->dateFactory = \Mockery::mock(DateFactory::class);
         $this->dateFactory->allows('instance')->andReturnUsing(
-            fn (DateTimeInterface $date): CarbonImmutable => CarbonImmutable::instance($date),
+            fn(\DateTimeInterface $date): CarbonImmutable => CarbonImmutable::instance($date),
         );
     });
 
-    it('should update all fields on the family set', function (): void {
+    it('should update all fields on the family set', function(): void {
         // arrange
         $savedValues = [];
-        $familySet = Mockery::mock(FamilySet::class);
-        $familySet->allows('setAttribute')->andReturnUsing(function ($key, $value) use (&$savedValues): void {
+        $familySet = \Mockery::mock(FamilySet::class);
+        $familySet->allows('setAttribute')->andReturnUsing(function($key, $value) use (&$savedValues): void {
             $savedValues[$key] = $value;
         });
-        $familySet->allows('getAttribute')->andReturnUsing(function ($key) use (&$savedValues): mixed {
+        $familySet->allows('getAttribute')->andReturnUsing(function($key) use (&$savedValues): mixed {
             return $savedValues[$key] ?? null;
         });
         $familySet->shouldReceive('save')->once();
@@ -57,14 +57,14 @@ describe('UpdateFamilySetAction', function (): void {
             ->and($savedValues['notes'])->toBe('Updated notes');
     });
 
-    it('should set purchase_date to null when not provided', function (): void {
+    it('should set purchase_date to null when not provided', function(): void {
         // arrange
         $savedValues = [];
-        $familySet = Mockery::mock(FamilySet::class);
-        $familySet->allows('setAttribute')->andReturnUsing(function ($key, $value) use (&$savedValues): void {
+        $familySet = \Mockery::mock(FamilySet::class);
+        $familySet->allows('setAttribute')->andReturnUsing(function($key, $value) use (&$savedValues): void {
             $savedValues[$key] = $value;
         });
-        $familySet->allows('getAttribute')->andReturnUsing(function ($key) use (&$savedValues): mixed {
+        $familySet->allows('getAttribute')->andReturnUsing(function($key) use (&$savedValues): mixed {
             return $savedValues[$key] ?? null;
         });
         $familySet->shouldReceive('save')->once();
@@ -85,9 +85,9 @@ describe('UpdateFamilySetAction', function (): void {
             ->and($savedValues['notes'])->toBeNull();
     });
 
-    it('should call save on the family set', function (): void {
+    it('should call save on the family set', function(): void {
         // arrange
-        $familySet = Mockery::mock(FamilySet::class);
+        $familySet = \Mockery::mock(FamilySet::class);
         $familySet->allows('setAttribute');
         $familySet->allows('getAttribute');
         $familySet->shouldReceive('save')->once();
@@ -104,9 +104,9 @@ describe('UpdateFamilySetAction', function (): void {
         // assert - Mockery expectations verify the interactions
     });
 
-    it('should return the same family set instance', function (): void {
+    it('should return the same family set instance', function(): void {
         // arrange
-        $familySet = Mockery::mock(FamilySet::class);
+        $familySet = \Mockery::mock(FamilySet::class);
         $familySet->allows('setAttribute');
         $familySet->allows('getAttribute');
         $familySet->shouldReceive('save')->once();

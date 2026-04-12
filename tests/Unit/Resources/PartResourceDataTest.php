@@ -1,16 +1,16 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 use App\Http\Resources\PartResourceData;
 use App\Models\Part;
 
 covers(PartResourceData::class);
 
-describe('PartResourceData', function (): void {
-    it('should convert part model to resource data', function (): void {
+describe('PartResourceData', function(): void {
+    it('should convert part model to resource data', function(): void {
         // arrange
-        $part = Mockery::mock(Part::class);
+        $part = \Mockery::mock(Part::class);
         $part->allows('getAttribute')->with('id')->andReturn(1);
         $part->allows('getAttribute')->with('part_num')->andReturn('3001');
         $part->allows('getAttribute')->with('name')->andReturn('Brick 2 x 4');
@@ -29,9 +29,9 @@ describe('PartResourceData', function (): void {
             ->and($resource->image_url)->toBe('https://example.com/3001.jpg');
     });
 
-    it('should handle nullable category', function (): void {
+    it('should handle nullable category', function(): void {
         // arrange
-        $part = Mockery::mock(Part::class);
+        $part = \Mockery::mock(Part::class);
         $part->allows('getAttribute')->with('id')->andReturn(2);
         $part->allows('getAttribute')->with('part_num')->andReturn('99999');
         $part->allows('getAttribute')->with('name')->andReturn('Unknown Part');
@@ -46,9 +46,9 @@ describe('PartResourceData', function (): void {
             ->and($resource->image_url)->toBeNull();
     });
 
-    it('should convert to array format', function (): void {
+    it('should convert to array format', function(): void {
         // arrange
-        $part = Mockery::mock(Part::class);
+        $part = \Mockery::mock(Part::class);
         $part->allows('getAttribute')->with('id')->andReturn(1);
         $part->allows('getAttribute')->with('part_num')->andReturn('3001');
         $part->allows('getAttribute')->with('name')->andReturn('Brick 2 x 4');

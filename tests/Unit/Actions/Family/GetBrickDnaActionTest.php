@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 use App\Actions\Family\GetBrickDnaAction;
 use App\Models\Family;
@@ -20,7 +20,7 @@ covers(GetBrickDnaAction::class);
  */
 function mockChainBuilder(array $chainMethods): MockInterface
 {
-    $builder = Mockery::mock(Builder::class);
+    $builder = \Mockery::mock(Builder::class);
 
     foreach ($chainMethods as $chainMethod) {
         $builder->shouldReceive($chainMethod)->andReturnSelf();
@@ -29,19 +29,19 @@ function mockChainBuilder(array $chainMethods): MockInterface
     return $builder;
 }
 
-describe('GetBrickDnaAction', function (): void {
-    it('should return empty data when family has no storage options', function (): void {
-        $family = Mockery::mock(Family::class);
+describe('GetBrickDnaAction', function(): void {
+    it('should return empty data when family has no storage options', function(): void {
+        $family = \Mockery::mock(Family::class);
         $family->allows('getAttribute')->with('id')->andReturn(1);
 
-        $storageOptionBuilder = Mockery::mock(Builder::class);
+        $storageOptionBuilder = \Mockery::mock(Builder::class);
         $storageOptionBuilder->shouldReceive('where')->with('family_id', 1)->andReturnSelf();
         $storageOptionBuilder->shouldReceive('pluck')->with('id')->andReturn(new Collection);
 
-        $storageOption = Mockery::mock(StorageOption::class);
+        $storageOption = \Mockery::mock(StorageOption::class);
         $storageOption->shouldReceive('newQuery')->once()->andReturn($storageOptionBuilder);
 
-        $storageOptionPart = Mockery::mock(StorageOptionPart::class);
+        $storageOptionPart = \Mockery::mock(StorageOptionPart::class);
 
         $action = new GetBrickDnaAction($storageOption, $storageOptionPart);
         $result = $action->execute($family);
@@ -54,27 +54,27 @@ describe('GetBrickDnaAction', function (): void {
             ->and($result->totalPartsQuantity)->toBe(0);
     });
 
-    it('should compute brick DNA analytics for a family with stored parts', function (): void {
-        $family = Mockery::mock(Family::class);
+    it('should compute brick DNA analytics for a family with stored parts', function(): void {
+        $family = \Mockery::mock(Family::class);
         $family->allows('getAttribute')->with('id')->andReturn(3);
 
         $storageOptionIds = new Collection([10, 20]);
 
         // StorageOption query
-        $storageOptionBuilder = Mockery::mock(Builder::class);
+        $storageOptionBuilder = \Mockery::mock(Builder::class);
         $storageOptionBuilder->shouldReceive('where')->with('family_id', 3)->andReturnSelf();
         $storageOptionBuilder->shouldReceive('pluck')->with('id')->andReturn($storageOptionIds);
 
-        $storageOption = Mockery::mock(StorageOption::class);
+        $storageOption = \Mockery::mock(StorageOption::class);
         $storageOption->shouldReceive('newQuery')->once()->andReturn($storageOptionBuilder);
 
         // Count query
-        $countBuilder = Mockery::mock(Builder::class);
+        $countBuilder = \Mockery::mock(Builder::class);
         $countBuilder->shouldReceive('whereIn')->with('storage_option_id', $storageOptionIds)->andReturnSelf();
         $countBuilder->shouldReceive('count')->andReturn(15);
 
         // Sum query
-        $sumBuilder = Mockery::mock(Builder::class);
+        $sumBuilder = \Mockery::mock(Builder::class);
         $sumBuilder->shouldReceive('whereIn')->with('storage_option_id', $storageOptionIds)->andReturnSelf();
         $sumBuilder->shouldReceive('sum')->with('quantity')->andReturn(150);
 
@@ -86,7 +86,7 @@ describe('GetBrickDnaAction', function (): void {
             'is_transparent' => false,
             'total_quantity' => 50,
         ];
-        $topColorsBaseBuilder = Mockery::mock(BaseBuilder::class);
+        $topColorsBaseBuilder = \Mockery::mock(BaseBuilder::class);
         $topColorsBaseBuilder->shouldReceive('get')->andReturn(new Collection([$topColorsRow]));
 
         $topColorsBuilder = mockChainBuilder(['whereIn', 'whereNotNull', 'join', 'selectRaw', 'groupBy', 'orderByDesc', 'limit']);
@@ -100,7 +100,7 @@ describe('GetBrickDnaAction', function (): void {
             'category' => 'Bricks',
             'total_quantity' => 30,
         ];
-        $topPartsBaseBuilder = Mockery::mock(BaseBuilder::class);
+        $topPartsBaseBuilder = \Mockery::mock(BaseBuilder::class);
         $topPartsBaseBuilder->shouldReceive('get')->andReturn(new Collection([$topPartsRow]));
 
         $topPartsBuilder = mockChainBuilder(['whereIn', 'join', 'selectRaw', 'groupBy', 'orderByDesc', 'limit']);
@@ -116,20 +116,20 @@ describe('GetBrickDnaAction', function (): void {
             'color_rgb' => '0000FF',
             'quantity' => 1,
         ];
-        $rarestBaseBuilder = Mockery::mock(BaseBuilder::class);
+        $rarestBaseBuilder = \Mockery::mock(BaseBuilder::class);
         $rarestBaseBuilder->shouldReceive('get')->andReturn(new Collection([$rarestRow]));
 
         $rarestBuilder = mockChainBuilder(['whereIn', 'join', 'leftJoin', 'selectRaw', 'orderBy', 'limit']);
         $rarestBuilder->shouldReceive('toBase')->andReturn($rarestBaseBuilder);
 
         // Diversity score query — 2 colors, equal distribution = 1.0
-        $diversityBaseBuilder = Mockery::mock(BaseBuilder::class);
+        $diversityBaseBuilder = \Mockery::mock(BaseBuilder::class);
         $diversityBaseBuilder->shouldReceive('pluck')->with('total_quantity')->andReturn(new Collection([75, 75]));
 
         $diversityBuilder = mockChainBuilder(['whereIn', 'whereNotNull', 'selectRaw', 'groupBy']);
         $diversityBuilder->shouldReceive('toBase')->andReturn($diversityBaseBuilder);
 
-        $storageOptionPart = Mockery::mock(StorageOptionPart::class);
+        $storageOptionPart = \Mockery::mock(StorageOptionPart::class);
         $storageOptionPart->shouldReceive('newQuery')
             ->times(6)
             ->andReturn($countBuilder, $sumBuilder, $topColorsBuilder, $topPartsBuilder, $rarestBuilder, $diversityBuilder);
@@ -160,53 +160,53 @@ describe('GetBrickDnaAction', function (): void {
             ->and($result->diversityScore)->toBe(1.0);
     });
 
-    it('should return diversity score of 0 when only one color exists', function (): void {
-        $family = Mockery::mock(Family::class);
+    it('should return diversity score of 0 when only one color exists', function(): void {
+        $family = \Mockery::mock(Family::class);
         $family->allows('getAttribute')->with('id')->andReturn(1);
 
         $storageOptionIds = new Collection([10]);
 
-        $storageOptionBuilder = Mockery::mock(Builder::class);
+        $storageOptionBuilder = \Mockery::mock(Builder::class);
         $storageOptionBuilder->shouldReceive('where')->with('family_id', 1)->andReturnSelf();
         $storageOptionBuilder->shouldReceive('pluck')->with('id')->andReturn($storageOptionIds);
 
-        $storageOption = Mockery::mock(StorageOption::class);
+        $storageOption = \Mockery::mock(StorageOption::class);
         $storageOption->shouldReceive('newQuery')->once()->andReturn($storageOptionBuilder);
 
         // Count + Sum
-        $countBuilder = Mockery::mock(Builder::class);
+        $countBuilder = \Mockery::mock(Builder::class);
         $countBuilder->shouldReceive('whereIn')->andReturnSelf();
         $countBuilder->shouldReceive('count')->andReturn(5);
 
-        $sumBuilder = Mockery::mock(Builder::class);
+        $sumBuilder = \Mockery::mock(Builder::class);
         $sumBuilder->shouldReceive('whereIn')->andReturnSelf();
         $sumBuilder->shouldReceive('sum')->andReturn(20);
 
         // Top colors — empty
-        $topColorsBaseBuilder = Mockery::mock(BaseBuilder::class);
+        $topColorsBaseBuilder = \Mockery::mock(BaseBuilder::class);
         $topColorsBaseBuilder->shouldReceive('get')->andReturn(new Collection);
         $topColorsBuilder = mockChainBuilder(['whereIn', 'whereNotNull', 'join', 'selectRaw', 'groupBy', 'orderByDesc', 'limit']);
         $topColorsBuilder->shouldReceive('toBase')->andReturn($topColorsBaseBuilder);
 
         // Top parts — empty
-        $topPartsBaseBuilder = Mockery::mock(BaseBuilder::class);
+        $topPartsBaseBuilder = \Mockery::mock(BaseBuilder::class);
         $topPartsBaseBuilder->shouldReceive('get')->andReturn(new Collection);
         $topPartsBuilder = mockChainBuilder(['whereIn', 'join', 'selectRaw', 'groupBy', 'orderByDesc', 'limit']);
         $topPartsBuilder->shouldReceive('toBase')->andReturn($topPartsBaseBuilder);
 
         // Rarest — empty
-        $rarestBaseBuilder = Mockery::mock(BaseBuilder::class);
+        $rarestBaseBuilder = \Mockery::mock(BaseBuilder::class);
         $rarestBaseBuilder->shouldReceive('get')->andReturn(new Collection);
         $rarestBuilder = mockChainBuilder(['whereIn', 'join', 'leftJoin', 'selectRaw', 'orderBy', 'limit']);
         $rarestBuilder->shouldReceive('toBase')->andReturn($rarestBaseBuilder);
 
         // Diversity — only one color
-        $diversityBaseBuilder = Mockery::mock(BaseBuilder::class);
+        $diversityBaseBuilder = \Mockery::mock(BaseBuilder::class);
         $diversityBaseBuilder->shouldReceive('pluck')->with('total_quantity')->andReturn(new Collection([20]));
         $diversityBuilder = mockChainBuilder(['whereIn', 'whereNotNull', 'selectRaw', 'groupBy']);
         $diversityBuilder->shouldReceive('toBase')->andReturn($diversityBaseBuilder);
 
-        $storageOptionPart = Mockery::mock(StorageOptionPart::class);
+        $storageOptionPart = \Mockery::mock(StorageOptionPart::class);
         $storageOptionPart->shouldReceive('newQuery')
             ->times(6)
             ->andReturn($countBuilder, $sumBuilder, $topColorsBuilder, $topPartsBuilder, $rarestBuilder, $diversityBuilder);
@@ -219,33 +219,33 @@ describe('GetBrickDnaAction', function (): void {
             ->and($result->totalPartsQuantity)->toBe(20);
     });
 
-    it('should handle rarest parts with null color', function (): void {
-        $family = Mockery::mock(Family::class);
+    it('should handle rarest parts with null color', function(): void {
+        $family = \Mockery::mock(Family::class);
         $family->allows('getAttribute')->with('id')->andReturn(2);
 
         $storageOptionIds = new Collection([30]);
 
-        $storageOptionBuilder = Mockery::mock(Builder::class);
+        $storageOptionBuilder = \Mockery::mock(Builder::class);
         $storageOptionBuilder->shouldReceive('where')->with('family_id', 2)->andReturnSelf();
         $storageOptionBuilder->shouldReceive('pluck')->with('id')->andReturn($storageOptionIds);
 
-        $storageOption = Mockery::mock(StorageOption::class);
+        $storageOption = \Mockery::mock(StorageOption::class);
         $storageOption->shouldReceive('newQuery')->once()->andReturn($storageOptionBuilder);
 
-        $countBuilder = Mockery::mock(Builder::class);
+        $countBuilder = \Mockery::mock(Builder::class);
         $countBuilder->shouldReceive('whereIn')->andReturnSelf();
         $countBuilder->shouldReceive('count')->andReturn(1);
 
-        $sumBuilder = Mockery::mock(Builder::class);
+        $sumBuilder = \Mockery::mock(Builder::class);
         $sumBuilder->shouldReceive('whereIn')->andReturnSelf();
         $sumBuilder->shouldReceive('sum')->andReturn(3);
 
-        $topColorsBaseBuilder = Mockery::mock(BaseBuilder::class);
+        $topColorsBaseBuilder = \Mockery::mock(BaseBuilder::class);
         $topColorsBaseBuilder->shouldReceive('get')->andReturn(new Collection);
         $topColorsBuilder = mockChainBuilder(['whereIn', 'whereNotNull', 'join', 'selectRaw', 'groupBy', 'orderByDesc', 'limit']);
         $topColorsBuilder->shouldReceive('toBase')->andReturn($topColorsBaseBuilder);
 
-        $topPartsBaseBuilder = Mockery::mock(BaseBuilder::class);
+        $topPartsBaseBuilder = \Mockery::mock(BaseBuilder::class);
         $topPartsBaseBuilder->shouldReceive('get')->andReturn(new Collection);
         $topPartsBuilder = mockChainBuilder(['whereIn', 'join', 'selectRaw', 'groupBy', 'orderByDesc', 'limit']);
         $topPartsBuilder->shouldReceive('toBase')->andReturn($topPartsBaseBuilder);
@@ -260,18 +260,18 @@ describe('GetBrickDnaAction', function (): void {
             'color_rgb' => null,
             'quantity' => 1,
         ];
-        $rarestBaseBuilder = Mockery::mock(BaseBuilder::class);
+        $rarestBaseBuilder = \Mockery::mock(BaseBuilder::class);
         $rarestBaseBuilder->shouldReceive('get')->andReturn(new Collection([$rarestRow]));
         $rarestBuilder = mockChainBuilder(['whereIn', 'join', 'leftJoin', 'selectRaw', 'orderBy', 'limit']);
         $rarestBuilder->shouldReceive('toBase')->andReturn($rarestBaseBuilder);
 
         // Diversity — no colors
-        $diversityBaseBuilder = Mockery::mock(BaseBuilder::class);
+        $diversityBaseBuilder = \Mockery::mock(BaseBuilder::class);
         $diversityBaseBuilder->shouldReceive('pluck')->with('total_quantity')->andReturn(new Collection);
         $diversityBuilder = mockChainBuilder(['whereIn', 'whereNotNull', 'selectRaw', 'groupBy']);
         $diversityBuilder->shouldReceive('toBase')->andReturn($diversityBaseBuilder);
 
-        $storageOptionPart = Mockery::mock(StorageOptionPart::class);
+        $storageOptionPart = \Mockery::mock(StorageOptionPart::class);
         $storageOptionPart->shouldReceive('newQuery')
             ->times(6)
             ->andReturn($countBuilder, $sumBuilder, $topColorsBuilder, $topPartsBuilder, $rarestBuilder, $diversityBuilder);
@@ -286,28 +286,28 @@ describe('GetBrickDnaAction', function (): void {
             ->and($result->rarestParts[0]['quantity'])->toBe(1);
     });
 
-    it('should handle part types with null category', function (): void {
-        $family = Mockery::mock(Family::class);
+    it('should handle part types with null category', function(): void {
+        $family = \Mockery::mock(Family::class);
         $family->allows('getAttribute')->with('id')->andReturn(4);
 
         $storageOptionIds = new Collection([40]);
 
-        $storageOptionBuilder = Mockery::mock(Builder::class);
+        $storageOptionBuilder = \Mockery::mock(Builder::class);
         $storageOptionBuilder->shouldReceive('where')->with('family_id', 4)->andReturnSelf();
         $storageOptionBuilder->shouldReceive('pluck')->with('id')->andReturn($storageOptionIds);
 
-        $storageOption = Mockery::mock(StorageOption::class);
+        $storageOption = \Mockery::mock(StorageOption::class);
         $storageOption->shouldReceive('newQuery')->once()->andReturn($storageOptionBuilder);
 
-        $countBuilder = Mockery::mock(Builder::class);
+        $countBuilder = \Mockery::mock(Builder::class);
         $countBuilder->shouldReceive('whereIn')->andReturnSelf();
         $countBuilder->shouldReceive('count')->andReturn(1);
 
-        $sumBuilder = Mockery::mock(Builder::class);
+        $sumBuilder = \Mockery::mock(Builder::class);
         $sumBuilder->shouldReceive('whereIn')->andReturnSelf();
         $sumBuilder->shouldReceive('sum')->andReturn(5);
 
-        $topColorsBaseBuilder = Mockery::mock(BaseBuilder::class);
+        $topColorsBaseBuilder = \Mockery::mock(BaseBuilder::class);
         $topColorsBaseBuilder->shouldReceive('get')->andReturn(new Collection);
         $topColorsBuilder = mockChainBuilder(['whereIn', 'whereNotNull', 'join', 'selectRaw', 'groupBy', 'orderByDesc', 'limit']);
         $topColorsBuilder->shouldReceive('toBase')->andReturn($topColorsBaseBuilder);
@@ -320,22 +320,22 @@ describe('GetBrickDnaAction', function (): void {
             'category' => null,
             'total_quantity' => 5,
         ];
-        $topPartsBaseBuilder = Mockery::mock(BaseBuilder::class);
+        $topPartsBaseBuilder = \Mockery::mock(BaseBuilder::class);
         $topPartsBaseBuilder->shouldReceive('get')->andReturn(new Collection([$topPartsRow]));
         $topPartsBuilder = mockChainBuilder(['whereIn', 'join', 'selectRaw', 'groupBy', 'orderByDesc', 'limit']);
         $topPartsBuilder->shouldReceive('toBase')->andReturn($topPartsBaseBuilder);
 
-        $rarestBaseBuilder = Mockery::mock(BaseBuilder::class);
+        $rarestBaseBuilder = \Mockery::mock(BaseBuilder::class);
         $rarestBaseBuilder->shouldReceive('get')->andReturn(new Collection);
         $rarestBuilder = mockChainBuilder(['whereIn', 'join', 'leftJoin', 'selectRaw', 'orderBy', 'limit']);
         $rarestBuilder->shouldReceive('toBase')->andReturn($rarestBaseBuilder);
 
-        $diversityBaseBuilder = Mockery::mock(BaseBuilder::class);
+        $diversityBaseBuilder = \Mockery::mock(BaseBuilder::class);
         $diversityBaseBuilder->shouldReceive('pluck')->with('total_quantity')->andReturn(new Collection);
         $diversityBuilder = mockChainBuilder(['whereIn', 'whereNotNull', 'selectRaw', 'groupBy']);
         $diversityBuilder->shouldReceive('toBase')->andReturn($diversityBaseBuilder);
 
-        $storageOptionPart = Mockery::mock(StorageOptionPart::class);
+        $storageOptionPart = \Mockery::mock(StorageOptionPart::class);
         $storageOptionPart->shouldReceive('newQuery')
             ->times(6)
             ->andReturn($countBuilder, $sumBuilder, $topColorsBuilder, $topPartsBuilder, $rarestBuilder, $diversityBuilder);
@@ -348,49 +348,49 @@ describe('GetBrickDnaAction', function (): void {
             ->and($result->topPartTypes[0]['name'])->toBe('Mystery Part');
     });
 
-    it('should compute uneven diversity score between 0 and 1', function (): void {
-        $family = Mockery::mock(Family::class);
+    it('should compute uneven diversity score between 0 and 1', function(): void {
+        $family = \Mockery::mock(Family::class);
         $family->allows('getAttribute')->with('id')->andReturn(5);
 
         $storageOptionIds = new Collection([50]);
 
-        $storageOptionBuilder = Mockery::mock(Builder::class);
+        $storageOptionBuilder = \Mockery::mock(Builder::class);
         $storageOptionBuilder->shouldReceive('where')->with('family_id', 5)->andReturnSelf();
         $storageOptionBuilder->shouldReceive('pluck')->with('id')->andReturn($storageOptionIds);
 
-        $storageOption = Mockery::mock(StorageOption::class);
+        $storageOption = \Mockery::mock(StorageOption::class);
         $storageOption->shouldReceive('newQuery')->once()->andReturn($storageOptionBuilder);
 
-        $countBuilder = Mockery::mock(Builder::class);
+        $countBuilder = \Mockery::mock(Builder::class);
         $countBuilder->shouldReceive('whereIn')->andReturnSelf();
         $countBuilder->shouldReceive('count')->andReturn(10);
 
-        $sumBuilder = Mockery::mock(Builder::class);
+        $sumBuilder = \Mockery::mock(Builder::class);
         $sumBuilder->shouldReceive('whereIn')->andReturnSelf();
         $sumBuilder->shouldReceive('sum')->andReturn(100);
 
-        $topColorsBaseBuilder = Mockery::mock(BaseBuilder::class);
+        $topColorsBaseBuilder = \Mockery::mock(BaseBuilder::class);
         $topColorsBaseBuilder->shouldReceive('get')->andReturn(new Collection);
         $topColorsBuilder = mockChainBuilder(['whereIn', 'whereNotNull', 'join', 'selectRaw', 'groupBy', 'orderByDesc', 'limit']);
         $topColorsBuilder->shouldReceive('toBase')->andReturn($topColorsBaseBuilder);
 
-        $topPartsBaseBuilder = Mockery::mock(BaseBuilder::class);
+        $topPartsBaseBuilder = \Mockery::mock(BaseBuilder::class);
         $topPartsBaseBuilder->shouldReceive('get')->andReturn(new Collection);
         $topPartsBuilder = mockChainBuilder(['whereIn', 'join', 'selectRaw', 'groupBy', 'orderByDesc', 'limit']);
         $topPartsBuilder->shouldReceive('toBase')->andReturn($topPartsBaseBuilder);
 
-        $rarestBaseBuilder = Mockery::mock(BaseBuilder::class);
+        $rarestBaseBuilder = \Mockery::mock(BaseBuilder::class);
         $rarestBaseBuilder->shouldReceive('get')->andReturn(new Collection);
         $rarestBuilder = mockChainBuilder(['whereIn', 'join', 'leftJoin', 'selectRaw', 'orderBy', 'limit']);
         $rarestBuilder->shouldReceive('toBase')->andReturn($rarestBaseBuilder);
 
         // Diversity — 90% one color, 10% another = low diversity
-        $diversityBaseBuilder = Mockery::mock(BaseBuilder::class);
+        $diversityBaseBuilder = \Mockery::mock(BaseBuilder::class);
         $diversityBaseBuilder->shouldReceive('pluck')->with('total_quantity')->andReturn(new Collection([90, 10]));
         $diversityBuilder = mockChainBuilder(['whereIn', 'whereNotNull', 'selectRaw', 'groupBy']);
         $diversityBuilder->shouldReceive('toBase')->andReturn($diversityBaseBuilder);
 
-        $storageOptionPart = Mockery::mock(StorageOptionPart::class);
+        $storageOptionPart = \Mockery::mock(StorageOptionPart::class);
         $storageOptionPart->shouldReceive('newQuery')
             ->times(6)
             ->andReturn($countBuilder, $sumBuilder, $topColorsBuilder, $topPartsBuilder, $rarestBuilder, $diversityBuilder);
@@ -403,49 +403,49 @@ describe('GetBrickDnaAction', function (): void {
             ->and($result->diversityScore)->toBeLessThan(1.0);
     });
 
-    it('should return diversity score of 0 when total quantity is zero across multiple colors', function (): void {
-        $family = Mockery::mock(Family::class);
+    it('should return diversity score of 0 when total quantity is zero across multiple colors', function(): void {
+        $family = \Mockery::mock(Family::class);
         $family->allows('getAttribute')->with('id')->andReturn(6);
 
         $storageOptionIds = new Collection([60]);
 
-        $storageOptionBuilder = Mockery::mock(Builder::class);
+        $storageOptionBuilder = \Mockery::mock(Builder::class);
         $storageOptionBuilder->shouldReceive('where')->with('family_id', 6)->andReturnSelf();
         $storageOptionBuilder->shouldReceive('pluck')->with('id')->andReturn($storageOptionIds);
 
-        $storageOption = Mockery::mock(StorageOption::class);
+        $storageOption = \Mockery::mock(StorageOption::class);
         $storageOption->shouldReceive('newQuery')->once()->andReturn($storageOptionBuilder);
 
-        $countBuilder = Mockery::mock(Builder::class);
+        $countBuilder = \Mockery::mock(Builder::class);
         $countBuilder->shouldReceive('whereIn')->andReturnSelf();
         $countBuilder->shouldReceive('count')->andReturn(2);
 
-        $sumBuilder = Mockery::mock(Builder::class);
+        $sumBuilder = \Mockery::mock(Builder::class);
         $sumBuilder->shouldReceive('whereIn')->andReturnSelf();
         $sumBuilder->shouldReceive('sum')->andReturn(0);
 
-        $topColorsBaseBuilder = Mockery::mock(BaseBuilder::class);
+        $topColorsBaseBuilder = \Mockery::mock(BaseBuilder::class);
         $topColorsBaseBuilder->shouldReceive('get')->andReturn(new Collection);
         $topColorsBuilder = mockChainBuilder(['whereIn', 'whereNotNull', 'join', 'selectRaw', 'groupBy', 'orderByDesc', 'limit']);
         $topColorsBuilder->shouldReceive('toBase')->andReturn($topColorsBaseBuilder);
 
-        $topPartsBaseBuilder = Mockery::mock(BaseBuilder::class);
+        $topPartsBaseBuilder = \Mockery::mock(BaseBuilder::class);
         $topPartsBaseBuilder->shouldReceive('get')->andReturn(new Collection);
         $topPartsBuilder = mockChainBuilder(['whereIn', 'join', 'selectRaw', 'groupBy', 'orderByDesc', 'limit']);
         $topPartsBuilder->shouldReceive('toBase')->andReturn($topPartsBaseBuilder);
 
-        $rarestBaseBuilder = Mockery::mock(BaseBuilder::class);
+        $rarestBaseBuilder = \Mockery::mock(BaseBuilder::class);
         $rarestBaseBuilder->shouldReceive('get')->andReturn(new Collection);
         $rarestBuilder = mockChainBuilder(['whereIn', 'join', 'leftJoin', 'selectRaw', 'orderBy', 'limit']);
         $rarestBuilder->shouldReceive('toBase')->andReturn($rarestBaseBuilder);
 
         // Diversity — 2 colors, both with zero quantity
-        $diversityBaseBuilder = Mockery::mock(BaseBuilder::class);
+        $diversityBaseBuilder = \Mockery::mock(BaseBuilder::class);
         $diversityBaseBuilder->shouldReceive('pluck')->with('total_quantity')->andReturn(new Collection([0, 0]));
         $diversityBuilder = mockChainBuilder(['whereIn', 'whereNotNull', 'selectRaw', 'groupBy']);
         $diversityBuilder->shouldReceive('toBase')->andReturn($diversityBaseBuilder);
 
-        $storageOptionPart = Mockery::mock(StorageOptionPart::class);
+        $storageOptionPart = \Mockery::mock(StorageOptionPart::class);
         $storageOptionPart->shouldReceive('newQuery')
             ->times(6)
             ->andReturn($countBuilder, $sumBuilder, $topColorsBuilder, $topPartsBuilder, $rarestBuilder, $diversityBuilder);
@@ -456,49 +456,49 @@ describe('GetBrickDnaAction', function (): void {
         expect($result->diversityScore)->toBe(0.0);
     });
 
-    it('should skip zero-quantity colors in diversity computation', function (): void {
-        $family = Mockery::mock(Family::class);
+    it('should skip zero-quantity colors in diversity computation', function(): void {
+        $family = \Mockery::mock(Family::class);
         $family->allows('getAttribute')->with('id')->andReturn(7);
 
         $storageOptionIds = new Collection([70]);
 
-        $storageOptionBuilder = Mockery::mock(Builder::class);
+        $storageOptionBuilder = \Mockery::mock(Builder::class);
         $storageOptionBuilder->shouldReceive('where')->with('family_id', 7)->andReturnSelf();
         $storageOptionBuilder->shouldReceive('pluck')->with('id')->andReturn($storageOptionIds);
 
-        $storageOption = Mockery::mock(StorageOption::class);
+        $storageOption = \Mockery::mock(StorageOption::class);
         $storageOption->shouldReceive('newQuery')->once()->andReturn($storageOptionBuilder);
 
-        $countBuilder = Mockery::mock(Builder::class);
+        $countBuilder = \Mockery::mock(Builder::class);
         $countBuilder->shouldReceive('whereIn')->andReturnSelf();
         $countBuilder->shouldReceive('count')->andReturn(3);
 
-        $sumBuilder = Mockery::mock(Builder::class);
+        $sumBuilder = \Mockery::mock(Builder::class);
         $sumBuilder->shouldReceive('whereIn')->andReturnSelf();
         $sumBuilder->shouldReceive('sum')->andReturn(100);
 
-        $topColorsBaseBuilder = Mockery::mock(BaseBuilder::class);
+        $topColorsBaseBuilder = \Mockery::mock(BaseBuilder::class);
         $topColorsBaseBuilder->shouldReceive('get')->andReturn(new Collection);
         $topColorsBuilder = mockChainBuilder(['whereIn', 'whereNotNull', 'join', 'selectRaw', 'groupBy', 'orderByDesc', 'limit']);
         $topColorsBuilder->shouldReceive('toBase')->andReturn($topColorsBaseBuilder);
 
-        $topPartsBaseBuilder = Mockery::mock(BaseBuilder::class);
+        $topPartsBaseBuilder = \Mockery::mock(BaseBuilder::class);
         $topPartsBaseBuilder->shouldReceive('get')->andReturn(new Collection);
         $topPartsBuilder = mockChainBuilder(['whereIn', 'join', 'selectRaw', 'groupBy', 'orderByDesc', 'limit']);
         $topPartsBuilder->shouldReceive('toBase')->andReturn($topPartsBaseBuilder);
 
-        $rarestBaseBuilder = Mockery::mock(BaseBuilder::class);
+        $rarestBaseBuilder = \Mockery::mock(BaseBuilder::class);
         $rarestBaseBuilder->shouldReceive('get')->andReturn(new Collection);
         $rarestBuilder = mockChainBuilder(['whereIn', 'join', 'leftJoin', 'selectRaw', 'orderBy', 'limit']);
         $rarestBuilder->shouldReceive('toBase')->andReturn($rarestBaseBuilder);
 
         // Diversity — 3 colors, one with zero quantity (skipped in Shannon computation)
-        $diversityBaseBuilder = Mockery::mock(BaseBuilder::class);
+        $diversityBaseBuilder = \Mockery::mock(BaseBuilder::class);
         $diversityBaseBuilder->shouldReceive('pluck')->with('total_quantity')->andReturn(new Collection([0, 50, 50]));
         $diversityBuilder = mockChainBuilder(['whereIn', 'whereNotNull', 'selectRaw', 'groupBy']);
         $diversityBuilder->shouldReceive('toBase')->andReturn($diversityBaseBuilder);
 
-        $storageOptionPart = Mockery::mock(StorageOptionPart::class);
+        $storageOptionPart = \Mockery::mock(StorageOptionPart::class);
         $storageOptionPart->shouldReceive('newQuery')
             ->times(6)
             ->andReturn($countBuilder, $sumBuilder, $topColorsBuilder, $topPartsBuilder, $rarestBuilder, $diversityBuilder);

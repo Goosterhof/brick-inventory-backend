@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 use App\Http\Controllers\Auth\MeController;
 use App\Models\User;
@@ -10,8 +10,8 @@ covers(MeController::class);
 
 uses(RefreshDatabase::class);
 
-describe('MeController', function (): void {
-    it('should return the authenticated user', function (): void {
+describe('MeController', function(): void {
+    it('should return the authenticated user', function(): void {
         $user = User::factory()->create([
             'name' => 'John Smith',
             'email' => 'john@example.com',
@@ -28,7 +28,7 @@ describe('MeController', function (): void {
             ]);
     });
 
-    it('should return 401 for unauthenticated user', function (): void {
+    it('should return 401 for unauthenticated user', function(): void {
         $response = $this->getJson('/api/me');
 
         $response->assertStatus(401);

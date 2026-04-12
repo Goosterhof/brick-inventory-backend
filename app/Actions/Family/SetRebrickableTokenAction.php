@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Actions\Family;
 
@@ -18,7 +18,7 @@ final readonly class SetRebrickableTokenAction
 
     public function execute(Family $family, SetRebrickableTokenData $setRebrickableTokenData, User $user): Family
     {
-        return $this->connection->transaction(function () use ($family, $setRebrickableTokenData, $user): Family {
+        return $this->connection->transaction(function() use ($family, $setRebrickableTokenData, $user): Family {
             if ($family->head_id !== $user->id) {
                 throw NotFamilyHeadException::forUser($user->id);
             }

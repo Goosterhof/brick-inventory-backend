@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Jobs;
 
@@ -47,7 +47,7 @@ final class ImportOwnedSetsJob implements ShouldQueue
         if ($importOwnedSetsResultData->skippedSetNums !== []) {
             /** @var array<int, array{set_num: string, error: string}> $failedDetails */
             $failedDetails = array_map(
-                static fn (string $setNum): array => ['set_num' => $setNum, 'error' => 'Multiple family sets exist for this set — requires manual reconciliation'],
+                static fn(string $setNum): array => ['set_num' => $setNum, 'error' => 'Multiple family sets exist for this set — requires manual reconciliation'],
                 $importOwnedSetsResultData->skippedSetNums,
             );
             $importJob->failed_set_details = $failedDetails;

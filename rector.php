@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 use Rector\Config\RectorConfig;
 use Rector\DeadCode\Rector\ClassMethod\RemoveUnusedPublicMethodParameterRector;
@@ -9,6 +9,11 @@ use Rector\Naming\Rector\ClassMethod\RenameParamToMatchTypeRector;
 use Rector\Naming\Rector\ClassMethod\RenameVariableToMatchNewTypeRector;
 use Rector\Php74\Rector\Closure\ClosureToArrowFunctionRector;
 use Rector\Php83\Rector\ClassMethod\AddOverrideAttributeToOverriddenMethodsRector;
+use RectorLaravel\Rector\FuncCall\RemoveDumpDataDeadCodeRector;
+use RectorLaravel\Rector\MethodCall\WhereToWhereLikeRector;
+use RectorLaravel\Rector\StaticCall\CarbonToDateFacadeRector;
+use RectorLaravel\Rector\StaticCall\RouteActionCallableRector;
+use RectorLaravel\Set\LaravelLevelSetList;
 use RectorLaravel\Set\LaravelSetList;
 
 return RectorConfig::configure()
@@ -25,26 +30,24 @@ return RectorConfig::configure()
         __DIR__ . '/bootstrap/cache',
         __DIR__ . '/storage',
         __DIR__ . '/vendor',
-        // Skip override attribute for Laravel - causes issues with framework classes
+        CarbonToDateFacadeRector::class,
         AddOverrideAttributeToOverriddenMethodsRector::class,
-        // Skip aggressive naming rules for migrations (keeps Laravel convention of $table)
         RenameParamToMatchTypeRector::class => [
             __DIR__ . '/database/migrations',
         ],
-        // Skip arrow function conversion in Actions (arch test requires full closure in transactions)
-        ClosureToArrowFunctionRector::class => [
-            __DIR__ . '/app/Actions',
-        ],
-        // Skip unused parameter removal in Policies (Laravel requires $user and model params by contract)
-        RemoveUnusedPublicMethodParameterRector::class => [
-            __DIR__ . '/app/Policies',
-        ],
-        // Skip variable renaming in tests (keeps meaningful mock variable names)
         RenameVariableToMatchMethodCallReturnTypeRector::class => [
             __DIR__ . '/tests',
         ],
         RenameVariableToMatchNewTypeRector::class => [
             __DIR__ . '/tests',
+        ],
+        // Transaction closures in Actions must use full closures (arch test enforced)
+        ClosureToArrowFunctionRector::class => [
+            __DIR__ . '/app/Actions',
+        ],
+        // Laravel requires (User $user, Model $model) signature in Policies
+        RemoveUnusedPublicMethodParameterRector::class => [
+            __DIR__ . '/app/Policies',
         ],
     ])
     ->withPhpSets(php84: true)
@@ -52,22 +55,36 @@ return RectorConfig::configure()
         deadCode: true,
         codeQuality: true,
         codingStyle: true,
+        earlyReturn: true,
         typeDeclarations: true,
         privatization: true,
-        earlyReturn: true,
         instanceOf: true,
         naming: true,
     )
     ->withSets([
-        // Laravel-specific code quality improvements
+        LaravelLevelSetList::UP_TO_LARAVEL_120,
         LaravelSetList::LARAVEL_CODE_QUALITY,
         LaravelSetList::LARAVEL_COLLECTION,
+        LaravelSetList::LARAVEL_TESTING,
+        LaravelSetList::LARAVEL_TYPE_DECLARATIONS,
+        LaravelSetList::LARAVEL_ARRAYACCESS_TO_METHOD_CALL,
+        LaravelSetList::LARAVEL_ARRAY_STR_FUNCTION_TO_STATIC_CALL,
+        LaravelSetList::LARAVEL_CONTAINER_STRING_TO_FULLY_QUALIFIED_NAME,
         LaravelSetList::LARAVEL_ELOQUENT_MAGIC_METHOD_TO_QUERY_BUILDER,
         LaravelSetList::LARAVEL_FACADE_ALIASES_TO_FULL_NAMES,
+        LaravelSetList::LARAVEL_FACTORIES,
+    ])
+    ->withConfiguredRule(RemoveDumpDataDeadCodeRector::class, ['dd', 'dump'])
+    ->withConfiguredRule(RouteActionCallableRector::class, [
+        RouteActionCallableRector::NAMESPACE => 'App\Http\Controllers',
+    ])
+    ->withConfiguredRule(WhereToWhereLikeRector::class, [
+        WhereToWhereLikeRector::USING_POSTGRES_DRIVER => true,
     ])
     ->withImportNames(
         importNames: true,
         importDocBlockNames: true,
         importShortClasses: false,
         removeUnusedImports: true,
-    );
+    )
+    ->withCache(__DIR__ . '/storage/rector');

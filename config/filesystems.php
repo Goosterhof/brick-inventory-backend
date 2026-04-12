@@ -1,9 +1,8 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 return [
-
     /*
     |--------------------------------------------------------------------------
     | Default Filesystem Disk
@@ -13,7 +12,7 @@ return [
     | by the framework. The "local" disk, as well as a variety of cloud
     | based disks are available to your application for file storage.
     |
-    */
+     */
 
     'default' => env('FILESYSTEM_DISK', 'local'),
 
@@ -28,7 +27,7 @@ return [
     |
     | Supported drivers: "local", "ftp", "sftp", "s3"
     |
-    */
+     */
 
     'disks' => [
 
@@ -73,7 +72,7 @@ return [
     | `storage:link` Artisan command is executed. The array keys should be
     | the locations of the links and the values should be their targets.
     |
-    */
+     */
 
     'links' => [
         public_path('storage') => storage_path('app/public'),

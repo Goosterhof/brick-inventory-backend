@@ -1,14 +1,14 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 use App\Data\BrickDnaData;
 use App\Http\Resources\BrickDnaResourceData;
 
 covers(BrickDnaResourceData::class);
 
-describe('BrickDnaResourceData', function (): void {
-    it('should create resource from BrickDnaData', function (): void {
+describe('BrickDnaResourceData', function(): void {
+    it('should create resource from BrickDnaData', function(): void {
         // arrange
         $data = new BrickDnaData(
             topColors: [
@@ -23,7 +23,7 @@ describe('BrickDnaResourceData', function (): void {
             ],
             diversityScore: 0.85,
             totalUniqueParts: 150,
-            totalPartsQuantity: 1200,
+            totalPartsQuantity: 1_200,
         );
 
         // act
@@ -39,10 +39,10 @@ describe('BrickDnaResourceData', function (): void {
             ->and($resource->rarest_parts[0]['part_name'])->toBe('Rare Gem')
             ->and($resource->diversity_score)->toBe(0.85)
             ->and($resource->total_unique_parts)->toBe(150)
-            ->and($resource->total_parts_quantity)->toBe(1200);
+            ->and($resource->total_parts_quantity)->toBe(1_200);
     });
 
-    it('should serialize to array with snake_case keys', function (): void {
+    it('should serialize to array with snake_case keys', function(): void {
         // arrange
         $data = new BrickDnaData(
             topColors: [
@@ -71,7 +71,7 @@ describe('BrickDnaResourceData', function (): void {
         ]);
     });
 
-    it('should handle empty arrays', function (): void {
+    it('should handle empty arrays', function(): void {
         // arrange
         $data = new BrickDnaData(
             topColors: [],

@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 use App\Data\Brickognize\BrickognizePredictionData;
 use App\Services\BrickognizeService;
@@ -25,12 +25,12 @@ function loadBrickognizeFixture(string $name): array
 {
     $path = __DIR__ . '/Fixtures/' . $name;
 
-    return json_decode((string) file_get_contents($path), true, 512, JSON_THROW_ON_ERROR);
+    return json_decode((string) file_get_contents($path), true, 512, \JSON_THROW_ON_ERROR);
 }
 
-describe('Brickognize API Contract', function (): void {
-    describe('identifyBrick contract', function (): void {
-        it('should parse a full realistic prediction response', function (): void {
+describe('Brickognize API Contract', function(): void {
+    describe('identifyBrick contract', function(): void {
+        it('should parse a full realistic prediction response', function(): void {
             $fixture = loadBrickognizeFixture('brickognize-predict.json');
 
             Http::fake([

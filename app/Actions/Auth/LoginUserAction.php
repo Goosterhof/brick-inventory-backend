@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Actions\Auth;
 
@@ -21,9 +21,7 @@ final readonly class LoginUserAction
         $user = $this->user->newQuery()->where('email', $loginUserData->email)->first();
 
         if ($user === null || !$this->hasher->check($loginUserData->password, $user->password)) {
-            throw ValidationException::withMessages([
-                'email' => ['The provided credentials are incorrect.'],
-            ]);
+            throw ValidationException::withMessages(['email' => ['The provided credentials are incorrect.']]);
         }
 
         return $user;

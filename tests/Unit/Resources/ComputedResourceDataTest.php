@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 use App\Contracts\ResourceDataSourceInterface;
 use App\Contracts\ResourceResponseInterface;
@@ -31,7 +31,7 @@ final readonly class TestComputedResourceData extends ComputedResourceData
     ) {}
 
     /**
-     * @param TestSourceData $resourceDataSource
+     * @param \TestSourceData $resourceDataSource
      */
     public static function from(ResourceDataSourceInterface $resourceDataSource): static
     {
@@ -59,7 +59,7 @@ final readonly class TestComputedEnumResourceData extends ComputedResourceData
     ) {}
 
     /**
-     * @param TestEnumSourceData $resourceDataSource
+     * @param \TestEnumSourceData $resourceDataSource
      */
     public static function from(ResourceDataSourceInterface $resourceDataSource): static
     {
@@ -70,7 +70,7 @@ final readonly class TestComputedEnumResourceData extends ComputedResourceData
 final readonly class TestDateSourceData implements ResourceDataSourceInterface
 {
     public function __construct(
-        public DateTimeInterface $created_at,
+        public \DateTimeInterface $created_at,
     ) {}
 }
 
@@ -80,11 +80,11 @@ final readonly class TestDateSourceData implements ResourceDataSourceInterface
 final readonly class TestComputedDateResourceData extends ComputedResourceData
 {
     public function __construct(
-        public DateTimeInterface $created_at,
+        public \DateTimeInterface $created_at,
     ) {}
 
     /**
-     * @param TestDateSourceData $resourceDataSource
+     * @param \TestDateSourceData $resourceDataSource
      */
     public static function from(ResourceDataSourceInterface $resourceDataSource): static
     {
@@ -94,7 +94,9 @@ final readonly class TestComputedDateResourceData extends ComputedResourceData
 
 final readonly class TestArraySourceData implements ResourceDataSourceInterface
 {
-    /** @param array<int, FamilySetStatus> $statuses */
+    /**
+     * @param array<int, FamilySetStatus> $statuses
+     */
     public function __construct(
         public array $statuses,
     ) {}
@@ -105,13 +107,15 @@ final readonly class TestArraySourceData implements ResourceDataSourceInterface
  */
 final readonly class TestComputedArrayResourceData extends ComputedResourceData
 {
-    /** @param array<int, FamilySetStatus> $statuses */
+    /**
+     * @param array<int, FamilySetStatus> $statuses
+     */
     public function __construct(
         public array $statuses,
     ) {}
 
     /**
-     * @param TestArraySourceData $resourceDataSource
+     * @param \TestArraySourceData $resourceDataSource
      */
     public static function from(ResourceDataSourceInterface $resourceDataSource): static
     {
@@ -136,7 +140,7 @@ final readonly class TestComputedNullableResourceData extends ComputedResourceDa
     ) {}
 
     /**
-     * @param TestNullableSourceData $resourceDataSource
+     * @param \TestNullableSourceData $resourceDataSource
      */
     public static function from(ResourceDataSourceInterface $resourceDataSource): static
     {
@@ -160,15 +164,15 @@ final readonly class TestComputedNestedResourceData extends ComputedResourceData
 {
     public function __construct(
         public int $id,
-        public TestComputedResourceData $child,
+        public \TestComputedResourceData $child,
     ) {}
 
     /**
-     * @param TestNestedSourceData $resourceDataSource
+     * @param \TestNestedSourceData $resourceDataSource
      */
     public static function from(ResourceDataSourceInterface $resourceDataSource): static
     {
-        $child = new TestComputedResourceData(
+        $child = new \TestComputedResourceData(
             name: $resourceDataSource->childName,
             count: $resourceDataSource->childCount,
         );
@@ -180,29 +184,29 @@ final readonly class TestComputedNestedResourceData extends ComputedResourceData
     }
 }
 
-describe('ComputedResourceData', function (): void {
-    describe('from()', function (): void {
-        it('should create an instance from a ResourceDataSource', function (): void {
+describe('ComputedResourceData', function(): void {
+    describe('from()', function(): void {
+        it('should create an instance from a ResourceDataSource', function(): void {
             // arrange
-            $source = new TestSourceData(name: 'Test', count: 42);
+            $source = new \TestSourceData(name: 'Test', count: 42);
 
             // act
-            $resource = TestComputedResourceData::from($source);
+            $resource = \TestComputedResourceData::from($source);
 
             // assert
-            expect($resource)->toBeInstanceOf(TestComputedResourceData::class)
+            expect($resource)->toBeInstanceOf(\TestComputedResourceData::class)
                 ->and($resource->name)->toBe('Test')
                 ->and($resource->count)->toBe(42);
         });
     });
 
-    describe('transformValue()', function (): void {
-        it('should transform nested ResourceResponse instances to arrays', function (): void {
+    describe('transformValue()', function(): void {
+        it('should transform nested ResourceResponse instances to arrays', function(): void {
             // arrange
-            $source = new TestNestedSourceData(id: 1, childName: 'Alice', childCount: 30);
+            $source = new \TestNestedSourceData(id: 1, childName: 'Alice', childCount: 30);
 
             // act
-            $resource = TestComputedNestedResourceData::from($source);
+            $resource = \TestComputedNestedResourceData::from($source);
             $array = $resource->toArray();
 
             // assert
@@ -211,9 +215,9 @@ describe('ComputedResourceData', function (): void {
                 ->and($array['child']['count'])->toBe(30);
         });
 
-        it('should transform BackedEnum instances to their backing value', function (): void {
+        it('should transform BackedEnum instances to their backing value', function(): void {
             // arrange
-            $resource = new TestComputedEnumResourceData(FamilySetStatus::Built);
+            $resource = new \TestComputedEnumResourceData(FamilySetStatus::Built);
 
             // act
             $array = $resource->toArray();
@@ -222,10 +226,10 @@ describe('ComputedResourceData', function (): void {
             expect($array['status'])->toBe('built');
         });
 
-        it('should transform DateTimeInterface instances to ISO 8601 format', function (): void {
+        it('should transform DateTimeInterface instances to ISO 8601 format', function(): void {
             // arrange
-            $date = new DateTimeImmutable('2025-06-15T14:30:00+02:00');
-            $resource = new TestComputedDateResourceData($date);
+            $date = new \DateTimeImmutable('2025-06-15T14:30:00+02:00');
+            $resource = new \TestComputedDateResourceData($date);
 
             // act
             $array = $resource->toArray();
@@ -234,9 +238,9 @@ describe('ComputedResourceData', function (): void {
             expect($array['created_at'])->toBe('2025-06-15T14:30:00+02:00');
         });
 
-        it('should recursively transform array values', function (): void {
+        it('should recursively transform array values', function(): void {
             // arrange
-            $resource = new TestComputedArrayResourceData([FamilySetStatus::Sealed, FamilySetStatus::Built]);
+            $resource = new \TestComputedArrayResourceData([FamilySetStatus::Sealed, FamilySetStatus::Built]);
 
             // act
             $array = $resource->toArray();
@@ -245,12 +249,12 @@ describe('ComputedResourceData', function (): void {
             expect($array['statuses'])->toBe(['sealed', 'built']);
         });
 
-        it('should pass through scalar values unchanged', function (): void {
+        it('should pass through scalar values unchanged', function(): void {
             // arrange
-            $source = new TestSourceData(name: 'Test', count: 25);
+            $source = new \TestSourceData(name: 'Test', count: 25);
 
             // act
-            $resource = TestComputedResourceData::from($source);
+            $resource = \TestComputedResourceData::from($source);
             $array = $resource->toArray();
 
             // assert
@@ -258,9 +262,9 @@ describe('ComputedResourceData', function (): void {
                 ->and($array['count'])->toBe(25);
         });
 
-        it('should pass through null values unchanged', function (): void {
+        it('should pass through null values unchanged', function(): void {
             // arrange
-            $resource = new TestComputedNullableResourceData(null);
+            $resource = new \TestComputedNullableResourceData(null);
 
             // act
             $array = $resource->toArray();
@@ -270,11 +274,11 @@ describe('ComputedResourceData', function (): void {
         });
     });
 
-    describe('toResponse()', function (): void {
-        it('should return a JsonResponse with 200 status', function (): void {
+    describe('toResponse()', function(): void {
+        it('should return a JsonResponse with 200 status', function(): void {
             // arrange
-            $source = new TestSourceData(name: 'Test', count: 25);
-            $resource = TestComputedResourceData::from($source);
+            $source = new \TestSourceData(name: 'Test', count: 25);
+            $resource = \TestComputedResourceData::from($source);
 
             // act
             $response = $resource->toResponse();
@@ -285,11 +289,11 @@ describe('ComputedResourceData', function (): void {
         });
     });
 
-    describe('toResponseWithStatus()', function (): void {
-        it('should return a JsonResponse with the specified status code', function (): void {
+    describe('toResponseWithStatus()', function(): void {
+        it('should return a JsonResponse with the specified status code', function(): void {
             // arrange
-            $source = new TestSourceData(name: 'Test', count: 25);
-            $resource = TestComputedResourceData::from($source);
+            $source = new \TestSourceData(name: 'Test', count: 25);
+            $resource = \TestComputedResourceData::from($source);
 
             // act
             $response = $resource->toResponseWithStatus(201);
@@ -300,21 +304,21 @@ describe('ComputedResourceData', function (): void {
         });
     });
 
-    describe('jsonSerialize()', function (): void {
-        it('should return the same array as toArray()', function (): void {
+    describe('jsonSerialize()', function(): void {
+        it('should return the same array as toArray()', function(): void {
             // arrange
-            $source = new TestSourceData(name: 'Test', count: 25);
-            $resource = TestComputedResourceData::from($source);
+            $source = new \TestSourceData(name: 'Test', count: 25);
+            $resource = \TestComputedResourceData::from($source);
 
             // act & assert
             expect($resource->jsonSerialize())->toBe($resource->toArray());
         });
     });
 
-    it('should implement ResourceResponse interface', function (): void {
+    it('should implement ResourceResponse interface', function(): void {
         // arrange
-        $source = new TestSourceData(name: 'Test', count: 25);
-        $resource = TestComputedResourceData::from($source);
+        $source = new \TestSourceData(name: 'Test', count: 25);
+        $resource = \TestComputedResourceData::from($source);
 
         // assert
         expect($resource)->toBeInstanceOf(ResourceResponseInterface::class);

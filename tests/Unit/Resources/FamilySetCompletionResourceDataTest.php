@@ -1,20 +1,20 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 use App\Data\FamilySetCompletionData;
 use App\Http\Resources\FamilySetCompletionResourceData;
 
 covers(FamilySetCompletionResourceData::class);
 
-describe('FamilySetCompletionResourceData', function (): void {
-    it('should create resource from FamilySetCompletionData', function (): void {
+describe('FamilySetCompletionResourceData', function(): void {
+    it('should create resource from FamilySetCompletionData', function(): void {
         // arrange
         $data = new FamilySetCompletionData(
             familySetId: 1,
             setNum: '75192-1',
-            totalParts: 7541,
-            storedParts: 3200,
+            totalParts: 7_541,
+            storedParts: 3_200,
             percentage: 42.43,
         );
 
@@ -25,18 +25,18 @@ describe('FamilySetCompletionResourceData', function (): void {
         expect($resource)->toBeInstanceOf(FamilySetCompletionResourceData::class)
             ->and($resource->family_set_id)->toBe(1)
             ->and($resource->set_num)->toBe('75192-1')
-            ->and($resource->total_parts)->toBe(7541)
-            ->and($resource->stored_parts)->toBe(3200)
+            ->and($resource->total_parts)->toBe(7_541)
+            ->and($resource->stored_parts)->toBe(3_200)
             ->and($resource->percentage)->toBe(42.43);
     });
 
-    it('should serialize to array with snake_case keys', function (): void {
+    it('should serialize to array with snake_case keys', function(): void {
         // arrange
         $data = new FamilySetCompletionData(
             familySetId: 5,
             setNum: '10294-1',
-            totalParts: 2532,
-            storedParts: 2532,
+            totalParts: 2_532,
+            storedParts: 2_532,
             percentage: 100.0,
         );
 
@@ -47,13 +47,13 @@ describe('FamilySetCompletionResourceData', function (): void {
         expect($array)->toBe([
             'family_set_id' => 5,
             'set_num' => '10294-1',
-            'total_parts' => 2532,
-            'stored_parts' => 2532,
+            'total_parts' => 2_532,
+            'stored_parts' => 2_532,
             'percentage' => 100.0,
         ]);
     });
 
-    it('should handle nullable fields', function (): void {
+    it('should handle nullable fields', function(): void {
         // arrange
         $data = new FamilySetCompletionData(
             familySetId: 3,

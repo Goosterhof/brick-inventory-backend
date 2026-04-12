@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Data;
 
@@ -13,7 +13,7 @@ namespace App\Data;
 final readonly class ImportOwnedSetsResultData
 {
     /**
-     * @param array<string> $skippedSetNums Set numbers that were skipped due to duplicates
+     * @param list<string> $skippedSetNums Set numbers that were skipped due to duplicates
      */
     public function __construct(
         public int $created,

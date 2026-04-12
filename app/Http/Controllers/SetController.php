@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Http\Controllers;
 
@@ -33,7 +33,8 @@ class SetController extends Controller
         string $setNum,
         GetSetPartsAction $getSetPartsAction,
         GetSetStorageMapAction $getSetStorageMapAction,
-        #[CurrentUser] User $user,
+        #[CurrentUser]
+        User $user,
     ): JsonResponse {
         $set = $getSetPartsAction->execute($setNum);
 

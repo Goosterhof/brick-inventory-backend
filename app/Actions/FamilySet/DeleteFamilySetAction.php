@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Actions\FamilySet;
 
@@ -15,7 +15,7 @@ final readonly class DeleteFamilySetAction
 
     public function execute(FamilySet $familySet): void
     {
-        $this->connection->transaction(function () use ($familySet): void {
+        $this->connection->transaction(function() use ($familySet): void {
             $familySet->delete();
         });
     }

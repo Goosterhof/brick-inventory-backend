@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 use App\Http\Resources\SetPartResourceData;
 use App\Http\Resources\SetWithPartsResourceData;
@@ -15,20 +15,20 @@ covers(SetWithPartsResourceData::class);
 
 function mockSetPartForSetWith(array $overrides = []): MockInterface&SetPart
 {
-    $part = Mockery::mock(Part::class);
+    $part = \Mockery::mock(Part::class);
     $part->allows('getAttribute')->with('id')->andReturn($overrides['part_id'] ?? 10);
     $part->allows('getAttribute')->with('part_num')->andReturn($overrides['part_num'] ?? '3001');
     $part->allows('getAttribute')->with('name')->andReturn($overrides['part_name'] ?? 'Brick 2 x 4');
     $part->allows('getAttribute')->with('category')->andReturn($overrides['part_category'] ?? null);
     $part->allows('getAttribute')->with('image_url')->andReturn($overrides['part_image_url'] ?? null);
 
-    $color = Mockery::mock(Color::class);
+    $color = \Mockery::mock(Color::class);
     $color->allows('getAttribute')->with('id')->andReturn($overrides['color_id'] ?? 5);
     $color->allows('getAttribute')->with('name')->andReturn($overrides['color_name'] ?? 'Red');
     $color->allows('getAttribute')->with('rgb')->andReturn($overrides['color_rgb'] ?? 'CC0000');
     $color->allows('getAttribute')->with('is_transparent')->andReturn(false);
 
-    $setPart = Mockery::mock(SetPart::class);
+    $setPart = \Mockery::mock(SetPart::class);
     $setPart->allows('getAttribute')->with('id')->andReturn($overrides['id'] ?? 1);
     $setPart->allows('getAttribute')->with('quantity')->andReturn($overrides['quantity'] ?? 10);
     $setPart->allows('getAttribute')->with('is_spare')->andReturn($overrides['is_spare'] ?? false);
@@ -42,18 +42,18 @@ function mockSetPartForSetWith(array $overrides = []): MockInterface&SetPart
     return $setPart;
 }
 
-describe('SetWithPartsResourceData', function (): void {
-    it('should convert set with parts to resource data', function (): void {
+describe('SetWithPartsResourceData', function(): void {
+    it('should convert set with parts to resource data', function(): void {
         // arrange
         $setPart = mockSetPartForSetWith();
 
-        $set = Mockery::mock(Set::class);
+        $set = \Mockery::mock(Set::class);
         $set->allows('getAttribute')->with('id')->andReturn(1);
         $set->allows('getAttribute')->with('set_num')->andReturn('75192-1');
         $set->allows('getAttribute')->with('name')->andReturn('Millennium Falcon');
-        $set->allows('getAttribute')->with('year')->andReturn(2017);
+        $set->allows('getAttribute')->with('year')->andReturn(2_017);
         $set->allows('getAttribute')->with('theme')->andReturn('Star Wars');
-        $set->allows('getAttribute')->with('num_parts')->andReturn(7541);
+        $set->allows('getAttribute')->with('num_parts')->andReturn(7_541);
         $set->allows('getAttribute')->with('image_url')->andReturn('https://example.com/falcon.jpg');
         $set->allows('getAttribute')->with('setParts')->andReturn(new Collection([$setPart]));
         $set->shouldReceive('loadMissing')->andReturnSelf();
@@ -66,9 +66,9 @@ describe('SetWithPartsResourceData', function (): void {
             ->and($resource->id)->toBe(1)
             ->and($resource->set_num)->toBe('75192-1')
             ->and($resource->name)->toBe('Millennium Falcon')
-            ->and($resource->year)->toBe(2017)
+            ->and($resource->year)->toBe(2_017)
             ->and($resource->theme)->toBe('Star Wars')
-            ->and($resource->num_parts)->toBe(7541)
+            ->and($resource->num_parts)->toBe(7_541)
             ->and($resource->image_url)->toBe('https://example.com/falcon.jpg')
             ->and($resource->parts)->toBeArray()
             ->and($resource->parts)->toHaveCount(1)
@@ -77,13 +77,13 @@ describe('SetWithPartsResourceData', function (): void {
             ->and($resource->parts[0]->part->part_num)->toBe('3001');
     });
 
-    it('should handle empty parts', function (): void {
+    it('should handle empty parts', function(): void {
         // arrange
-        $set = Mockery::mock(Set::class);
+        $set = \Mockery::mock(Set::class);
         $set->allows('getAttribute')->with('id')->andReturn(1);
         $set->allows('getAttribute')->with('set_num')->andReturn('10281-1');
         $set->allows('getAttribute')->with('name')->andReturn('Bonsai Tree');
-        $set->allows('getAttribute')->with('year')->andReturn(2021);
+        $set->allows('getAttribute')->with('year')->andReturn(2_021);
         $set->allows('getAttribute')->with('theme')->andReturn(null);
         $set->allows('getAttribute')->with('num_parts')->andReturn(878);
         $set->allows('getAttribute')->with('image_url')->andReturn(null);
@@ -99,17 +99,17 @@ describe('SetWithPartsResourceData', function (): void {
             ->and($resource->parts)->toBeEmpty();
     });
 
-    it('should convert to array format', function (): void {
+    it('should convert to array format', function(): void {
         // arrange
         $setPart = mockSetPartForSetWith();
 
-        $set = Mockery::mock(Set::class);
+        $set = \Mockery::mock(Set::class);
         $set->allows('getAttribute')->with('id')->andReturn(1);
         $set->allows('getAttribute')->with('set_num')->andReturn('75192-1');
         $set->allows('getAttribute')->with('name')->andReturn('Millennium Falcon');
-        $set->allows('getAttribute')->with('year')->andReturn(2017);
+        $set->allows('getAttribute')->with('year')->andReturn(2_017);
         $set->allows('getAttribute')->with('theme')->andReturn('Star Wars');
-        $set->allows('getAttribute')->with('num_parts')->andReturn(7541);
+        $set->allows('getAttribute')->with('num_parts')->andReturn(7_541);
         $set->allows('getAttribute')->with('image_url')->andReturn('https://example.com/falcon.jpg');
         $set->allows('getAttribute')->with('setParts')->andReturn(new Collection([$setPart]));
         $set->shouldReceive('loadMissing')->andReturnSelf();
@@ -127,18 +127,18 @@ describe('SetWithPartsResourceData', function (): void {
             ->and($array['parts'][0]['part']['part_num'])->toBe('3001');
     });
 
-    it('should handle multiple parts', function (): void {
+    it('should handle multiple parts', function(): void {
         // arrange
         $setPart1 = mockSetPartForSetWith(['id' => 1, 'part_id' => 10, 'part_num' => '3001', 'quantity' => 5]);
         $setPart2 = mockSetPartForSetWith(['id' => 2, 'part_id' => 20, 'part_num' => '3002', 'quantity' => 3, 'is_spare' => true, 'element_id' => '300226']);
 
-        $set = Mockery::mock(Set::class);
+        $set = \Mockery::mock(Set::class);
         $set->allows('getAttribute')->with('id')->andReturn(1);
         $set->allows('getAttribute')->with('set_num')->andReturn('10179-1');
         $set->allows('getAttribute')->with('name')->andReturn('Ultimate Collector Millennium Falcon');
-        $set->allows('getAttribute')->with('year')->andReturn(2007);
+        $set->allows('getAttribute')->with('year')->andReturn(2_007);
         $set->allows('getAttribute')->with('theme')->andReturn('Star Wars');
-        $set->allows('getAttribute')->with('num_parts')->andReturn(5195);
+        $set->allows('getAttribute')->with('num_parts')->andReturn(5_195);
         $set->allows('getAttribute')->with('image_url')->andReturn(null);
         $set->allows('getAttribute')->with('setParts')->andReturn(new Collection([$setPart1, $setPart2]));
         $set->shouldReceive('loadMissing')->andReturnSelf();

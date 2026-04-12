@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Actions\StorageOption;
 
@@ -16,7 +16,7 @@ final readonly class UpdateStorageOptionAction
 
     public function execute(StorageOption $storageOption, StorageOptionData $storageOptionData): StorageOption
     {
-        return $this->connection->transaction(function () use ($storageOption, $storageOptionData): StorageOption {
+        return $this->connection->transaction(function() use ($storageOption, $storageOptionData): StorageOption {
             $storageOption->name = $storageOptionData->name;
             $storageOption->description = $storageOptionData->description;
             $storageOption->parent_id = $storageOptionData->parentId;

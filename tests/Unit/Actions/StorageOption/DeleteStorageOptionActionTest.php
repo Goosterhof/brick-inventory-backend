@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 use App\Actions\StorageOption\DeleteStorageOptionAction;
 use App\Models\StorageOption;
@@ -10,18 +10,18 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 covers(DeleteStorageOptionAction::class);
 
-describe('DeleteStorageOptionAction', function (): void {
-    beforeEach(function (): void {
-        $this->db = Mockery::mock(ConnectionInterface::class);
-        $this->db->allows('transaction')->andReturnUsing(fn (Closure $callback) => $callback());
+describe('DeleteStorageOptionAction', function(): void {
+    beforeEach(function(): void {
+        $this->db = \Mockery::mock(ConnectionInterface::class);
+        $this->db->allows('transaction')->andReturnUsing(fn(\Closure $callback) => $callback());
     });
 
-    it('should call delete on the storage option', function (): void {
+    it('should call delete on the storage option', function(): void {
         // arrange
-        $storageOptionPartsRelation = Mockery::mock(HasMany::class);
+        $storageOptionPartsRelation = \Mockery::mock(HasMany::class);
         $storageOptionPartsRelation->shouldReceive('delete')->once();
 
-        $storageOption = Mockery::mock(StorageOption::class);
+        $storageOption = \Mockery::mock(StorageOption::class);
         $storageOption->shouldReceive('load')
             ->with('children.storageOptionParts', 'storageOptionParts')
             ->once()
@@ -38,20 +38,20 @@ describe('DeleteStorageOptionAction', function (): void {
         // assert - Mockery expectations verify the interactions
     });
 
-    it('should recursively delete children', function (): void {
+    it('should recursively delete children', function(): void {
         // arrange
-        $childPartsRelation = Mockery::mock(HasMany::class);
+        $childPartsRelation = \Mockery::mock(HasMany::class);
         $childPartsRelation->shouldReceive('delete')->once();
 
-        $child = Mockery::mock(StorageOption::class);
+        $child = \Mockery::mock(StorageOption::class);
         $child->shouldReceive('getAttribute')->with('children')->andReturn(new Collection);
         $child->shouldReceive('storageOptionParts')->once()->andReturn($childPartsRelation);
         $child->shouldReceive('delete')->once();
 
-        $parentPartsRelation = Mockery::mock(HasMany::class);
+        $parentPartsRelation = \Mockery::mock(HasMany::class);
         $parentPartsRelation->shouldReceive('delete')->once();
 
-        $parent = Mockery::mock(StorageOption::class);
+        $parent = \Mockery::mock(StorageOption::class);
         $parent->shouldReceive('load')
             ->with('children.storageOptionParts', 'storageOptionParts')
             ->once()
@@ -68,12 +68,12 @@ describe('DeleteStorageOptionAction', function (): void {
         // assert - Mockery expectations verify the interactions
     });
 
-    it('should delete storage option parts', function (): void {
+    it('should delete storage option parts', function(): void {
         // arrange
-        $storageOptionPartsRelation = Mockery::mock(HasMany::class);
+        $storageOptionPartsRelation = \Mockery::mock(HasMany::class);
         $storageOptionPartsRelation->shouldReceive('delete')->once();
 
-        $storageOption = Mockery::mock(StorageOption::class);
+        $storageOption = \Mockery::mock(StorageOption::class);
         $storageOption->shouldReceive('load')
             ->with('children.storageOptionParts', 'storageOptionParts')
             ->once()
@@ -90,12 +90,12 @@ describe('DeleteStorageOptionAction', function (): void {
         // assert - Mockery expectations verify the interactions
     });
 
-    it('should eager load the full tree before the transaction', function (): void {
+    it('should eager load the full tree before the transaction', function(): void {
         // arrange
-        $storageOptionPartsRelation = Mockery::mock(HasMany::class);
+        $storageOptionPartsRelation = \Mockery::mock(HasMany::class);
         $storageOptionPartsRelation->shouldReceive('delete')->once();
 
-        $storageOption = Mockery::mock(StorageOption::class);
+        $storageOption = \Mockery::mock(StorageOption::class);
         $storageOption->shouldReceive('load')
             ->with('children.storageOptionParts', 'storageOptionParts')
             ->once()

@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Actions\Sync;
 
@@ -19,7 +19,7 @@ final readonly class UpsertSetAction
     public function execute(LegoSetData $legoSetData): Set
     {
         try {
-            return $this->connection->transaction(function () use ($legoSetData): Set {
+            return $this->connection->transaction(function() use ($legoSetData): Set {
                 $set = $this->set->newQuery()->where('set_num', $legoSetData->setNum)->first();
 
                 if (!$set instanceof Set) {
@@ -38,7 +38,7 @@ final readonly class UpsertSetAction
                 return $set;
             });
         } catch (UniqueConstraintViolationException) {
-            return $this->connection->transaction(function () use ($legoSetData): Set {
+            return $this->connection->transaction(function() use ($legoSetData): Set {
                 /** @var Set */
                 $set = $this->set->newQuery()->where('set_num', $legoSetData->setNum)->firstOrFail();
 

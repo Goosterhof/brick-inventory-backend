@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 use App\Exceptions\InvalidApiResponseException;
 use App\Models\User;
@@ -12,9 +12,9 @@ covers(InvalidApiResponseException::class);
 
 uses(RefreshDatabase::class);
 
-describe('ExceptionHandler', function (): void {
-    describe('InvalidApiResponseException', function (): void {
-        it('should return 502 with error message when external API returns malformed response', function (): void {
+describe('ExceptionHandler', function(): void {
+    describe('InvalidApiResponseException', function(): void {
+        it('should return 502 with error message when external API returns malformed response', function(): void {
             // arrange
             $user = User::factory()->create();
 
@@ -36,7 +36,7 @@ describe('ExceptionHandler', function (): void {
                 ->assertJsonPath('error', 'Unexpected response from external API');
         });
 
-        it('should return 502 when external API returns non-array response', function (): void {
+        it('should return 502 when external API returns non-array response', function(): void {
             // arrange
             $user = User::factory()->create();
 

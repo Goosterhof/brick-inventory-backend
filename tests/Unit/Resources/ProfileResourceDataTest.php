@@ -1,22 +1,22 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 use App\Http\Resources\ProfileResourceData;
 use App\Models\User;
 
 covers(ProfileResourceData::class);
 
-describe('ProfileResourceData', function (): void {
-    it('should convert user model to profile resource data', function (): void {
+describe('ProfileResourceData', function(): void {
+    it('should convert user model to profile resource data', function(): void {
         // arrange
-        $user = Mockery::mock(User::class);
+        $user = \Mockery::mock(User::class);
         $user->allows('getAttribute')->with('id')->andReturn(1);
         $user->allows('getAttribute')->with('family_id')->andReturn(10);
         $user->allows('getAttribute')->with('name')->andReturn('Jan de Vries');
         $user->allows('getAttribute')->with('email')->andReturn('jan@example.com');
         $user->allows('getAttribute')->with('email_verified_at')->andReturn(
-            new DateTimeImmutable('2025-06-15T14:30:00+02:00'),
+            new \DateTimeImmutable('2025-06-15T14:30:00+02:00'),
         );
 
         // act
@@ -28,18 +28,18 @@ describe('ProfileResourceData', function (): void {
             ->and($resource->family_id)->toBe(10)
             ->and($resource->name)->toBe('Jan de Vries')
             ->and($resource->email)->toBe('jan@example.com')
-            ->and($resource->email_verified_at)->toBeInstanceOf(DateTimeInterface::class);
+            ->and($resource->email_verified_at)->toBeInstanceOf(\DateTimeInterface::class);
     });
 
-    it('should serialize email_verified_at to ISO 8601 format', function (): void {
+    it('should serialize email_verified_at to ISO 8601 format', function(): void {
         // arrange
-        $user = Mockery::mock(User::class);
+        $user = \Mockery::mock(User::class);
         $user->allows('getAttribute')->with('id')->andReturn(1);
         $user->allows('getAttribute')->with('family_id')->andReturn(10);
         $user->allows('getAttribute')->with('name')->andReturn('Jan de Vries');
         $user->allows('getAttribute')->with('email')->andReturn('jan@example.com');
         $user->allows('getAttribute')->with('email_verified_at')->andReturn(
-            new DateTimeImmutable('2025-06-15T14:30:00+02:00'),
+            new \DateTimeImmutable('2025-06-15T14:30:00+02:00'),
         );
 
         // act
@@ -49,9 +49,9 @@ describe('ProfileResourceData', function (): void {
         expect($array['email_verified_at'])->toBe('2025-06-15T14:30:00+02:00');
     });
 
-    it('should handle null email_verified_at', function (): void {
+    it('should handle null email_verified_at', function(): void {
         // arrange
-        $user = Mockery::mock(User::class);
+        $user = \Mockery::mock(User::class);
         $user->allows('getAttribute')->with('id')->andReturn(2);
         $user->allows('getAttribute')->with('family_id')->andReturn(10);
         $user->allows('getAttribute')->with('name')->andReturn('Maria Jansen');

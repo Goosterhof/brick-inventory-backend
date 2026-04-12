@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 use App\Actions\StorageOption\UpdateStorageOptionAction;
 use App\DataTransferObjects\StorageOption\StorageOptionData;
@@ -9,20 +9,20 @@ use Illuminate\Database\ConnectionInterface;
 
 covers(UpdateStorageOptionAction::class);
 
-describe('UpdateStorageOptionAction', function (): void {
-    beforeEach(function (): void {
-        $this->db = Mockery::mock(ConnectionInterface::class);
-        $this->db->allows('transaction')->andReturnUsing(fn (Closure $callback) => $callback());
+describe('UpdateStorageOptionAction', function(): void {
+    beforeEach(function(): void {
+        $this->db = \Mockery::mock(ConnectionInterface::class);
+        $this->db->allows('transaction')->andReturnUsing(fn(\Closure $callback) => $callback());
     });
 
-    it('should update storage option properties', function (): void {
+    it('should update storage option properties', function(): void {
         // arrange
         $savedValues = [];
-        $storageOption = Mockery::mock(StorageOption::class);
-        $storageOption->allows('setAttribute')->andReturnUsing(function ($key, $value) use (&$savedValues): void {
+        $storageOption = \Mockery::mock(StorageOption::class);
+        $storageOption->allows('setAttribute')->andReturnUsing(function($key, $value) use (&$savedValues): void {
             $savedValues[$key] = $value;
         });
-        $storageOption->allows('getAttribute')->andReturnUsing(function ($key) use (&$savedValues): mixed {
+        $storageOption->allows('getAttribute')->andReturnUsing(function($key) use (&$savedValues): mixed {
             return $savedValues[$key] ?? null;
         });
         $storageOption->shouldReceive('save')->once();
@@ -42,14 +42,14 @@ describe('UpdateStorageOptionAction', function (): void {
             ->and($savedValues['description'])->toBe('New description');
     });
 
-    it('should update row and column', function (): void {
+    it('should update row and column', function(): void {
         // arrange
         $savedValues = [];
-        $storageOption = Mockery::mock(StorageOption::class);
-        $storageOption->allows('setAttribute')->andReturnUsing(function ($key, $value) use (&$savedValues): void {
+        $storageOption = \Mockery::mock(StorageOption::class);
+        $storageOption->allows('setAttribute')->andReturnUsing(function($key, $value) use (&$savedValues): void {
             $savedValues[$key] = $value;
         });
-        $storageOption->allows('getAttribute')->andReturnUsing(function ($key) use (&$savedValues): mixed {
+        $storageOption->allows('getAttribute')->andReturnUsing(function($key) use (&$savedValues): mixed {
             return $savedValues[$key] ?? null;
         });
         $storageOption->shouldReceive('save')->once();
@@ -69,14 +69,14 @@ describe('UpdateStorageOptionAction', function (): void {
             ->and($savedValues['column'])->toBe(4);
     });
 
-    it('should update parent_id', function (): void {
+    it('should update parent_id', function(): void {
         // arrange
         $savedValues = [];
-        $storageOption = Mockery::mock(StorageOption::class);
-        $storageOption->allows('setAttribute')->andReturnUsing(function ($key, $value) use (&$savedValues): void {
+        $storageOption = \Mockery::mock(StorageOption::class);
+        $storageOption->allows('setAttribute')->andReturnUsing(function($key, $value) use (&$savedValues): void {
             $savedValues[$key] = $value;
         });
-        $storageOption->allows('getAttribute')->andReturnUsing(function ($key) use (&$savedValues): mixed {
+        $storageOption->allows('getAttribute')->andReturnUsing(function($key) use (&$savedValues): mixed {
             return $savedValues[$key] ?? null;
         });
         $storageOption->shouldReceive('save')->once();
@@ -94,9 +94,9 @@ describe('UpdateStorageOptionAction', function (): void {
         expect($savedValues['parent_id'])->toBe(5);
     });
 
-    it('should call save on the storage option', function (): void {
+    it('should call save on the storage option', function(): void {
         // arrange
-        $storageOption = Mockery::mock(StorageOption::class);
+        $storageOption = \Mockery::mock(StorageOption::class);
         $storageOption->allows('setAttribute');
         $storageOption->allows('getAttribute');
         $storageOption->shouldReceive('save')->once();

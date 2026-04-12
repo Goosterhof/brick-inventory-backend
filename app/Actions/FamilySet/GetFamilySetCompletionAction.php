@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Actions\FamilySet;
 
@@ -67,7 +67,7 @@ final readonly class GetFamilySetCompletionAction
             $storedPartsCounts = $this->storageOptionPart->newQuery()
                 ->whereIn('storage_option_parts.storage_option_id', $storageOptionIds)
                 ->where('storage_option_parts.quantity', '>', 0)
-                ->join('set_parts', function (JoinClause $joinClause) use ($setIds): void {
+                ->join('set_parts', function(JoinClause $joinClause) use ($setIds): void {
                     $joinClause->on('storage_option_parts.part_id', '=', 'set_parts.part_id')
                         ->on('storage_option_parts.color_id', '=', 'set_parts.color_id')
                         ->whereIn('set_parts.set_id', $setIds)
@@ -81,7 +81,7 @@ final readonly class GetFamilySetCompletionAction
         }
 
         /** @var list<FamilySetCompletionData> */
-        return array_values($familySets->map(function (FamilySet $familySet) use ($totalPartsCounts, $storedPartsCounts): FamilySetCompletionData {
+        return array_values($familySets->map(function(FamilySet $familySet) use ($totalPartsCounts, $storedPartsCounts): FamilySetCompletionData {
             $setId = $familySet->set_id;
             $totalPartsRow = $totalPartsCounts->get($setId);
 

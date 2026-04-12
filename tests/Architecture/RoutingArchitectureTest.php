@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 use Illuminate\Routing\Route;
 use Illuminate\Support\Facades\Route as RouteFacade;
@@ -19,11 +19,11 @@ use Tests\TestCase;
 |   1. Forgot to add ->can() to your route (fix it), or
 |   2. The route legitimately skips authorization (add it to the exempt list below with a reason).
 |
-*/
+ */
 
 uses(TestCase::class);
 
-it('should have can middleware on all authenticated routes except explicit exemptions', function (): void {
+it('should have can middleware on all authenticated routes except explicit exemptions', function(): void {
     /**
      * Routes that legitimately skip ->can() middleware.
      * Each entry requires a justification comment.
@@ -36,7 +36,7 @@ it('should have can middleware on all authenticated routes except explicit exemp
     $allRoutes = RouteFacade::getRoutes();
 
     $authenticatedRoutes = collect($allRoutes->getRoutes())
-        ->filter(function (Route $route): bool {
+        ->filter(function(Route $route): bool {
             $middleware = $route->gatherMiddleware();
 
             foreach ($middleware as $m) {
@@ -56,7 +56,7 @@ it('should have can middleware on all authenticated routes except explicit exemp
         foreach ($methods as $method) {
             $routeKey = $method . ' ' . $authenticatedRoute->uri();
 
-            if (in_array($routeKey, $exemptRoutes, strict: true)) {
+            if (\in_array($routeKey, $exemptRoutes, strict: true)) {
                 continue;
             }
 
@@ -64,8 +64,9 @@ it('should have can middleware on all authenticated routes except explicit exemp
             $hasCanMiddleware = false;
 
             foreach ($middleware as $m) {
-                if (is_string($m) && str_starts_with($m, 'can:')) {
+                if (\is_string($m) && str_starts_with($m, 'can:')) {
                     $hasCanMiddleware = true;
+
                     break;
                 }
             }
@@ -82,7 +83,7 @@ it('should have can middleware on all authenticated routes except explicit exemp
     );
 });
 
-it('should have the expected number of authenticated routes as a drift guard', function (): void {
+it('should have the expected number of authenticated routes as a drift guard', function(): void {
     /**
      * Sanity check: if this number changes, someone added or removed an
      * auth:sanctum route. Update this count after verifying the new route
@@ -93,7 +94,7 @@ it('should have the expected number of authenticated routes as a drift guard', f
     $allRoutes = RouteFacade::getRoutes();
 
     $authenticatedRouteCount = collect($allRoutes->getRoutes())
-        ->filter(function (Route $route): bool {
+        ->filter(function(Route $route): bool {
             $middleware = $route->gatherMiddleware();
 
             foreach ($middleware as $m) {
@@ -108,7 +109,7 @@ it('should have the expected number of authenticated routes as a drift guard', f
 
     expect($authenticatedRouteCount)->toBe(
         $expectedAuthenticatedRouteCount,
-        sprintf('Expected %d auth:sanctum routes but found %d. ', $expectedAuthenticatedRouteCount, $authenticatedRouteCount)
+        \sprintf('Expected %d auth:sanctum routes but found %d. ', $expectedAuthenticatedRouteCount, $authenticatedRouteCount)
         . 'If you added a new route, update this count after confirming it has proper can: middleware.',
     );
 });

@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 namespace App\Actions\StorageOption;
 
@@ -15,7 +15,7 @@ final readonly class DeleteStorageOptionPartAction
 
     public function execute(StorageOptionPart $storageOptionPart): void
     {
-        $this->connection->transaction(function () use ($storageOptionPart): void {
+        $this->connection->transaction(function() use ($storageOptionPart): void {
             $storageOptionPart->delete();
         });
     }

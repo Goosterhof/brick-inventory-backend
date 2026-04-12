@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 use App\Actions\Auth\LoginUserAction;
 use App\DataTransferObjects\Auth\LoginUserData;
@@ -11,13 +11,13 @@ use Illuminate\Validation\ValidationException;
 
 covers(LoginUserAction::class);
 
-describe('LoginUserAction', function (): void {
-    it('should return user when credentials are valid', function (): void {
+describe('LoginUserAction', function(): void {
+    it('should return user when credentials are valid', function(): void {
         // arrange
-        $userInstance = Mockery::mock(User::class);
+        $userInstance = \Mockery::mock(User::class);
         $userInstance->allows('getAttribute')->with('password')->andReturn('hashed_password');
 
-        $builder = Mockery::mock(Builder::class);
+        $builder = \Mockery::mock(Builder::class);
         $builder->shouldReceive('where')
             ->with('email', 'john@example.com')
             ->once()
@@ -26,12 +26,12 @@ describe('LoginUserAction', function (): void {
             ->once()
             ->andReturn($userInstance);
 
-        $user = Mockery::mock(User::class);
+        $user = \Mockery::mock(User::class);
         $user->shouldReceive('newQuery')
             ->once()
             ->andReturn($builder);
 
-        $hasher = Mockery::mock(Hasher::class);
+        $hasher = \Mockery::mock(Hasher::class);
         $hasher->shouldReceive('check')
             ->with('password123', 'hashed_password')
             ->once()
@@ -51,12 +51,12 @@ describe('LoginUserAction', function (): void {
         expect($result)->toBe($userInstance);
     });
 
-    it('should throw validation exception when password is incorrect', function (): void {
+    it('should throw validation exception when password is incorrect', function(): void {
         // arrange
-        $userInstance = Mockery::mock(User::class);
+        $userInstance = \Mockery::mock(User::class);
         $userInstance->allows('getAttribute')->with('password')->andReturn('hashed_password');
 
-        $builder = Mockery::mock(Builder::class);
+        $builder = \Mockery::mock(Builder::class);
         $builder->shouldReceive('where')
             ->with('email', 'john@example.com')
             ->once()
@@ -65,12 +65,12 @@ describe('LoginUserAction', function (): void {
             ->once()
             ->andReturn($userInstance);
 
-        $user = Mockery::mock(User::class);
+        $user = \Mockery::mock(User::class);
         $user->shouldReceive('newQuery')
             ->once()
             ->andReturn($builder);
 
-        $hasher = Mockery::mock(Hasher::class);
+        $hasher = \Mockery::mock(Hasher::class);
         $hasher->shouldReceive('check')
             ->with('wrongpassword', 'hashed_password')
             ->once()
@@ -87,9 +87,9 @@ describe('LoginUserAction', function (): void {
         $action->execute($loginData);
     })->throws(ValidationException::class);
 
-    it('should throw validation exception when user does not exist', function (): void {
+    it('should throw validation exception when user does not exist', function(): void {
         // arrange
-        $builder = Mockery::mock(Builder::class);
+        $builder = \Mockery::mock(Builder::class);
         $builder->shouldReceive('where')
             ->with('email', 'nonexistent@example.com')
             ->once()
@@ -98,12 +98,12 @@ describe('LoginUserAction', function (): void {
             ->once()
             ->andReturn(null);
 
-        $user = Mockery::mock(User::class);
+        $user = \Mockery::mock(User::class);
         $user->shouldReceive('newQuery')
             ->once()
             ->andReturn($builder);
 
-        $hasher = Mockery::mock(Hasher::class);
+        $hasher = \Mockery::mock(Hasher::class);
 
         $loginData = new LoginUserData(
             email: 'nonexistent@example.com',

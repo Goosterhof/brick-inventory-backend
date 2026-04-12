@@ -1,6 +1,6 @@
 <?php
 
-declare(strict_types=1);
+declare(strict_types = 1);
 
 use App\Actions\FamilySet\GetFamilySetsAction;
 use App\Models\FamilySet;
@@ -10,15 +10,15 @@ use Illuminate\Database\Eloquent\Collection;
 
 covers(GetFamilySetsAction::class);
 
-describe('GetFamilySetsAction', function (): void {
-    it('should query family sets by user family_id', function (): void {
+describe('GetFamilySetsAction', function(): void {
+    it('should query family sets by user family_id', function(): void {
         // arrange
-        $user = Mockery::mock(User::class);
+        $user = \Mockery::mock(User::class);
         $user->allows('getAttribute')->with('family_id')->andReturn(5);
 
         $collection = new Collection;
 
-        $builder = Mockery::mock(Builder::class);
+        $builder = \Mockery::mock(Builder::class);
         $builder->shouldReceive('where')
             ->with('family_id', 5)
             ->once()
@@ -26,7 +26,7 @@ describe('GetFamilySetsAction', function (): void {
         $builder->shouldReceive('latest')->andReturnSelf();
         $builder->shouldReceive('get')->andReturn($collection);
 
-        $familySet = Mockery::mock(FamilySet::class);
+        $familySet = \Mockery::mock(FamilySet::class);
         $familySet->shouldReceive('newQuery')
             ->once()
             ->andReturn($builder);
@@ -40,21 +40,21 @@ describe('GetFamilySetsAction', function (): void {
         expect($result)->toBe($collection);
     });
 
-    it('should order by latest (created_at descending)', function (): void {
+    it('should order by latest (created_at descending)', function(): void {
         // arrange
-        $user = Mockery::mock(User::class);
+        $user = \Mockery::mock(User::class);
         $user->allows('getAttribute')->with('family_id')->andReturn(1);
 
         $collection = new Collection;
 
-        $builder = Mockery::mock(Builder::class);
+        $builder = \Mockery::mock(Builder::class);
         $builder->shouldReceive('where')->andReturnSelf();
         $builder->shouldReceive('latest')
             ->once()
             ->andReturnSelf();
         $builder->shouldReceive('get')->andReturn($collection);
 
-        $familySet = Mockery::mock(FamilySet::class);
+        $familySet = \Mockery::mock(FamilySet::class);
         $familySet->shouldReceive('newQuery')->andReturn($builder);
 
         $action = new GetFamilySetsAction($familySet);
