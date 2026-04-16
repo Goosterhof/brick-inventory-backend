@@ -86,5 +86,5 @@ Once this ships, the next shipping order is the Plate side: the `/parts/missing`
 
 ---
 
-**Status:** Open
-**Shift Log:** _link to shift log when filed_
+**Status:** Complete
+**Shift Log:** `.claude/records/journals/2026-04-16-master-shopping-list.md`
