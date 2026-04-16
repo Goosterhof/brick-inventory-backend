@@ -82,6 +82,7 @@ composer mutation
 3. **File the shift log immediately — before reporting completion.** Create a shift log at `.claude/records/journals/YYYY-MM-DD-{slug}.md` using the template at `.claude/records/journals/.shift-log-template.md`. Update the shipping order status to `Completed` and link the shift log. The task is not done until the log is filed and the permit is closed — never defer this to "later."
 4. Fill in all sections honestly — the Logistics Director will evaluate your self-debrief.
 5. The shift log IS your report to the Logistics Director. Don't produce a separate report — everything goes in the log.
+6. **If a tool (`Write`, `Edit`, `Bash`, etc.) is refused on a known-good path like `.claude/records/`, treat the first refusal as a permission signal** — flag it in the report and hand verbatim content to the Director for transcription. Don't retry across alternative tool classes; the boundary is environmental, not flaky. Four silent retries cost real cycles — one flagged refusal costs none.
 
 ---
 
@@ -297,7 +298,9 @@ _Proposals observed once. Need a second confirming shift before graduation._
 | When fixing race conditions, prefer database-level constraints over application-level locks — they survive code path changes and cache failures | 2026-03-29 | 2026-03-29-harden-job-layer | Race condition in StartImportAction closed with partial unique index rather than Cache::lock() |
 | Before closing a shift, verify the shipping order status is updated from Open to Completed with a link to the shift log | 2026-04-08 | 2026-03-31-audit-remediation-3 | Shipping order left Open with no shift log link despite work being done |
 | When planning a multi-finding commit split, list which files each finding touches before staging — file overlap forces a re-plan if discovered mid-staging | 2026-04-16 | 2026-04-16-action-contract-hygiene | Staged for a three-commit scope split; `StorageOptionController.php` hosted edits from two separate findings, forcing a single-commit re-plan |
-| When a write tool is refused on a known-good path, treat the first refusal as a permission signal and flag it in the report — don't retry across alternative tools | 2026-04-16 | 2026-04-16-action-contract-hygiene | Sorter retried `Write` / `Edit` / `Bash` four times on `.claude/records/` before recognizing the block as environmental rather than flaky |
+| ~~When a write tool is refused on a known-good path, treat the first refusal as a permission signal and flag it in the report — don't retry across alternative tools~~ | 2026-04-16 | 2026-04-16-action-contract-hygiene | **Graduated 2026-04-16** — see Graduated table |
+| When a feature test asserts an exact aggregate result, pin every factory-randomized numeric column that feeds the arithmetic — not just the ones under test | 2026-04-16 | 2026-04-16-master-shopping-list | `FamilySetFactory::quantity` defaults randomized between 1-3; `quantity_needed` came out 12 instead of 6 because the unrelated factory default wasn't pinned |
+| When writing a lambda that contains a `@phpstan-ignore` comment, default to a multi-statement `function(...) { ... }` body instead of arrow-ish single-statement style — Rector can reshuffle arguments and misplace the suppression | 2026-04-16 | 2026-04-16-master-shopping-list | Rector rewrote the `storedByKey` keyBy lambda, breaking the `@phpstan-ignore` placement between argument lines |
 
 ### Graduated
 
@@ -308,6 +311,7 @@ _Proposals confirmed across 2+ shifts. Promoted into training above._
 | Use `toBase()->get()` returning `stdClass` for raw SQL joins in Actions | 2026-03-26 | 2026-03-25-brick-dna-lab, 2026-03-26-set-completion-gauge | Actions (Sorting Procedures) training |
 | Use separate `newQuery()` calls instead of `clone` on Eloquent Builder | 2026-03-26 | 2026-03-25-brick-dna-lab, 2026-03-26-set-completion-gauge | Actions (Sorting Procedures) training |
 | File the shift log immediately upon completion — never retroactively; update permit status to Completed before reporting done | 2026-04-08 | 2026-03-28-add-tooling-testing, 2026-03-31-audit-remediation-3 | "When You're Done" training (step 3) |
+| When a write tool is refused on a known-good path, treat the first refusal as a permission signal and flag it — don't retry across alternative tools | 2026-04-16 | 2026-04-16-action-contract-hygiene, 2026-04-16-master-shopping-list | "When You're Done" training (step 6) |
 
 ### Dropped
 
