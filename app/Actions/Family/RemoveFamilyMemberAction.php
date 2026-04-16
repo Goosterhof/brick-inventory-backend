@@ -20,19 +20,19 @@ final readonly class RemoveFamilyMemberAction
 
     public function execute(Family $family, User $member, User $actor): void
     {
-        $this->connection->transaction(function() use ($family, $member, $actor): void {
-            if ($family->head_id !== $actor->id) {
-                throw NotFamilyHeadException::forUser($actor->id);
-            }
+        if ($family->head_id !== $actor->id) {
+            throw NotFamilyHeadException::forUser($actor->id);
+        }
 
-            if ($actor->id === $member->id) {
-                throw CannotRemoveSelfException::forUser($actor->id);
-            }
+        if ($actor->id === $member->id) {
+            throw CannotRemoveSelfException::forUser($actor->id);
+        }
 
-            if ($member->family_id !== $family->id) {
-                throw UserNotInFamilyException::forUser($member->id, $family->id);
-            }
+        if ($member->family_id !== $family->id) {
+            throw UserNotInFamilyException::forUser($member->id, $family->id);
+        }
 
+        $this->connection->transaction(function() use ($member): void {
             $newFamily = $this->family->newInstance();
             $newFamily->name = $member->name . "'s Family";
             $newFamily->save();

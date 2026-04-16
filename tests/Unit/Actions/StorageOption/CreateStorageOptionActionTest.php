@@ -4,8 +4,8 @@ declare(strict_types = 1);
 
 use App\Actions\StorageOption\CreateStorageOptionAction;
 use App\DataTransferObjects\StorageOption\StorageOptionData;
+use App\Models\Family;
 use App\Models\StorageOption;
-use App\Models\User;
 use Illuminate\Database\ConnectionInterface;
 
 covers(CreateStorageOptionAction::class);
@@ -34,17 +34,17 @@ describe('CreateStorageOptionAction', function(): void {
             ->once()
             ->andReturn($storageOptionInstance);
 
-        $user = \Mockery::mock(User::class);
-        $user->allows('getAttribute')->with('family_id')->andReturn(1);
+        $family = \Mockery::mock(Family::class);
+        $family->allows('getAttribute')->with('id')->andReturn(1);
 
-        $action = new CreateStorageOptionAction($storageOption, $user, $this->db);
+        $action = new CreateStorageOptionAction($storageOption, $this->db);
         $data = new StorageOptionData(
             name: 'Cabinet 1',
             description: 'Main storage cabinet',
         );
 
         // act
-        $result = $action->execute($data);
+        $result = $action->execute($family, $data);
 
         // assert
         expect($result)->toBe($storageOptionInstance)
@@ -71,10 +71,10 @@ describe('CreateStorageOptionAction', function(): void {
             ->once()
             ->andReturn($storageOptionInstance);
 
-        $user = \Mockery::mock(User::class);
-        $user->allows('getAttribute')->with('family_id')->andReturn(1);
+        $family = \Mockery::mock(Family::class);
+        $family->allows('getAttribute')->with('id')->andReturn(1);
 
-        $action = new CreateStorageOptionAction($storageOption, $user, $this->db);
+        $action = new CreateStorageOptionAction($storageOption, $this->db);
         $data = new StorageOptionData(
             name: 'Drawer A1',
             parentId: 5,
@@ -83,7 +83,7 @@ describe('CreateStorageOptionAction', function(): void {
         );
 
         // act
-        $action->execute($data);
+        $action->execute($family, $data);
 
         // assert
         expect($savedValues['parent_id'])->toBe(5)
@@ -103,16 +103,16 @@ describe('CreateStorageOptionAction', function(): void {
             ->withNoArgs()
             ->andReturn($storageOptionInstance);
 
-        $user = \Mockery::mock(User::class);
-        $user->allows('getAttribute')->with('family_id')->andReturn(1);
+        $family = \Mockery::mock(Family::class);
+        $family->allows('getAttribute')->with('id')->andReturn(1);
 
-        $action = new CreateStorageOptionAction($storageOption, $user, $this->db);
+        $action = new CreateStorageOptionAction($storageOption, $this->db);
         $data = new StorageOptionData(
             name: 'Test Cabinet',
         );
 
         // act
-        $action->execute($data);
+        $action->execute($family, $data);
 
         // assert - Mockery expectations verify save() was called
     });
