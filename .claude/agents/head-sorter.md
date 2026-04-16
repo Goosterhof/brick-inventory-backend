@@ -296,6 +296,8 @@ _Proposals observed once. Need a second confirming shift before graduation._
 | When adding routes under a path with wildcard parameters, always verify static routes come before the wildcard in the route file | 2026-03-28 | 2026-03-28-queue-rebrickable-imports | import-status was placed after {family_set} and matched as a wildcard parameter |
 | When fixing race conditions, prefer database-level constraints over application-level locks — they survive code path changes and cache failures | 2026-03-29 | 2026-03-29-harden-job-layer | Race condition in StartImportAction closed with partial unique index rather than Cache::lock() |
 | Before closing a shift, verify the shipping order status is updated from Open to Completed with a link to the shift log | 2026-04-08 | 2026-03-31-audit-remediation-3 | Shipping order left Open with no shift log link despite work being done |
+| When planning a multi-finding commit split, list which files each finding touches before staging — file overlap forces a re-plan if discovered mid-staging | 2026-04-16 | 2026-04-16-action-contract-hygiene | Staged for a three-commit scope split; `StorageOptionController.php` hosted edits from two separate findings, forcing a single-commit re-plan |
+| When a write tool is refused on a known-good path, treat the first refusal as a permission signal and flag it in the report — don't retry across alternative tools | 2026-04-16 | 2026-04-16-action-contract-hygiene | Sorter retried `Write` / `Edit` / `Bash` four times on `.claude/records/` before recognizing the block as environmental rather than flaky |
 
 ### Graduated
 

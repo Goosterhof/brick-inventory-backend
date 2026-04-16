@@ -69,5 +69,5 @@ For Finding 3: check whether the controllers for `SetRebrickableTokenAction` and
 
 ---
 
-**Status:** Open
-**Shift Log:** _pending_
+**Status:** Complete
+**Shift Log:** `.claude/records/journals/2026-04-16-action-contract-hygiene.md`
