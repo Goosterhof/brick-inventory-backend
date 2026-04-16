@@ -2,6 +2,7 @@
 
 declare(strict_types = 1);
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 
 arch('models should extend Illuminate\Database\Eloquent\Model')
@@ -59,8 +60,8 @@ it('should not use mass-assignment methods in application code', function(): voi
     ];
 
     foreach ($bannedPatterns as $pattern => $description) {
-        $files = new RecursiveIteratorIterator(
-            new RecursiveDirectoryIterator($appDir, FilesystemIterator::SKIP_DOTS),
+        $files = new \RecursiveIteratorIterator(
+            new \RecursiveDirectoryIterator($appDir, \FilesystemIterator::SKIP_DOTS),
         );
 
         foreach ($files as $file) {
