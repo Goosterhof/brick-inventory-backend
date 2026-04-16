@@ -29,7 +29,7 @@ class FamilySetController extends Controller
      */
     public function index(#[CurrentUser] User $user, GetFamilySetsAction $getFamilySetsAction): array
     {
-        $familySets = $getFamilySetsAction->execute($user);
+        $familySets = $getFamilySetsAction->execute($user->family);
 
         return FamilySetResourceData::collection($familySets);
     }

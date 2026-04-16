@@ -4,8 +4,8 @@ declare(strict_types = 1);
 
 namespace App\Actions\FamilySet;
 
+use App\Models\Family;
 use App\Models\FamilySet;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Collection;
 
 final readonly class GetFamilySetsAction
@@ -17,10 +17,10 @@ final readonly class GetFamilySetsAction
     /**
      * @return Collection<int, FamilySet>
      */
-    public function execute(User $user): Collection
+    public function execute(Family $family): Collection
     {
         return $this->familySet->newQuery()
-            ->where('family_id', $user->family_id)
+            ->where('family_id', $family->id)
             ->latest()
             ->get();
     }

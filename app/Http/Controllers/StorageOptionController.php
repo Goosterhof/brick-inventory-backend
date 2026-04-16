@@ -31,16 +31,18 @@ class StorageOptionController extends Controller
         User $user,
         GetStorageOptionsAction $getStorageOptionsAction,
     ): array {
-        $storageOptions = $getStorageOptionsAction->execute(user: $user);
+        $storageOptions = $getStorageOptionsAction->execute($user->family);
 
         return StorageOptionResourceData::collection($storageOptions);
     }
 
     public function store(
         StorageOptionRequest $storageOptionRequest,
+        #[CurrentUser]
+        User $user,
         CreateStorageOptionAction $createStorageOptionAction,
     ): JsonResponse {
-        $storageOption = $createStorageOptionAction->execute($storageOptionRequest->toDto());
+        $storageOption = $createStorageOptionAction->execute($user->family, $storageOptionRequest->toDto());
 
         return StorageOptionResourceData::from($storageOption)->toResponseWithStatus(201);
     }

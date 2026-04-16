@@ -3,18 +3,18 @@
 declare(strict_types = 1);
 
 use App\Actions\FamilySet\GetFamilySetsAction;
+use App\Models\Family;
 use App\Models\FamilySet;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Collection;
 
 covers(GetFamilySetsAction::class);
 
 describe('GetFamilySetsAction', function(): void {
-    it('should query family sets by user family_id', function(): void {
+    it('should query family sets by family id', function(): void {
         // arrange
-        $user = \Mockery::mock(User::class);
-        $user->allows('getAttribute')->with('family_id')->andReturn(5);
+        $family = \Mockery::mock(Family::class);
+        $family->allows('getAttribute')->with('id')->andReturn(5);
 
         $collection = new Collection;
 
@@ -34,7 +34,7 @@ describe('GetFamilySetsAction', function(): void {
         $action = new GetFamilySetsAction($familySet);
 
         // act
-        $result = $action->execute($user);
+        $result = $action->execute($family);
 
         // assert
         expect($result)->toBe($collection);
@@ -42,8 +42,8 @@ describe('GetFamilySetsAction', function(): void {
 
     it('should order by latest (created_at descending)', function(): void {
         // arrange
-        $user = \Mockery::mock(User::class);
-        $user->allows('getAttribute')->with('family_id')->andReturn(1);
+        $family = \Mockery::mock(Family::class);
+        $family->allows('getAttribute')->with('id')->andReturn(1);
 
         $collection = new Collection;
 
@@ -60,7 +60,7 @@ describe('GetFamilySetsAction', function(): void {
         $action = new GetFamilySetsAction($familySet);
 
         // act
-        $action->execute($user);
+        $action->execute($family);
 
         // assert - Mockery expectations verify the interactions
     });
