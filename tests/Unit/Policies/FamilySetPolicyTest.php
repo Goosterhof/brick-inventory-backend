@@ -61,6 +61,12 @@ describe('FamilySetPolicy', function(): void {
         expect($this->policy->viewCompletion($user))->toBeTrue();
     });
 
+    it('should allow viewMissingParts', function(): void {
+        $user = \Mockery::mock(User::class);
+
+        expect($this->policy->viewMissingParts($user))->toBeTrue();
+    });
+
     describe('importFromRebrickable', function(): void {
         it('should allow family head to import', function(): void {
             $user = \Mockery::mock(User::class);

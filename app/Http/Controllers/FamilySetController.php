@@ -6,6 +6,7 @@ namespace App\Http\Controllers;
 
 use App\Actions\FamilySet\CreateFamilySetAction;
 use App\Actions\FamilySet\DeleteFamilySetAction;
+use App\Actions\FamilySet\GetFamilyMissingPartsAction;
 use App\Actions\FamilySet\GetFamilySetCompletionAction;
 use App\Actions\FamilySet\GetFamilySetsAction;
 use App\Actions\FamilySet\GetImportStatusAction;
@@ -13,6 +14,7 @@ use App\Actions\FamilySet\StartImportAction;
 use App\Actions\FamilySet\UpdateFamilySetAction;
 use App\Http\Requests\FamilySet\StoreFamilySetRequest;
 use App\Http\Requests\FamilySet\UpdateFamilySetRequest;
+use App\Http\Resources\FamilyMissingPartsResourceData;
 use App\Http\Resources\FamilySetCompletionResourceData;
 use App\Http\Resources\FamilySetResourceData;
 use App\Http\Resources\ImportJobResourceData;
@@ -48,6 +50,16 @@ class FamilySetController extends Controller
             FamilySetCompletionResourceData::from(...),
             $completionData,
         );
+    }
+
+    public function missingParts(
+        #[CurrentUser]
+        User $user,
+        GetFamilyMissingPartsAction $getFamilyMissingPartsAction,
+    ): JsonResponse {
+        $familyMissingPartsData = $getFamilyMissingPartsAction->execute($user->family);
+
+        return FamilyMissingPartsResourceData::from($familyMissingPartsData)->toResponse();
     }
 
     public function store(

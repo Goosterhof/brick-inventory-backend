@@ -78,6 +78,9 @@ Route::middleware(['auth:sanctum', 'family.ownership'])->group(function(): void 
     Route::get('/family-sets/completion', [FamilySetController::class, 'completion'])
         ->middleware(['etag', 'cache.headers:private;max_age=60'])
         ->can('viewCompletion', FamilySet::class);
+    Route::get('/family-sets/missing-parts', [FamilySetController::class, 'missingParts'])
+        ->middleware(['etag', 'cache.headers:private;max_age=60'])
+        ->can('viewMissingParts', FamilySet::class);
     Route::post('/family-sets/import-from-rebrickable', [FamilySetController::class, 'importFromRebrickable'])
         ->can('importFromRebrickable', FamilySet::class);
     Route::get('/family-sets/import-status', [FamilySetController::class, 'importStatus'])

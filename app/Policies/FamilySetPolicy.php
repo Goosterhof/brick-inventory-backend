@@ -39,6 +39,11 @@ final readonly class FamilySetPolicy
         return true;
     }
 
+    public function viewMissingParts(User $user): bool
+    {
+        return true;
+    }
+
     public function importFromRebrickable(User $user): bool
     {
         return $user->family->head_id === $user->id;
