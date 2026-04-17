@@ -27,18 +27,15 @@ final readonly class GetFamilyMissingPartsAction
 
     public function execute(Family $family): FamilyMissingPartsData
     {
-        // Q1: Non-wishlist family_sets with their set_num + `family_sets.quantity` multiplicity.
+        // Q1: Non-wishlist family_sets — id + set_id only. Multiplicity and set_num come from Q2/Q4 joins.
         // Bounded by the family's owned set count — typically dozens, not thousands.
         /** @var Collection<int, stdClass> $familySets */
         $familySets = $this->familySet->newQuery()
             ->where('family_sets.family_id', $family->id)
             ->where('family_sets.status', '!=', FamilySetStatus::Wishlist->value)
-            ->join('sets', 'family_sets.set_id', '=', 'sets.id')
             ->select([
                 'family_sets.id as family_set_id',
                 'family_sets.set_id',
-                'family_sets.quantity as family_set_quantity',
-                'sets.set_num',
             ])
             ->toBase()
             ->get();
@@ -172,7 +169,7 @@ final readonly class GetFamilyMissingPartsAction
             ->pluck('set_id')
             ->all();
 
-        $knownSetIdMap = array_fill_keys($knownSetIdList, true);
+        $knownSetIdMap = array_flip($knownSetIdList);
 
         $unknownFamilySetIds = [];
         foreach ($familySets as $familySet) {
