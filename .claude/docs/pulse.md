@@ -14,9 +14,9 @@ A consolidated, current-state assessment of the backend codebase. Updated by the
 ## Overall Health
 
 **Rating:** 8.5/10
-**Assessed:** 2026-04-11
+**Assessed:** 2026-04-16
 
-Architecture is sound — PHPStan at max with zero errors (291 files), Deptrac with zero violations, 516 tests passing (1822 assertions), 11 coherent ADRs. All high-severity findings resolved. Recent deliveries: security hardening (error leakage remediation, cache header privacy, Scramble to require-dev), GetFamilyPartsAction `family_set_id` fix, Log facade remediation in ImportOwnedSetsJob, and audit remediation rounds 3-4. Coverage and mutation testing cannot be measured without a PHP coverage driver in the environment.
+Architecture is sound — PHPStan at max with zero errors (297 files), Deptrac with zero violations, 540 tests passing (1914 assertions), 11 coherent ADRs. All high-severity findings resolved. Recent deliveries: cross-set missing-parts shortfall endpoint (sibling to the set-completion gauge — both are bulk aggregation endpoints with matching five-query SQL-side discipline and envelope `ComputedResourceData`), action contract hygiene pass (5 Actions normalized for family-scoping + authorization-before-transaction), security hardening, audit remediation rounds 3-4. Coverage and mutation testing cannot be measured without a PHP coverage driver in the environment.
 
 ## Active Concerns
 
@@ -33,7 +33,7 @@ Architecture is sound — PHPStan at max with zero errors (291 files), Deptrac w
 
 ## In-Progress Work
 
-**Assessed:** 2026-04-11
+**Assessed:** 2026-04-16
 
 | Work Item | Status | Next Step |
 |---|---|---|
@@ -49,19 +49,22 @@ Architecture is sound — PHPStan at max with zero errors (291 files), Deptrac w
 | Job layer hardening | Complete | JobArchitectureTest added; conventions documented |
 | Audit remediation (round 3) | Complete | 2026-03-30 full sweep — 6 findings resolved |
 | Audit remediation (round 4) | Complete | 2026-04-11 post-delivery sweep — ADR-0003, CLAUDE.md, CI, pulse |
+| Action contract hygiene | Complete | 2026-04-16 — 5 Actions normalized (family-scoped signatures, authorization-before-transaction) |
+| Master shopping list endpoint | Complete | 2026-04-16 — `GET /family-sets/missing-parts` bulk shortfall aggregation with `unknownFamilySetIds` honesty contract |
 
 ## Pattern Maturity
 
-**Assessed:** 2026-04-11
+**Assessed:** 2026-04-16
 
 | Pattern | Maturity | Evidence |
 |---|---|---|
-| Action layer (31 classes) | Battle-tested | Architecture tests guard it; all pass. Three approved try-catch exceptions documented in ADR-0003: partial-failure (ImportOwnedSetsAction), UniqueConstraintViolationException upsert (5 Actions), and race-condition guard (StartImportAction) |
+| Action layer (35 classes) | Battle-tested | Architecture tests guard it; all pass. Three approved try-catch exceptions documented in ADR-0003: partial-failure (ImportOwnedSetsAction), UniqueConstraintViolationException upsert (5 Actions), and race-condition guard (StartImportAction) |
 | Service layer (2 classes) | Battle-tested | Contract interfaces, Deptrac boundaries hold, no facade or model leakage |
-| ResourceData pattern (17 classes) | Battle-tested | All have `from()` factories, EAGER_LOAD where needed. ComputedResourceData (ADR-0010) handles DTO-sourced responses |
+| ResourceData pattern (18 classes) | Battle-tested | All have `from()` factories, EAGER_LOAD where needed. ComputedResourceData (ADR-0010) handles DTO-sourced responses; `FamilyMissingPartsResourceData` is the latest envelope application |
 | Explicit cascade deletion | Battle-tested | MigrationArchitectureTest + CascadeRelationArchitectureTest confirm compliance |
 | Thin controllers | Battle-tested | No constructors, no try-catch, method injection only. ControllerArchitectureTest confirms |
 | Job layer (1 class) | Established | JobArchitectureTest guards conventions; thin wrapper pattern documented in CLAUDE.md |
+| Bulk aggregation endpoints (2 endpoints) | Established | `/family-sets/completion` and `/family-sets/missing-parts` share the five-query SQL-side discipline — no PHP summation, database portability preserved |
 
 ## Tech Debt
 
@@ -88,7 +91,7 @@ Architecture is sound — PHPStan at max with zero errors (291 files), Deptrac w
 
 ## Quality Metrics
 
-**Assessed:** 2026-04-11
+**Assessed:** 2026-04-16
 
 | Metric | Value | Threshold |
 |---|---|---|
@@ -96,6 +99,6 @@ Architecture is sound — PHPStan at max with zero errors (291 files), Deptrac w
 | Feature coverage | Unable to measure (no coverage driver) | 90% |
 | Mutation score | Unable to measure (no coverage driver) | 76% |
 | Architecture tests | 19 files, 88 passed, 0 risky (1186 assertions) | All passing |
-| PHPStan | Level max, 0 errors (291 files) | Level max, zero errors |
-| Deptrac | 0 violations (607 allowed, 476 uncovered) | Zero violations |
-| Full test suite | 516 tests, 1822 assertions | All passing |
+| PHPStan | Level max, 0 errors (297 files) | Level max, zero errors |
+| Deptrac | 0 violations | Zero violations |
+| Full test suite | 540 tests, 1914 assertions | All passing |
