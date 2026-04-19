@@ -77,5 +77,5 @@ Run the full gauntlet before filing the shift log. Include a short "gotchas enco
 
 ---
 
-**Status:** Open
-**Shift Log:** _to be linked when filed_
+**Status:** Complete (pending mutation-drill follow-up)
+**Shift Log:** `.claude/records/journals/2026-04-19-laravel-13-upgrade.md`
