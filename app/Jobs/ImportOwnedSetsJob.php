@@ -10,8 +10,12 @@ use App\Models\Family;
 use App\Models\ImportJob;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Queue\Queueable;
+use Illuminate\Queue\Attributes\FailOnTimeout;
+use Illuminate\Queue\Attributes\Timeout;
 use Throwable;
 
+#[FailOnTimeout]
+#[Timeout(600)]
 final class ImportOwnedSetsJob implements ShouldQueue
 {
     use Queueable;
