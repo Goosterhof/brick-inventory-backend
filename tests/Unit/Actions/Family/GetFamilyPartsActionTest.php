@@ -29,6 +29,7 @@ describe('GetFamilyPartsAction', function(): void {
         $eloquentBuilder->shouldReceive('leftJoin')->andReturnSelf();
         $eloquentBuilder->shouldReceive('where')->with('storage_options.family_id', 1)->andReturnSelf();
         $eloquentBuilder->shouldReceive('select')->andReturnSelf();
+        $eloquentBuilder->shouldReceive('selectRaw')->andReturnSelf();
         $eloquentBuilder->shouldReceive('orderBy')->with('storage_option_parts.id')->andReturnSelf();
         $eloquentBuilder->shouldReceive('toBase')->once()->andReturn($baseBuilder);
 
@@ -62,6 +63,7 @@ describe('GetFamilyPartsAction', function(): void {
         $eloquentBuilder->shouldReceive('leftJoin')->andReturnSelf();
         $eloquentBuilder->shouldReceive('where')->andReturnSelf();
         $eloquentBuilder->shouldReceive('select')->andReturnSelf();
+        $eloquentBuilder->shouldReceive('selectRaw')->andReturnSelf();
         $eloquentBuilder->shouldReceive('orderBy')->andReturnSelf();
         $eloquentBuilder->shouldReceive('toBase')->andReturn($baseBuilder);
 
@@ -95,6 +97,7 @@ describe('GetFamilyPartsAction', function(): void {
         $eloquentBuilder->shouldReceive('leftJoin')->andReturnSelf();
         $eloquentBuilder->shouldReceive('where')->andReturnSelf();
         $eloquentBuilder->shouldReceive('select')->andReturnSelf();
+        $eloquentBuilder->shouldReceive('selectRaw')->andReturnSelf();
         $eloquentBuilder->shouldReceive('orderBy')->andReturnSelf();
         $eloquentBuilder->shouldReceive('toBase')->andReturn($baseBuilder);
 
