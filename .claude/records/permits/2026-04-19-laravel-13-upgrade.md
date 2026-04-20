@@ -77,5 +77,11 @@ Run the full gauntlet before filing the shift log. Include a short "gotchas enco
 
 ---
 
-**Status:** Complete (pending mutation-drill follow-up)
+**Status:** Complete (pending CI verification of MSI ≥ 76%)
+
+**Qualifier history:**
+- Filed as `Complete (pending mutation-drill follow-up)` on 2026-04-19.
+- Rewritten on 2026-04-19 after the isolated mutation-drill shift (`2026-04-19-laravel-13-mutation-drill`) aborted on a missing coverage driver. Director ruled Option C: accept CI-only MSI enforcement as the formal L13 gate, with the 76.83% baseline from `2026-03-26-enforce-code-quality` as the pre-upgrade reference. Local mutation drills remain infeasible in this container until pcov/xdebug is baked in — a platform decision outside warehouse scope.
+
 **Shift Log:** `.claude/records/journals/2026-04-19-laravel-13-upgrade.md`
+**Follow-up Shift Log:** `.claude/records/journals/2026-04-19-laravel-13-mutation-drill.md`
