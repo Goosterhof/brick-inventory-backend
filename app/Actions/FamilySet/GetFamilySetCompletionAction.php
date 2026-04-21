@@ -4,7 +4,7 @@ declare(strict_types = 1);
 
 namespace App\Actions\FamilySet;
 
-use App\Data\FamilySetCompletionData;
+use App\DataTransferObjects\Result\FamilySet\FamilySetCompletionData;
 use App\Enums\FamilySetStatus;
 use App\Models\Family;
 use App\Models\FamilySet;

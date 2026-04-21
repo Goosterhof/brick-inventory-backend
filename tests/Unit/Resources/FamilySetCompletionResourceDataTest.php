@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-use App\Data\FamilySetCompletionData;
+use App\DataTransferObjects\Result\FamilySet\FamilySetCompletionData;
 use App\Http\Resources\FamilySetCompletionResourceData;
 
 covers(FamilySetCompletionResourceData::class);

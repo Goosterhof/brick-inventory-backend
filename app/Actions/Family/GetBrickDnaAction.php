@@ -4,7 +4,7 @@ declare(strict_types = 1);
 
 namespace App\Actions\Family;
 
-use App\Data\BrickDnaData;
+use App\DataTransferObjects\Result\Family\BrickDnaData;
 use App\Models\Family;
 use App\Models\StorageOption;
 use App\Models\StorageOptionPart;

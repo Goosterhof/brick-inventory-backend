@@ -5,7 +5,7 @@ declare(strict_types = 1);
 use App\Actions\FamilySet\ImportOwnedSetsAction;
 use App\Actions\Sync\UpsertSetAction;
 use App\Contracts\LegoDataServiceInterface;
-use App\Data\ImportOwnedSetsResultData;
+use App\DataTransferObjects\Result\FamilySet\ImportOwnedSetsResultData;
 use App\DataTransferObjects\Input\Lego\LegoSetData;
 use App\DataTransferObjects\Input\Lego\RebrickableUserSetData;
 use App\Enums\FamilySetStatus;

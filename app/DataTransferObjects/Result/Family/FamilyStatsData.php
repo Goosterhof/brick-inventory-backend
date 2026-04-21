@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace App\Data;
+namespace App\DataTransferObjects\Result\Family;
 
 use App\Contracts\ResourceDataSourceInterface;
 

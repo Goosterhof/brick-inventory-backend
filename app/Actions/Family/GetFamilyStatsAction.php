@@ -4,7 +4,7 @@ declare(strict_types = 1);
 
 namespace App\Actions\Family;
 
-use App\Data\FamilyStatsData;
+use App\DataTransferObjects\Result\Family\FamilyStatsData;
 use App\Enums\FamilySetStatus;
 use App\Models\Family;
 use App\Models\FamilySet;

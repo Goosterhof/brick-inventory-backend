@@ -5,7 +5,7 @@ declare(strict_types = 1);
 namespace App\Http\Resources;
 
 use App\Contracts\ResourceDataSourceInterface;
-use App\Data\FamilyMissingPartsData;
+use App\DataTransferObjects\Result\Family\FamilyMissingPartsData;
 
 /**
  * @extends ComputedResourceData<FamilyMissingPartsData>

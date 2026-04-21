@@ -4,7 +4,7 @@ declare(strict_types = 1);
 
 namespace App\Actions\FamilySet;
 
-use App\Data\FamilyMissingPartsData;
+use App\DataTransferObjects\Result\Family\FamilyMissingPartsData;
 use App\Enums\FamilySetStatus;
 use App\Models\Family;
 use App\Models\FamilySet;

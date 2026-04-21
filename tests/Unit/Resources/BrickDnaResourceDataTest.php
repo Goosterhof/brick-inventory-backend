@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-use App\Data\BrickDnaData;
+use App\DataTransferObjects\Result\Family\BrickDnaData;
 use App\Http\Resources\BrickDnaResourceData;
 
 covers(BrickDnaResourceData::class);

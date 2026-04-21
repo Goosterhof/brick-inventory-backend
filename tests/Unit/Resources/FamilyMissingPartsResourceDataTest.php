@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-use App\Data\FamilyMissingPartsData;
+use App\DataTransferObjects\Result\Family\FamilyMissingPartsData;
 use App\Http\Resources\FamilyMissingPartsResourceData;
 
 covers(FamilyMissingPartsResourceData::class);

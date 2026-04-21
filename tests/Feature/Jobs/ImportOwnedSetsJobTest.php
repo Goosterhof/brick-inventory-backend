@@ -3,7 +3,7 @@
 declare(strict_types = 1);
 
 use App\Actions\FamilySet\ImportOwnedSetsAction;
-use App\Data\ImportOwnedSetsResultData;
+use App\DataTransferObjects\Result\FamilySet\ImportOwnedSetsResultData;
 use App\Enums\ImportJobStatus;
 use App\Jobs\ImportOwnedSetsJob;
 use App\Models\Family;

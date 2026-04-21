@@ -5,7 +5,7 @@ declare(strict_types = 1);
 namespace App\Http\Resources;
 
 use App\Contracts\ResourceDataSourceInterface;
-use App\Data\BrickDnaData;
+use App\DataTransferObjects\Result\Family\BrickDnaData;
 
 /**
  * @extends ComputedResourceData<BrickDnaData>
