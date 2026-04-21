@@ -90,8 +90,9 @@ app/
 │   ├── Requests/               # Packing Slips — validated input DTOs
 │   ├── Resources/              # Shipping Labels — structured output DTOs
 │   └── Middleware/             # Security Checkpoints
-├── Data/                       # Internal Transfer Slips — DTOs between procedures
-├── DataTransferObjects/        # Intake Forms — request DTOs
+├── DataTransferObjects/        # Intake Forms & Shipping Receipts — typed DTOs
+│   ├── Input/                  #   Intake Forms — Actions RECEIVE these (FormRequest → Action, Service → Action)
+│   └── Result/                 #   Shipping Receipts — Actions RETURN these (may carry Collection<Model>)
 ├── Contracts/                  # Supplier Agreements — service interfaces
 ├── Exceptions/                 # Incident Reports — typed failure signals
 ├── Enums/                      # Classification Stamps — status enums
@@ -163,7 +164,19 @@ Validated input. The intake form a shipment must fill out before entering the wa
 
 - `final` classes extending `FormRequest`
 - Produce a DTO via typed method — bridge between HTTP and the warehouse interior
+- `toDto()` must declare an explicit return type, and that return type must live in `App\DataTransferObjects\Input\*`
 - No public constants — keep the form clean
+
+### Intake Forms & Shipping Receipts (DTOs)
+
+Typed data carriers between the warehouse's inner departments. Split by **usage direction at the Action boundary**:
+
+- **Intake Forms** (`App\DataTransferObjects\Input\<Domain>\`) — shapes the Action **receives**. FormRequest → Action, or Service → Action (for supplier-response payloads from Rebrickable / Brickognize). Pure leaves — may depend on `Enums` only, never on Models. Keeps the HTTP boundary honest.
+- **Shipping Receipts** (`App\DataTransferObjects\Result\<Domain>\`) — shapes the Action **returns**. May carry `Collection<Model>`, single `Model`, `Enum`, or plain scalars/arrays. A Result DTO that carries a Collection lets the ResourceData shape the response in a single pass — no flatten-then-remap double loops.
+
+**Rule of thumb:** Does the Action receive it → Input. Does the Action hand it back → Result. The dependency content (whether the DTO references a Model) is a consequence, not the rule — a class can be pure-primitive today and still live in `Result/` if it is the declared return type of an `Action::execute()`.
+
+Enforced from three angles in `tests/Architecture/DataTransferObjectPlacementTest.php`: Action return types, Action execute() parameter types, and FormRequest::toDto() return types.
 
 ### Shipping Labels (ResourceData)
 
@@ -232,19 +245,20 @@ CaptainHook enforces on every commit (PHP files only): **lint:test → phpstan �
 
 ### The Boundary Fences (Deptrac)
 
-Eleven functional rows with strict one-way dependencies. The warehouse aisles do not cross.
+Functional rows with strict one-way dependencies. The warehouse aisles do not cross.
 
 ```
-Leaf Layers (no dependencies):     Model, Data, DTO, Enum, Exception
-Interface Layer:                    Contract → Data, Enum, Exception
-Supply Lines:                       Service → Contract, Data, Exception
-Input Processing:                   FormRequest → DTO, Enum, Model
-Output Shaping:                     ResourceData → Model, Enum, Data, Exception
+Leaf Layers (no App deps):          Model, InputDTO, Enum, Exception
+Result-DTO Layer:                   ResultDTO → Enum, Model (the only leaf allowed to carry Models)
+Interface Layer:                    Contract → InputDTO, Enum, Exception
+Supply Lines:                       Service → Contract, InputDTO, Exception
+Input Processing:                   FormRequest → InputDTO, Enum, Model
+Output Shaping:                     ResourceData → Model, Enum, ResultDTO, Exception, Contract
 Authorization:                      Policy → Model
 Security:                           Middleware → Model, Contract
-Orchestration:                      Action → Action, Job, Contract, Model, Data, DTO, Enum, Exception
+Orchestration:                      Action → Action, Job, Contract, Model, InputDTO, ResultDTO, Enum, Exception
 Async Execution:                    Job → Action, Model, Enum
-Entry Point:                        Controller → Action, FormRequest, ResourceData, Model
+Entry Point:                        Controller → Action, FormRequest, ResourceData, Model, ResultDTO
 Wiring:                             Provider → Contract, Service, Policy
 ```
 
@@ -263,7 +277,7 @@ Eleven decisions that shaped the warehouse (consolidated from sixteen — implem
 | 0007 | #[Config] attributes, not helpers/facades | ConfigArchitectureTest, GeneralArchitectureTest |
 | 0008 | Explicit routes, not apiResource | RoutingArchitectureTest |
 | 0009 | Thin controllers with method injection only | ControllerArchitectureTest |
-| 0010 | ComputedResourceData for DTO-sourced responses | ResourceDataArchitectureTest, PHPStan, Deptrac |
+| 0010 | ComputedResourceData for Result-DTO-sourced responses (marker interface retired; Input/Result namespace split supersedes the `Data`/`DataTransferObjects` duality) | ResourceDataArchitectureTest, DataTransferObjectPlacementTest, PHPStan, Deptrac |
 | 0011 | Save-what-you-can import atomicity with honest reporting | Unit tests (three-scenario coverage), ADR-0003 try-catch constraints |
 
 Before building anything non-trivial, check the Ledger. Don't relitigate settled decisions — if the context has changed, propose a superseding ADR.
