@@ -4,7 +4,6 @@ declare(strict_types = 1);
 
 namespace App\Http\Resources;
 
-use App\Contracts\ResourceDataSourceInterface;
 use App\DataTransferObjects\Result\Family\FamilyMissingPartsData;
 
 /**
@@ -33,13 +32,13 @@ final readonly class FamilyMissingPartsResourceData extends ComputedResourceData
     ) {}
 
     /**
-     * @param FamilyMissingPartsData $resourceDataSource
+     * @param FamilyMissingPartsData $resultData
      */
-    public static function from(ResourceDataSourceInterface $resourceDataSource): static
+    public static function from(object $resultData): static
     {
         return new self(
-            shortfalls: $resourceDataSource->shortfalls,
-            unknown_family_set_ids: $resourceDataSource->unknownFamilySetIds,
+            shortfalls: $resultData->shortfalls,
+            unknown_family_set_ids: $resultData->unknownFamilySetIds,
         );
     }
 }

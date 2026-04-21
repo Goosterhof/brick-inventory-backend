@@ -4,9 +4,8 @@ declare(strict_types = 1);
 
 namespace App\DataTransferObjects\Result\Family;
 
-use App\Contracts\ResourceDataSourceInterface;
 
-final readonly class FamilyStatsData implements ResourceDataSourceInterface
+final readonly class FamilyStatsData
 {
     /**
      * @param array<string, int> $setsByStatus
