@@ -3,6 +3,7 @@
 declare(strict_types = 1);
 
 use App\Actions\FamilySet\GetFamilySetCompletionAction;
+use App\DataTransferObjects\Result\FamilySet\FamilySetCompletionsResultData;
 use App\Enums\FamilySetStatus;
 use App\Models\Family;
 use App\Models\FamilySet;
@@ -19,7 +20,7 @@ use Illuminate\Support\Collection;
 covers(GetFamilySetCompletionAction::class);
 
 describe('GetFamilySetCompletionAction', function(): void {
-    it('should return empty array when family has no non-wishlist sets', function(): void {
+    it('should return an empty Result when family has no non-wishlist sets', function(): void {
         $family = \Mockery::mock(Family::class);
         $family->allows('getAttribute')->with('id')->andReturn(1);
 
@@ -39,10 +40,13 @@ describe('GetFamilySetCompletionAction', function(): void {
         $action = new GetFamilySetCompletionAction($familySet, $setPart, $storageOption, $storageOptionPart);
         $result = $action->execute($family);
 
-        expect($result)->toBe([]);
+        expect($result)->toBeInstanceOf(FamilySetCompletionsResultData::class)
+            ->and($result->familySets)->toBeInstanceOf(EloquentCollection::class)
+            ->and($result->familySets)->toHaveCount(0)
+            ->and($result->countsByFamilySetId)->toBe([]);
     });
 
-    it('should return null completion for sets with no parts loaded', function(): void {
+    it('should return null counts for sets with no parts loaded', function(): void {
         $family = \Mockery::mock(Family::class);
         $family->allows('getAttribute')->with('id')->andReturn(2);
 
@@ -106,12 +110,13 @@ describe('GetFamilySetCompletionAction', function(): void {
         $action = new GetFamilySetCompletionAction($familySet, $setPart, $storageOption, $storageOptionPart);
         $result = $action->execute($family);
 
-        expect($result)->toHaveCount(1)
-            ->and($result[0]->familySetId)->toBe(100)
-            ->and($result[0]->setNum)->toBe('42100-1')
-            ->and($result[0]->totalParts)->toBeNull()
-            ->and($result[0]->storedParts)->toBeNull()
-            ->and($result[0]->percentage)->toBeNull();
+        expect($result->familySets)->toHaveCount(1)
+            ->and($result->countsByFamilySetId)->toHaveKey(100)
+            ->and($result->countsByFamilySetId[100])->toBe([
+                'total_parts' => null,
+                'stored_parts' => null,
+                'percentage' => null,
+            ]);
     });
 
     it('should compute completion percentage for partially complete set', function(): void {
@@ -190,12 +195,12 @@ describe('GetFamilySetCompletionAction', function(): void {
         $action = new GetFamilySetCompletionAction($familySet, $setPart, $storageOption, $storageOptionPart);
         $result = $action->execute($family);
 
-        expect($result)->toHaveCount(1)
-            ->and($result[0]->familySetId)->toBe(200)
-            ->and($result[0]->setNum)->toBe('75192-1')
-            ->and($result[0]->totalParts)->toBe(10)
-            ->and($result[0]->storedParts)->toBe(3)
-            ->and($result[0]->percentage)->toBe(30.0);
+        expect($result->familySets)->toHaveCount(1)
+            ->and($result->countsByFamilySetId[200])->toBe([
+                'total_parts' => 10,
+                'stored_parts' => 3,
+                'percentage' => 30.0,
+            ]);
     });
 
     it('should cap percentage at 100 when stored parts exceed total parts', function(): void {
@@ -264,8 +269,7 @@ describe('GetFamilySetCompletionAction', function(): void {
         $action = new GetFamilySetCompletionAction($familySet, $setPart, $storageOption, $storageOptionPart);
         $result = $action->execute($family);
 
-        expect($result)->toHaveCount(1)
-            ->and($result[0]->percentage)->toBe(100.0);
+        expect($result->countsByFamilySetId[300]['percentage'])->toBe(100.0);
     });
 
     it('should return zero percentage when total parts is zero', function(): void {
@@ -322,12 +326,11 @@ describe('GetFamilySetCompletionAction', function(): void {
         $action = new GetFamilySetCompletionAction($familySet, $setPart, $storageOption, $storageOptionPart);
         $result = $action->execute($family);
 
-        expect($result)->toHaveCount(1)
-            ->and($result[0]->familySetId)->toBe(600)
-            ->and($result[0]->setNum)->toBe('71043-1')
-            ->and($result[0]->totalParts)->toBe(0)
-            ->and($result[0]->storedParts)->toBe(0)
-            ->and($result[0]->percentage)->toBe(0.0);
+        expect($result->countsByFamilySetId[600])->toBe([
+            'total_parts' => 0,
+            'stored_parts' => 0,
+            'percentage' => 0.0,
+        ]);
     });
 
     it('should return zero stored parts when family has no storage options', function(): void {
@@ -385,10 +388,11 @@ describe('GetFamilySetCompletionAction', function(): void {
         $action = new GetFamilySetCompletionAction($familySet, $setPart, $storageOption, $storageOptionPart);
         $result = $action->execute($family);
 
-        expect($result)->toHaveCount(1)
-            ->and($result[0]->totalParts)->toBe(8)
-            ->and($result[0]->storedParts)->toBe(0)
-            ->and($result[0]->percentage)->toBe(0.0);
+        expect($result->countsByFamilySetId[400])->toBe([
+            'total_parts' => 8,
+            'stored_parts' => 0,
+            'percentage' => 0.0,
+        ]);
     });
 
     it('should compute 100% for a fully complete set', function(): void {
@@ -457,9 +461,10 @@ describe('GetFamilySetCompletionAction', function(): void {
         $action = new GetFamilySetCompletionAction($familySet, $setPart, $storageOption, $storageOptionPart);
         $result = $action->execute($family);
 
-        expect($result)->toHaveCount(1)
-            ->and($result[0]->percentage)->toBe(100.0)
-            ->and($result[0]->totalParts)->toBe(15)
-            ->and($result[0]->storedParts)->toBe(15);
+        expect($result->countsByFamilySetId[500])->toBe([
+            'total_parts' => 15,
+            'stored_parts' => 15,
+            'percentage' => 100.0,
+        ]);
     });
 });

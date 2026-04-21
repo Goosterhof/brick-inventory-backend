@@ -4,7 +4,7 @@ declare(strict_types = 1);
 
 namespace App\Actions\FamilySet;
 
-use App\DataTransferObjects\Result\FamilySet\FamilySetCompletionData;
+use App\DataTransferObjects\Result\FamilySet\FamilySetCompletionsResultData;
 use App\Enums\FamilySetStatus;
 use App\Models\Family;
 use App\Models\FamilySet;
@@ -24,11 +24,9 @@ final readonly class GetFamilySetCompletionAction
         private StorageOptionPart $storageOptionPart,
     ) {}
 
-    /**
-     * @return list<FamilySetCompletionData>
-     */
-    public function execute(Family $family): array
+    public function execute(Family $family): FamilySetCompletionsResultData
     {
+        /** @var Collection<int, FamilySet> $familySets */
         $familySets = $this->familySet->newQuery()
             ->where('family_id', $family->id)
             ->where('status', '!=', FamilySetStatus::Wishlist)
@@ -36,7 +34,10 @@ final readonly class GetFamilySetCompletionAction
             ->get();
 
         if ($familySets->isEmpty()) {
-            return [];
+            return new FamilySetCompletionsResultData(
+                familySets: $familySets,
+                countsByFamilySetId: [],
+            );
         }
 
         $setIds = $familySets->pluck('set_id')->unique()->values();
@@ -80,20 +81,22 @@ final readonly class GetFamilySetCompletionAction
                 ->keyBy('set_id');
         }
 
-        /** @var list<FamilySetCompletionData> */
-        return array_values($familySets->map(function(FamilySet $familySet) use ($totalPartsCounts, $storedPartsCounts): FamilySetCompletionData {
+        /** @var array<int, array{total_parts: int|null, stored_parts: int|null, percentage: float|null}> $countsByFamilySetId */
+        $countsByFamilySetId = [];
+
+        foreach ($familySets as $familySet) {
             $setId = $familySet->set_id;
             $totalPartsRow = $totalPartsCounts->get($setId);
 
             // No set_parts rows means parts were never fetched from Rebrickable
             if ($totalPartsRow === null) {
-                return new FamilySetCompletionData(
-                    familySetId: $familySet->id,
-                    setNum: $familySet->set->set_num,
-                    totalParts: null,
-                    storedParts: null,
-                    percentage: null,
-                );
+                $countsByFamilySetId[$familySet->id] = [
+                    'total_parts' => null,
+                    'stored_parts' => null,
+                    'percentage' => null,
+                ];
+
+                continue;
             }
 
             $totalParts = (int) $totalPartsRow->total_parts; // @phpstan-ignore cast.int
@@ -104,13 +107,16 @@ final readonly class GetFamilySetCompletionAction
                 ? min(round($storedParts / $totalParts * 100, 2), 100.0)
                 : 0.0;
 
-            return new FamilySetCompletionData(
-                familySetId: $familySet->id,
-                setNum: $familySet->set->set_num,
-                totalParts: $totalParts,
-                storedParts: $storedParts,
-                percentage: $percentage,
-            );
-        })->all());
+            $countsByFamilySetId[$familySet->id] = [
+                'total_parts' => $totalParts,
+                'stored_parts' => $storedParts,
+                'percentage' => $percentage,
+            ];
+        }
+
+        return new FamilySetCompletionsResultData(
+            familySets: $familySets,
+            countsByFamilySetId: $countsByFamilySetId,
+        );
     }
 }
