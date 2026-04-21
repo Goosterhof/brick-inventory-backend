@@ -2,6 +2,17 @@
 
 declare(strict_types = 1);
 
+/*
+|--------------------------------------------------------------------------
+| DataTransferObject — Core Structural Rules
+|--------------------------------------------------------------------------
+|
+| Every class under App\DataTransferObjects\{Input,Result}\* must be a
+| final readonly value carrier. Placement rules (Input vs Result by usage
+| direction) live in DataTransferObjectPlacementTest.php.
+|
+ */
+
 arch('data transfer objects should end with Data')
     ->expect('App\DataTransferObjects')
     ->toHaveSuffix('Data');
@@ -28,40 +39,5 @@ it('should not have methods in DTOs', function(): void {
         expect($nonConstructorMethods)->toBeEmpty(
             \sprintf('DTO %s should only have __construct, found: %s', $className, implode(', ', $methodNames)),
         );
-    }
-});
-
-arch('App\Data DTOs should end with Data')
-    ->expect('App\Data')
-    ->toHaveSuffix('Data');
-
-arch('App\Data DTOs should be readonly')
-    ->expect('App\Data')
-    ->toBeReadonly();
-
-arch('App\Data DTOs should be final')
-    ->expect('App\Data')
-    ->toBeFinal();
-
-it('should not have methods in App\Data DTOs', function(): void {
-    $directories = [
-        \dirname(__DIR__, 2) . '/app/Data' => 'App\Data\\',
-    ];
-
-    foreach ($directories as $directory => $namespace) {
-        foreach (getClassesInDirectory($directory, $namespace) as $className) {
-            $reflection = new \ReflectionClass($className);
-            $methods = array_filter(
-                $reflection->getMethods(),
-                fn(\ReflectionMethod $reflectionMethod): bool => $reflectionMethod->getDeclaringClass()->getName() === $className,
-            );
-
-            $methodNames = array_map(fn(\ReflectionMethod $reflectionMethod): string => $reflectionMethod->getName(), $methods);
-            $nonConstructorMethods = array_diff($methodNames, ['__construct']);
-
-            expect($nonConstructorMethods)->toBeEmpty(
-                \sprintf('DTO %s should only have __construct, found: %s', $className, implode(', ', $methodNames)),
-            );
-        }
     }
 });
