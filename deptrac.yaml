@@ -5,19 +5,19 @@ deptrac:
     - '#.*test.*#'
     - '#.*PHPStan.*#'
   layers:
-    # --- Leaf layers (no App\ dependencies allowed) ---
+    # --- Leaf layers (no App\ dependencies allowed, except ResultDTO which may carry Models) ---
     - name: Model
       collectors:
         - type: classLike
           value: App\\Models\\.*
-    - name: Data
+    - name: InputDTO
       collectors:
         - type: classLike
-          value: App\\Data\\.*
-    - name: DataTransferObject
+          value: App\\DataTransferObjects\\Input\\.*
+    - name: ResultDTO
       collectors:
         - type: classLike
-          value: App\\DataTransferObjects\\.*
+          value: App\\DataTransferObjects\\Result\\.*
     - name: Enum
       collectors:
         - type: classLike
@@ -80,40 +80,46 @@ deptrac:
           value: App\\Providers\\.*
 
   ruleset:
-    # Leaf layers: no dependencies on other App\ layers
+    # Leaf layers: Input DTOs must not reach Models (HTTP-boundary purity);
+    # Result DTOs MAY depend on Models and Enums (Actions hand these back).
     Model:
       - Enum
       - Contract
-    Data:
-      - Contract
-    DataTransferObject:
+    InputDTO:
       - Enum
+    ResultDTO:
+      - Enum
+      - Model
     Enum: []
     Exception: []
 
-    # Contracts define interfaces using DTOs, exceptions, and enums
+    # Contracts define interfaces using DTOs, exceptions, and enums.
+    # Input DTOs cover supplier-response shapes (Rebrickable/Brickognize)
+    # that Services return and hand to Actions.
     Contract:
-      - Data
+      - InputDTO
       - Enum
       - Exception
 
-    # Services implement contracts, use DTOs and throw exceptions
+    # Services implement contracts; they return Input DTOs (supplier shapes)
+    # and throw exceptions.
     Service:
       - Contract
-      - Data
+      - InputDTO
       - Exception
 
-    # Form requests validate input, produce DTOs, reference enums and models (closure rules check ownership)
+    # Form requests validate input, produce Input DTOs, reference enums and models
+    # (closure rules check ownership).
     FormRequest:
-      - DataTransferObject
+      - InputDTO
       - Enum
       - Model
 
-    # Resource data transforms models into API responses
+    # ResourceData shapes API responses from Models or Result DTOs.
     ResourceData:
       - Model
       - Enum
-      - Data
+      - ResultDTO
       - Exception
       - Contract
 
@@ -126,14 +132,15 @@ deptrac:
       - Model
       - Contract
 
-    # Actions orchestrate business logic across all lower layers
+    # Actions orchestrate business logic across all lower layers.
+    # Receive InputDTOs; return ResultDTOs (or Models, Collections, void).
     Action:
       - Action
       - Job
       - Contract
       - Model
-      - Data
-      - DataTransferObject
+      - InputDTO
+      - ResultDTO
       - Enum
       - Exception
 
@@ -143,12 +150,14 @@ deptrac:
       - Model
       - Enum
 
-    # Controllers are thin HTTP handlers delegating to actions
+    # Controllers are thin HTTP handlers delegating to actions.
+    # They may reference Result DTOs when wiring Actions to ResourceData.
     Controller:
       - Action
       - FormRequest
       - ResourceData
       - Model
+      - ResultDTO
 
     # Providers wire interfaces to implementations and configure action dependencies
     Provider:
