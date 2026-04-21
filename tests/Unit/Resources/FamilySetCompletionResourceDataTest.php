@@ -145,7 +145,7 @@ describe('FamilySetCompletionResourceData', function(): void {
         );
 
         // act + assert
-        expect(fn() => FamilySetCompletionResourceData::fromResult($resultData))
+        expect(fn(): array => FamilySetCompletionResourceData::fromResult($resultData))
             ->toThrow(MissingRelationException::class);
     });
 });

@@ -6,8 +6,8 @@ namespace App\Actions\FamilySet;
 
 use App\Actions\Sync\UpsertSetAction;
 use App\Contracts\LegoDataServiceInterface;
-use App\DataTransferObjects\Result\FamilySet\ImportOwnedSetsResultData;
 use App\DataTransferObjects\Input\Lego\RebrickableUserSetData;
+use App\DataTransferObjects\Result\FamilySet\ImportOwnedSetsResultData;
 use App\Enums\FamilySetStatus;
 use App\Exceptions\InvalidApiResponseException;
 use App\Exceptions\MissingRebrickableTokenException;

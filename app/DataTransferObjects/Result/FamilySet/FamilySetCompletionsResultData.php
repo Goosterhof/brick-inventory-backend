@@ -19,7 +19,7 @@ use Illuminate\Support\Collection;
 final readonly class FamilySetCompletionsResultData
 {
     /**
-     * @param Collection<int, FamilySet>                                                   $familySets     Non-wishlist family sets with `set` eager-loaded.
+     * @param Collection<int, FamilySet>                                                               $familySets          non-wishlist family sets with `set` eager-loaded
      * @param array<int, array{total_parts: int|null, stored_parts: int|null, percentage: float|null}> $countsByFamilySetId Keyed by FamilySet id. `null` totals mean the set's parts were never fetched from Rebrickable.
      */
     public function __construct(
