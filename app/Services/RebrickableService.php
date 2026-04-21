@@ -5,11 +5,11 @@ declare(strict_types = 1);
 namespace App\Services;
 
 use App\Contracts\LegoDataServiceInterface;
-use App\Data\Lego\LegoColorData;
-use App\Data\Lego\LegoPartData;
-use App\Data\Lego\LegoSetData;
-use App\Data\Lego\LegoSetPartData;
-use App\Data\Lego\RebrickableUserSetData;
+use App\DataTransferObjects\Input\Lego\LegoColorData;
+use App\DataTransferObjects\Input\Lego\LegoPartData;
+use App\DataTransferObjects\Input\Lego\LegoSetData;
+use App\DataTransferObjects\Input\Lego\LegoSetPartData;
+use App\DataTransferObjects\Input\Lego\RebrickableUserSetData;
 use App\Exceptions\InvalidApiResponseException;
 use App\Exceptions\RebrickableApiException;
 use App\Exceptions\SetNotFoundException;

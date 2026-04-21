@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace App\Data\Lego;
+namespace App\DataTransferObjects\Input\Lego;
 
 /**
  * DTO for a part within a LEGO set from external APIs.

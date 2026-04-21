@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace App\Data\Lego;
+namespace App\DataTransferObjects\Input\Lego;
 
 /**
  * DTO for a set in a user's Rebrickable collection.

@@ -4,7 +4,7 @@ declare(strict_types = 1);
 
 namespace App\Actions\Sync;
 
-use App\Data\Lego\LegoPartData;
+use App\DataTransferObjects\Input\Lego\LegoPartData;
 use App\Models\Part;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\UniqueConstraintViolationException;

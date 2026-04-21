@@ -4,7 +4,7 @@ declare(strict_types = 1);
 
 namespace App\Actions\Sync;
 
-use App\Data\Lego\LegoColorData;
+use App\DataTransferObjects\Input\Lego\LegoColorData;
 use App\Models\Color;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\UniqueConstraintViolationException;

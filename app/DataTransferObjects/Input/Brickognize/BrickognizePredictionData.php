@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace App\Data\Brickognize;
+namespace App\DataTransferObjects\Input\Brickognize;
 
 /**
  * DTO for a single Brickognize prediction result.
