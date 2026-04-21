@@ -4,7 +4,7 @@ declare(strict_types = 1);
 
 namespace App\Http\Requests\FamilySet;
 
-use App\DataTransferObjects\FamilySet\UpdateFamilySetData;
+use App\DataTransferObjects\Input\FamilySet\UpdateFamilySetData;
 use App\Enums\FamilySetStatus;
 use Carbon\CarbonImmutable;
 use Illuminate\Foundation\Http\FormRequest;

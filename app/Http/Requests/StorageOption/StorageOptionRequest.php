@@ -4,7 +4,7 @@ declare(strict_types = 1);
 
 namespace App\Http\Requests\StorageOption;
 
-use App\DataTransferObjects\StorageOption\StorageOptionData;
+use App\DataTransferObjects\Input\StorageOption\StorageOptionData;
 use App\Models\StorageOption;
 use App\Models\User;
 use Closure;

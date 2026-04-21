@@ -4,7 +4,7 @@ declare(strict_types = 1);
 
 namespace App\Actions\StorageOption;
 
-use App\DataTransferObjects\StorageOption\AssignPartToStorageData;
+use App\DataTransferObjects\Input\StorageOption\AssignPartToStorageData;
 use App\Models\StorageOption;
 use App\Models\StorageOptionPart;
 use Illuminate\Database\ConnectionInterface;

@@ -4,7 +4,7 @@ declare(strict_types = 1);
 
 namespace App\Actions\Family;
 
-use App\DataTransferObjects\Family\SetRebrickableTokenData;
+use App\DataTransferObjects\Input\Family\SetRebrickableTokenData;
 use App\Exceptions\NotFamilyHeadException;
 use App\Models\Family;
 use App\Models\User;

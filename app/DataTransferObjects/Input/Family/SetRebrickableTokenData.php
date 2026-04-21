@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace App\DataTransferObjects\Family;
+namespace App\DataTransferObjects\Input\Family;
 
 final readonly class SetRebrickableTokenData
 {

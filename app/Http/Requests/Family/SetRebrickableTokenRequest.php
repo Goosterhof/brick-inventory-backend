@@ -4,7 +4,7 @@ declare(strict_types = 1);
 
 namespace App\Http\Requests\Family;
 
-use App\DataTransferObjects\Family\SetRebrickableTokenData;
+use App\DataTransferObjects\Input\Family\SetRebrickableTokenData;
 use Illuminate\Foundation\Http\FormRequest;
 
 final class SetRebrickableTokenRequest extends FormRequest

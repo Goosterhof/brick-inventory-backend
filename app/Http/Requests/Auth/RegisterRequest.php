@@ -4,7 +4,7 @@ declare(strict_types = 1);
 
 namespace App\Http\Requests\Auth;
 
-use App\DataTransferObjects\Auth\RegisterUserData;
+use App\DataTransferObjects\Input\Auth\RegisterUserData;
 use Illuminate\Foundation\Http\FormRequest;
 
 final class RegisterRequest extends FormRequest

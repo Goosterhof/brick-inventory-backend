@@ -4,7 +4,7 @@ declare(strict_types = 1);
 
 namespace App\Http\Requests\BrickIdentification;
 
-use App\DataTransferObjects\BrickIdentification\IdentifyBrickData;
+use App\DataTransferObjects\Input\BrickIdentification\IdentifyBrickData;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\UploadedFile;
 

@@ -8,7 +8,7 @@ use App\Actions\Sync\UpsertPartAction;
 use App\Contracts\BrickIdentificationServiceInterface;
 use App\Data\Brickognize\BrickognizePredictionData;
 use App\Data\Lego\LegoPartData;
-use App\DataTransferObjects\BrickIdentification\IdentifyBrickData;
+use App\DataTransferObjects\Input\BrickIdentification\IdentifyBrickData;
 use App\Exceptions\BrickognizeApiException;
 use App\Models\Part;
 

@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace App\DataTransferObjects\Auth;
+namespace App\DataTransferObjects\Input\Auth;
 
 final readonly class RegisterUserData
 {
