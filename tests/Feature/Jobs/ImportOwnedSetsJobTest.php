@@ -9,6 +9,8 @@ use App\Jobs\ImportOwnedSetsJob;
 use App\Models\Family;
 use App\Models\ImportJob;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Queue\Attributes\FailOnTimeout;
+use Illuminate\Queue\Attributes\Timeout;
 use Illuminate\Support\Facades\Log;
 
 covers(ImportOwnedSetsJob::class);
@@ -180,6 +182,31 @@ describe('ImportOwnedSetsJob', function(): void {
 
         // assert - no import job was created or modified
         expect(ImportJob::query()->where('id', 999_999)->exists())->toBeFalse();
+    });
+
+    it('should declare a 600 second timeout via the Timeout attribute', function(): void {
+        // arrange
+        $reflection = new \ReflectionClass(ImportOwnedSetsJob::class);
+
+        // act
+        $timeoutAttributes = $reflection->getAttributes(Timeout::class);
+
+        // assert
+        expect($timeoutAttributes)->toHaveCount(1);
+
+        $timeout = $timeoutAttributes[0]->newInstance();
+        expect($timeout->timeout)->toBe(600);
+    });
+
+    it('should declare FailOnTimeout so the failed() hook fires when the worker kills the import', function(): void {
+        // arrange
+        $reflection = new \ReflectionClass(ImportOwnedSetsJob::class);
+
+        // act
+        $failOnTimeoutAttributes = $reflection->getAttributes(FailOnTimeout::class);
+
+        // assert
+        expect($failOnTimeoutAttributes)->toHaveCount(1);
     });
 
     it('should set status to in_progress before executing import', function(): void {
