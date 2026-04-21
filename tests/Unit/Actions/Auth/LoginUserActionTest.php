@@ -3,7 +3,7 @@
 declare(strict_types = 1);
 
 use App\Actions\Auth\LoginUserAction;
-use App\DataTransferObjects\Auth\LoginUserData;
+use App\DataTransferObjects\Input\Auth\LoginUserData;
 use App\Models\User;
 use Illuminate\Contracts\Hashing\Hasher;
 use Illuminate\Database\Eloquent\Builder;

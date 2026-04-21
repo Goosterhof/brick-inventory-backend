@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace App\DataTransferObjects\FamilySet;
+namespace App\DataTransferObjects\Input\FamilySet;
 
 use App\Enums\FamilySetStatus;
 use DateTimeInterface;

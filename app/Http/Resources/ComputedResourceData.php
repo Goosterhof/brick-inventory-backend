@@ -4,7 +4,6 @@ declare(strict_types = 1);
 
 namespace App\Http\Resources;
 
-use App\Contracts\ResourceDataSourceInterface;
 use App\Contracts\ResourceResponseInterface;
 use BackedEnum;
 use DateTimeInterface;
@@ -13,19 +12,23 @@ use Illuminate\Http\JsonResponse;
 use function is_array;
 
 /**
- * Base class for API responses sourced from computed/aggregated Data DTOs.
+ * Base class for API responses sourced from Result DTOs (Action return values).
  * Sibling to ResourceData (which handles Model-sourced responses).
  *
- * @template TSource of ResourceDataSourceInterface
+ * Subclasses declare their own narrowed `from()` signature targeting the specific
+ * Result DTO they shape — LSP-compatible covariant parameters are fine here because
+ * each subclass is final and owns its serialisation contract.
+ *
+ * @template TSource of object
  */
 abstract readonly class ComputedResourceData implements ResourceResponseInterface
 {
     /**
-     * Create an instance from a data source DTO.
+     * Create an instance from a Result DTO.
      *
-     * @param TSource $resourceDataSource
+     * @param TSource $resultData
      */
-    abstract public static function from(ResourceDataSourceInterface $resourceDataSource): static;
+    abstract public static function from(object $resultData): static;
 
     // Serialization duplicated from ResourceData — extract into shared mechanism if a third variant emerges
 

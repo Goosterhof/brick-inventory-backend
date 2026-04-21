@@ -3,7 +3,7 @@
 declare(strict_types = 1);
 
 use App\Actions\Auth\CreateUserWithFamilyAction;
-use App\DataTransferObjects\Auth\RegisterUserData;
+use App\DataTransferObjects\Input\Auth\RegisterUserData;
 use App\Exceptions\InvalidInviteCodeException;
 use App\Models\Family;
 use App\Models\InviteCode;

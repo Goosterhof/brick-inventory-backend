@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace App\DataTransferObjects\StorageOption;
+namespace App\DataTransferObjects\Input\StorageOption;
 
 final readonly class StorageOptionData
 {

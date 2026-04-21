@@ -4,7 +4,7 @@ declare(strict_types = 1);
 
 namespace App\Http\Requests\StorageOption;
 
-use App\DataTransferObjects\StorageOption\AssignPartToStorageData;
+use App\DataTransferObjects\Input\StorageOption\AssignPartToStorageData;
 use Illuminate\Foundation\Http\FormRequest;
 
 final class AssignPartRequest extends FormRequest

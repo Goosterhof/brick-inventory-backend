@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-namespace App\DataTransferObjects\BrickIdentification;
+namespace App\DataTransferObjects\Input\BrickIdentification;
 
 use Illuminate\Http\UploadedFile;
 

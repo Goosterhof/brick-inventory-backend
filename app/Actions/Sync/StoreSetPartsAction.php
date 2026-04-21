@@ -4,7 +4,7 @@ declare(strict_types = 1);
 
 namespace App\Actions\Sync;
 
-use App\Data\Lego\LegoSetPartData;
+use App\DataTransferObjects\Input\Lego\LegoSetPartData;
 use App\Models\Set;
 use App\Models\SetPart;
 use Illuminate\Database\ConnectionInterface;

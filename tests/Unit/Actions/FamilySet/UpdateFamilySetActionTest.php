@@ -3,7 +3,7 @@
 declare(strict_types = 1);
 
 use App\Actions\FamilySet\UpdateFamilySetAction;
-use App\DataTransferObjects\FamilySet\UpdateFamilySetData;
+use App\DataTransferObjects\Input\FamilySet\UpdateFamilySetData;
 use App\Enums\FamilySetStatus;
 use App\Models\FamilySet;
 use Carbon\CarbonImmutable;

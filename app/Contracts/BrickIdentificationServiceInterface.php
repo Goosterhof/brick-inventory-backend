@@ -4,7 +4,7 @@ declare(strict_types = 1);
 
 namespace App\Contracts;
 
-use App\Data\Brickognize\BrickognizePredictionData;
+use App\DataTransferObjects\Input\Brickognize\BrickognizePredictionData;
 use App\Exceptions\BrickognizeApiException;
 use App\Exceptions\InvalidApiResponseException;
 use Illuminate\Http\UploadedFile;

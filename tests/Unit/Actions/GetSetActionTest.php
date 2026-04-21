@@ -5,7 +5,7 @@ declare(strict_types = 1);
 use App\Actions\GetSetAction;
 use App\Actions\Sync\UpsertSetAction;
 use App\Contracts\LegoDataServiceInterface;
-use App\Data\Lego\LegoSetData;
+use App\DataTransferObjects\Input\Lego\LegoSetData;
 use App\Models\Set;
 use Illuminate\Database\Eloquent\Builder;
 

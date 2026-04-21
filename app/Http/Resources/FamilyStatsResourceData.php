@@ -4,8 +4,7 @@ declare(strict_types = 1);
 
 namespace App\Http\Resources;
 
-use App\Contracts\ResourceDataSourceInterface;
-use App\Data\FamilyStatsData;
+use App\DataTransferObjects\Result\Family\FamilyStatsData;
 
 /**
  * @extends ComputedResourceData<FamilyStatsData>
@@ -25,17 +24,17 @@ final readonly class FamilyStatsResourceData extends ComputedResourceData
     ) {}
 
     /**
-     * @param FamilyStatsData $resourceDataSource
+     * @param FamilyStatsData $resultData
      */
-    public static function from(ResourceDataSourceInterface $resourceDataSource): static
+    public static function from(object $resultData): static
     {
         return new self(
-            total_sets: $resourceDataSource->totalSets,
-            total_set_quantity: $resourceDataSource->totalSetQuantity,
-            sets_by_status: $resourceDataSource->setsByStatus,
-            total_storage_locations: $resourceDataSource->totalStorageLocations,
-            total_unique_parts: $resourceDataSource->totalUniqueParts,
-            total_parts_quantity: $resourceDataSource->totalPartsQuantity,
+            total_sets: $resultData->totalSets,
+            total_set_quantity: $resultData->totalSetQuantity,
+            sets_by_status: $resultData->setsByStatus,
+            total_storage_locations: $resultData->totalStorageLocations,
+            total_unique_parts: $resultData->totalUniqueParts,
+            total_parts_quantity: $resultData->totalPartsQuantity,
         );
     }
 }

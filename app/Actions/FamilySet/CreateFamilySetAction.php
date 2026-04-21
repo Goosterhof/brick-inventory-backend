@@ -5,8 +5,8 @@ declare(strict_types = 1);
 namespace App\Actions\FamilySet;
 
 use App\Actions\GetSetAction;
-use App\DataTransferObjects\FamilySet\CreateFamilySetData;
-use App\DataTransferObjects\FamilySet\UpdateFamilySetData;
+use App\DataTransferObjects\Input\FamilySet\CreateFamilySetData;
+use App\DataTransferObjects\Input\FamilySet\UpdateFamilySetData;
 use App\Models\Family;
 use App\Models\FamilySet;
 use Illuminate\Database\ConnectionInterface;

@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-use App\Data\Brickognize\BrickognizePredictionData;
+use App\DataTransferObjects\Input\Brickognize\BrickognizePredictionData;
 use App\Services\BrickognizeService;
 use Illuminate\Http\Client\Factory as HttpFactory;
 use Illuminate\Http\UploadedFile;

@@ -2,7 +2,6 @@
 
 declare(strict_types = 1);
 
-use App\Contracts\ResourceDataSourceInterface;
 use App\Contracts\ResourceResponseInterface;
 use App\Enums\FamilySetStatus;
 use App\Http\Resources\ComputedResourceData;
@@ -10,9 +9,11 @@ use Illuminate\Http\JsonResponse;
 
 covers(ComputedResourceData::class);
 
-// Concrete test doubles for the abstract ComputedResourceData base class
+// Concrete test doubles for the abstract ComputedResourceData base class.
+// Source DTOs are plain objects — the marker interface retired with the
+// Input/Result migration; the base's `from(object)` signature is the contract.
 
-final readonly class TestSourceData implements ResourceDataSourceInterface
+final readonly class TestSourceData
 {
     public function __construct(
         public string $name,
@@ -31,18 +32,18 @@ final readonly class TestComputedResourceData extends ComputedResourceData
     ) {}
 
     /**
-     * @param \TestSourceData $resourceDataSource
+     * @param \TestSourceData $resultData
      */
-    public static function from(ResourceDataSourceInterface $resourceDataSource): static
+    public static function from(object $resultData): static
     {
         return new self(
-            name: $resourceDataSource->name,
-            count: $resourceDataSource->count,
+            name: $resultData->name,
+            count: $resultData->count,
         );
     }
 }
 
-final readonly class TestEnumSourceData implements ResourceDataSourceInterface
+final readonly class TestEnumSourceData
 {
     public function __construct(
         public FamilySetStatus $status,
@@ -59,15 +60,15 @@ final readonly class TestComputedEnumResourceData extends ComputedResourceData
     ) {}
 
     /**
-     * @param \TestEnumSourceData $resourceDataSource
+     * @param \TestEnumSourceData $resultData
      */
-    public static function from(ResourceDataSourceInterface $resourceDataSource): static
+    public static function from(object $resultData): static
     {
-        return new self(status: $resourceDataSource->status);
+        return new self(status: $resultData->status);
     }
 }
 
-final readonly class TestDateSourceData implements ResourceDataSourceInterface
+final readonly class TestDateSourceData
 {
     public function __construct(
         public \DateTimeInterface $created_at,
@@ -84,15 +85,15 @@ final readonly class TestComputedDateResourceData extends ComputedResourceData
     ) {}
 
     /**
-     * @param \TestDateSourceData $resourceDataSource
+     * @param \TestDateSourceData $resultData
      */
-    public static function from(ResourceDataSourceInterface $resourceDataSource): static
+    public static function from(object $resultData): static
     {
-        return new self(created_at: $resourceDataSource->created_at);
+        return new self(created_at: $resultData->created_at);
     }
 }
 
-final readonly class TestArraySourceData implements ResourceDataSourceInterface
+final readonly class TestArraySourceData
 {
     /**
      * @param array<int, FamilySetStatus> $statuses
@@ -115,15 +116,15 @@ final readonly class TestComputedArrayResourceData extends ComputedResourceData
     ) {}
 
     /**
-     * @param \TestArraySourceData $resourceDataSource
+     * @param \TestArraySourceData $resultData
      */
-    public static function from(ResourceDataSourceInterface $resourceDataSource): static
+    public static function from(object $resultData): static
     {
-        return new self(statuses: $resourceDataSource->statuses);
+        return new self(statuses: $resultData->statuses);
     }
 }
 
-final readonly class TestNullableSourceData implements ResourceDataSourceInterface
+final readonly class TestNullableSourceData
 {
     public function __construct(
         public ?string $optional,
@@ -140,15 +141,15 @@ final readonly class TestComputedNullableResourceData extends ComputedResourceDa
     ) {}
 
     /**
-     * @param \TestNullableSourceData $resourceDataSource
+     * @param \TestNullableSourceData $resultData
      */
-    public static function from(ResourceDataSourceInterface $resourceDataSource): static
+    public static function from(object $resultData): static
     {
-        return new self(optional: $resourceDataSource->optional);
+        return new self(optional: $resultData->optional);
     }
 }
 
-final readonly class TestNestedSourceData implements ResourceDataSourceInterface
+final readonly class TestNestedSourceData
 {
     public function __construct(
         public int $id,
@@ -168,17 +169,17 @@ final readonly class TestComputedNestedResourceData extends ComputedResourceData
     ) {}
 
     /**
-     * @param \TestNestedSourceData $resourceDataSource
+     * @param \TestNestedSourceData $resultData
      */
-    public static function from(ResourceDataSourceInterface $resourceDataSource): static
+    public static function from(object $resultData): static
     {
         $child = new \TestComputedResourceData(
-            name: $resourceDataSource->childName,
-            count: $resourceDataSource->childCount,
+            name: $resultData->childName,
+            count: $resultData->childCount,
         );
 
         return new self(
-            id: $resourceDataSource->id,
+            id: $resultData->id,
             child: $child,
         );
     }
@@ -186,7 +187,7 @@ final readonly class TestComputedNestedResourceData extends ComputedResourceData
 
 describe('ComputedResourceData', function(): void {
     describe('from()', function(): void {
-        it('should create an instance from a ResourceDataSource', function(): void {
+        it('should create an instance from a Result DTO object', function(): void {
             // arrange
             $source = new \TestSourceData(name: 'Test', count: 42);
 

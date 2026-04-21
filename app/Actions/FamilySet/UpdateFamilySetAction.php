@@ -4,7 +4,7 @@ declare(strict_types = 1);
 
 namespace App\Actions\FamilySet;
 
-use App\DataTransferObjects\FamilySet\UpdateFamilySetData;
+use App\DataTransferObjects\Input\FamilySet\UpdateFamilySetData;
 use App\Models\FamilySet;
 use DateTimeInterface;
 use Illuminate\Database\ConnectionInterface;

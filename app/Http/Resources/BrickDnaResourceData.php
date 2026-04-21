@@ -4,8 +4,7 @@ declare(strict_types = 1);
 
 namespace App\Http\Resources;
 
-use App\Contracts\ResourceDataSourceInterface;
-use App\Data\BrickDnaData;
+use App\DataTransferObjects\Result\Family\BrickDnaData;
 
 /**
  * @extends ComputedResourceData<BrickDnaData>
@@ -27,17 +26,17 @@ final readonly class BrickDnaResourceData extends ComputedResourceData
     ) {}
 
     /**
-     * @param BrickDnaData $resourceDataSource
+     * @param BrickDnaData $resultData
      */
-    public static function from(ResourceDataSourceInterface $resourceDataSource): static
+    public static function from(object $resultData): static
     {
         return new self(
-            top_colors: $resourceDataSource->topColors,
-            top_part_types: $resourceDataSource->topPartTypes,
-            rarest_parts: $resourceDataSource->rarestParts,
-            diversity_score: $resourceDataSource->diversityScore,
-            total_unique_parts: $resourceDataSource->totalUniqueParts,
-            total_parts_quantity: $resourceDataSource->totalPartsQuantity,
+            top_colors: $resultData->topColors,
+            top_part_types: $resultData->topPartTypes,
+            rarest_parts: $resultData->rarestParts,
+            diversity_score: $resultData->diversityScore,
+            total_unique_parts: $resultData->totalUniqueParts,
+            total_parts_quantity: $resultData->totalPartsQuantity,
         );
     }
 }

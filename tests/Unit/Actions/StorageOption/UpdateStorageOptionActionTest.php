@@ -3,7 +3,7 @@
 declare(strict_types = 1);
 
 use App\Actions\StorageOption\UpdateStorageOptionAction;
-use App\DataTransferObjects\StorageOption\StorageOptionData;
+use App\DataTransferObjects\Input\StorageOption\StorageOptionData;
 use App\Models\StorageOption;
 use Illuminate\Database\ConnectionInterface;
 

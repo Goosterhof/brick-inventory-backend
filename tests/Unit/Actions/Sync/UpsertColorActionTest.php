@@ -3,7 +3,7 @@
 declare(strict_types = 1);
 
 use App\Actions\Sync\UpsertColorAction;
-use App\Data\Lego\LegoColorData;
+use App\DataTransferObjects\Input\Lego\LegoColorData;
 use App\Models\Color;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\Eloquent\Builder;

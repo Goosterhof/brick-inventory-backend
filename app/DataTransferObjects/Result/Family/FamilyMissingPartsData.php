@@ -2,11 +2,9 @@
 
 declare(strict_types = 1);
 
-namespace App\Data;
+namespace App\DataTransferObjects\Result\Family;
 
-use App\Contracts\ResourceDataSourceInterface;
-
-final readonly class FamilyMissingPartsData implements ResourceDataSourceInterface
+final readonly class FamilyMissingPartsData
 {
     /**
      * @param list<array{

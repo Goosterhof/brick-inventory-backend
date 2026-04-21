@@ -2,7 +2,7 @@
 
 declare(strict_types = 1);
 
-use App\Data\FamilyStatsData;
+use App\DataTransferObjects\Result\Family\FamilyStatsData;
 use App\Http\Resources\FamilyStatsResourceData;
 
 covers(FamilyStatsResourceData::class);

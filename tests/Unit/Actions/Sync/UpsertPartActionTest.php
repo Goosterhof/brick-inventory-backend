@@ -3,7 +3,7 @@
 declare(strict_types = 1);
 
 use App\Actions\Sync\UpsertPartAction;
-use App\Data\Lego\LegoPartData;
+use App\DataTransferObjects\Input\Lego\LegoPartData;
 use App\Models\Part;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\Eloquent\Builder;

@@ -2,9 +2,9 @@
 
 declare(strict_types = 1);
 
-use App\Data\Lego\LegoSetData;
-use App\Data\Lego\LegoSetPartData;
-use App\Data\Lego\RebrickableUserSetData;
+use App\DataTransferObjects\Input\Lego\LegoSetData;
+use App\DataTransferObjects\Input\Lego\LegoSetPartData;
+use App\DataTransferObjects\Input\Lego\RebrickableUserSetData;
 use App\Services\RebrickableService;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
 use Illuminate\Http\Client\Factory as HttpFactory;

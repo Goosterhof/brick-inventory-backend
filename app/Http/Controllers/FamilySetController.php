@@ -44,12 +44,9 @@ class FamilySetController extends Controller
         User $user,
         GetFamilySetCompletionAction $getFamilySetCompletionAction,
     ): array {
-        $completionData = $getFamilySetCompletionAction->execute($user->family);
+        $familySetCompletionsResultData = $getFamilySetCompletionAction->execute($user->family);
 
-        return array_map(
-            FamilySetCompletionResourceData::from(...),
-            $completionData,
-        );
+        return FamilySetCompletionResourceData::fromResult($familySetCompletionsResultData);
     }
 
     public function missingParts(
