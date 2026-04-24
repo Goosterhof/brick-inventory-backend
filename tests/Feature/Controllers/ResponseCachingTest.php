@@ -57,7 +57,7 @@ describe('Response Caching', function(): void {
 
             $response->assertStatus(200);
             $response->assertHeader('ETag');
-            $response->assertHeader('Cache-Control', 'max-age=3600, public');
+            $response->assertHeader('Cache-Control', 'max-age=3600, private');
         });
 
         it('should return 304 when If-None-Match matches on set parts endpoint', function(): void {
@@ -130,7 +130,7 @@ describe('Response Caching', function(): void {
 
             $response->assertStatus(200);
             $response->assertHeader('ETag');
-            $response->assertHeader('Cache-Control', 'max-age=3600, public');
+            $response->assertHeader('Cache-Control', 'max-age=3600, private');
         });
     });
 
