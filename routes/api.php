@@ -105,6 +105,10 @@ Route::middleware(['auth:sanctum', 'family.ownership'])->group(function(): void 
     Route::get('/family/parts', [FamilyController::class, 'parts'])
         ->middleware(['etag', 'cache.headers:private;max_age=60'])
         ->can('viewParts', Family::class);
+    Route::get('/family/parts/{partNum}/{colorId}/usage', [FamilyController::class, 'partUsage'])
+        ->where('colorId', '\d+')
+        ->middleware(['etag', 'cache.headers:private;max_age=60'])
+        ->can('viewParts', Family::class);
     Route::get('/family/stats', [FamilyController::class, 'stats'])
         ->middleware(['etag', 'cache.headers:private;max_age=60'])
         ->can('viewStats', Family::class);
