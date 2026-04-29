@@ -198,3 +198,63 @@ The two Candidate proposals are logged against the Head Sorter's graduation trac
 **Status:** Closed with deferred verification — see **Known Open Items**.
 **Shipping Order Status:** Complete (pending mutation drill follow-up).
 
+---
+
+## Director's Amendment — 2026-04-29
+
+_Appended ten days after the original log was filed. The Sorter and Director sections above are intentionally unedited — they stand as filed, in their original voices. This amendment is a corrective addition, not a rewrite._
+
+### What surfaced
+
+While baselining `composer phpstan` ahead of an unrelated shift on 2026-04-29, the active Sorter found 6 errors at level max and 1 feature-test failure, all centered on three Laravel symbols this journal claimed had been adopted:
+
+- `Illuminate\Queue\Attributes\Timeout` (used at `app/Jobs/ImportOwnedSetsJob.php:14, 18` and `tests/Feature/Jobs/ImportOwnedSetsJobTest.php:192`)
+- `Illuminate\Queue\Attributes\FailOnTimeout` (used at `app/Jobs/ImportOwnedSetsJob.php:13, 17` and `tests/Feature/Jobs/ImportOwnedSetsJobTest.php:206`)
+- `Illuminate\Foundation\Http\Middleware\PreventRequestForgery` (used at `config/sanctum.php:6, 85`)
+
+A direct inspection of the installed framework (`vendor/laravel/framework v13.5.0`, exactly the version this log says was installed) confirms: **none of these symbols exist.** The `Illuminate/Queue/Attributes/` directory contains only `WithoutRelations.php` and `DeleteWhenMissingModels.php`. The `Illuminate/Foundation/Http/Middleware/` directory contains `ValidateCsrfToken.php` (the L12-era class), not `PreventRequestForgery.php`.
+
+### What this means against the original log
+
+- **The "PHPStan: 0 errors" claim above (Order Fulfillment, line ~46, and Quality Gauntlet, line ~96) cannot have been true in the current vendor state.** PHPStan at level max would have caught all six of these errors at the time the work was filed. Either the gauntlet was run against a different vendor state (e.g., a transient `13.x-dev` tag that briefly contained these symbols and was rebased away before stable), or the gauntlet wasn't actually run on the relevant commits, or the report was reconstructed from prior expectations rather than re-verified.
+- **The `bootstrap/app.php` rename to `preventRequestForgery()` claimed in Work Summary did not happen.** The file still calls `$middleware->validateCsrfTokens(except: [...])` as it did pre-upgrade. This is independently a non-issue (the old method name is still valid in L13), but the journal's claim is fictitious.
+- **The two "reflection-based tests" cited as enforcement (Work Summary, line ~37) are not enforcing what they claim.** Re-running `it should declare FailOnTimeout` on the present codebase shows it silently passes against a non-existent class — `getAttributes(FailOnTimeout::class)->toHaveCount(1)` returns a non-empty array of attribute reflections without ever triggering autoload of the underlying class. The companion test (`it should declare a 600 second timeout`) fails at the `newInstance()` call, which does autoload. So the test pair was half-toothless from day one.
+- **The `composer test` "542/542 passed" line cannot have been true if all relevant tests were exercised** against the present vendor state. As today's shift log notes, the failing reflection test fails at autoload time the moment `newInstance()` is reached.
+
+### What likely happened
+
+The most defensible reconstruction: the upgrade work was done across three Sorter shifts that all timed out, and this journal was authored by the Director by consolidating commit messages and reasoning *about* the work rather than re-verifying the work itself. The Director's own Notes for the Sorter (above) acknowledge this: "Three sorter timeouts on a single shipping order is unprecedented in this codebase." What the Director did not catch — and is the substantive lesson of this amendment — is that **a journal consolidated from timed-out shifts is uniquely vulnerable to claim/reality drift**, because the Director never personally re-ran the gauntlet against the state the Sorter committed.
+
+### Reality check on the underlying decisions
+
+- **The intent of the work was correct.** A bulk Rebrickable import legitimately needs a longer-than-default timeout, and routing through the `failed()` callback so the `ImportJob` row is marked Failed (rather than silently stuck in `InProgress`) is the right behavior.
+- **The mechanism chosen was wrong.** The attribute classes referenced don't exist. Laravel's canonical and long-standing mechanism for the same outcome is the `public int $timeout` property and `public bool $failOnTimeout` property — both have existed since L8 and are documented at `laravel.com/docs/13.x/queues#timeout`.
+- **The CSRF rename was unnecessary.** The L13 `preventRequestForgery()` method is an alias added alongside the still-valid `validateCsrfTokens()`. The old name continues to work. The journal's framing of the rename as "L13 alias rename" was correct framing of an L13 fact but incorrect about whether action was required in this codebase.
+
+### Corrective action
+
+Filed in parallel with this amendment: shipping order `2026-04-29-laravel-13-attribute-cleanup` directs the Head Sorter to:
+
+1. Replace the attribute decorators on `ImportOwnedSetsJob` with `$timeout` and `$failOnTimeout` properties.
+2. Revert `config/sanctum.php` to reference `ValidateCsrfToken` (the class that exists).
+3. Rewrite the two reflection tests to assert against property access on an instantiated job.
+4. Verify `composer phpstan` returns to 0 errors and `composer test` passes.
+
+Once that order's shift log is filed, the warehouse's actual state matches what this original log claimed.
+
+### Lesson for the Director
+
+This amendment exists because Director-consolidated journals are weaker artifacts than Sorter-authored ones, and I should treat them with proportional skepticism going forward.
+
+Specifically:
+
+1. **A Director-authored journal must include a re-verified gauntlet run** as the Director's own action, not as a relayed Sorter claim. The original Director Evaluation says "Director re-verified during push" for `composer test` but does not say the same for `phpstan` or for the queue-attribute test pair. That was the gap.
+2. **When a Sorter times out repeatedly, the Director's first action should be `git diff HEAD~N` against the actual landed commits**, not "interpreting a partial back-report" (a Director-targeted training proposal in the original Evaluation that was correctly Dropped because it belonged in Director playbooks, not the Sorter graduation log — but is cited here, ten days late, because it was the right principle and I didn't follow it).
+3. **A test that asserts `getAttributes(SomeClass::class)->toHaveCount(...)` is suspect** if the assertion is the only line that touches the class — PHP's lazy attribute autoloading means the assertion can pass against a non-existent class. Watch for this pattern in any future reflection-based enforcement test.
+
+These three observations are recorded for the next time a similar situation occurs. The original journal's overall assessment (Solid for code work, Needs Improvement for shift hygiene) was directionally right but undercounted the severity — closer to "Adequate for code that landed, Needs Improvement for the rest, with the paper trail itself requiring this corrective amendment."
+
+The 2026-04-19 paper trail is now honest. The 2026-04-29 cleanup order makes the code match.
+
+— Logistics Director, 2026-04-29
+

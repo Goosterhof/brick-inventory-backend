@@ -117,7 +117,7 @@
             "captainhook/hook-installer": false
         },
         "platform": {
-            "php": "8.4"
+            "php": "8.5"
         }
     },
     "minimum-stability": "stable",

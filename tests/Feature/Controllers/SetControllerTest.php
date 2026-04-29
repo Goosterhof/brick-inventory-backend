@@ -7,6 +7,8 @@ use App\Models\Color;
 use App\Models\Part;
 use App\Models\Set;
 use App\Models\SetPart;
+use App\Models\StorageOption;
+use App\Models\StorageOptionPart;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
@@ -237,7 +239,7 @@ describe('SetController', function(): void {
             $response->assertStatus(401);
         });
 
-        it('should return storage map for a cached set', function(): void {
+        it('should return storage map wrapped in entries envelope', function(): void {
             $user = User::factory()->create();
 
             $set = Set::factory()->create([
@@ -274,7 +276,72 @@ describe('SetController', function(): void {
 
             $response = $this->actingAs($user)->getJson('/api/sets/75192-1/storage-map');
 
-            $response->assertStatus(200);
+            $response->assertStatus(200)
+                ->assertExactJson(['entries' => []]);
+        });
+
+        it('should return storage map entries when family has matching storage rows', function(): void {
+            $user = User::factory()->create();
+
+            $set = Set::factory()->create([
+                'set_num' => '75192-1',
+                'name' => 'Millennium Falcon',
+                'year' => 2_017,
+                'theme' => 'Star Wars',
+                'num_parts' => 7_541,
+                'image_url' => 'https://example.com/falcon.jpg',
+            ]);
+
+            $color = Color::factory()->create([
+                'rebrickable_id' => 1,
+                'name' => 'White',
+                'rgb' => 'FFFFFF',
+                'is_transparent' => false,
+            ]);
+
+            $part = Part::factory()->create([
+                'part_num' => '3001',
+                'name' => 'Brick 2 x 4',
+                'category' => '11',
+                'image_url' => 'https://example.com/3001.jpg',
+            ]);
+
+            $setPart = new SetPart;
+            $setPart->set_id = $set->id;
+            $setPart->part_id = $part->id;
+            $setPart->color_id = $color->id;
+            $setPart->quantity = 10;
+            $setPart->is_spare = false;
+            $setPart->element_id = '300101';
+            $setPart->save();
+
+            $storageOption = new StorageOption;
+            $storageOption->family_id = $user->family_id;
+            $storageOption->name = 'Drawer A';
+            $storageOption->parent_id = null;
+            $storageOption->save();
+
+            $storageOptionPart = new StorageOptionPart;
+            $storageOptionPart->storage_option_id = $storageOption->id;
+            $storageOptionPart->part_id = $part->id;
+            $storageOptionPart->color_id = $color->id;
+            $storageOptionPart->quantity = 4;
+            $storageOptionPart->save();
+
+            $response = $this->actingAs($user)->getJson('/api/sets/75192-1/storage-map');
+
+            $response->assertStatus(200)
+                ->assertExactJson([
+                    'entries' => [
+                        [
+                            'part_id' => $part->id,
+                            'color_id' => $color->id,
+                            'storage_option_id' => $storageOption->id,
+                            'storage_option_name' => 'Drawer A',
+                            'quantity' => 4,
+                        ],
+                    ],
+                ]);
         });
     });
 

@@ -7,6 +7,7 @@ namespace App\Http\Controllers;
 use App\Actions\GetSetByEanAction;
 use App\Actions\GetSetPartsAction;
 use App\Actions\GetSetStorageMapAction;
+use App\Http\Resources\SetStorageMapResourceData;
 use App\Http\Resources\SetSummaryResourceData;
 use App\Http\Resources\SetWithPartsResourceData;
 use App\Models\User;
@@ -37,7 +38,8 @@ class SetController extends Controller
         User $user,
     ): JsonResponse {
         $set = $getSetPartsAction->execute($setNum);
+        $setStorageMapData = $getSetStorageMapAction->execute($set, $user->family);
 
-        return new JsonResponse($getSetStorageMapAction->execute($set, $user->family));
+        return SetStorageMapResourceData::from($setStorageMapData)->toResponse();
     }
 }
