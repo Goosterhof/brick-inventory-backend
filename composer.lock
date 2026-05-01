@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "412e9ad61ef3d6e36229591f56da8683",
+    "content-hash": "79add1e6bd4d0aadc8d007ed6e44d38c",
     "packages": [
         {
             "name": "brick/math",
@@ -9396,6 +9396,66 @@
                 }
             ],
             "time": "2026-04-16T13:07:34+00:00"
+        },
+        {
+            "name": "script-development/phpstan-warroom-rules",
+            "version": "v0.1.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/script-development/phpstan-warroom-rules.git",
+                "reference": "a8c084c8589b1d90b996c596b13b58aefa191771"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/script-development/phpstan-warroom-rules/zipball/a8c084c8589b1d90b996c596b13b58aefa191771",
+                "reference": "a8c084c8589b1d90b996c596b13b58aefa191771",
+                "shasum": ""
+            },
+            "require": {
+                "illuminate/cache": "^11.0 || ^12.0 || ^13.0",
+                "illuminate/contracts": "^11.0 || ^12.0 || ^13.0",
+                "illuminate/database": "^11.0 || ^12.0 || ^13.0",
+                "illuminate/filesystem": "^11.0 || ^12.0 || ^13.0",
+                "illuminate/log": "^11.0 || ^12.0 || ^13.0",
+                "illuminate/mail": "^11.0 || ^12.0 || ^13.0",
+                "nikic/php-parser": "^5.0",
+                "php": "^8.3",
+                "phpstan/phpstan": "^2.0",
+                "psr/log": "^3.0"
+            },
+            "require-dev": {
+                "laravel/pint": "^1.18",
+                "phpunit/phpunit": "^11.0"
+            },
+            "type": "phpstan-extension",
+            "extra": {
+                "phpstan": {
+                    "includes": [
+                        "extension.neon"
+                    ]
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "ScriptDevelopment\\PhpstanWarroomRules\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "description": "Canonical PHPStan rules enforcing war-room doctrine across script-development Laravel territories.",
+            "keywords": [
+                "PHPStan",
+                "laravel",
+                "phpstan-extension",
+                "static-analysis"
+            ],
+            "support": {
+                "issues": "https://github.com/script-development/phpstan-warroom-rules/issues",
+                "source": "https://github.com/script-development/phpstan-warroom-rules/tree/v0.1.1"
+            },
+            "time": "2026-04-29T11:25:14+00:00"
         },
         {
             "name": "sebastian/cli-parser",
