@@ -2,13 +2,8 @@ includes:
     - vendor/larastan/larastan/extension.neon
     - vendor/phpstan/phpstan-strict-rules/rules.neon
     - vendor/phpstan/phpstan-deprecation-rules/rules.neon
+    - vendor/script-development/phpstan-warroom-rules/extension.neon
     - phar://phpstan.phar/conf/bleedingEdge.neon
-
-services:
-    -
-        class: App\PHPStan\ConnectionTransactionReturnTypeExtension
-        tags:
-            - phpstan.broker.dynamicMethodReturnTypeExtension
 
 parameters:
     level: max
