@@ -87,5 +87,5 @@ The mutation drill (76% threshold) on `EmailInviteCodeAction` is non-negotiable 
 
 ---
 
-**Status:** Open
-**Shift Log:** _(to be filed by Head Sorter)_
+**Status:** Completed
+**Shift Log:** [`.claude/records/journals/2026-05-03-invite-code-by-email.md`](../journals/2026-05-03-invite-code-by-email.md)
