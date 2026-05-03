@@ -137,4 +137,17 @@ return [
 
     'invite_code_ttl_days' => (int) env('INVITE_CODE_TTL_DAYS', 7),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Frontend URL
+    |--------------------------------------------------------------------------
+    |
+    | Base URL of the frontend (Plate). Used by mailables and other server-
+    | rendered links that point at the SPA. Production deployments set
+    | FRONTEND_URL_PRODUCTION; local/dev fall back to FRONTEND_URL.
+    |
+     */
+
+    'frontend_url' => env('FRONTEND_URL_PRODUCTION', env('FRONTEND_URL', 'http://localhost:5173')),
+
 ];

@@ -123,6 +123,9 @@ Route::middleware(['auth:sanctum', 'family.ownership'])->group(function(): void 
     // Invite Codes
     Route::post('/family/invite-code', [InviteCodeController::class, 'store'])
         ->can('generateInviteCode', Family::class);
+    Route::post('/family/invite-code/email', [InviteCodeController::class, 'email'])
+        ->middleware('throttle:invite-email')
+        ->can('generateInviteCode', Family::class);
     Route::get('/family/invite-code', [InviteCodeController::class, 'show'])
         ->middleware(['etag', 'cache.headers:private;max_age=60'])
         ->can('viewInviteCode', Family::class);

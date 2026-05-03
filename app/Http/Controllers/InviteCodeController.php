@@ -4,9 +4,11 @@ declare(strict_types = 1);
 
 namespace App\Http\Controllers;
 
+use App\Actions\Family\EmailInviteCodeAction;
 use App\Actions\Family\GenerateInviteCodeAction;
 use App\Actions\Family\GetActiveInviteCodeAction;
 use App\Actions\Family\RevokeInviteCodeAction;
+use App\Http\Requests\Family\EmailInviteCodeRequest;
 use App\Http\Resources\InviteCodeResourceData;
 use App\Models\User;
 use Illuminate\Container\Attributes\CurrentUser;
@@ -42,5 +44,20 @@ class InviteCodeController extends Controller
         $revokeInviteCodeAction->execute($user->family);
 
         return new JsonResponse(null, 204);
+    }
+
+    public function email(
+        EmailInviteCodeRequest $emailInviteCodeRequest,
+        #[CurrentUser]
+        User $user,
+        EmailInviteCodeAction $emailInviteCodeAction,
+    ): JsonResponse {
+        $inviteCode = $emailInviteCodeAction->execute(
+            $user->family,
+            $user,
+            $emailInviteCodeRequest->toDto(),
+        );
+
+        return InviteCodeResourceData::from($inviteCode)->toResponseWithStatus(202);
     }
 }

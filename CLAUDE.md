@@ -96,6 +96,7 @@ app/
 ├── Contracts/                  # Supplier Agreements — service interfaces
 ├── Exceptions/                 # Incident Reports — typed failure signals
 ├── Enums/                      # Classification Stamps — status enums
+├── Mail/                       # Outbound Notifications — primitive-only Mailables
 ├── Policies/                   # Access Badges — authorization rules
 └── Providers/                  # Wiring Closet — DI bindings
 
@@ -196,6 +197,36 @@ Thin wrappers that move sorting procedures onto the async conveyor belt.
 - Job body: look up records via `$model->newQuery()->findOrFail()`, delegate to Action, update status. No business logic in the Job itself
 - `failed()` callback: static Model queries are acceptable here — this method is called by the queue worker directly, not resolved from the container
 
+### Mail (Outbound Notifications)
+
+Mailables in `app/Mail/` are **App\ leaves**. They render a view and that's it — every other concern lives somewhere else.
+
+- `final` classes extending `Illuminate\Mail\Mailable` and implementing `ShouldQueue` — every email goes through the queue, no synchronous mail
+- Constructor accepts **primitives only** (`string`, `int`, `bool`, `?string`, `?CarbonImmutable`) — no Models, no DTOs, no other `App\` imports. The Action is responsible for unpacking model/DTO data into primitives before constructing the Mailable. This keeps the Mailable simple to test, free of cascading rebuild cost when models change shape, and friendly to the queue serializer (which has to survive marshalling across worker boundaries)
+- Public surface is the Mailable contract only — `__construct`, `envelope`, `content`, `attachments`, `headers`. No facade usage. No Eloquent. `MailArchitectureTest` enforces all of it.
+- Subject lives in `envelope()`. View lives in `content()` as a Markdown view path (`mail.<name>`). View payload is bound via `with: [...]` — pass primitives, no `$this` references in the view
+- From-address comes from `config('mail.from')` (`MAIL_FROM_ADDRESS`/`MAIL_FROM_NAME`) — Mailables do not override
+- The Action sends via the `Illuminate\Contracts\Mail\Mailer` contract: `$this->mailer->to($recipient)->send($mailable)`. `send()` automatically queues when the Mailable implements `ShouldQueue`
+- Deptrac: the `Mail` layer has **no allowed dependencies**; only the `Action` layer may depend on `Mail`
+
+### Queue Worker
+
+The Brick is the writer of email and async-import jobs; a `queue:work` worker is the reader. **Production needs both, period.** A `ShouldQueue` mailable hitting an absent worker is a silent failure, not an error.
+
+- **Production (Railway):** a dedicated `worker` service runs against the same image and env as the web service:
+
+  ```
+  php artisan queue:work --queue=default --tries=3 --backoff=10 --timeout=60 --max-time=3600
+  ```
+
+  `--max-time=3600` recycles the process hourly so memory leaks don't compound. Restart-on-exit is required.
+
+- **Local dev:** orchestrator-side `make queue` runs the same command inside the backend container. Run it in a second terminal alongside `make up`.
+
+- **Tests:** unit/feature tests use `Mail::fake()` / `Bus::fake()`. E2E uses fakes by the same default (the e2e profile does not run a worker process).
+
+- **Verifying alive:** `php artisan queue:monitor default --max=100` (logs warnings if pending count exceeds threshold), or query the `failed_jobs` table for failures. Default driver: `database` (`QUEUE_CONNECTION=database`). No Horizon — added when queue volume justifies it.
+
 ### Security Checkpoints (Middleware)
 
 - `EnsureFamilyOwnership` — verifies the shipment belongs to the requesting tenant
@@ -239,7 +270,7 @@ CaptainHook enforces on every commit (PHP files only): **lint:test → phpstan �
 
 ### Coverage Policy
 
-- **Unit tests (Actions, Services):** 100% — every sorting procedure, every supply line
+- **Unit tests (Actions, Services, Mail):** 100% — every sorting procedure, every supply line, every Mailable
 - **Feature tests (Controllers):** 90% — integration drills cover the main paths
 - **Mutation testing:** 76% minimum — the sabotage drill ensures tests actually catch defects, not just touch lines
 
@@ -248,7 +279,7 @@ CaptainHook enforces on every commit (PHP files only): **lint:test → phpstan �
 Functional rows with strict one-way dependencies. The warehouse aisles do not cross.
 
 ```
-Leaf Layers (no App deps):          Model, InputDTO, Enum, Exception
+Leaf Layers (no App deps):          Model, InputDTO, Enum, Exception, Mail
 Result-DTO Layer:                   ResultDTO → Enum, Model (the only leaf allowed to carry Models)
 Interface Layer:                    Contract → InputDTO, Enum, Exception
 Supply Lines:                       Service → Contract, InputDTO, Exception
@@ -256,7 +287,7 @@ Input Processing:                   FormRequest → InputDTO, Enum, Model
 Output Shaping:                     ResourceData → Model, Enum, ResultDTO, Exception, Contract
 Authorization:                      Policy → Model
 Security:                           Middleware → Model, Contract
-Orchestration:                      Action → Action, Job, Contract, Model, InputDTO, ResultDTO, Enum, Exception
+Orchestration:                      Action → Action, Job, Mail, Contract, Model, InputDTO, ResultDTO, Enum, Exception
 Async Execution:                    Job → Action, Model, Enum
 Entry Point:                        Controller → Action, FormRequest, ResourceData, Model, ResultDTO
 Wiring:                             Provider → Contract, Service, Policy

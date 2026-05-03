@@ -3,9 +3,13 @@
 declare(strict_types = 1);
 
 use App\Http\Controllers\InviteCodeController;
+use App\Mail\InviteCodeMail;
 use App\Models\InviteCode;
 use App\Models\User;
+use App\Providers\AppServiceProvider;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\RateLimiter;
 
 covers(InviteCodeController::class);
 
@@ -181,6 +185,181 @@ describe('InviteCodeController', function(): void {
             $response = $this->deleteJson('/api/family/invite-code');
 
             $response->assertStatus(401);
+        });
+    });
+
+    describe('email', function(): void {
+        it('should accept the request, queue the mailable, and return 202 with the new invite code envelope', function(): void {
+            Mail::fake();
+
+            $headUser = User::factory()->create();
+
+            $response = $this->actingAs($headUser)->postJson('/api/family/invite-code/email', [
+                'recipient_email' => 'kid@example.com',
+                'recipient_name' => 'Kid Brickson',
+            ]);
+
+            $response->assertStatus(202)
+                ->assertJsonStructure(['id', 'code', 'expires_at', 'created_at']);
+
+            $code = $response->json('code');
+            expect($code)->toMatch('/^BRICK-[A-Z0-9]{4}$/');
+
+            Mail::assertQueued(
+                InviteCodeMail::class,
+                fn(InviteCodeMail $inviteCodeMail): bool => $inviteCodeMail->hasTo('kid@example.com')
+                    && $inviteCodeMail->code === $code
+                    && $inviteCodeMail->familyName === $headUser->family->name
+                    && $inviteCodeMail->recipientName === 'Kid Brickson'
+                    && str_contains($inviteCodeMail->registerUrl, '?invite=' . $code),
+            );
+
+            $this->assertDatabaseHas('invite_codes', [
+                'family_id' => $headUser->family_id,
+                'generated_by' => $headUser->id,
+                'code' => $code,
+            ]);
+        });
+
+        it('should accept a request without recipient_name and pass null through to the mailable', function(): void {
+            Mail::fake();
+
+            $headUser = User::factory()->create();
+
+            $response = $this->actingAs($headUser)->postJson('/api/family/invite-code/email', [
+                'recipient_email' => 'kid@example.com',
+            ]);
+
+            $response->assertStatus(202);
+
+            Mail::assertQueued(
+                InviteCodeMail::class,
+                fn(InviteCodeMail $inviteCodeMail): bool => $inviteCodeMail->hasTo('kid@example.com')
+                    && $inviteCodeMail->recipientName === null,
+            );
+        });
+
+        it('should revoke any existing active code and email a fresh one', function(): void {
+            Mail::fake();
+
+            $headUser = User::factory()->create();
+            $existingCode = InviteCode::factory()
+                ->forFamily($headUser->family)
+                ->generatedBy($headUser)
+                ->create();
+
+            $response = $this->actingAs($headUser)->postJson('/api/family/invite-code/email', [
+                'recipient_email' => 'kid@example.com',
+            ]);
+
+            $response->assertStatus(202);
+
+            $existingCode->refresh();
+            expect($existingCode->revoked_at)->not->toBeNull();
+            expect($response->json('code'))->not->toBe($existingCode->code);
+
+            Mail::assertQueued(InviteCodeMail::class);
+        });
+
+        it('should return 422 when recipient_email is missing', function(): void {
+            Mail::fake();
+
+            $headUser = User::factory()->create();
+
+            $response = $this->actingAs($headUser)->postJson('/api/family/invite-code/email', []);
+
+            $response->assertStatus(422)
+                ->assertJsonValidationErrors(['recipient_email']);
+
+            Mail::assertNothingQueued();
+        });
+
+        it('should return 422 when recipient_email is invalid', function(): void {
+            Mail::fake();
+
+            $headUser = User::factory()->create();
+
+            $response = $this->actingAs($headUser)->postJson('/api/family/invite-code/email', [
+                'recipient_email' => 'not-an-email',
+            ]);
+
+            $response->assertStatus(422)
+                ->assertJsonValidationErrors(['recipient_email']);
+
+            Mail::assertNothingQueued();
+        });
+
+        it('should return 422 when recipient_name exceeds 100 characters', function(): void {
+            Mail::fake();
+
+            $headUser = User::factory()->create();
+
+            $response = $this->actingAs($headUser)->postJson('/api/family/invite-code/email', [
+                'recipient_email' => 'kid@example.com',
+                'recipient_name' => str_repeat('A', 101),
+            ]);
+
+            $response->assertStatus(422)
+                ->assertJsonValidationErrors(['recipient_name']);
+
+            Mail::assertNothingQueued();
+        });
+
+        it('should return 401 when unauthenticated', function(): void {
+            Mail::fake();
+
+            $response = $this->postJson('/api/family/invite-code/email', [
+                'recipient_email' => 'kid@example.com',
+            ]);
+
+            $response->assertStatus(401);
+
+            Mail::assertNothingQueued();
+        });
+
+        it('should return 403 when a non-head member attempts to email an invite', function(): void {
+            Mail::fake();
+
+            $headUser = User::factory()->create();
+            $member = User::factory()->forFamily($headUser->family)->create();
+
+            $response = $this->actingAs($member)->postJson('/api/family/invite-code/email', [
+                'recipient_email' => 'kid@example.com',
+            ]);
+
+            $response->assertStatus(403);
+
+            Mail::assertNothingQueued();
+        });
+
+        it('should rate-limit at 10 requests per hour per user', function(): void {
+            // The default 'testing' env disables limiters; we need them on for this test.
+            $this->app['env'] = 'production';
+
+            // Force the AppServiceProvider closures to re-bind under the new env.
+            $this->app->register(AppServiceProvider::class, force: true);
+
+            // Reset any prior counters left over from sibling tests.
+            RateLimiter::clear('invite-email');
+
+            Mail::fake();
+
+            $headUser = User::factory()->create();
+
+            // 10 calls within the hour are allowed.
+            for ($i = 0; $i < 10; $i++) {
+                $response = $this->actingAs($headUser)->postJson('/api/family/invite-code/email', [
+                    'recipient_email' => 'kid' . $i . '@example.com',
+                ]);
+                $response->assertStatus(202);
+            }
+
+            // 11th call must be throttled.
+            $response = $this->actingAs($headUser)->postJson('/api/family/invite-code/email', [
+                'recipient_email' => 'kid11@example.com',
+            ]);
+
+            $response->assertStatus(429);
         });
     });
 });

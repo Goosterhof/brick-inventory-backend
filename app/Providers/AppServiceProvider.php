@@ -67,5 +67,12 @@ class AppServiceProvider extends ServiceProvider
             ? Limit::perMinute(30)->by((string) ($request->user()->id ?? $request->ip()))
             : Limit::none(),
         );
+
+        RateLimiter::for(
+            'invite-email',
+            fn(Request $request): Limit => $enabled
+            ? Limit::perHour(10)->by((string) ($request->user()->id ?? $request->ip()))
+            : Limit::none(),
+        );
     }
 }
