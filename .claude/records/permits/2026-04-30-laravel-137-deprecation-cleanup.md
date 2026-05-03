@@ -86,5 +86,5 @@ This shift closes the last open thread of the 2026-04-29 investigation cascade. 
 
 ---
 
-**Status:** Open — pre-filed for next-session first-dispatch
-**Shift Log:** _to be filed by Head Sorter on completion_
+**Status:** Completed
+**Shift Log:** [2026-04-30-laravel-137-deprecation-cleanup.md](../journals/2026-04-30-laravel-137-deprecation-cleanup.md)
