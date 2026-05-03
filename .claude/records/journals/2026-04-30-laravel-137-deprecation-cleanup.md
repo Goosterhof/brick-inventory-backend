@@ -148,3 +148,27 @@ The one polish gap — coverage / mutation still blocked — is now visibly tied
 - ADR-0012 is well-structured. The option matrix presentation (A/B/C with rejection reasoning for the unchosen) is the right shape for a runtime-tightening decision; future ADRs in this style are welcome.
 - The platform-check rediscovery cost ~30 seconds. The candidate captures it; that's enough. Don't over-correct toward defensive prediction on every command — the cost was low and the failure mode was informative.
 - The cross-check on the dirty working tree (cleanup + parked feature) was discretionary insurance and paid off — it confirms the feature work doesn't lean on the deprecated APIs and lets the Director sequence the two commits without further verification. Repeat that pattern when a continuation commit shares the working tree with parked work.
+
+---
+
+## Addendum (2026-05-03 post-push) — CI workflow miss
+
+After PR #166 was opened and pushed, all 7 PHP-running CI jobs (`audit`, `lint`, `test`, `coverage`, `feature-coverage`, `mutation`, `seed`) failed at `composer install`:
+
+```
+Your Composer dependencies require a PHP version ">= 8.5.0". You are running 8.4.20.
+```
+
+`.github/workflows/ci.yml` pinned `php-version: '8.4'` in seven places (one per job's `Setup PHP` step). Tightening `composer.json` `require.php` to `^8.5` invalidated those pins; the local gauntlet was green only because the host runs 8.5. CI was never re-run after the push, and the platform-check that fires on `composer install` made the failure structural rather than a deprecation flag.
+
+The fix was mechanical: bump all seven `php-version: '8.4'` occurrences to `'8.5'` in a single fix-up commit on this branch (`chore(ci): pin workflows to PHP 8.5 to match require.php`). The cleanup permit's scope retroactively included this — tightening a runtime constraint is incomplete until every environment that depends on it (host, Dockerfile, CI workflows, Railway runtime) honors the new floor.
+
+### Connection to graduated training
+
+The CEO flagged this as a direct application case for the rule that graduated *during the same review pass*: **"Verify external-state claims in permits — permit text is design intent; the file/dashboard is ground truth."** CI workflow files are external to the cleanup edit surface, but they depend on the constraint the cleanup tightened. The graduated rule would have caught this if applied during the cleanup shift — not as "verify a permit claim" but as the broader "verify every external surface that depends on the constraint you're changing."
+
+This is not a new training proposal — the rule is already graduated. It is post-graduation evidence that the rule generalizes beyond permit-text claims: it covers any external-to-the-edit-surface state coupled to the edit. Recording here for archaeology; the cost (one fix-up commit, no main-branch impact) was small but the principle is sharp.
+
+### Acceptance criterion update
+
+The cleanup shift's "all gauntlet stages green" criterion is now read more broadly: green locally + green in CI. Before this addendum, "the gauntlet" implicitly meant the local pre-commit/pre-push runs. The CEO's review made explicit what was implicit. Future runtime-constraint tightenings should include CI-workflow verification as part of the in-scope checklist.
