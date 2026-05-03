@@ -26,4 +26,8 @@ return [
         'base_url' => env('BRICKOGNIZE_BASE_URL', 'https://api.brickognize.com'),
     ],
 
+    'resend' => [
+        'key' => env('RESEND_API_KEY'),
+    ],
+
 ];
