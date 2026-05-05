@@ -20,12 +20,20 @@ final readonly class UpdateFamilySetAction
     public function execute(FamilySet $familySet, UpdateFamilySetData $updateFamilySetData): FamilySet
     {
         return $this->connection->transaction(function() use ($familySet, $updateFamilySetData): FamilySet {
-            $familySet->quantity = $updateFamilySetData->quantity;
-            $familySet->status = $updateFamilySetData->status;
-            $familySet->purchase_date = $updateFamilySetData->purchaseDate instanceof DateTimeInterface
-                ? $this->dateFactory->instance($updateFamilySetData->purchaseDate)
-                : null;
-            $familySet->notes = $updateFamilySetData->notes;
+            if ($updateFamilySetData->quantity !== null) {
+                $familySet->quantity = $updateFamilySetData->quantity;
+            }
+            if ($updateFamilySetData->status !== null) {
+                $familySet->status = $updateFamilySetData->status;
+            }
+            if ($updateFamilySetData->purchaseDateProvided) {
+                $familySet->purchase_date = $updateFamilySetData->purchaseDate instanceof DateTimeInterface
+                    ? $this->dateFactory->instance($updateFamilySetData->purchaseDate)
+                    : null;
+            }
+            if ($updateFamilySetData->notesProvided) {
+                $familySet->notes = $updateFamilySetData->notes;
+            }
             $familySet->save();
 
             return $familySet;
