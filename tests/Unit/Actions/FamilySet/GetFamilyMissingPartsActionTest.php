@@ -25,7 +25,7 @@ function buildFamilySetsQuery(int $familyId, Collection $rows): Builder
 
     $builder = \Mockery::mock(Builder::class);
     $builder->shouldReceive('where')->once()->with('family_sets.family_id', $familyId)->andReturnSelf();
-    $builder->shouldReceive('where')->once()->with('family_sets.status', '!=', FamilySetStatus::Wishlist->value)->andReturnSelf();
+    $builder->shouldReceive('whereNotIn')->once()->with('family_sets.status', [FamilySetStatus::Wishlist->value, FamilySetStatus::InStorage->value])->andReturnSelf();
     $builder->shouldReceive('select')->once()->with(['family_sets.id as family_set_id', 'family_sets.set_id'])->andReturnSelf();
     $builder->shouldReceive('toBase')->once()->andReturn($base);
 
@@ -46,7 +46,7 @@ function buildNeededQuery(int $familyId, Collection $rows): Builder
     $builder->shouldReceive('join')->once()->with('parts', 'parts.id', '=', 'set_parts.part_id')->andReturnSelf();
     $builder->shouldReceive('join')->once()->with('colors', 'colors.id', '=', 'set_parts.color_id')->andReturnSelf();
     $builder->shouldReceive('where')->once()->with('family_sets.family_id', $familyId)->andReturnSelf();
-    $builder->shouldReceive('where')->once()->with('family_sets.status', '!=', FamilySetStatus::Wishlist->value)->andReturnSelf();
+    $builder->shouldReceive('whereNotIn')->once()->with('family_sets.status', [FamilySetStatus::Wishlist->value, FamilySetStatus::InStorage->value])->andReturnSelf();
     $builder->shouldReceive('groupBy')->once()->with('parts.part_num', 'set_parts.color_id', 'parts.name', 'colors.name', 'colors.rgb', 'parts.image_url')->andReturnSelf();
     $builder->shouldReceive('selectRaw')->once()->with('parts.part_num AS part_num, set_parts.color_id AS color_id, parts.name AS part_name, colors.name AS color_name, colors.rgb AS color_hex, parts.image_url AS part_image_url, SUM(set_parts.quantity * family_sets.quantity) AS quantity_needed')->andReturnSelf();
     $builder->shouldReceive('toBase')->once()->andReturn($base);
@@ -99,7 +99,7 @@ function buildNeededBySetQuery(int $familyId, Collection $rows): Builder
     $builder->shouldReceive('join')->once()->with('sets', 'sets.id', '=', 'set_parts.set_id')->andReturnSelf();
     $builder->shouldReceive('join')->once()->with('parts', 'parts.id', '=', 'set_parts.part_id')->andReturnSelf();
     $builder->shouldReceive('where')->once()->with('family_sets.family_id', $familyId)->andReturnSelf();
-    $builder->shouldReceive('where')->once()->with('family_sets.status', '!=', FamilySetStatus::Wishlist->value)->andReturnSelf();
+    $builder->shouldReceive('whereNotIn')->once()->with('family_sets.status', [FamilySetStatus::Wishlist->value, FamilySetStatus::InStorage->value])->andReturnSelf();
     $builder->shouldReceive('distinct')->once()->withNoArgs()->andReturnSelf();
     $builder->shouldReceive('select')->once()->with(['parts.part_num as part_num', 'set_parts.color_id as color_id', 'sets.set_num as set_num'])->andReturnSelf();
     $builder->shouldReceive('toBase')->once()->andReturn($base);

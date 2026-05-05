@@ -27,21 +27,25 @@ final class UpdateFamilySetRequest extends FormRequest
     public function rules(): array
     {
         return [
-            self::QUANTITY => ['required', 'integer', 'min:1'],
-            self::STATUS => ['required', 'string', Rule::enum(FamilySetStatus::class)],
-            self::PURCHASE_DATE => ['nullable', 'date'],
-            self::NOTES => ['nullable', 'string', 'max:65535'],
+            self::QUANTITY => ['sometimes', 'integer', 'min:1'],
+            self::STATUS => ['sometimes', 'string', Rule::enum(FamilySetStatus::class)],
+            self::PURCHASE_DATE => ['sometimes', 'nullable', 'date'],
+            self::NOTES => ['sometimes', 'nullable', 'string', 'max:65535'],
         ];
     }
 
     public function toDto(): UpdateFamilySetData
     {
         return new UpdateFamilySetData(
-            quantity: $this->safe()->integer(self::QUANTITY),
-            status: FamilySetStatus::from($this->safe()->string(self::STATUS)->toString()),
+            quantity: $this->has(self::QUANTITY) ? $this->safe()->integer(self::QUANTITY) : null,
+            status: $this->has(self::STATUS)
+                ? FamilySetStatus::from($this->safe()->string(self::STATUS)->toString())
+                : null,
+            purchaseDateProvided: $this->has(self::PURCHASE_DATE),
             purchaseDate: $this->isNotFilled(self::PURCHASE_DATE)
                 ? null
                 : CarbonImmutable::parse($this->safe()->string(self::PURCHASE_DATE)->toString()),
+            notesProvided: $this->has(self::NOTES),
             notes: $this->isNotFilled(self::NOTES) ? null : $this->safe()->string(self::NOTES)->toString(),
         );
     }

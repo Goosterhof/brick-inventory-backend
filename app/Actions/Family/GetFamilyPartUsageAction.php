@@ -52,8 +52,9 @@ final readonly class GetFamilyPartUsageAction
         $colorHex = $metadataRow !== null ? $this->castNullableString($metadataRow->color_hex) : null;
 
         // Q2: per-family_set demand for the requested (part_num, color_id). One row per
-        // non-wishlist family_set that needs this part+color. Bounded by the number of
-        // owned sets that include the part — typically a handful, not thousands.
+        // claiming family_set that needs this part+color. Wishlist (not owned) and InStorage
+        // (parts pooled into storage_option_parts and shared with other builds) are excluded
+        // — they don't claim parts.
         /** @var Collection<int, stdClass> $usageRows */
         $usageRows = $this->setPart->newQuery()
             ->where('set_parts.is_spare', false)
@@ -63,7 +64,7 @@ final readonly class GetFamilyPartUsageAction
             ->join('sets', 'sets.id', '=', 'set_parts.set_id')
             ->where('parts.part_num', $partNum)
             ->where('family_sets.family_id', $family->id)
-            ->where('family_sets.status', '!=', FamilySetStatus::Wishlist->value)
+            ->whereNotIn('family_sets.status', [FamilySetStatus::Wishlist->value, FamilySetStatus::InStorage->value])
             ->select([
                 'family_sets.id as family_set_id',
                 'family_sets.status as status',

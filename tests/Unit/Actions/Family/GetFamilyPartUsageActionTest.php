@@ -73,7 +73,7 @@ function buildUsageQuery(int $familyId, string $partNum, int $colorId, Collectio
     $builder->shouldReceive('join')->once()->with('sets', 'sets.id', '=', 'set_parts.set_id')->andReturnSelf();
     $builder->shouldReceive('where')->once()->with('parts.part_num', $partNum)->andReturnSelf();
     $builder->shouldReceive('where')->once()->with('family_sets.family_id', $familyId)->andReturnSelf();
-    $builder->shouldReceive('where')->once()->with('family_sets.status', '!=', FamilySetStatus::Wishlist->value)->andReturnSelf();
+    $builder->shouldReceive('whereNotIn')->once()->with('family_sets.status', [FamilySetStatus::Wishlist->value, FamilySetStatus::InStorage->value])->andReturnSelf();
     $builder->shouldReceive('select')->once()->with([
         'family_sets.id as family_set_id',
         'family_sets.status as status',
