@@ -109,5 +109,5 @@ This is a regulation change — once shipped, the warehouse's pre-push contract 
 
 ---
 
-**Status:** Open
+**Status:** In Progress
 **Shift Log:** _to be filed_
