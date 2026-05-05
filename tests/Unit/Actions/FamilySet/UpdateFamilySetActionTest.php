@@ -42,7 +42,9 @@ describe('UpdateFamilySetAction', function(): void {
         $data = new UpdateFamilySetData(
             quantity: 5,
             status: FamilySetStatus::Built,
+            purchaseDateProvided: true,
             purchaseDate: $purchaseDate,
+            notesProvided: true,
             notes: 'Updated notes',
         );
 
@@ -57,7 +59,7 @@ describe('UpdateFamilySetAction', function(): void {
             ->and($savedValues['notes'])->toBe('Updated notes');
     });
 
-    it('should set purchase_date to null when not provided', function(): void {
+    it('should leave fields untouched when their provided flags are false', function(): void {
         // arrange
         $savedValues = [];
         $familySet = \Mockery::mock(FamilySet::class);
@@ -71,7 +73,6 @@ describe('UpdateFamilySetAction', function(): void {
 
         $action = new UpdateFamilySetAction($this->dateFactory, $this->db);
         $data = new UpdateFamilySetData(
-            quantity: 3,
             status: FamilySetStatus::InProgress,
         );
 
@@ -79,9 +80,40 @@ describe('UpdateFamilySetAction', function(): void {
         $action->execute($familySet, $data);
 
         // assert
-        expect($savedValues['quantity'])->toBe(3)
+        expect($savedValues)->toHaveKey('status')
             ->and($savedValues['status'])->toBe(FamilySetStatus::InProgress)
+            ->and($savedValues)->not->toHaveKey('quantity')
+            ->and($savedValues)->not->toHaveKey('purchase_date')
+            ->and($savedValues)->not->toHaveKey('notes');
+    });
+
+    it('should clear purchase_date and notes when provided flags are true with null values', function(): void {
+        // arrange
+        $savedValues = [];
+        $familySet = \Mockery::mock(FamilySet::class);
+        $familySet->allows('setAttribute')->andReturnUsing(function($key, $value) use (&$savedValues): void {
+            $savedValues[$key] = $value;
+        });
+        $familySet->allows('getAttribute')->andReturnUsing(function($key) use (&$savedValues): mixed {
+            return $savedValues[$key] ?? null;
+        });
+        $familySet->shouldReceive('save')->once();
+
+        $action = new UpdateFamilySetAction($this->dateFactory, $this->db);
+        $data = new UpdateFamilySetData(
+            purchaseDateProvided: true,
+            purchaseDate: null,
+            notesProvided: true,
+            notes: null,
+        );
+
+        // act
+        $action->execute($familySet, $data);
+
+        // assert
+        expect($savedValues)->toHaveKey('purchase_date')
             ->and($savedValues['purchase_date'])->toBeNull()
+            ->and($savedValues)->toHaveKey('notes')
             ->and($savedValues['notes'])->toBeNull();
     });
 

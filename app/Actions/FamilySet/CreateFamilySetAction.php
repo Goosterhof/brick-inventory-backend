@@ -35,7 +35,9 @@ final readonly class CreateFamilySetAction
             return $this->updateFamilySetAction->execute($familySet, new UpdateFamilySetData(
                 quantity: $createFamilySetData->quantity,
                 status: $createFamilySetData->status,
+                purchaseDateProvided: true,
                 purchaseDate: $createFamilySetData->purchaseDate,
+                notesProvided: true,
                 notes: $createFamilySetData->notes,
             ));
         });

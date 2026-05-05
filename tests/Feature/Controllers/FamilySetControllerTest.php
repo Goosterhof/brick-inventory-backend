@@ -326,20 +326,47 @@ describe('FamilySetController', function(): void {
             $response->assertStatus(401);
         });
 
-        it('should require quantity and status', function(): void {
+        it('should accept a partial patch updating only notes', function(): void {
             $user = User::factory()->create();
             $set = Set::factory()->create();
             $familySet = FamilySet::factory()->create([
                 'family_id' => $user->family_id,
                 'set_id' => $set->id,
+                'quantity' => 4,
+                'status' => FamilySetStatus::Sealed,
             ]);
 
             $response = $this->actingAs($user)->patchJson('/api/family-sets/' . $familySet->id, [
                 'notes' => 'Just notes',
             ]);
 
-            $response->assertStatus(422)
-                ->assertJsonValidationErrors(['quantity', 'status']);
+            $response->assertStatus(200);
+
+            $fresh = $familySet->fresh();
+            expect($fresh->notes)->toBe('Just notes')
+                ->and($fresh->quantity)->toBe(4)
+                ->and($fresh->status)->toBe(FamilySetStatus::Sealed);
+        });
+
+        it('should accept a status-only patch', function(): void {
+            $user = User::factory()->create();
+            $set = Set::factory()->create();
+            $familySet = FamilySet::factory()->create([
+                'family_id' => $user->family_id,
+                'set_id' => $set->id,
+                'quantity' => 2,
+                'status' => FamilySetStatus::Built,
+            ]);
+
+            $response = $this->actingAs($user)->patchJson('/api/family-sets/' . $familySet->id, [
+                'status' => 'in_storage',
+            ]);
+
+            $response->assertStatus(200);
+
+            $fresh = $familySet->fresh();
+            expect($fresh->status)->toBe(FamilySetStatus::InStorage)
+                ->and($fresh->quantity)->toBe(2);
         });
     });
 
