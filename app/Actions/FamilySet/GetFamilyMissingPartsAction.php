@@ -27,12 +27,13 @@ final readonly class GetFamilyMissingPartsAction
 
     public function execute(Family $family): FamilyMissingPartsData
     {
-        // Q1: Non-wishlist family_sets — id + set_id only. Multiplicity and set_num come from Q2/Q4 joins.
-        // Bounded by the family's owned set count — typically dozens, not thousands.
+        // Q1: Claiming family_sets — id + set_id. Wishlist is excluded (not owned). InStorage is excluded
+        // because its parts are pooled in storage_option_parts and are treated as available for other
+        // builds; counting them as "needed" would double-book against the same storage rows.
         /** @var Collection<int, stdClass> $familySets */
         $familySets = $this->familySet->newQuery()
             ->where('family_sets.family_id', $family->id)
-            ->where('family_sets.status', '!=', FamilySetStatus::Wishlist->value)
+            ->whereNotIn('family_sets.status', [FamilySetStatus::Wishlist->value, FamilySetStatus::InStorage->value])
             ->select([
                 'family_sets.id as family_set_id',
                 'family_sets.set_id',
@@ -56,7 +57,7 @@ final readonly class GetFamilyMissingPartsAction
             ->join('parts', 'parts.id', '=', 'set_parts.part_id')
             ->join('colors', 'colors.id', '=', 'set_parts.color_id')
             ->where('family_sets.family_id', $family->id)
-            ->where('family_sets.status', '!=', FamilySetStatus::Wishlist->value)
+            ->whereNotIn('family_sets.status', [FamilySetStatus::Wishlist->value, FamilySetStatus::InStorage->value])
             ->groupBy('parts.part_num', 'set_parts.color_id', 'parts.name', 'colors.name', 'colors.rgb', 'parts.image_url')
             ->selectRaw('parts.part_num AS part_num, set_parts.color_id AS color_id, parts.name AS part_name, colors.name AS color_name, colors.rgb AS color_hex, parts.image_url AS part_image_url, SUM(set_parts.quantity * family_sets.quantity) AS quantity_needed')
             ->toBase()
@@ -103,7 +104,7 @@ final readonly class GetFamilyMissingPartsAction
             ->join('sets', 'sets.id', '=', 'set_parts.set_id')
             ->join('parts', 'parts.id', '=', 'set_parts.part_id')
             ->where('family_sets.family_id', $family->id)
-            ->where('family_sets.status', '!=', FamilySetStatus::Wishlist->value)
+            ->whereNotIn('family_sets.status', [FamilySetStatus::Wishlist->value, FamilySetStatus::InStorage->value])
             ->distinct()
             ->select(['parts.part_num as part_num', 'set_parts.color_id as color_id', 'sets.set_num as set_num'])
             ->toBase()
