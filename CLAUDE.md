@@ -390,7 +390,7 @@ The `**Status:**` field in a permit drives the [Pre-Push Gauntlet](#the-pre-push
 
 **Why the late `Completed` flip:** the gate fails on `Completed` and `Cancelled` permits to prevent stale-permit reuse. If `Completed` were set when the shift log was filed locally, every close-out push would require `--no-verify` and the documented escape hatch would lose its meaning through routine use. Flipping after merge keeps the bypass reserved for genuine exceptions.
 
-**Mechanics of the late flip:** after the PR merges (or as part of the merge commit), update the permit's `Status:` line to `Completed` and link the shift log. This can be a manual edit on `main` or a follow-up commit; either way it is a low-risk, single-line change that does not need its own permit.
+**Mechanics of the late flip:** after the PR merges, open a small follow-up PR that updates the permit's `Status:` line to `Completed` and confirms the shift log link. The flip lives below the gate's threshold (a single-line diff), so the gate skips it and no new permit is required — but the change still goes through PR review like every other change to `main`. Direct pushes to `main` are not the right path even for trivial edits; the PR keeps the audit trail intact.
 
 ### Shift Logs (`.claude/records/journals/`)
 
