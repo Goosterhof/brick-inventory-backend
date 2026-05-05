@@ -69,6 +69,11 @@
         "enabled": true,
         "actions": [
             {
+                "action": "\\Tools\\CaptainHook\\PrePushPermitGate",
+                "options": [],
+                "conditions": []
+            },
+            {
                 "action": "composer test",
                 "options": [],
                 "conditions": []

@@ -266,7 +266,14 @@ BrickognizeApiException           → 502
 
 ### The Pre-Commit Gauntlet
 
-CaptainHook enforces on every commit (PHP files only): **lint:test → phpstan → deptrac → test:arch**. All must pass. On every push: **full test suite**. There are no shortcuts. The warehouse does not ship uninspected goods.
+CaptainHook enforces on every commit (PHP files only): **lint:test → phpstan → deptrac → test:arch**. All must pass. There are no shortcuts. The warehouse does not ship uninspected goods.
+
+### The Pre-Push Gauntlet
+
+CaptainHook enforces on every push: **PrePushPermitGate → composer test**. Both must pass.
+
+- **PrePushPermitGate** (ADR-0013) — verifies that any non-trivial branch has a corresponding open permit on file. **Threshold:** more than 20 files OR more than 500 lines changed against `origin/main`. **Slug match:** strict equality between the branch slug (portion after the last `/`, lowercased) and the permit slug (filename minus the `YYYY-MM-DD-` prefix and `.md` suffix, lowercased). The permit's `**Status:**` must read `Open` or `In Progress`. Branches under the threshold and pushes from `main` skip the check entirely. Documented `--no-verify` escape — see [Documented Escape Hatch](#documented-escape-hatch).
+- **composer test** — full quality inspection rig.
 
 ### Coverage Policy
 
@@ -370,6 +377,21 @@ A shipping order specifies: what to sort, what's in scope, what's not, and how t
 **Naming:** `YYYY-MM-DD-{short-description}.md`
 **Template:** `.claude/records/permits/.shipping-order-template.md`
 
+#### Permit Lifecycle
+
+The `**Status:**` field in a permit drives the [Pre-Push Gauntlet](#the-pre-push-gauntlet) (ADR-0013), so its values are not decorative — they are the gate's truth source.
+
+| Status | When |
+|---|---|
+| `Open` | Filed but not yet picked up. Visible to the floor; no Sorter assigned. |
+| `In Progress` | Sorter has picked it up and started work. **Stays In Progress through the close-out push** — the gate accepts pushes against the close-out shift log without `--no-verify`. |
+| `Completed` | The PR has merged into `main`. Flipping happens AFTER merge, not after shift log filing. |
+| `Cancelled` | Order withdrawn before completion. Equivalent to `Completed` for the gate (treated as inactive). |
+
+**Why the late `Completed` flip:** the gate fails on `Completed` and `Cancelled` permits to prevent stale-permit reuse. If `Completed` were set when the shift log was filed locally, every close-out push would require `--no-verify` and the documented escape hatch would lose its meaning through routine use. Flipping after merge keeps the bypass reserved for genuine exceptions.
+
+**Mechanics of the late flip:** after the PR merges (or as part of the merge commit), update the permit's `Status:` line to `Completed` and link the shift log. This can be a manual edit on `main` or a follow-up commit; either way it is a low-risk, single-line change that does not need its own permit.
+
 ### Shift Logs (`.claude/records/journals/`)
 
 Filed AFTER work completes. The Head Sorter produces a shift log for every shipping order. The log includes: what was sorted, whether acceptance criteria were met, decisions made, quality gauntlet results, proposed knowledge updates, and a self-debrief with training proposals.
@@ -409,6 +431,18 @@ Both crew members (sorter and auditor) propose training improvements in their lo
 - A proposal must be observed in **at least 2 shifts** before promotion into the crew member's training
 - Every graduation log entry references the specific log or report that provided evidence
 - The Logistics Director dispositions proposals (Candidate / Dropped) with rationale — no silent ignoring
+
+### Documented Escape Hatch
+
+`git push --no-verify` bypasses the Pre-Push Gauntlet (including PrePushPermitGate). The bypass remains available, but its use is **documented, not silent**. Every push that uses `--no-verify` must be recorded in the corresponding shift log's **Decisions Made** section, with:
+
+- The justification (why the bypass was the right call)
+- An explicit Logistics Director sign-off line acknowledging the bypass
+- The scope of the bypass (single push vs. ongoing exception)
+
+Legitimate uses include emergency hotfixes where pre-flight permit filing is impractical, pre-authorized exploratory work where the Director has agreed in advance, and pre-existing baseline breaches that pre-date the gauntlet rules. The 2026-04-29 warroom-rules shift is the canonical precedent — a 4-error PHPStan baseline carried over from the Laravel 13 upgrade would have caused unrelated work to fail; the bypass was justified, narrowly scoped, and documented in the shift log.
+
+Silent `--no-verify` use is the violation, not the bypass itself. An undocumented bypass discovered in audit becomes a finding regardless of the underlying push being legitimate.
 
 ---
 
