@@ -87,7 +87,7 @@
             "@php artisan package:discover --ansi"
         ],
         "post-install-cmd": [
-            "@php -r \"if (is_dir('.git') && file_exists('vendor/bin/captainhook')) { passthru('vendor/bin/captainhook install --force --skip-existing'); }\""
+            "@php -r \"if (file_exists('.git') && file_exists('vendor/bin/captainhook')) { passthru('vendor/bin/captainhook install --force --skip-existing'); }\""
         ],
         "post-update-cmd": [
             "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
