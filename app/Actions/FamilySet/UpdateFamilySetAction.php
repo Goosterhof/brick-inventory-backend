@@ -5,6 +5,7 @@ declare(strict_types = 1);
 namespace App\Actions\FamilySet;
 
 use App\DataTransferObjects\Input\FamilySet\UpdateFamilySetData;
+use App\Enums\FamilySetStatus;
 use App\Models\FamilySet;
 use DateTimeInterface;
 use Illuminate\Database\ConnectionInterface;
@@ -23,17 +24,21 @@ final readonly class UpdateFamilySetAction
             if ($updateFamilySetData->quantity !== null) {
                 $familySet->quantity = $updateFamilySetData->quantity;
             }
-            if ($updateFamilySetData->status !== null) {
+
+            if ($updateFamilySetData->status instanceof FamilySetStatus) {
                 $familySet->status = $updateFamilySetData->status;
             }
+
             if ($updateFamilySetData->purchaseDateProvided) {
                 $familySet->purchase_date = $updateFamilySetData->purchaseDate instanceof DateTimeInterface
                     ? $this->dateFactory->instance($updateFamilySetData->purchaseDate)
                     : null;
             }
+
             if ($updateFamilySetData->notesProvided) {
                 $familySet->notes = $updateFamilySetData->notes;
             }
+
             $familySet->save();
 
             return $familySet;
