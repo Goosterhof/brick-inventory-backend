@@ -15,6 +15,8 @@ Decisions that shaped the build. Each records what was chosen, what was rejected
 | [0009](0009-thin-controllers-method-injection.md) | Thin controllers with method injection only | ControllerArchitectureTest |
 | [0010](0010-computed-resource-data.md) | ComputedResourceData for DTO-sourced responses (sibling to ResourceData, shared ResourceResponse interface) | ResourceDataArchitectureTest, PHPStan, Deptrac |
 | [0011](0011-import-atomicity.md) | Save-what-you-can import atomicity with honest reporting | Unit tests (three-scenario coverage), ADR-0003 try-catch constraints |
+| [0012](0012-tighten-runtime-to-php-85.md) | Tighten runtime to PHP 8.5+ and remove PHP 8.4 fallback | composer.json platform pin, CI matrix, Dockerfile base image |
+| [0013](0013-pre-push-permit-verification.md) | Pre-push permit verification gate (CaptainHook structural enforcement of Operations Protocol) | CaptainHook pre-push action, threshold-gated permit lookup, fail-not-prompt on miss |
 
 ## Adding a New ADR
 
