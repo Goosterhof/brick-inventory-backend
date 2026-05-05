@@ -108,12 +108,12 @@ database/
 └── factories/                  # Test Fixtures — inventory for quality inspections
 
 tests/
-├── Architecture/               # Regulation Enforcement — 18 architecture tests
+├── Architecture/               # Regulation Enforcement — 21 architecture tests
 ├── Feature/                    # Integration Drills — controller-level tests
 └── Unit/                       # Component Inspections — action & service tests
 
 docs/
-└── adr/                        # The Decision Ledger — 9 architecture decisions (consolidated from 16)
+└── adr/                        # The Decision Ledger — 13 architecture decisions (consolidated from 16)
 ```
 
 ---
@@ -295,7 +295,7 @@ Wiring:                             Provider → Contract, Service, Policy
 
 ### Architecture Decision Ledger
 
-Eleven decisions that shaped the warehouse (consolidated from sixteen — implementation details merged into their parent ADRs). Each records what was chosen, what was rejected, and what machine enforces it. Full records in `docs/adr/`.
+Thirteen decisions that shaped the warehouse (consolidated from sixteen — implementation details merged into their parent ADRs). Each records what was chosen, what was rejected, and what machine enforces it. Full records in `docs/adr/`.
 
 | ADR | Decision | Enforcement |
 |---|---|---|
@@ -310,6 +310,8 @@ Eleven decisions that shaped the warehouse (consolidated from sixteen — implem
 | 0009 | Thin controllers with method injection only | ControllerArchitectureTest |
 | 0010 | ComputedResourceData for Result-DTO-sourced responses (marker interface retired; Input/Result namespace split supersedes the `Data`/`DataTransferObjects` duality) | ResourceDataArchitectureTest, DataTransferObjectPlacementTest, PHPStan, Deptrac |
 | 0011 | Save-what-you-can import atomicity with honest reporting | Unit tests (three-scenario coverage), ADR-0003 try-catch constraints |
+| 0012 | Tighten runtime to PHP 8.5+ and remove PHP 8.4 fallback | composer.json platform pin, CI matrix, Dockerfile base image |
+| 0013 | Pre-push permit verification gate (CaptainHook structural enforcement of Operations Protocol) | CaptainHook pre-push action, threshold-gated permit lookup, fail-not-prompt on miss |
 
 Before building anything non-trivial, check the Ledger. Don't relitigate settled decisions — if the context has changed, propose a superseding ADR.
 

@@ -297,6 +297,7 @@ Training proposals from audit reports are tracked here. A proposal must prove it
 | When filing a finding about enforcement drift, ask: can the enforcement be made self-maintaining instead? Recommend the structural fix, not a human-memory fix | 2026-03-26 | 2026-03-26-route-test-auto-detect | Filed Finding 2 recommending "add routes to hardcoded list" — the real fix was making the test auto-detect routes. CEO identified the structural solution. |
 | SOP 2 step 6: when a try-catch hits a documented exception type, verify the implementation matches the documented pattern (not just the exception class) | 2026-04-11 | 2026-04-11-post-delivery-sweep | `StartImportAction` catches `UniqueConstraintViolationException` (documented type) but implements re-throw, not upsert retry — a different pattern needing separate documentation |
 | SOP 3: check all prose count references in CLAUDE.md, not just tables | 2026-04-11 | 2026-04-11-post-delivery-sweep | "Ten decisions" prose was stale while the table beneath it had 11 entries; existing SOP focuses on threshold tables |
+| SOP 3 or SOP 4: verify all shift logs in the audit period have completed Director Evaluations | 2026-05-05 | 2026-05-05-full-sweep | Findings 5 and 6 — two journals with placeholder Director sections were caught only by reading logs end-to-end; no SOP step prompts checking the Director's accountability artifact |
 
 ### Graduated
 

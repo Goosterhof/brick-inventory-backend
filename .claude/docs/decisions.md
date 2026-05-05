@@ -22,5 +22,7 @@ Every significant decision goes through a **Logistics Director-mediated review**
 | 0009 | Thin controllers with method injection only | 2026-03-22 | Accepted |
 | 0010 | ComputedResourceData for DTO-sourced responses (sibling to ResourceData, shared ResourceResponse interface) | 2026-03-28 | Accepted |
 | 0011 | Save-what-you-can import atomicity with honest reporting | 2026-02-11 | Accepted |
+| 0012 | Tighten runtime to PHP 8.5+ and remove PHP 8.4 fallback | 2026-04-30 | Accepted |
+| 0013 | Pre-push permit verification gate (CaptainHook structural enforcement of Operations Protocol) | 2026-05-05 | Accepted |
 
 _Note: The original ADRs 0010–0016 were consolidated into their parent ADRs on 2026-03-22. The sub-decisions (cascadeRelations contract, final readonly, instance query builders, family-scoped multi-tenancy, API resilience, attribute casting, FormRequest-to-DTO bridge) now live within ADRs 0002–0006. ADR-0010 and ADR-0011 were subsequently assigned to new decisions._

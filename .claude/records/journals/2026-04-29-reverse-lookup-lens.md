@@ -129,29 +129,62 @@ What I would polish given another shift: the `castNullableString` private helper
 
 _Appended by the Logistics Director after reviewing the log. The sorter's sections above are not edited — they stand as written._
 
-**Overall Assessment:** _to be filled by Director_
+**Filed retroactively 2026-05-05** — the original shift was completed 2026-04-29 and merged via `db9172c`; the Director Evaluation was not appended at filing time. This evaluation closes that accountability gap, surfaced as Finding 5 in the 2026-05-05 full sweep audit.
+
+**Overall Assessment:** Excellent shift. Portfolio-quality delivery against a substantive permit. The bounded-SQL discipline, mutation-pinned testing, and explicit Q1/Q2/Q3 query budget make this a reference implementation for the next bulk-aggregation endpoint.
 
 ### Order Fulfillment Review
 
-_Did the sorter deliver what the shipping order specified? Any gaps or over-delivery?_
+All five acceptance criteria met. The bounded-query proof via `DB::listen` query-count assertion on a 5-set fixture is over-and-above what the permit required — it converts "at most three queries" from a design intent into a runtime invariant. That's the kind of unprompted depth that strengthens the warehouse, not scope creep.
+
+The same-layer `ResultDTO → ResultDTO` reference (`FamilyPartUsageData → FamilyPartUsageEntryData`) is a genuine architectural innovation. Verified deptrac allows it; the Sorter cited the existing Input-layer precedent (`RebrickableUserSetData → LegoSetData`) as the pattern to mirror. This kind of "find the precedent before assuming you need a new pattern" reasoning is exactly what ADR-0010's evolution rewards.
 
 ### Decision Review
 
-_Were the decisions well-reasoned? Any that should have been escalated to the CEO?_
+**Decision 1 (200 vs 404 for unknown part):** Sound. The Sorter's articulation of the underlying semantics — "the endpoint is shaped as a query, not a fetch" — is the right way to think about this. A query over family data with a possibly-empty answer is 200; a missing entity fetch is 404. The consistency with `GET /family-sets/missing-parts` clinches it.
+
+**Decision 2 (per-entry shortfall semantics, repeating `quantityStored`):** Sound. The "is this one set covered?" framing matches the Reverse Lookup Lens's UX intent. Distributing stored proportionally across entries would invent a policy the user didn't ask for. Documenting the no-summing constraint on the DTO docblock is a sharp move — future consumers can't misread the shape.
+
+**Decision 3 (same-layer ResultDTO → ResultDTO):** Approved as documented. The deptrac verification + Input-layer precedent citation makes this defensible. Worth noting that the audit's Finding 7 remediation will amend ADR-0010 to formalize the Input/Result split rule — at that point, the same-layer dependency rule should be made explicit in the ADR text. Flagging as a follow-up for the paper-trail order.
+
+**Decision 4 (parameterised `whereRaw` in leftJoin closure):** Approved. The +1-query alternative would have breached the documented three-query budget; `DB::raw` would have breached ADR-0007. The leftJoin-closure trick is the cleanest in-budget option. Mutation tests pin the closure body — exactly what the testing strategy should look like.
+
+**Decision 5 (renamed `FamilyPartUsageEntry` → `FamilyPartUsageEntryData`):** Forced by `DtoArchitectureTest` — the architecture gauntlet doing its job. No judgment needed; the rule is universal.
+
+No decisions needed escalation. The 200-vs-404 judgment was the only one that flirted with that line, and the Sorter's articulation made it self-justifying.
 
 ### Showcase Assessment
 
-_Does the delivery strengthen the portfolio, or is there polish needed?_
+This shift strengthens the portfolio materially. A senior architect auditing this code would find:
+
+- Bounded SQL with documented Q1/Q2/Q3 rationale
+- 100% MSI on a non-trivial Action (41 mutations, 0 escaped)
+- Strict-mock unit tests that lock SQL clause shape per query
+- A feature-level `DB::listen` query-count test that proves the budget under real fixtures
+- Same-layer ResultDTO innovation with explicit precedent citation
+- Honest semantics in the DTO docblock (no-summing constraint documented)
+
+The polish opportunity the Sorter flagged (`castNullableString` private helper) is genuine but minor — the helper improves readability at four call-sites, and PHPStan narrowing is cleaner with it. Not worth a follow-up shift.
 
 ### Training Proposal Dispositions
 
 | Proposal | Disposition | Rationale |
 |---|---|---|
-| _Before constructing a ResourceData via `Collection::map()->all()`, wrap in `array_values()` when the parameter type is `list<...>`._ | _to be filled_ | _to be filled_ |
-| _When designing a Result DTO that an existing precedent stores as array shapes, re-read the permit before defaulting to the cheaper pattern._ | _to be filled_ | _to be filled_ |
-| _When mocking a leftJoin-with-Closure for unit coverage, invoke the closure against a JoinClause mock — otherwise the closure body is uncovered._ | _to be filled_ | _to be filled_ |
-| _When the shipping order's acceptance criteria include an "at most N queries" budget, always add a feature-level `DB::listen` query-count test on a fixture sized larger than the budget._ | _to be filled_ | _to be filled_ |
+| Before constructing a ResourceData via `Collection::map()->all()`, wrap in `array_values()` when the parameter type is `list<...>` | **Candidate** | Concrete, recurring PHPStan/typing pattern. Will repeat on every nested-list ResourceData. First confirming observation logged. |
+| When designing a Result DTO that an existing precedent stores as array shapes, re-read the permit before defaulting to the cheaper pattern | **Drop** | Generic "read the order carefully" framed as a learning. Hard to formalize as a structural check; it's diligence, not pattern. The graduated 2026-05-03 training about verifying permit claims via filesystem already covers the broader "permit text is design intent; verify before defaulting" principle from a different angle. No new candidate needed. |
+| When mocking a leftJoin-with-Closure for unit coverage, invoke the closure against a JoinClause mock — otherwise the closure body is uncovered | **Candidate** | Specific recurring testing technique. Will apply to every Action that uses `leftJoin(table, Closure)` for parameterised joins. Mutation testing surfaced the gap; first confirming observation. |
+| When the shipping order's acceptance criteria include an "at most N queries" budget, always add a feature-level `DB::listen` query-count test on a fixture sized larger than the budget | **Candidate** | Strong proposal. Mock-once unit tests prove the Action's *intent*; `DB::listen` proves the *runtime behaviour*. Both are needed when "at most N" is the contract. Will recur on bulk aggregation endpoints. First confirming observation logged; this one is graduation-track. |
 
 ### Notes for the Sorter
 
-_Direct feedback. What to repeat, what to do differently next time._
+This shift is a reference implementation. Points worth repeating:
+
+- **The "I almost did not write a query-count test" self-flag.** That's the kind of self-awareness the warehouse rewards. Catching the gap before it ships is the whole point.
+- **Reading the precedent first.** The permit said "mirror `GetFamilyMissingPartsAction`" and the Sorter read it before designing. Result: a sibling action that the next sorter will read in five minutes.
+- **The DTO docblock no-summing constraint.** Documenting semantic constraints at the DTO layer (not just in the calling code) is excellent forward-defense. Future consumers can't misread the shape.
+
+One small note for next time: the same-layer ResultDTO precedent citation was correctly verified, but the citation lived in the shift log's Decisions Made section, not in the ADR-0010 text. That is the right place — ADR amendments are Director-side work, not Sorter-side. But when the paper-trail order amends ADR-0010 (sibling order `2026-05-05-audit-remediation-5-paper-trail`), this same-layer dependency rule should be folded into the amendment so the precedent is captured architecturally, not just journal-archaeologically.
+
+### Note on the Frontend Contract Blind Spot
+
+The Sorter's blind-spot self-flag about the wire shape (snake_case fields, `status` enum string value) is well-placed. The Plate side shipped in parallel and the contract held. Future shifts producing wire shapes for cross-repo consumers should continue this pattern — flag the contract explicitly, do not unilaterally adjust.
