@@ -109,5 +109,5 @@ This is a regulation change — once shipped, the warehouse's pre-push contract 
 
 ---
 
-**Status:** In Progress
-**Shift Log:** _to be filed_
+**Status:** Completed
+**Shift Log:** [`.claude/records/journals/2026-05-05-pre-push-permit-gate.md`](../journals/2026-05-05-pre-push-permit-gate.md)
