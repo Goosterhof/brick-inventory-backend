@@ -109,5 +109,7 @@ This is a regulation change — once shipped, the warehouse's pre-push contract 
 
 ---
 
-**Status:** Completed
+**Status:** In Progress
 **Shift Log:** [`.claude/records/journals/2026-05-05-pre-push-permit-gate.md`](../journals/2026-05-05-pre-push-permit-gate.md)
+
+_Status remains `In Progress` through the close-out push so the gate accepts the shift-log commit; flips to `Completed` after the PR merges. See decision #7 in the shift log._

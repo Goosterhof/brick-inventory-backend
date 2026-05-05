@@ -52,6 +52,8 @@ Optional architecture test (verify `PrePushPermitGate` is wired into `captainhoo
 
 6. **`afterEach` in `scanPermits` tests uses `scandir` + skip `./..`, not `glob('*')`** — The first attempt used `glob('*')` which silently misses dotfiles. The template fixture (`.shipping-order-template.md`) is a dotfile, so its `unlink` was skipped and `rmdir` failed with "Directory not empty". Switched to `scandir` after the test fail-clue surfaced the issue.
 
+7. **Permit Status stays `In Progress` until the PR merges, not until the shift log is filed locally.** When invoking the new gate against the actual repo after closing the permit, the gate correctly blocked the close-out push because the permit was `Completed`. Two reads were possible: flip Status late (after merge) and let the close-out push through; flip Status early and use documented `--no-verify` for the close-out. The CEO chose the late-flip option — pushing with `--no-verify` for routine close-outs would normalize bypass use and dilute the escape hatch. The Status convention going forward: `Open` → picked up → `In Progress` → shift log filed (Status unchanged) → push to remote (gate passes) → PR merged → flip to `Completed`. The permit file's Status field gains a one-line note pointing here.
+
 ## Quality Gauntlet
 
 | Check | Result | Notes |
