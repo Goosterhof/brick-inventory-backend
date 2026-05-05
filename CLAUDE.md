@@ -377,6 +377,21 @@ A shipping order specifies: what to sort, what's in scope, what's not, and how t
 **Naming:** `YYYY-MM-DD-{short-description}.md`
 **Template:** `.claude/records/permits/.shipping-order-template.md`
 
+#### Permit Lifecycle
+
+The `**Status:**` field in a permit drives the [Pre-Push Gauntlet](#the-pre-push-gauntlet) (ADR-0013), so its values are not decorative — they are the gate's truth source.
+
+| Status | When |
+|---|---|
+| `Open` | Filed but not yet picked up. Visible to the floor; no Sorter assigned. |
+| `In Progress` | Sorter has picked it up and started work. **Stays In Progress through the close-out push** — the gate accepts pushes against the close-out shift log without `--no-verify`. |
+| `Completed` | The PR has merged into `main`. Flipping happens AFTER merge, not after shift log filing. |
+| `Cancelled` | Order withdrawn before completion. Equivalent to `Completed` for the gate (treated as inactive). |
+
+**Why the late `Completed` flip:** the gate fails on `Completed` and `Cancelled` permits to prevent stale-permit reuse. If `Completed` were set when the shift log was filed locally, every close-out push would require `--no-verify` and the documented escape hatch would lose its meaning through routine use. Flipping after merge keeps the bypass reserved for genuine exceptions.
+
+**Mechanics of the late flip:** after the PR merges (or as part of the merge commit), update the permit's `Status:` line to `Completed` and link the shift log. This can be a manual edit on `main` or a follow-up commit; either way it is a low-risk, single-line change that does not need its own permit.
+
 ### Shift Logs (`.claude/records/journals/`)
 
 Filed AFTER work completes. The Head Sorter produces a shift log for every shipping order. The log includes: what was sorted, whether acceptance criteria were met, decisions made, quality gauntlet results, proposed knowledge updates, and a self-debrief with training proposals.
