@@ -12,7 +12,7 @@
 | Action | File | Notes |
 |---|---|---|
 | Created | `tools/CaptainHook/PrePushPermitGate.php` | Final action class implementing CaptainHook's Action interface. Pure static decision helpers (`branchSlug`, `permitSlugFromFilename`, `isUnderThreshold`, `parseStatus`, `parseShortstat`, `findMatchingPermit`, `failureMessage`, `scanPermits`) plus instance glue for git diff (`computeDiffStats` via `shell_exec`) |
-| Created | `tests/Unit/CaptainHook/PrePushPermitGateTest.php` | 41 unit tests across 8 describe blocks. Pure-logic methods tested directly; `scanPermits` tested with a temp permits directory |
+| Created | `tests/Tools/CaptainHook/PrePushPermitGateTest.php` | 41 unit tests across 8 describe blocks. Pure-logic methods tested directly; `scanPermits` tested with a temp permits directory. Lives under a separate `Tools` testsuite (added to `phpunit.xml`) so coverage/mutation runs filtered to `--testsuite=Unit` don't warn about the `covers()` target being outside their `<source>` filter — initial CI run failed for exactly this reason. |
 | Modified | `captainhook.json` | Added `\\Tools\\CaptainHook\\PrePushPermitGate` action to `pre-push` block, before `composer test` |
 | Modified | `composer.json` | Registered `Tools\\` → `tools/` under `autoload-dev` |
 | Modified | `CLAUDE.md` | Added **Pre-Push Gauntlet** subsection in Quality Control Bay (parallel to Pre-Commit Gauntlet); added **Documented Escape Hatch** subsection in Operations Protocol |
