@@ -108,29 +108,56 @@ The one wart is AC #6 unmet — but it is unmet for a reason that strengthens th
 
 ## Logistics Director Evaluation
 
-_Pending — appended after Logistics Director review._
+_Appended by the Logistics Director after reviewing the log. The sorter's sections above are not edited — they stand as written._
 
-**Overall Assessment:** _to be assessed_
+**Filed retroactively 2026-05-05** — the original shift was completed 2026-05-01 and merged via `f7e7d3c`; the Director Evaluation was not appended at filing time. This evaluation closes that accountability gap, surfaced as Finding 6 in the 2026-05-05 full sweep audit.
+
+**Overall Assessment:** Clean adoption shift, executed exactly as the pre-survey predicted. The discipline confirmed by the discovery pass (0 findings on all four new rule identifiers) is the strongest signal a rules-package adoption can produce — it means the warehouse's existing patterns already aligned with the canonical rules before they were enforced.
 
 ### Order Fulfillment Review
 
-_Pending._
+11 of 12 acceptance criteria met. AC #6 ("composer phpstan passes at level max with 0 errors") was not met due to a pre-existing 4-error baseline on `main` (Laravel 13 deprecation flags on `bootstrap/app.php`, `config/database.php`, `config/sanctum.php`). This was correctly diagnosed as **predating, not caused by, this adoption**.
+
+The Sorter's Option A choice — ship the package adoption clean, defer the deprecation cleanup to its dedicated permit (`2026-04-30-laravel-137-deprecation-cleanup`) — was the right strategic call. Bundling would have entangled two distinct units of work in a single git blame line, reducing the auditability of both. The dedicated permit's existence and explicit enumeration of the same 4 errors justifies deferral; this is exactly the "do not bundle" discipline the original Shipping Order called for, applied to its own constraints.
 
 ### Decision Review
 
-_Pending._
+**Decision 1 (Option A — ship narrow, accept AC #6 as predating):** Approved with documented rationale. The General authorized; the Sorter executed; the audit trail is intact. Worth noting: this is a textbook example of when "do not bundle" is correct — the deprecation cleanup is owned by its own permit, with a flagged ADR-level call (`MYSQL_ATTR_SSL_CA`) that deserves considered disposition rather than reflex inclusion.
+
+**Decision 2 (`--no-verify` on commit and push):** Approved retrospectively. The pre-commit hook would have failed on phpstan due to the predating baseline, independent of this branch's content. The General authorized a one-time scoped exception; the Sorter documented the scope in the shift log; the test suite (which is the actual coverage assurance) passed in full.
+
+**This is exactly the use case ADR-0013 (filed 2026-05-05) is designed to govern.** Going forward, the new pre-push permit gate will require an active shipping order on the branch slug for any push containing >20 files or >500 lines. This shift's pattern — documented General authorization, narrow scope, predating-baseline rationale, single-commit shape — is the template for future legitimate `--no-verify` use, with the addition that the override itself must now be explicitly called out in the shift log's Decisions Made section (which this Sorter did, ahead of the formal requirement).
+
+**Decision 3 (single commit, no second commit for suppressions):** Approved. The two-commit branch was conditional on Step 3 surfacing findings; Step 3 found nothing; the canonical one-commit shape applied. Correct application of the conditional permit logic.
+
+**Decision 4 (no `app/CLAUDE.md` modification):** Approved. The grep verification before assuming was the right discipline — the regulations describe the rule, not the inline extension class, so there was nothing to update. This is the kind of "verify before defaulting" practice the graduated 2026-05-03 training rewards.
+
+### Note on the ADR-0021 Reference
+
+The shift log's AC #11 references "ADR-0021" governing this work. The warehouse's ADR ledger currently runs 0001–0013 (with ADR-0013 added 2026-05-05). ADR-0021 is therefore an exogenous reference — a war-room ADR or Phaeton-side decision record, not a warehouse ADR. This is fine for the war-room deployment context but worth flagging so future readers understand the warehouse's ADR ledger is not affected. No action needed on this front.
 
 ### Showcase Assessment
 
-_Pending._
+This is a strong portfolio entry. The "discipline confirmed by a dispassionate audit" framing is exactly right. A senior architect reviewing this shipment sees:
+
+- A pre-survey that predicted the cleanest outcome, and a discovery pass that confirmed it
+- A one-commit shape that reads cleanly in `git blame`
+- A scoped, documented `--no-verify` rationale tied to a predating-baseline state
+- A standing dedicated permit for the deferred cleanup (with ADR-level call flagged for considered disposition)
+
+The unmet AC #6 strengthens the portfolio rather than weakening it — it demonstrates strategic scoping discipline. The audit trail (shift log + permit + General's brief + dedicated cleanup permit) is complete and self-consistent.
 
 ### Training Proposal Dispositions
 
 | Proposal | Disposition | Rationale |
 |---|---|---|
-| Document `--no-verify` scope in shift log | _Pending_ | _to be assessed_ |
-| Capture full phpstan output for clean discovery passes | _Pending_ | _to be assessed_ |
+| When the General authorizes `--no-verify` for a scoped reason, document the scope in the shift log even if the General's brief has the rationale — the audit trail lives in the warehouse, not the war room | **Drop** | Superseded by ADR-0013 (filed 2026-05-05). The new pre-push permit gate formalizes this requirement at the warehouse-regulation layer: every `--no-verify` push must reference an active shipping order whose Decisions Made section documents the override scope. The Sorter's proposal anticipated the right principle; ADR-0013 promotes it from Sorter SOP to warehouse regulation. Tracking it as a Sorter candidate would duplicate enforcement. |
+| Before claiming "0 findings on all four new rules," capture the full `composer phpstan` output to a file or block — the discovery counts table is the artifact, but the raw output is the proof | **Candidate** | First confirming observation. Adjacent to the graduated 2026-04-29 training about capturing baseline command output (`/tmp/<step>.log`), but distinct: that one is for "must drop from N to M" delta proofs; this one is for "discovery pass returned clean" claims. The general principle — "raw command output is the audit-grade evidence; summary tables are the convenience layer" — may eventually graduate as a unified rule, but for now this candidate stays narrow and observation-counts toward that broader graduation. |
 
 ### Notes for the Sorter
 
-_Pending._
+This shift was a model of constraint-aware execution. The General's Option A direction was followed precisely; the temptation to "fix the 4 deprecation errors while we're here" was real and was correctly resisted. That kind of scope discipline is exactly what the warehouse rewards.
+
+The blind-spot self-flag — "verified by the General should not become no Armorer ever verifies" — is sharp. Keep doing that. It's the difference between a Sorter who follows orders and a Sorter who treats their own diligence as the last line of defense.
+
+One forward-looking note: with ADR-0013 now filed, future `--no-verify` shifts must (a) reference an active shipping order with the matching branch slug, and (b) explicitly document the override in the shift log's Decisions Made section. This shift already met both requirements ahead of the formal regulation — that's the standard to maintain.
