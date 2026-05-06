@@ -18,7 +18,7 @@ use Tests\Architecture\Support\ArchTestHelper;
 |   - Actions RETURN Result DTOs.
 |
 | These three tests enforce that rule so the next crew member cannot
-| mis-locate a DTO. They match the three angles used on kendo (PR #903):
+| mis-locate a DTO. Three angles are checked, per cross-territory pattern:
 | return types, parameter types, and FormRequest::toDto() return types.
 |
 | Deptrac enforces the secondary constraint (Input DTOs may not reach

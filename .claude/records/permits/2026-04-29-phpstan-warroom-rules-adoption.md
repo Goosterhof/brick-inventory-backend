@@ -10,9 +10,9 @@
 
 ## The Shipment
 
-The war room has packaged five PHPStan rules into a canonical Composer package — `script-development/phpstan-warroom-rules` (ADR-0021). Four ally cascades have already shipped (emmie origin dogfood, kendo, ublgenie Phase 1, entreezuil Phase 1 + Phase 2). Lego-storage is the next leg of the rollout. Replace the warehouse's inline `App\PHPStan\ConnectionTransactionReturnTypeExtension` with the published package, surface any rule violations in a discovery pass, and land Phase 1 (adoption) — Phase 2 (cleanup of any systemic findings) is scoped only if discovery surfaces them.
+The war room has packaged five PHPStan rules into a canonical Composer package — `script-development/phpstan-warroom-rules` (ADR-0021). Four ally cascades have already shipped (donor-origin dogfood, plus three follow-on Phase 1 adoptions). Lego-storage is the next leg of the rollout. Replace the warehouse's inline `App\PHPStan\ConnectionTransactionReturnTypeExtension` with the published package, surface any rule violations in a discovery pass, and land Phase 1 (adoption) — Phase 2 (cleanup of any systemic findings) is scoped only if discovery surfaces them.
 
-The pre-survey signals this is the cleanest non-donor cascade we'll see: every Action already injects `Illuminate\Database\ConnectionInterface` (donor convention, mandated by `app/CLAUDE.md` warehouse regulations), no `DatabaseManager` is imported anywhere in `app/Actions/`, no `abort()` family helper appears anywhere in `app/`, and no model name contains "Log" (case-insensitive). The shipment should land as a one-commit dogfood-shape adoption — closer to emmie's round-trip than to ublgenie/entreezuil's Phase 1 with global suppression.
+The pre-survey signals this is the cleanest non-donor cascade we'll see: every Action already injects `Illuminate\Database\ConnectionInterface` (donor convention, mandated by `app/CLAUDE.md` warehouse regulations), no `DatabaseManager` is imported anywhere in `app/Actions/`, no `abort()` family helper appears anywhere in `app/`, and no model name contains "Log" (case-insensitive). The shipment should land as a one-commit dogfood-shape adoption — closer to the donor's round-trip than to the Phase 1 cascades that needed global suppression.
 
 ## Scope
 
@@ -35,7 +35,7 @@ The pre-survey signals this is the cleanest non-donor cascade we'll see: every A
    - **0 findings on a rule:** no action; the rule enforces silently going forward.
    - **`enforceActionTransactions.missingTransaction` finding(s):** open each cited Action and reason about whether the missing transaction is (a) a real bug — an Action performing ≥2 writes without `->transaction()` wrapping, in which case it goes on the Phase 2 backlog and is suppressed in `phpstan.neon` with `identifier: enforceActionTransactions.missingTransaction` + a `path:` scoped to the cited file, **with a `# TODO:` comment naming the follow-up shipping order**; or (b) a false positive (e.g., the rule miscounts non-DB property calls), in which case open a war-room issue against the package before suppressing. Do not blanket-suppress.
    - **Any other unexpected finding** (a rule that pre-survey expected 0 from): stop and ping the General before drafting suppression — the rule is doing what it should, and a surprise finding is news worth reading.
-4. **Step 4 — Add a clarifying comment above any `ignoreErrors` entries** stating the doctrine origin (ADR-0021), the package version, and the disposition (Phase 2 backlog vs. legitimate exception). The kendo precedent (`ProvisionTenantDatabaseAction:24` legitimate-exception comment) is the model.
+4. **Step 4 — Add a clarifying comment above any `ignoreErrors` entries** stating the doctrine origin (ADR-0021), the package version, and the disposition (Phase 2 backlog vs. legitimate exception). The cross-territory legitimate-exception comment style is the model.
 5. **Step 5 — Verify `composer phpstan` is green at level max** with the new package wired and any suppression entries in place. `reportUnmatchedIgnoredErrors: true` is already on (line 35 of `phpstan.neon`), which is the correct posture — keep it on.
 6. **Step 6 — Run the full Quality Control gauntlet locally** before the push gauntlet runs it again: `composer lint:test && composer phpstan && composer deptrac && composer test`. The arch-test suite (`tests/Architecture/`) does not test for the new rules' coverage and will not regress; this is a precaution against any incidental cross-effect.
 7. **Step 7 — Land as one or two commits.**
@@ -74,10 +74,10 @@ The pre-survey signals this is the cleanest non-donor cascade we'll see: every A
 - Package repo: https://github.com/script-development/phpstan-warroom-rules
 - Package on Packagist: https://packagist.org/packages/script-development/phpstan-warroom-rules
 - Donor cascade PRs (use these as shape references, not as instruction):
-  - emmie (donor dogfood): emmie-app/emmie#189
-  - kendo (cleanest cleanroom): script-development/kendo#1002
-  - ublgenie (Phase 1 with global suppression): Back-to-code/ublgenie-app#163
-  - entreezuil (Phase 1 + Phase 2 same-day): script-development/entreezuil#137 / #138
+  - donor dogfood: [private-territory]/[allied-app]#REDACTED
+  - cleanest cleanroom: [private-org]/[allied-app]#REDACTED
+  - Phase 1 with global suppression: [private-org]/[allied-app]#REDACTED
+  - Phase 1 + Phase 2 same-day: [private-org]/[allied-app]#REDACTED / #REDACTED
 - War room `MEMORY.md` lessons that apply to this shipment:
   - **Cascade Discovery Pass** — drives Step 1 above.
   - **PHPStan Baseline Cascade** — `reportUnmatchedIgnoredErrors: true` already on; suppressions decay loudly when violations move.
@@ -91,13 +91,13 @@ The pre-survey signals this is the cleanest non-donor cascade we'll see: every A
 
 **The pre-survey is strong but not a substitute for the discovery pass.** Grep can prove absence of `DatabaseManager` imports, of `abort()` calls, of "Log" model names — those are syntactic surfaces. It cannot prove absence of `enforceActionTransactions.missingTransaction` findings, because that rule reasons about call sequences inside `execute()` methods, not about syntax. The discovery pass is mandatory; the pre-survey just sets the prior on what to expect.
 
-**The inline `ConnectionTransactionReturnTypeExtension` is a happy coincidence, not duplication that needs careful migration.** When emmie was the donor, this extension was already in lego-storage — same use case (return-type inference on `$connection->transaction()` closures), same code shape. The package consolidates it. There is no behavioral migration; the package's class replaces the inline class, the namespace differs, the `phpstan.neon` wiring shifts from `services:` to `includes:`. PHPStan's behavior for the warehouse's source code does not change.
+**The inline `ConnectionTransactionReturnTypeExtension` is a happy coincidence, not duplication that needs careful migration.** When the donor cascade started, this extension was already in lego-storage — same use case (return-type inference on `$connection->transaction()` closures), same code shape. The package consolidates it. There is no behavioral migration; the package's class replaces the inline class, the namespace differs, the `phpstan.neon` wiring shifts from `services:` to `includes:`. PHPStan's behavior for the warehouse's source code does not change.
 
-**Time-to-enforcement is immediate on the four other rules.** Whatever findings appear in the discovery pass are findings that the warehouse has been carrying without static-analysis surfacing them. That is the entire point of the cascade: rules that were Level 6 (passive monitoring) for every territory except emmie are now Level 2 (static analysis) here. If the discovery pass finds 0 across all four new rules, the warehouse has been doing the right thing on doctrine that wasn't yet enforced — record that explicitly in the shift log; it is a portfolio signal.
+**Time-to-enforcement is immediate on the four other rules.** Whatever findings appear in the discovery pass are findings that the warehouse has been carrying without static-analysis surfacing them. That is the entire point of the cascade: rules that were Level 6 (passive monitoring) for every territory except the donor are now Level 2 (static analysis) here. If the discovery pass finds 0 across all four new rules, the warehouse has been doing the right thing on doctrine that wasn't yet enforced — record that explicitly in the shift log; it is a portfolio signal.
 
 **`composer require` only — no `php8.4 -d ...` prefix.** Per the war room's deployment-order shell pitfalls memo: a prefixed install bypasses warehouse environment expectations and has caused setup drift on prior cascades. Run the bare command.
 
-**The warehouse is on Laravel 13 and PHP 8.4.** Both are within the package's `^11.0 || ^12.0 || ^13.0` Laravel constraint and the `^8.3` PHP floor. The v0.1.0 → v0.1.1 patch (Laravel 13 widening, shipped same-day during entreezuil's cascade) means lego-storage gets the right constraint floor on the first install attempt.
+**The warehouse is on Laravel 13 and PHP 8.4.** Both are within the package's `^11.0 || ^12.0 || ^13.0` Laravel constraint and the `^8.3` PHP floor. The v0.1.0 → v0.1.1 patch (Laravel 13 widening, shipped same-day during a prior allied cascade) means lego-storage gets the right constraint floor on the first install attempt.
 
 Run the gauntlet before filing the shift log. Include the per-rule discovery counts and a one-paragraph "what the cascade revealed about the warehouse" section — this PR's `git blame` will be referenced when the next non-donor territory adopts the package.
 

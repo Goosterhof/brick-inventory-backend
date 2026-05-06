@@ -31,7 +31,7 @@ Per Step 1 of the Shipping Order, ran `composer phpstan` after wiring the packag
 | `forbidAbort.abortUsed` | 0 |
 | `log.forbiddenWrite` | 0 |
 
-The pre-survey held byte-for-byte: every Action injects `Illuminate\Database\ConnectionInterface`, no `DatabaseManager` imports anywhere in `app/Actions/`, no `abort()` family helper appears anywhere in `app/`, no model name contains "Log". The cleanest non-donor cascade outcome the Shipping Order predicted as the "best case." Whatever the warehouse has been carrying without static-analysis surfacing it has now graduated from passive monitoring (Level 6) to static analysis (Level 2). One-commit dogfood-shape adoption — closer to emmie's round-trip than to ublgenie/entreezuil's Phase 1 with global suppression.
+The pre-survey held byte-for-byte: every Action injects `Illuminate\Database\ConnectionInterface`, no `DatabaseManager` imports anywhere in `app/Actions/`, no `abort()` family helper appears anywhere in `app/`, no model name contains "Log". The cleanest non-donor cascade outcome the Shipping Order predicted as the "best case." Whatever the warehouse has been carrying without static-analysis surfacing it has now graduated from passive monitoring (Level 6) to static analysis (Level 2). One-commit dogfood-shape adoption — closer to the donor's round-trip than to the Phase 1 cascades that needed global suppression.
 
 ## Order Fulfillment
 

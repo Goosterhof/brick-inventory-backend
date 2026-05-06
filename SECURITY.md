@@ -4,7 +4,7 @@
 
 If you discover a security vulnerability in this project, please report it privately rather than opening a public issue.
 
-**Email:** security@example.com
+**Email:** gerard@script.nl
 
 Please include:
 
