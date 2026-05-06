@@ -21,8 +21,8 @@ A REST API for managing your LEGO inventory. Track which parts you have, where t
 
 ```bash
 # Clone the repository
-git clone https://github.com/Goosterhof/lego-storage.git
-cd lego-storage
+git clone https://github.com/Goosterhof/brick-inventory-backend.git
+cd brick-inventory-backend
 
 # Install dependencies and set up the application
 composer setup

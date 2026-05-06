@@ -8,8 +8,8 @@ Thank you for your interest in contributing to LEGO Storage!
 2. Clone your fork and set up the project:
 
 ```bash
-git clone https://github.com/your-username/lego-storage.git
-cd lego-storage
+git clone https://github.com/your-username/brick-inventory-backend.git
+cd brick-inventory-backend
 composer setup
 ```
 
