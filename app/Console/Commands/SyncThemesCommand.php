@@ -23,13 +23,13 @@ final class SyncThemesCommand extends Command
 
     public function handle(SyncThemesAction $syncThemesAction): int
     {
-        $themeSyncResult = $syncThemesAction->execute();
+        $themeSyncResultData = $syncThemesAction->execute();
 
         $this->info(sprintf(
             'Themes sync complete: fetched=%d upserted=%d parentsLinked=%d',
-            $themeSyncResult->fetched,
-            $themeSyncResult->upserted,
-            $themeSyncResult->parentsLinked,
+            $themeSyncResultData->fetched,
+            $themeSyncResultData->upserted,
+            $themeSyncResultData->parentsLinked,
         ));
 
         return self::SUCCESS;
