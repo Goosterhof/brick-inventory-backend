@@ -8,6 +8,7 @@ use Carbon\Carbon;
 use Database\Factories\SetFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
@@ -16,16 +17,25 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string       $set_num
  * @property string       $name
  * @property int|null     $year
- * @property string|null  $theme
+ * @property int|null     $theme_id
  * @property int          $num_parts
  * @property string|null  $image_url
  * @property Carbon|null  $created_at
  * @property Carbon|null  $updated_at
+ * @property Theme|null   $theme
  */
 class Set extends Model
 {
     /** @use HasFactory<SetFactory> */
     use HasFactory;
+
+    /**
+     * @return BelongsTo<Theme, $this>
+     */
+    public function theme(): BelongsTo
+    {
+        return $this->belongsTo(Theme::class);
+    }
 
     /**
      * @return BelongsToMany<Part, $this>

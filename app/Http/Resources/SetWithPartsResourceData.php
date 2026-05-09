@@ -12,7 +12,7 @@ use Illuminate\Database\Eloquent\Model;
  */
 final readonly class SetWithPartsResourceData extends ResourceData
 {
-    public const array EAGER_LOAD = ['setParts.part', 'setParts.color'];
+    public const array EAGER_LOAD = ['theme', 'setParts.part', 'setParts.color'];
 
     /**
      * @param array<int, SetPartResourceData> $parts
@@ -22,7 +22,7 @@ final readonly class SetWithPartsResourceData extends ResourceData
         public string $set_num,
         public string $name,
         public ?int $year,
-        public ?string $theme,
+        public ?ThemeResourceData $theme,
         public int $num_parts,
         public ?string $image_url,
         public array $parts,
@@ -40,7 +40,7 @@ final readonly class SetWithPartsResourceData extends ResourceData
             set_num: $model->set_num,
             name: $model->name,
             year: $model->year,
-            theme: $model->theme,
+            theme: $model->theme !== null ? ThemeResourceData::from($model->theme) : null,
             num_parts: $model->num_parts,
             image_url: $model->image_url,
             parts: array_map(

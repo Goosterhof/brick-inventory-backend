@@ -9,6 +9,7 @@ use App\DataTransferObjects\Input\Lego\LegoColorData;
 use App\DataTransferObjects\Input\Lego\LegoPartData;
 use App\DataTransferObjects\Input\Lego\LegoSetData;
 use App\DataTransferObjects\Input\Lego\LegoSetPartData;
+use App\DataTransferObjects\Input\Lego\LegoThemeData;
 use App\DataTransferObjects\Input\Lego\RebrickableUserSetData;
 use App\Exceptions\InvalidApiResponseException;
 use App\Exceptions\RebrickableApiException;
@@ -35,6 +36,8 @@ final readonly class RebrickableService implements LegoDataServiceInterface
     private const array COLOR_NESTED_REQUIRED_FIELDS = ['id', 'name', 'rgb', 'is_trans'];
 
     private const array USER_SET_REQUIRED_FIELDS = ['set', 'quantity'];
+
+    private const array THEME_REQUIRED_FIELDS = ['id', 'name'];
 
     public function __construct(
         private HttpFactory $httpFactory,
@@ -238,6 +241,68 @@ final readonly class RebrickableService implements LegoDataServiceInterface
                 'results' => $pageResults,
                 'next' => $sanitizedNext,
             ], $this->userCacheTtl);
+
+            yield $pageResults;
+
+            $nextUrl = $sanitizedNext;
+            $page++;
+        }
+    }
+
+    /**
+     * @throws RebrickableApiException
+     * @throws InvalidApiResponseException
+     *
+     * @return Generator<int, list<LegoThemeData>>
+     */
+    public function fetchThemes(): Generator
+    {
+        /** @var string|null $nextUrl */
+        $nextUrl = '/lego/themes/';
+        $page = 1;
+
+        while ($nextUrl !== null) {
+            $cacheKey = sprintf('rebrickable:themes:page:%d', $page);
+
+            /** @var array{results: list<LegoThemeData>, next: string|null}|null $cachedPage */
+            $cachedPage = $this->cacheRepository->get($cacheKey);
+
+            if (is_array($cachedPage)) {
+                yield $cachedPage['results'];
+                $nextUrl = $cachedPage['next'];
+                $page++;
+
+                continue;
+            }
+
+            $response = $this->httpClient()->get($nextUrl);
+
+            $this->throwOnApiError($response, 'Failed to fetch themes');
+
+            $data = $response->json();
+
+            $this->validateThemesResponse($data);
+
+            /** @var array{results: list<array{id: int, parent_id: int|null, name: string}>, next: string|null} $validatedData */
+            $validatedData = $data;
+
+            /** @var list<LegoThemeData> $pageResults */
+            $pageResults = [];
+
+            foreach ($validatedData['results'] as $themeData) {
+                $pageResults[] = new LegoThemeData(
+                    id: $themeData['id'],
+                    name: $themeData['name'],
+                    parentId: $themeData['parent_id'] ?? null,
+                );
+            }
+
+            $sanitizedNext = $this->sanitizePaginationUrl($validatedData['next']);
+
+            $this->cacheRepository->put($cacheKey, [
+                'results' => $pageResults,
+                'next' => $sanitizedNext,
+            ], $this->cacheTtl);
 
             yield $pageResults;
 
@@ -477,6 +542,45 @@ final readonly class RebrickableService implements LegoDataServiceInterface
 
         if ($missingFields !== []) {
             throw InvalidApiResponseException::missingFields($missingFields, sprintf('User set at index %d', $index));
+        }
+    }
+
+    /**
+     * @throws InvalidApiResponseException
+     */
+    private function validateThemesResponse(mixed $data): void
+    {
+        if (!is_array($data)) {
+            throw InvalidApiResponseException::invalidStructure('Fetching themes', 'Expected array response');
+        }
+
+        if (!array_key_exists('results', $data) || !is_array($data['results'])) {
+            throw InvalidApiResponseException::invalidStructure('Fetching themes', "Missing or invalid 'results' field");
+        }
+
+        foreach ($data['results'] as $index => $themeData) {
+            $this->validateThemeData($themeData, $index);
+        }
+    }
+
+    /**
+     * @throws InvalidApiResponseException
+     */
+    private function validateThemeData(mixed $themeData, int $index): void
+    {
+        if (!is_array($themeData)) {
+            throw InvalidApiResponseException::invalidStructure('Fetching themes', sprintf('Theme at index %d is not an array', $index));
+        }
+
+        $missingFields = [];
+        foreach (self::THEME_REQUIRED_FIELDS as $field) {
+            if (!array_key_exists($field, $themeData)) {
+                $missingFields[] = $field;
+            }
+        }
+
+        if ($missingFields !== []) {
+            throw InvalidApiResponseException::missingFields($missingFields, sprintf('Theme at index %d', $index));
         }
     }
 }

@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 use App\DataTransferObjects\Input\Lego\LegoSetData;
 use App\DataTransferObjects\Input\Lego\LegoSetPartData;
+use App\DataTransferObjects\Input\Lego\LegoThemeData;
 use App\DataTransferObjects\Input\Lego\RebrickableUserSetData;
 use App\Services\RebrickableService;
 use Illuminate\Contracts\Cache\Repository as CacheRepository;
@@ -118,6 +119,35 @@ describe('Rebrickable API Contract', function(): void {
             expect($result[1]->color->name)->toBe('Black');
             expect($result[1]->isSpare)->toBeTrue();
             expect($result[1]->elementId)->toBeNull();
+        });
+    });
+
+    describe('fetchThemes contract', function(): void {
+        it('should parse a full realistic themes response including extra fields', function(): void {
+            $fixture = loadFixture('rebrickable-themes.json');
+
+            Http::fake([
+                'https://rebrickable.com/api/v3/lego/themes/' => Http::response($fixture),
+            ]);
+
+            $service = createContractRebrickableService();
+            $pages = iterator_to_array($service->fetchThemes());
+
+            expect($pages)->toHaveCount(1);
+            expect($pages[0])->toHaveCount(3);
+
+            expect($pages[0][0])->toBeInstanceOf(LegoThemeData::class);
+            expect($pages[0][0]->id)->toBe(1);
+            expect($pages[0][0]->name)->toBe('Technic');
+            expect($pages[0][0]->parentId)->toBeNull();
+
+            expect($pages[0][1]->id)->toBe(158);
+            expect($pages[0][1]->name)->toBe('Star Wars');
+            expect($pages[0][1]->parentId)->toBeNull();
+
+            expect($pages[0][2]->id)->toBe(209);
+            expect($pages[0][2]->name)->toBe('Episode I');
+            expect($pages[0][2]->parentId)->toBe(158);
         });
     });
 

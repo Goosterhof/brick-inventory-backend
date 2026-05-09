@@ -78,6 +78,10 @@ deptrac:
       collectors:
         - type: classLike
           value: App\\Http\\Controllers\\.*
+    - name: Console
+      collectors:
+        - type: classLike
+          value: App\\Console\\.*
 
     # --- Wiring layer ---
     - name: Provider
@@ -168,6 +172,12 @@ deptrac:
       - FormRequest
       - ResourceData
       - Model
+      - ResultDTO
+
+    # Console commands are entry points for scheduled / operator-only flows.
+    # They delegate to Actions and surface Result DTO counts via the CLI.
+    Console:
+      - Action
       - ResultDTO
 
     # Providers wire interfaces to implementations and configure action dependencies
