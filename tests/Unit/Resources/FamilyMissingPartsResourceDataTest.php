@@ -12,6 +12,7 @@ describe('FamilyMissingPartsResourceData', function(): void {
         $data = new FamilyMissingPartsData(
             shortfalls: [
                 [
+                    'part_id' => 12_345,
                     'part_num' => '3001',
                     'color_id' => 4,
                     'part_name' => 'Brick 2 x 4',
@@ -38,6 +39,7 @@ describe('FamilyMissingPartsResourceData', function(): void {
         $data = new FamilyMissingPartsData(
             shortfalls: [
                 [
+                    'part_id' => 67_890,
                     'part_num' => '3024',
                     'color_id' => 1,
                     'part_name' => 'Plate 1 x 1',
@@ -58,6 +60,7 @@ describe('FamilyMissingPartsResourceData', function(): void {
         expect($array)->toBe([
             'shortfalls' => [
                 [
+                    'part_id' => 67_890,
                     'part_num' => '3024',
                     'color_id' => 1,
                     'part_name' => 'Plate 1 x 1',

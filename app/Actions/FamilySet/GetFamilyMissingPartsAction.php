@@ -58,8 +58,8 @@ final readonly class GetFamilyMissingPartsAction
             ->join('colors', 'colors.id', '=', 'set_parts.color_id')
             ->where('family_sets.family_id', $family->id)
             ->whereNotIn('family_sets.status', [FamilySetStatus::Wishlist->value, FamilySetStatus::InStorage->value])
-            ->groupBy('parts.part_num', 'set_parts.color_id', 'parts.name', 'colors.name', 'colors.rgb', 'parts.image_url')
-            ->selectRaw('parts.part_num AS part_num, set_parts.color_id AS color_id, parts.name AS part_name, colors.name AS color_name, colors.rgb AS color_hex, parts.image_url AS part_image_url, SUM(set_parts.quantity * family_sets.quantity) AS quantity_needed')
+            ->groupBy('parts.id', 'parts.part_num', 'set_parts.color_id', 'parts.name', 'colors.name', 'colors.rgb', 'parts.image_url')
+            ->selectRaw('parts.id AS part_id, parts.part_num AS part_num, set_parts.color_id AS color_id, parts.name AS part_name, colors.name AS color_name, colors.rgb AS color_hex, parts.image_url AS part_image_url, SUM(set_parts.quantity * family_sets.quantity) AS quantity_needed')
             ->toBase()
             ->get();
 
@@ -140,6 +140,7 @@ final readonly class GetFamilyMissingPartsAction
                 continue;
             }
 
+            $partId = (int) $neededRow->part_id; // @phpstan-ignore cast.int
             $partName = (string) $neededRow->part_name; // @phpstan-ignore cast.string
             $colorName = (string) $neededRow->color_name; // @phpstan-ignore cast.string
             $colorHex = (string) $neededRow->color_hex; // @phpstan-ignore cast.string
@@ -147,6 +148,7 @@ final readonly class GetFamilyMissingPartsAction
             $partImageUrl = $neededRow->part_image_url;
 
             $shortfalls[] = [
+                'part_id' => $partId,
                 'part_num' => $partNum,
                 'color_id' => $colorId,
                 'part_name' => $partName,
