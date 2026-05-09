@@ -9,6 +9,7 @@ use App\Models\Set;
 use App\Models\SetPart;
 use App\Models\StorageOption;
 use App\Models\StorageOptionPart;
+use App\Models\Theme;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Http;
@@ -32,7 +33,6 @@ describe('SetController', function(): void {
                 'set_num' => '75192-1',
                 'name' => 'Millennium Falcon',
                 'year' => 2_017,
-                'theme' => 'Star Wars',
                 'num_parts' => 7_541,
                 'image_url' => 'https://example.com/falcon.jpg',
             ]);
@@ -73,7 +73,58 @@ describe('SetController', function(): void {
                 ->assertJsonPath('parts.0.part.id', $part->id)
                 ->assertJsonPath('parts.0.part.part_num', '3001')
                 ->assertJsonPath('parts.0.color.name', 'White')
-                ->assertJsonPath('parts.0.quantity', 10);
+                ->assertJsonPath('parts.0.quantity', 10)
+                ->assertJsonPath('theme', null);
+        });
+
+        it('should return nested theme block when the set has a theme', function(): void {
+            $user = User::factory()->create();
+
+            $parentTheme = Theme::factory()->create([
+                'rebrickable_id' => 158,
+                'name' => 'Star Wars',
+                'parent_id' => null,
+            ]);
+
+            $childTheme = Theme::factory()->create([
+                'rebrickable_id' => 209,
+                'name' => 'Episode I',
+                'parent_id' => $parentTheme->id,
+            ]);
+
+            $set = Set::factory()->create([
+                'set_num' => '7171-1',
+                'name' => 'Mos Espa Podrace',
+                'year' => 1_999,
+                'theme_id' => $childTheme->id,
+                'num_parts' => 901,
+                'image_url' => null,
+            ]);
+
+            $color = Color::factory()->create();
+
+            $part = Part::factory()->create([
+                'part_num' => '3001',
+                'name' => 'Brick 2 x 4',
+                'category' => '11',
+                'image_url' => null,
+            ]);
+
+            $setPart = new SetPart;
+            $setPart->set_id = $set->id;
+            $setPart->part_id = $part->id;
+            $setPart->color_id = $color->id;
+            $setPart->quantity = 1;
+            $setPart->is_spare = false;
+            $setPart->element_id = null;
+            $setPart->save();
+
+            $response = $this->actingAs($user)->getJson('/api/sets/7171-1/parts');
+
+            $response->assertStatus(200)
+                ->assertJsonPath('theme.id', $childTheme->id)
+                ->assertJsonPath('theme.name', 'Episode I')
+                ->assertJsonPath('theme.parentId', $parentTheme->id);
         });
 
         it('should fetch parts from rebrickable api when not cached', function(): void {
@@ -246,7 +297,6 @@ describe('SetController', function(): void {
                 'set_num' => '75192-1',
                 'name' => 'Millennium Falcon',
                 'year' => 2_017,
-                'theme' => 'Star Wars',
                 'num_parts' => 7_541,
                 'image_url' => 'https://example.com/falcon.jpg',
             ]);
@@ -287,7 +337,6 @@ describe('SetController', function(): void {
                 'set_num' => '75192-1',
                 'name' => 'Millennium Falcon',
                 'year' => 2_017,
-                'theme' => 'Star Wars',
                 'num_parts' => 7_541,
                 'image_url' => 'https://example.com/falcon.jpg',
             ]);
@@ -392,7 +441,6 @@ describe('SetController', function(): void {
                 'set_num' => '75192-1',
                 'name' => 'Millennium Falcon',
                 'year' => 2_017,
-                'theme' => '158',
                 'num_parts' => 7_541,
                 'image_url' => 'https://example.com/falcon.jpg',
             ]);

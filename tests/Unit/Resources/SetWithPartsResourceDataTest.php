@@ -4,10 +4,12 @@ declare(strict_types = 1);
 
 use App\Http\Resources\SetPartResourceData;
 use App\Http\Resources\SetWithPartsResourceData;
+use App\Http\Resources\ThemeResourceData;
 use App\Models\Color;
 use App\Models\Part;
 use App\Models\Set;
 use App\Models\SetPart;
+use App\Models\Theme;
 use Illuminate\Support\Collection;
 use Mockery\MockInterface;
 
@@ -42,17 +44,28 @@ function mockSetPartForSetWith(array $overrides = []): MockInterface&SetPart
     return $setPart;
 }
 
+function mockThemeForSetWith(int $id = 158, string $name = 'Star Wars', ?int $parentId = null): MockInterface&Theme
+{
+    $theme = \Mockery::mock(Theme::class);
+    $theme->allows('getAttribute')->with('id')->andReturn($id);
+    $theme->allows('getAttribute')->with('name')->andReturn($name);
+    $theme->allows('getAttribute')->with('parent_id')->andReturn($parentId);
+
+    return $theme;
+}
+
 describe('SetWithPartsResourceData', function(): void {
-    it('should convert set with parts to resource data', function(): void {
+    it('should convert set with parts and theme to resource data', function(): void {
         // arrange
         $setPart = mockSetPartForSetWith();
+        $theme = mockThemeForSetWith();
 
         $set = \Mockery::mock(Set::class);
         $set->allows('getAttribute')->with('id')->andReturn(1);
         $set->allows('getAttribute')->with('set_num')->andReturn('75192-1');
         $set->allows('getAttribute')->with('name')->andReturn('Millennium Falcon');
         $set->allows('getAttribute')->with('year')->andReturn(2_017);
-        $set->allows('getAttribute')->with('theme')->andReturn('Star Wars');
+        $set->allows('getAttribute')->with('theme')->andReturn($theme);
         $set->allows('getAttribute')->with('num_parts')->andReturn(7_541);
         $set->allows('getAttribute')->with('image_url')->andReturn('https://example.com/falcon.jpg');
         $set->allows('getAttribute')->with('setParts')->andReturn(new Collection([$setPart]));
@@ -67,7 +80,9 @@ describe('SetWithPartsResourceData', function(): void {
             ->and($resource->set_num)->toBe('75192-1')
             ->and($resource->name)->toBe('Millennium Falcon')
             ->and($resource->year)->toBe(2_017)
-            ->and($resource->theme)->toBe('Star Wars')
+            ->and($resource->theme)->toBeInstanceOf(ThemeResourceData::class)
+            ->and($resource->theme->id)->toBe(158)
+            ->and($resource->theme->name)->toBe('Star Wars')
             ->and($resource->num_parts)->toBe(7_541)
             ->and($resource->image_url)->toBe('https://example.com/falcon.jpg')
             ->and($resource->parts)->toBeArray()
@@ -77,7 +92,7 @@ describe('SetWithPartsResourceData', function(): void {
             ->and($resource->parts[0]->part->part_num)->toBe('3001');
     });
 
-    it('should handle empty parts', function(): void {
+    it('should handle empty parts and null theme', function(): void {
         // arrange
         $set = \Mockery::mock(Set::class);
         $set->allows('getAttribute')->with('id')->andReturn(1);
@@ -95,6 +110,7 @@ describe('SetWithPartsResourceData', function(): void {
 
         // assert
         expect($resource->set_num)->toBe('10281-1')
+            ->and($resource->theme)->toBeNull()
             ->and($resource->parts)->toBeArray()
             ->and($resource->parts)->toBeEmpty();
     });
@@ -102,13 +118,14 @@ describe('SetWithPartsResourceData', function(): void {
     it('should convert to array format', function(): void {
         // arrange
         $setPart = mockSetPartForSetWith();
+        $theme = mockThemeForSetWith();
 
         $set = \Mockery::mock(Set::class);
         $set->allows('getAttribute')->with('id')->andReturn(1);
         $set->allows('getAttribute')->with('set_num')->andReturn('75192-1');
         $set->allows('getAttribute')->with('name')->andReturn('Millennium Falcon');
         $set->allows('getAttribute')->with('year')->andReturn(2_017);
-        $set->allows('getAttribute')->with('theme')->andReturn('Star Wars');
+        $set->allows('getAttribute')->with('theme')->andReturn($theme);
         $set->allows('getAttribute')->with('num_parts')->andReturn(7_541);
         $set->allows('getAttribute')->with('image_url')->andReturn('https://example.com/falcon.jpg');
         $set->allows('getAttribute')->with('setParts')->andReturn(new Collection([$setPart]));
@@ -121,6 +138,11 @@ describe('SetWithPartsResourceData', function(): void {
         expect($array)->toBeArray()
             ->and($array['id'])->toBe(1)
             ->and($array['set_num'])->toBe('75192-1')
+            ->and($array['theme'])->toBe([
+                'id' => 158,
+                'name' => 'Star Wars',
+                'parentId' => null,
+            ])
             ->and($array['parts'])->toBeArray()
             ->and($array['parts'])->toHaveCount(1)
             ->and($array['parts'][0]['quantity'])->toBe(10)
@@ -131,13 +153,14 @@ describe('SetWithPartsResourceData', function(): void {
         // arrange
         $setPart1 = mockSetPartForSetWith(['id' => 1, 'part_id' => 10, 'part_num' => '3001', 'quantity' => 5]);
         $setPart2 = mockSetPartForSetWith(['id' => 2, 'part_id' => 20, 'part_num' => '3002', 'quantity' => 3, 'is_spare' => true, 'element_id' => '300226']);
+        $theme = mockThemeForSetWith();
 
         $set = \Mockery::mock(Set::class);
         $set->allows('getAttribute')->with('id')->andReturn(1);
         $set->allows('getAttribute')->with('set_num')->andReturn('10179-1');
         $set->allows('getAttribute')->with('name')->andReturn('Ultimate Collector Millennium Falcon');
         $set->allows('getAttribute')->with('year')->andReturn(2_007);
-        $set->allows('getAttribute')->with('theme')->andReturn('Star Wars');
+        $set->allows('getAttribute')->with('theme')->andReturn($theme);
         $set->allows('getAttribute')->with('num_parts')->andReturn(5_195);
         $set->allows('getAttribute')->with('image_url')->andReturn(null);
         $set->allows('getAttribute')->with('setParts')->andReturn(new Collection([$setPart1, $setPart2]));

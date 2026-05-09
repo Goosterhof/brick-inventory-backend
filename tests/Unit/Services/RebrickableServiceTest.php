@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 use App\DataTransferObjects\Input\Lego\LegoSetData;
 use App\DataTransferObjects\Input\Lego\LegoSetPartData;
+use App\DataTransferObjects\Input\Lego\LegoThemeData;
 use App\DataTransferObjects\Input\Lego\RebrickableUserSetData;
 use App\Exceptions\InvalidApiResponseException;
 use App\Exceptions\RebrickableApiException;
@@ -840,6 +841,220 @@ describe('RebrickableService', function(): void {
             Http::assertSentCount(2);
             Http::assertSent(fn($request): bool => $request->url() === 'https://rebrickable.com/api/v3/steal?key=leaked');
             Http::assertNotSent(fn($request): bool => str_contains((string) $request->url(), 'evil.com'));
+        });
+    });
+
+    describe('fetchThemes', function(): void {
+        it('should yield themes from API', function(): void {
+            // arrange
+            Http::fake([
+                'https://rebrickable.com/api/v3/lego/themes/' => Http::response([
+                    'results' => [
+                        ['id' => 1, 'parent_id' => null, 'name' => 'Technic'],
+                        ['id' => 158, 'parent_id' => null, 'name' => 'Star Wars'],
+                    ],
+                    'next' => null,
+                ]),
+            ]);
+
+            $service = createRebrickableService();
+
+            // act
+            $pages = iterator_to_array($service->fetchThemes());
+
+            // assert
+            expect($pages)->toHaveCount(1);
+            expect($pages[0])->toHaveCount(2);
+            expect($pages[0][0])->toBeInstanceOf(LegoThemeData::class);
+            expect($pages[0][0]->id)->toBe(1);
+            expect($pages[0][0]->name)->toBe('Technic');
+            expect($pages[0][0]->parentId)->toBeNull();
+            expect($pages[0][1]->id)->toBe(158);
+            expect($pages[0][1]->name)->toBe('Star Wars');
+            expect($pages[0][1]->parentId)->toBeNull();
+
+            Http::assertSent(fn($request): bool => $request->url() === 'https://rebrickable.com/api/v3/lego/themes/'
+                && $request->method() === 'GET'
+                && $request->header('Authorization') === ['key ' . TEST_API_KEY]);
+        });
+
+        it('should yield each page from a paginated response', function(): void {
+            // arrange
+            Http::fake([
+                'https://rebrickable.com/api/v3/lego/themes/' => Http::response([
+                    'results' => [
+                        ['id' => 1, 'parent_id' => null, 'name' => 'Technic'],
+                    ],
+                    'next' => 'https://rebrickable.com/api/v3/lego/themes/?page=2',
+                ]),
+                'https://rebrickable.com/api/v3/lego/themes/?page=2' => Http::response([
+                    'results' => [
+                        ['id' => 209, 'parent_id' => 158, 'name' => 'Episode I'],
+                    ],
+                    'next' => null,
+                ]),
+            ]);
+
+            $service = createRebrickableService();
+
+            // act
+            $pages = iterator_to_array($service->fetchThemes());
+
+            // assert
+            expect($pages)->toHaveCount(2);
+            expect($pages[0][0]->id)->toBe(1);
+            expect($pages[1][0]->id)->toBe(209);
+            expect($pages[1][0]->parentId)->toBe(158);
+            Http::assertSentCount(2);
+        });
+
+        it('should return parent_id as null when the field is missing', function(): void {
+            // arrange — Rebrickable always returns parent_id, but be tolerant
+            Http::fake([
+                'https://rebrickable.com/api/v3/lego/themes/' => Http::response([
+                    'results' => [
+                        ['id' => 1, 'name' => 'Technic'],
+                    ],
+                    'next' => null,
+                ]),
+            ]);
+
+            $service = createRebrickableService();
+
+            // act
+            $pages = iterator_to_array($service->fetchThemes());
+
+            // assert
+            expect($pages[0][0]->parentId)->toBeNull();
+        });
+
+        it('should throw RebrickableApiException on 502', function(): void {
+            // arrange
+            Http::fake([
+                'https://rebrickable.com/api/v3/lego/themes/' => Http::response([], 502),
+            ]);
+
+            $service = createRebrickableService();
+
+            // act & assert
+            expect(fn(): array => iterator_to_array($service->fetchThemes()))
+                ->toThrow(RebrickableApiException::class);
+        });
+
+        it('should throw InvalidApiResponseException when response is not an array', function(): void {
+            // arrange
+            Http::fake([
+                'https://rebrickable.com/api/v3/lego/themes/' => Http::response('invalid'),
+            ]);
+
+            $service = createRebrickableService();
+
+            // act & assert
+            expect(fn(): array => iterator_to_array($service->fetchThemes()))
+                ->toThrow(InvalidApiResponseException::class);
+        });
+
+        it('should throw InvalidApiResponseException when results field is missing', function(): void {
+            // arrange
+            Http::fake([
+                'https://rebrickable.com/api/v3/lego/themes/' => Http::response([
+                    'data' => [],
+                    'next' => null,
+                ]),
+            ]);
+
+            $service = createRebrickableService();
+
+            // act & assert
+            expect(fn(): array => iterator_to_array($service->fetchThemes()))
+                ->toThrow(InvalidApiResponseException::class);
+        });
+
+        it('should throw InvalidApiResponseException when a theme entry is not an array', function(): void {
+            // arrange
+            Http::fake([
+                'https://rebrickable.com/api/v3/lego/themes/' => Http::response([
+                    'results' => ['not-an-array'],
+                    'next' => null,
+                ]),
+            ]);
+
+            $service = createRebrickableService();
+
+            // act & assert
+            expect(fn(): array => iterator_to_array($service->fetchThemes()))
+                ->toThrow(InvalidApiResponseException::class);
+        });
+
+        it('should throw InvalidApiResponseException when a theme is missing required fields', function(): void {
+            // arrange
+            Http::fake([
+                'https://rebrickable.com/api/v3/lego/themes/' => Http::response([
+                    'results' => [
+                        ['parent_id' => null], // missing id and name
+                    ],
+                    'next' => null,
+                ]),
+            ]);
+
+            $service = createRebrickableService();
+
+            // act & assert
+            expect(fn(): array => iterator_to_array($service->fetchThemes()))
+                ->toThrow(InvalidApiResponseException::class);
+        });
+
+        it('should strip host from pagination next URL to prevent SSRF', function(): void {
+            // arrange
+            Http::fake([
+                'https://rebrickable.com/api/v3/lego/themes/' => Http::response([
+                    'results' => [
+                        ['id' => 1, 'parent_id' => null, 'name' => 'Technic'],
+                    ],
+                    'next' => 'https://evil.com/steal?key=leaked',
+                ]),
+                'https://rebrickable.com/api/v3/steal?key=leaked' => Http::response([
+                    'results' => [],
+                    'next' => null,
+                ]),
+            ]);
+
+            $service = createRebrickableService();
+
+            // act
+            $pages = iterator_to_array($service->fetchThemes());
+
+            // assert
+            expect($pages)->toHaveCount(2);
+            Http::assertSentCount(2);
+            Http::assertSent(fn($request): bool => $request->url() === 'https://rebrickable.com/api/v3/steal?key=leaked');
+            Http::assertNotSent(fn($request): bool => str_contains((string) $request->url(), 'evil.com'));
+        });
+
+        it('should return cached fetchThemes pages without making HTTP call', function(): void {
+            // arrange
+            Http::fake([
+                'https://rebrickable.com/api/v3/lego/themes/' => Http::response([
+                    'results' => [
+                        ['id' => 1, 'parent_id' => null, 'name' => 'Technic'],
+                    ],
+                    'next' => null,
+                ]),
+            ]);
+
+            $service = createRebrickableService();
+
+            // Prime cache
+            iterator_to_array($service->fetchThemes());
+            Http::assertSentCount(1);
+
+            // act
+            $pages = iterator_to_array($service->fetchThemes());
+
+            // assert
+            Http::assertSentCount(1);
+            expect($pages)->toHaveCount(1);
+            expect($pages[0][0]->id)->toBe(1);
         });
     });
 

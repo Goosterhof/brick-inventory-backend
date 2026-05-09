@@ -25,7 +25,6 @@ describe('Response Caching', function(): void {
                 'set_num' => '75192-1',
                 'name' => 'Millennium Falcon',
                 'year' => 2_017,
-                'theme' => 'Star Wars',
                 'num_parts' => 7_541,
                 'image_url' => 'https://example.com/falcon.jpg',
             ]);
@@ -67,7 +66,6 @@ describe('Response Caching', function(): void {
                 'set_num' => '75192-1',
                 'name' => 'Millennium Falcon',
                 'year' => 2_017,
-                'theme' => 'Star Wars',
                 'num_parts' => 7_541,
                 'image_url' => 'https://example.com/falcon.jpg',
             ]);
@@ -142,7 +140,6 @@ describe('Response Caching', function(): void {
                 'set_num' => '75192-1',
                 'name' => 'Millennium Falcon',
                 'year' => 2_017,
-                'theme' => 'Star Wars',
                 'num_parts' => 7_541,
                 'image_url' => 'https://example.com/falcon.jpg',
             ]);

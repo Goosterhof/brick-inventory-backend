@@ -6,6 +6,7 @@ namespace App\Contracts;
 
 use App\DataTransferObjects\Input\Lego\LegoSetData;
 use App\DataTransferObjects\Input\Lego\LegoSetPartData;
+use App\DataTransferObjects\Input\Lego\LegoThemeData;
 use App\DataTransferObjects\Input\Lego\RebrickableUserSetData;
 use App\Exceptions\InvalidApiResponseException;
 use App\Exceptions\RebrickableApiException;
@@ -51,4 +52,14 @@ interface LegoDataServiceInterface
      * @return Generator<int, list<RebrickableUserSetData>>
      */
     public function fetchUserSets(string $userToken): Generator;
+
+    /**
+     * Fetch the LEGO theme catalog, yielding one page at a time.
+     *
+     * @throws RebrickableApiException
+     * @throws InvalidApiResponseException
+     *
+     * @return Generator<int, list<LegoThemeData>>
+     */
+    public function fetchThemes(): Generator;
 }
