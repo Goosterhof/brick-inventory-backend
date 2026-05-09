@@ -184,3 +184,57 @@ Repeat: the deviation-with-documented-rationale on `cascadeRelations`. That was 
 Do differently: front-load the architecture-test reading. The `cascadeRelations` rework was avoidable by spending 30 seconds in `tests/Architecture/CascadeRelationArchitectureTest.php` before writing the first model.
 
 The "GET /api/sets/{setNum}" criterion in the permit was on me, not on you. Good catch in the report.
+
+---
+
+## Post-Push CI Triage Addendum
+
+_Appended after the initial push surfaced two CI failures. Recorded for the audit trail and the graduation logs._
+
+### What Failed
+
+The first push (commit `f099f6d`) cleared the local pre-push gauntlet but two CI jobs failed on PR #179:
+
+1. **`lint`** — Rector flagged `RenameVariableToMatchMethodCallReturnTypeRector` on `app/Console/Commands/SyncThemesCommand.php`: `$themeSyncResult` should be `$themeSyncResultData` (matching the renamed Result DTO class). The local rector cache had cached the file under the old DTO name `ThemeSyncResult` and never invalidated when the class was renamed mid-shift, so the pre-push gauntlet never saw the issue. CI runs from a fresh cache and caught it on first attempt.
+2. **`feature-coverage`** — `--min=90` failed. Coverage dropped because `tests/Feature/Console/SyncThemesCommandTest.php` was included in the feature-coverage suite but covers a class (`SyncThemesCommand` in `app/Console/Commands`) that lives outside the suite's `<source><include>app/Http/Controllers</include></source>` declaration. The convention in this codebase — visible from the existing excludes (`Models`, `Jobs`, `Configuration`, `ExceptionHandlerTest`, `ResponseCachingTest`) — is that any feature test which doesn't cover a Controller is excluded from feature-coverage. The new Console suite was a new test category that should have been excluded from day one.
+
+### What Was Done
+
+| Commit | Fix |
+|---|---|
+| `eb771b4` (squashed into the PR) | Renamed `$themeSyncResult` → `$themeSyncResultData` per Rector. Cleared local rector cache to confirm the green state |
+| Rebase onto `origin/main` | The branch was based on `4151023`, predating `0b83b00` (part_id work). Rebasing brought the merge tree closer to the actual HEAD CI was running against and removed a confusing diff in `FamilyMissingPartsResourceData.php` |
+| `c2ce7a5` (squashed into the PR) | Added `<exclude>tests/Feature/Console</exclude>` to `phpunit.feature-coverage.xml`, completing the established convention |
+
+The Director re-ran phpstan / deptrac / lint:test / composer test independently after each commit. After the second push CI returned all 8 jobs green and the PR merged as `feed543`.
+
+### Decisions Made (Director-level)
+
+1. **Rebase rather than merge** — The branch had diverged by one main commit (`0b83b00`). Rebase keeps the history linear and makes the eventual squash-merge cleaner. There were no conflicts. Force-push with `--force-with-lease` was used per git safety convention.
+2. **Exclude rather than relocate the Console test** — Moving `SyncThemesCommandTest` to `tests/Unit/` was the alternative. It was rejected: the test boots the framework via `Artisan::call`, exercises the DB via `RefreshDatabase`, and asserts side-effects in the `themes` table. That is unambiguously a Feature test by this codebase's category definitions. The suite was wrong, not the test.
+3. **Single-line addition vs. broader CI restructure** — The `feature-coverage` config could have been restructured to use an opt-in pattern (only include `tests/Feature/Controllers/`) instead of opt-out excludes. Rejected: out of scope for a CI fix, would touch every controller test path implicitly, and would require a separate ADR. The exclude pattern matches what's already there.
+4. **No `--no-verify` was used.** Both fix-up commits passed pre-commit and pre-push gauntlets cleanly.
+
+### Updated Self-Debrief — What This Surfaced
+
+| Observation | Implication |
+|---|---|
+| The local pre-push gauntlet ran composer test but not against a fresh rector cache. The Sorter renamed the DTO class mid-shift; rector's per-file hash cache kept the old result for `SyncThemesCommand.php`. | Existing training proposal #1 (read the relevant `*ArchitectureTest.php` before extending) needs a sibling: when **renaming a class**, clear linter caches before the gauntlet. The signal here is "renamed something a linter has cached opinions about" — not just "extending architecture-enforced surface". |
+| The Sorter created `tests/Feature/Console/` as a new test category but did not check `phpunit.feature-coverage.xml` for category exclusions. A 30-second read of that file would have shown the established opt-out pattern and the need to add `tests/Feature/Console` to it. | New training proposal: when introducing a **new test directory** under `tests/Feature/`, audit all PHPUnit configs (`phpunit.xml`, `phpunit.coverage.xml`, `phpunit.feature-coverage.xml`) for `<exclude>` patterns and decide explicitly whether the new directory belongs included or excluded. |
+| The pre-push gauntlet only runs `composer test`. It does NOT run `composer test:feature-coverage` (no coverage driver in the dev container). The CI failures were not preventable by the local gauntlet alone — they needed a coverage driver locally. The Auditor's pulse already tracks the missing driver as an Active Concern (2026-05-05); this triage is the third shift in a row to hit the gap. | Director-level concern: this Active Concern should escalate from "tracked" to "scheduled for resolution" — file a separate shipping order for getting PCOV/Xdebug into the dev container, or for a CI-only safety net (e.g., a "draft PR open" hook that runs feature-coverage before push). Logged as a follow-up. |
+
+### Updated Logistics Director Disposition (Addendum to the Original)
+
+| Proposal | New Disposition | Rationale |
+|---|---|---|
+| Existing #1 — Read architecture tests before extending enforced surface | **Candidate (still)** | First-shift evidence stands. The rector-cache miss is a separate failure mode, not a confirmation of this rule. |
+| **NEW** — When renaming a class that linters cache opinions about (Rector, PHPStan, Pint, Deptrac), clear the relevant linter cache before re-running the gauntlet | **Candidate** | First-shift evidence: this shift's Rector cache miss caused a CI surprise. Hold for a second occurrence to confirm, but the cost is one `rm -rf storage/rector` and the savings are real. |
+| **NEW** — When introducing a new test directory under `tests/Feature/`, audit all PHPUnit configs for `<exclude>` patterns and decide explicitly whether the new directory belongs included or excluded | **Candidate** | First-shift evidence: this shift's `tests/Feature/Console/` was added without that audit. Strong proposal — the convention exists, the audit is mechanical, and the cost of missing it is a CI failure on the first PR. |
+| Existing — Verify route names with `route:list` before committing test assertions | **Candidate (still)** | First-shift evidence stands. |
+| Existing — Multi-page test before single-page test for supplier Generators | **Candidate (still)** | First-shift evidence stands. |
+
+Five candidates total in the Sorter's graduation log after this shift. None graduated yet (all first-evidence). If any of them recurs in the next two shifts, that's the second confirming session — formal Graduation Tests at that point.
+
+### Director's Note to the Sorter (Addendum)
+
+Two real misses that the local gauntlet didn't catch but CI did. Both are now Candidates in your graduation log. The takeaway is not "the local gauntlet is insufficient" (it is, for the missing coverage driver — that's an Active Concern, not a Sorter failure) — the takeaway is "stale linter caches and unaudited new test categories are predictable failure modes; both have a 30-second prevention check." We caught both within two CI cycles and the PR merged on the second push. That's a healthy fast-feedback loop. The post-merge close-out (this addendum + the permit Status flip) follows the protocol.
