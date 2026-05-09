@@ -188,5 +188,6 @@ lowercased). PrePushPermitGate enforces this on push.
 
 ---
 
-**Status:** In Progress
-**Shift Log:** _to be filed at `.claude/records/journals/2026-05-09-implement-set-themes-zsyta.md`_
+**Status:** Completed
+**Shift Log:** [`.claude/records/journals/2026-05-09-implement-set-themes-zsyta.md`](../journals/2026-05-09-implement-set-themes-zsyta.md)
+**Merged:** PR #179 → `main` at `feed543`
