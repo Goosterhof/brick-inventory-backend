@@ -47,8 +47,8 @@ function buildNeededQuery(int $familyId, Collection $rows): Builder
     $builder->shouldReceive('join')->once()->with('colors', 'colors.id', '=', 'set_parts.color_id')->andReturnSelf();
     $builder->shouldReceive('where')->once()->with('family_sets.family_id', $familyId)->andReturnSelf();
     $builder->shouldReceive('whereNotIn')->once()->with('family_sets.status', [FamilySetStatus::Wishlist->value, FamilySetStatus::InStorage->value])->andReturnSelf();
-    $builder->shouldReceive('groupBy')->once()->with('parts.part_num', 'set_parts.color_id', 'parts.name', 'colors.name', 'colors.rgb', 'parts.image_url')->andReturnSelf();
-    $builder->shouldReceive('selectRaw')->once()->with('parts.part_num AS part_num, set_parts.color_id AS color_id, parts.name AS part_name, colors.name AS color_name, colors.rgb AS color_hex, parts.image_url AS part_image_url, SUM(set_parts.quantity * family_sets.quantity) AS quantity_needed')->andReturnSelf();
+    $builder->shouldReceive('groupBy')->once()->with('parts.id', 'parts.part_num', 'set_parts.color_id', 'parts.name', 'colors.name', 'colors.rgb', 'parts.image_url')->andReturnSelf();
+    $builder->shouldReceive('selectRaw')->once()->with('parts.id AS part_id, parts.part_num AS part_num, set_parts.color_id AS color_id, parts.name AS part_name, colors.name AS color_name, colors.rgb AS color_hex, parts.image_url AS part_image_url, SUM(set_parts.quantity * family_sets.quantity) AS quantity_needed')->andReturnSelf();
     $builder->shouldReceive('toBase')->once()->andReturn($base);
 
     return $builder;
@@ -197,6 +197,7 @@ describe('GetFamilyMissingPartsAction', function(): void {
         //        `':' . $colorId` (RemoveLeft) key-collision mutants.
         $neededRows = new Collection([
             (object) [
+                'part_id' => '101',                                  // string → (int) 101
                 'part_num' => 3_001,                                  // int → (string) '3001'
                 'color_id' => '4',                                   // string → (int) 4
                 'part_name' => 'Brick 2 x 4',
@@ -206,6 +207,7 @@ describe('GetFamilyMissingPartsAction', function(): void {
                 'quantity_needed' => '10',                           // string → (int) 10
             ],
             (object) [
+                'part_id' => 101,
                 'part_num' => '3001',
                 'color_id' => 5,
                 'part_name' => 'Brick 2 x 4',
@@ -215,6 +217,7 @@ describe('GetFamilyMissingPartsAction', function(): void {
                 'quantity_needed' => 20,
             ],
             (object) [
+                'part_id' => 202,
                 'part_num' => '3020',
                 'color_id' => 4,
                 'part_name' => 'Plate 2 x 4',
@@ -269,6 +272,7 @@ describe('GetFamilyMissingPartsAction', function(): void {
         // Row A is zero-shortfall so it's dropped; rows B and C survive.
         expect($result->shortfalls)->toHaveCount(2)
             ->and($result->shortfalls[0])->toBe([
+                'part_id' => 101,
                 'part_num' => '3001',
                 'color_id' => 5,
                 'part_name' => 'Brick 2 x 4',
@@ -281,6 +285,7 @@ describe('GetFamilyMissingPartsAction', function(): void {
                 'needed_by_set_nums' => ['10294-1', '75192-1'],
             ])
             ->and($result->shortfalls[1])->toBe([
+                'part_id' => 202,
                 'part_num' => '3020',
                 'color_id' => 4,
                 'part_name' => 'Plate 2 x 4',
@@ -306,6 +311,7 @@ describe('GetFamilyMissingPartsAction', function(): void {
 
         $neededRows = new Collection([
             (object) [
+                'part_id' => 1,
                 'part_num' => 'X',
                 'color_id' => 7,
                 'part_name' => 'PartX',
@@ -356,6 +362,7 @@ describe('GetFamilyMissingPartsAction', function(): void {
 
         $neededRows = new Collection([
             (object) [
+                'part_id' => 1,
                 'part_num' => 'X',
                 'color_id' => 7,
                 'part_name' => 'PartX',

@@ -110,6 +110,7 @@ describe('FamilySetController missingParts', function(): void {
 
         $response->assertStatus(200)
             ->assertJsonCount(1, 'shortfalls')
+            ->assertJsonPath('shortfalls.0.part_id', $part->id)
             ->assertJsonPath('shortfalls.0.part_num', '3001')
             ->assertJsonPath('shortfalls.0.color_id', $color->id)
             ->assertJsonPath('shortfalls.0.part_name', 'Brick 2 x 4')

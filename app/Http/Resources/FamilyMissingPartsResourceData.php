@@ -13,6 +13,7 @@ final readonly class FamilyMissingPartsResourceData extends ComputedResourceData
 {
     /**
      * @param list<array{
+     *     part_id: int,
      *     part_num: string,
      *     color_id: int,
      *     part_name: string,
