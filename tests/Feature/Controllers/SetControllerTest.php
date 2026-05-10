@@ -2,7 +2,9 @@
 
 declare(strict_types = 1);
 
+use App\Enums\SetSyncStatus;
 use App\Http\Controllers\SetController;
+use App\Jobs\SyncSetPartsJob;
 use App\Models\Color;
 use App\Models\Part;
 use App\Models\Set;
@@ -12,6 +14,7 @@ use App\Models\StorageOptionPart;
 use App\Models\Theme;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Bus;
 use Illuminate\Support\Facades\Http;
 
 covers(SetController::class);
@@ -127,7 +130,38 @@ describe('SetController', function(): void {
                 ->assertJsonPath('theme.parentId', $parentTheme->id);
         });
 
-        it('should fetch parts from rebrickable api when not cached', function(): void {
+        it('should return 202 and dispatch a sync job on the first request for an uncached set', function(): void {
+            Bus::fake();
+
+            $user = User::factory()->create();
+
+            Http::fake([
+                'rebrickable.com/api/v3/lego/sets/10281-1/' => Http::response([
+                    'set_num' => '10281-1',
+                    'name' => 'Bonsai Tree',
+                    'year' => 2_021,
+                    'theme_id' => 598,
+                    'num_parts' => 878,
+                    'set_img_url' => 'https://example.com/bonsai.jpg',
+                ]),
+            ]);
+
+            $response = $this->actingAs($user)->getJson('/api/sets/10281-1/parts');
+
+            $response->assertStatus(202)
+                ->assertJsonPath('set_num', '10281-1')
+                ->assertJsonPath('status', SetSyncStatus::Pending->value);
+
+            // Set metadata is upserted synchronously; parts dispatch is queued.
+            $this->assertDatabaseHas('sets', [
+                'set_num' => '10281-1',
+                'parts_sync_status' => SetSyncStatus::Pending->value,
+            ]);
+
+            Bus::assertDispatched(SyncSetPartsJob::class);
+        });
+
+        it('should return 200 with parts after the sync job runs', function(): void {
             $user = User::factory()->create();
 
             Http::fake([
@@ -164,21 +198,74 @@ describe('SetController', function(): void {
                 ]),
             ]);
 
-            $response = $this->actingAs($user)->getJson('/api/sets/10281-1/parts');
+            // First hit — 202 with Pending status
+            $first = $this->actingAs($user)->getJson('/api/sets/10281-1/parts');
+            $first->assertStatus(202);
 
-            $response->assertStatus(200)
-                ->assertJson([
-                    'set_num' => '10281-1',
-                    'name' => 'Bonsai Tree',
-                ])
-                ->assertJsonCount(1, 'parts');
+            // Run the synchronous queue worker so the dispatched SyncSetPartsJob executes.
+            $this->artisan('queue:work', ['--once' => true, '--stop-when-empty' => true]);
 
-            $this->assertDatabaseHas('sets', ['set_num' => '10281-1']);
+            // Second hit — 200 with the full payload
+            $second = $this->actingAs($user)->getJson('/api/sets/10281-1/parts');
+            $second->assertStatus(200)
+                ->assertJsonPath('set_num', '10281-1')
+                ->assertJsonPath('name', 'Bonsai Tree')
+                ->assertJsonCount(1, 'parts')
+                ->assertJsonPath('parts.0.part.part_num', '3024')
+                ->assertJsonPath('parts.0.color.name', 'Green');
+
             $this->assertDatabaseHas('parts', ['part_num' => '3024']);
             $this->assertDatabaseHas('colors', ['rebrickable_id' => 6]);
+        });
 
-            $response->assertJsonPath('parts.0.part.part_num', '3024')
-                ->assertJsonPath('parts.0.color.name', 'Green');
+        it('should return 502 once with the prior reason and auto-restart sync when the set was in Failed status', function(): void {
+            // Failed surfaces to the client once with the reason, AND a fresh sync is
+            // dispatched in the background. Next poll sees Pending → 202, and so on.
+            Bus::fake();
+
+            $user = User::factory()->create();
+
+            Set::factory()->create([
+                'set_num' => '75192-1',
+                'parts_sync_status' => SetSyncStatus::Failed,
+                'parts_sync_failed_reason' => 'Rebrickable returned 503',
+            ]);
+
+            $response = $this->actingAs($user)->getJson('/api/sets/75192-1/parts');
+
+            $response->assertStatus(502)
+                ->assertJsonPath('set_num', '75192-1')
+                ->assertJsonPath('status', SetSyncStatus::Failed->value)
+                ->assertJsonPath('reason', 'Rebrickable returned 503');
+
+            Bus::assertDispatched(SyncSetPartsJob::class);
+
+            // The DB is already reset so the next poll sees Pending — the failure is shown once.
+            $this->assertDatabaseHas('sets', [
+                'set_num' => '75192-1',
+                'parts_sync_status' => SetSyncStatus::Pending->value,
+                'parts_sync_failed_reason' => null,
+            ]);
+        });
+
+        it('should return 202 when the set is currently in InProgress status', function(): void {
+            Bus::fake();
+
+            $user = User::factory()->create();
+
+            Set::factory()->create([
+                'set_num' => '75192-1',
+                'parts_sync_status' => SetSyncStatus::InProgress,
+            ]);
+
+            $response = $this->actingAs($user)->getJson('/api/sets/75192-1/parts');
+
+            $response->assertStatus(202)
+                ->assertJsonPath('set_num', '75192-1')
+                ->assertJsonPath('status', SetSyncStatus::InProgress->value);
+
+            // No dispatch because the set is mid-sync.
+            Bus::assertNotDispatched(SyncSetPartsJob::class);
         });
 
         it('should return 404 for non-existent set', function(): void {
@@ -213,7 +300,7 @@ describe('SetController', function(): void {
                 ->assertJson(['error' => 'Invalid API key']);
         });
 
-        it('should handle pagination from rebrickable api', function(): void {
+        it('should handle pagination from rebrickable api when the queued sync runs', function(): void {
             $user = User::factory()->create();
 
             Http::fake([
@@ -273,9 +360,14 @@ describe('SetController', function(): void {
                 ]),
             ]);
 
-            $response = $this->actingAs($user)->getJson('/api/sets/42056-1/parts');
+            // First hit dispatches the sync; second hit (after the worker runs) returns 200.
+            $first = $this->actingAs($user)->getJson('/api/sets/42056-1/parts');
+            $first->assertStatus(202);
 
-            $response->assertStatus(200)
+            $this->artisan('queue:work', ['--once' => true, '--stop-when-empty' => true]);
+
+            $second = $this->actingAs($user)->getJson('/api/sets/42056-1/parts');
+            $second->assertStatus(200)
                 ->assertJsonCount(2, 'parts');
 
             $this->assertDatabaseHas('parts', ['part_num' => '32316']);
@@ -288,6 +380,48 @@ describe('SetController', function(): void {
             $response = $this->getJson('/api/sets/75192-1/storage-map');
 
             $response->assertStatus(401);
+        });
+
+        it('should return 202 and dispatch a sync when the set parts have not been synced', function(): void {
+            Bus::fake();
+
+            $user = User::factory()->create();
+
+            Http::fake([
+                'rebrickable.com/api/v3/lego/sets/10281-1/' => Http::response([
+                    'set_num' => '10281-1',
+                    'name' => 'Bonsai Tree',
+                    'year' => 2_021,
+                    'theme_id' => 598,
+                    'num_parts' => 878,
+                    'set_img_url' => 'https://example.com/bonsai.jpg',
+                ]),
+            ]);
+
+            $response = $this->actingAs($user)->getJson('/api/sets/10281-1/storage-map');
+
+            $response->assertStatus(202)
+                ->assertJsonPath('status', SetSyncStatus::Pending->value);
+
+            Bus::assertDispatched(SyncSetPartsJob::class);
+        });
+
+        it('should return 202 when the set parts are mid-sync', function(): void {
+            Bus::fake();
+
+            $user = User::factory()->create();
+
+            Set::factory()->create([
+                'set_num' => '75192-1',
+                'parts_sync_status' => SetSyncStatus::InProgress,
+            ]);
+
+            $response = $this->actingAs($user)->getJson('/api/sets/75192-1/storage-map');
+
+            $response->assertStatus(202)
+                ->assertJsonPath('status', SetSyncStatus::InProgress->value);
+
+            Bus::assertNotDispatched(SyncSetPartsJob::class);
         });
 
         it('should return storage map wrapped in entries envelope', function(): void {

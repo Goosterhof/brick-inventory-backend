@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace Database\Factories;
 
+use App\Enums\SetSyncStatus;
 use App\Models\Set;
 use App\Models\Theme;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -22,6 +23,9 @@ class SetFactory extends Factory
             'theme_id' => null,
             'num_parts' => fake()->numberBetween(100, 5_000),
             'image_url' => fake()->optional()->imageUrl(),
+            'parts_sync_status' => SetSyncStatus::Completed,
+            'parts_synced_at' => now(),
+            'parts_sync_failed_reason' => null,
         ];
     }
 
