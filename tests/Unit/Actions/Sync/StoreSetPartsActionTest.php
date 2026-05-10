@@ -10,6 +10,7 @@ use App\Models\Color;
 use App\Models\Part;
 use App\Models\Set;
 use App\Models\SetPart;
+use Carbon\CarbonImmutable;
 use Illuminate\Database\ConnectionInterface;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Collection;
@@ -121,28 +122,30 @@ describe('StoreSetPartsAction', function(): void {
         // assert — Mockery verifies expectations
     });
 
-    it('should dedupe colors by rebrickable_id into a single bulk upsert', function() use ($buildPartMock, $buildSetPartMock): void {
+    it('should dedupe colors by rebrickable_id into a single bulk upsert with full payload, uniqueBy, and update args', function() use ($buildPartMock, $buildSetPartMock): void {
         // arrange
         $set = \Mockery::mock(Set::class);
         $set->allows('getAttribute')->with('id')->andReturn(42);
 
-        $colorUpserts = [];
-        $captureColorUpsert = function(array $values) use (&$colorUpserts): void {
-            $colorUpserts[] = $values;
-        };
+        $colorUpsertCalls = [];
+        $reloadWhereInCalls = [];
 
-        // Build color mock with capture
         $upsertBuilder = \Mockery::mock(Builder::class);
         $upsertBuilder->shouldReceive('upsert')
             ->once()
-            ->andReturnUsing(function(array $values) use ($captureColorUpsert): int {
-                $captureColorUpsert($values);
+            ->andReturnUsing(function(array $values, array $unique, array $update) use (&$colorUpsertCalls): int {
+                $colorUpsertCalls[] = ['values' => $values, 'unique' => $unique, 'update' => $update];
 
                 return \count($values);
             });
 
         $reloadBuilder = \Mockery::mock(Builder::class);
-        $reloadBuilder->shouldReceive('whereIn')->andReturnSelf();
+        $reloadBuilder->shouldReceive('whereIn')
+            ->andReturnUsing(function(string $column, array $values) use (&$reloadWhereInCalls, $reloadBuilder): Builder {
+                $reloadWhereInCalls[] = ['column' => $column, 'values' => $values];
+
+                return $reloadBuilder;
+            });
         $reloadBuilder->shouldReceive('pluck')->with('id', 'rebrickable_id')->andReturn(new Collection([1 => 11]));
 
         $color = \Mockery::mock(Color::class);
@@ -175,32 +178,56 @@ describe('StoreSetPartsAction', function(): void {
         // act
         $action->execute($set, $partsData);
 
-        // assert
-        expect($colorUpserts)->toHaveCount(1);
-        expect($colorUpserts[0])->toHaveCount(1);
-        expect($colorUpserts[0][0]['rebrickable_id'])->toBe(1);
-        expect($colorUpserts[0][0]['name'])->toBe('White');
+        // assert — exactly one upsert call, one row, every field present and correct.
+        expect($colorUpsertCalls)->toHaveCount(1);
+        expect($colorUpsertCalls[0]['values'])->toHaveCount(1);
+
+        $row = $colorUpsertCalls[0]['values'][0];
+        expect($row)->toHaveKeys(['rebrickable_id', 'name', 'rgb', 'is_transparent', 'created_at', 'updated_at']);
+        expect($row['rebrickable_id'])->toBe(1);
+        expect($row['name'])->toBe('White');
+        expect($row['rgb'])->toBe('FFFFFF');
+        expect($row['is_transparent'])->toBeFalse();
+        expect($row['created_at'])->toBeInstanceOf(CarbonImmutable::class);
+        expect($row['updated_at'])->toBeInstanceOf(CarbonImmutable::class);
+
+        // uniqueBy and update arrays must match exactly — guards against accidental reordering
+        // or column drops that would break ON CONFLICT semantics in PostgreSQL.
+        expect($colorUpsertCalls[0]['unique'])->toBe(['rebrickable_id']);
+        expect($colorUpsertCalls[0]['update'])->toBe(['name', 'rgb', 'is_transparent', 'updated_at']);
+
+        // The reload `whereIn` call uses the dedupe-key array (rebrickable_id values), not
+        // the payload values — guards against an `array_keys()` removal mutation.
+        expect($reloadWhereInCalls)->toHaveCount(1);
+        expect($reloadWhereInCalls[0])->toBe(['column' => 'rebrickable_id', 'values' => [1]]);
     });
 
-    it('should dedupe parts by part_num into a single bulk upsert', function() use ($buildColorMock, $buildSetPartMock): void {
+    it('should dedupe parts by part_num into a single bulk upsert with full payload, uniqueBy, and update args', function() use ($buildColorMock, $buildSetPartMock): void {
         // arrange
         $set = \Mockery::mock(Set::class);
         $set->allows('getAttribute')->with('id')->andReturn(42);
 
         $color = $buildColorMock([1 => 11, 2 => 12]);
 
-        $partUpserts = [];
+        $partUpsertCalls = [];
+        $reloadWhereInCalls = [];
+
         $upsertBuilder = \Mockery::mock(Builder::class);
         $upsertBuilder->shouldReceive('upsert')
             ->once()
-            ->andReturnUsing(function(array $values) use (&$partUpserts): int {
-                $partUpserts[] = $values;
+            ->andReturnUsing(function(array $values, array $unique, array $update) use (&$partUpsertCalls): int {
+                $partUpsertCalls[] = ['values' => $values, 'unique' => $unique, 'update' => $update];
 
                 return \count($values);
             });
 
         $reloadBuilder = \Mockery::mock(Builder::class);
-        $reloadBuilder->shouldReceive('whereIn')->andReturnSelf();
+        $reloadBuilder->shouldReceive('whereIn')
+            ->andReturnUsing(function(string $column, array $values) use (&$reloadWhereInCalls, $reloadBuilder): Builder {
+                $reloadWhereInCalls[] = ['column' => $column, 'values' => $values];
+
+                return $reloadBuilder;
+            });
         $reloadBuilder->shouldReceive('pluck')->with('id', 'part_num')->andReturn(new Collection(['3001' => 21]));
 
         $part = \Mockery::mock(Part::class);
@@ -214,14 +241,14 @@ describe('StoreSetPartsAction', function(): void {
         // Same part_num twice (different colors) — should appear once in the parts upsert.
         $partsData = [
             new LegoSetPartData(
-                part: new LegoPartData(partNum: '3001', name: 'Brick 2 x 4', categoryId: 11, imageUrl: null),
+                part: new LegoPartData(partNum: '3001', name: 'Brick 2 x 4', categoryId: 11, imageUrl: 'https://example.test/3001.png'),
                 color: new LegoColorData(id: 1, name: 'White', rgb: 'FFFFFF', isTransparent: false),
                 quantity: 5,
                 isSpare: false,
                 elementId: null,
             ),
             new LegoSetPartData(
-                part: new LegoPartData(partNum: '3001', name: 'Brick 2 x 4', categoryId: 11, imageUrl: null),
+                part: new LegoPartData(partNum: '3001', name: 'Brick 2 x 4', categoryId: 11, imageUrl: 'https://example.test/3001.png'),
                 color: new LegoColorData(id: 2, name: 'Black', rgb: '000000', isTransparent: false),
                 quantity: 3,
                 isSpare: false,
@@ -232,13 +259,89 @@ describe('StoreSetPartsAction', function(): void {
         // act
         $action->execute($set, $partsData);
 
-        // assert
-        expect($partUpserts)->toHaveCount(1);
-        expect($partUpserts[0])->toHaveCount(1);
-        expect($partUpserts[0][0]['part_num'])->toBe('3001');
+        // assert — exactly one upsert call, one row, every field present and correct.
+        expect($partUpsertCalls)->toHaveCount(1);
+        expect($partUpsertCalls[0]['values'])->toHaveCount(1);
+
+        $row = $partUpsertCalls[0]['values'][0];
+        expect($row)->toHaveKeys(['part_num', 'name', 'category', 'image_url', 'created_at', 'updated_at']);
+        expect($row['part_num'])->toBe('3001');
+        expect($row['name'])->toBe('Brick 2 x 4');
+        expect($row['category'])->toBe('11');
+        expect($row['image_url'])->toBe('https://example.test/3001.png');
+        expect($row['created_at'])->toBeInstanceOf(CarbonImmutable::class);
+        expect($row['updated_at'])->toBeInstanceOf(CarbonImmutable::class);
+
+        expect($partUpsertCalls[0]['unique'])->toBe(['part_num']);
+        expect($partUpsertCalls[0]['update'])->toBe(['name', 'category', 'image_url', 'updated_at']);
+
+        // The reload uses the dedupe-key array (part_num values), not the payload itself.
+        // Note: PHP coerces numeric-string array keys to ints, so '3001' surfaces here as 3001.
+        expect($reloadWhereInCalls)->toHaveCount(1);
+        expect($reloadWhereInCalls[0])->toBe(['column' => 'part_num', 'values' => [3_001]]);
     });
 
-    it('should dedupe set_parts by natural key (last-write-wins) and emit a single chunk for small payloads', function() use ($buildColorMock, $buildPartMock): void {
+    it('should pass null through to the parts upsert when categoryId is null, and stringify when present', function() use ($buildColorMock, $buildSetPartMock): void {
+        // arrange — both branches of the categoryId ternary covered in one test.
+        $set = \Mockery::mock(Set::class);
+        $set->allows('getAttribute')->with('id')->andReturn(42);
+
+        $color = $buildColorMock([1 => 11, 2 => 12]);
+
+        $partUpsertCalls = [];
+        $upsertBuilder = \Mockery::mock(Builder::class);
+        $upsertBuilder->shouldReceive('upsert')
+            ->once()
+            ->andReturnUsing(function(array $values) use (&$partUpsertCalls): int {
+                $partUpsertCalls[] = $values;
+
+                return \count($values);
+            });
+
+        $reloadBuilder = \Mockery::mock(Builder::class);
+        $reloadBuilder->shouldReceive('whereIn')->andReturnSelf();
+        $reloadBuilder->shouldReceive('pluck')->with('id', 'part_num')->andReturn(new Collection(['3001' => 21, '3024' => 22]));
+
+        $part = \Mockery::mock(Part::class);
+        $part->shouldReceive('newQuery')->twice()->andReturn($upsertBuilder, $reloadBuilder);
+
+        $captured = [];
+        $setPart = $buildSetPartMock($captured);
+
+        $action = new StoreSetPartsAction($color, $part, $setPart, $this->db);
+
+        $partsData = [
+            new LegoSetPartData(
+                part: new LegoPartData(partNum: '3001', name: 'With category', categoryId: 11, imageUrl: null),
+                color: new LegoColorData(id: 1, name: 'White', rgb: 'FFFFFF', isTransparent: false),
+                quantity: 1,
+                isSpare: false,
+                elementId: null,
+            ),
+            new LegoSetPartData(
+                part: new LegoPartData(partNum: '3024', name: 'No category', categoryId: null, imageUrl: null),
+                color: new LegoColorData(id: 2, name: 'Black', rgb: '000000', isTransparent: false),
+                quantity: 1,
+                isSpare: false,
+                elementId: null,
+            ),
+        ];
+
+        // act
+        $action->execute($set, $partsData);
+
+        // assert — categoryId=11 stringifies to '11'; null stays null.
+        expect($partUpsertCalls)->toHaveCount(1);
+        $byPartNum = [];
+        foreach ($partUpsertCalls[0] as $row) {
+            $byPartNum[$row['part_num']] = $row;
+        }
+
+        expect($byPartNum['3001']['category'])->toBe('11');
+        expect($byPartNum['3024']['category'])->toBeNull();
+    });
+
+    it('should dedupe set_parts by natural key (last-write-wins) and emit a single chunk with full payload, uniqueBy, and update args', function() use ($buildColorMock, $buildPartMock): void {
         // arrange
         $set = \Mockery::mock(Set::class);
         $set->allows('getAttribute')->with('id')->andReturn(42);
@@ -246,24 +349,20 @@ describe('StoreSetPartsAction', function(): void {
         $color = $buildColorMock([1 => 11]);
         $part = $buildPartMock(['3001' => 21]);
 
-        $captured = [];
-        $setPart = function() use (&$captured): SetPart {
-            $builder = \Mockery::mock(Builder::class);
-            $builder->shouldReceive('upsert')
-                ->once()
-                ->andReturnUsing(function(array $values) use (&$captured): int {
-                    $captured[] = $values;
+        $setPartCalls = [];
+        $builder = \Mockery::mock(Builder::class);
+        $builder->shouldReceive('upsert')
+            ->once()
+            ->andReturnUsing(function(array $values, array $unique, array $update) use (&$setPartCalls): int {
+                $setPartCalls[] = ['values' => $values, 'unique' => $unique, 'update' => $update];
 
-                    return \count($values);
-                });
+                return \count($values);
+            });
 
-            $sp = \Mockery::mock(SetPart::class);
-            $sp->shouldReceive('newQuery')->andReturn($builder);
+        $setPart = \Mockery::mock(SetPart::class);
+        $setPart->shouldReceive('newQuery')->andReturn($builder);
 
-            return $sp;
-        };
-
-        $action = new StoreSetPartsAction($color, $part, $setPart(), $this->db);
+        $action = new StoreSetPartsAction($color, $part, $setPart, $this->db);
 
         $partsData = [
             new LegoSetPartData(
@@ -286,11 +385,79 @@ describe('StoreSetPartsAction', function(): void {
         // act
         $action->execute($set, $partsData);
 
-        // assert
-        expect($captured)->toHaveCount(1);
-        expect($captured[0])->toHaveCount(1);
-        expect($captured[0][0]['quantity'])->toBe(8);
-        expect($captured[0][0]['element_id'])->toBe('last');
+        // assert — exactly one chunk, one row, every field present and correct (last-write-wins).
+        expect($setPartCalls)->toHaveCount(1);
+        expect($setPartCalls[0]['values'])->toHaveCount(1);
+
+        $row = $setPartCalls[0]['values'][0];
+        expect($row)->toHaveKeys(['set_id', 'part_id', 'color_id', 'quantity', 'is_spare', 'element_id', 'created_at', 'updated_at']);
+        expect($row['set_id'])->toBe(42);
+        expect($row['part_id'])->toBe(21);
+        expect($row['color_id'])->toBe(11);
+        expect($row['quantity'])->toBe(8);
+        expect($row['is_spare'])->toBeFalse();
+        expect($row['element_id'])->toBe('last');
+        expect($row['created_at'])->toBeInstanceOf(CarbonImmutable::class);
+        expect($row['updated_at'])->toBeInstanceOf(CarbonImmutable::class);
+
+        expect($setPartCalls[0]['unique'])->toBe(['set_id', 'part_id', 'color_id', 'is_spare']);
+        expect($setPartCalls[0]['update'])->toBe(['quantity', 'element_id', 'updated_at']);
+    });
+
+    it('should treat regular and spare rows as distinct natural keys (is_spare in the dedupe key)', function() use ($buildColorMock, $buildPartMock): void {
+        // arrange — same part+color, one regular and one spare. Both must land as distinct rows.
+        $set = \Mockery::mock(Set::class);
+        $set->allows('getAttribute')->with('id')->andReturn(42);
+
+        $color = $buildColorMock([1 => 11]);
+        $part = $buildPartMock(['3001' => 21]);
+
+        $setPartCalls = [];
+        $builder = \Mockery::mock(Builder::class);
+        $builder->shouldReceive('upsert')
+            ->once()
+            ->andReturnUsing(function(array $values) use (&$setPartCalls): int {
+                $setPartCalls[] = $values;
+
+                return \count($values);
+            });
+
+        $setPart = \Mockery::mock(SetPart::class);
+        $setPart->shouldReceive('newQuery')->andReturn($builder);
+
+        $action = new StoreSetPartsAction($color, $part, $setPart, $this->db);
+
+        $partsData = [
+            new LegoSetPartData(
+                part: new LegoPartData(partNum: '3001', name: 'Brick 2 x 4', categoryId: 11, imageUrl: null),
+                color: new LegoColorData(id: 1, name: 'White', rgb: 'FFFFFF', isTransparent: false),
+                quantity: 5,
+                isSpare: false,
+                elementId: 'regular',
+            ),
+            new LegoSetPartData(
+                part: new LegoPartData(partNum: '3001', name: 'Brick 2 x 4', categoryId: 11, imageUrl: null),
+                color: new LegoColorData(id: 1, name: 'White', rgb: 'FFFFFF', isTransparent: false),
+                quantity: 1,
+                isSpare: true,
+                elementId: 'spare',
+            ),
+        ];
+
+        // act
+        $action->execute($set, $partsData);
+
+        // assert — two rows, one for is_spare=false, one for is_spare=true.
+        expect($setPartCalls)->toHaveCount(1);
+        expect($setPartCalls[0])->toHaveCount(2);
+
+        $regularRows = array_values(array_filter($setPartCalls[0], static fn(array $row): bool => $row['is_spare'] === false));
+        $spareRows = array_values(array_filter($setPartCalls[0], static fn(array $row): bool => $row['is_spare'] === true));
+
+        expect($regularRows)->toHaveCount(1);
+        expect($spareRows)->toHaveCount(1);
+        expect($regularRows[0]['element_id'])->toBe('regular');
+        expect($spareRows[0]['element_id'])->toBe('spare');
     });
 
     it('should chunk the set_parts upsert at 500 rows', function() use ($buildPartMock, $buildColorMock): void {
