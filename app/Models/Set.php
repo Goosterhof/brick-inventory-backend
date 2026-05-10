@@ -4,6 +4,7 @@ declare(strict_types = 1);
 
 namespace App\Models;
 
+use App\Enums\SetSyncStatus;
 use Carbon\Carbon;
 use Database\Factories\SetFactory;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -13,16 +14,19 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * @property positive-int $id
- * @property string       $set_num
- * @property string       $name
- * @property int|null     $year
- * @property int|null     $theme_id
- * @property int          $num_parts
- * @property string|null  $image_url
- * @property Carbon|null  $created_at
- * @property Carbon|null  $updated_at
- * @property Theme|null   $theme
+ * @property positive-int  $id
+ * @property string        $set_num
+ * @property string        $name
+ * @property int|null      $year
+ * @property int|null      $theme_id
+ * @property int           $num_parts
+ * @property string|null   $image_url
+ * @property SetSyncStatus $parts_sync_status
+ * @property Carbon|null   $parts_synced_at
+ * @property string|null   $parts_sync_failed_reason
+ * @property Carbon|null   $created_at
+ * @property Carbon|null   $updated_at
+ * @property Theme|null    $theme
  */
 class Set extends Model
 {
@@ -71,5 +75,16 @@ class Set extends Model
     public static function cascadeRelations(): array
     {
         return ['setParts', 'familySets'];
+    }
+
+    /**
+     * @return array<string, string>
+     */
+    protected function casts(): array
+    {
+        return [
+            'parts_sync_status' => SetSyncStatus::class,
+            'parts_synced_at' => 'datetime',
+        ];
     }
 }

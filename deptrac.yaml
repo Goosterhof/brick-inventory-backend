@@ -162,17 +162,20 @@ deptrac:
     # Jobs wrap Actions for async execution
     Job:
       - Action
+      - Contract
       - Model
       - Enum
 
     # Controllers are thin HTTP handlers delegating to actions.
-    # They may reference Result DTOs when wiring Actions to ResourceData.
+    # They may reference Result DTOs when wiring Actions to ResourceData,
+    # and Enums when branching response codes on Action result statuses.
     Controller:
       - Action
       - FormRequest
       - ResourceData
       - Model
       - ResultDTO
+      - Enum
 
     # Console commands are entry points for scheduled / operator-only flows.
     # They delegate to Actions and surface Result DTO counts via the CLI.

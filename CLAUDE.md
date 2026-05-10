@@ -295,8 +295,8 @@ Output Shaping:                     ResourceData → Model, Enum, ResultDTO, Exc
 Authorization:                      Policy → Model
 Security:                           Middleware → Model, Contract
 Orchestration:                      Action → Action, Job, Mail, Contract, Model, InputDTO, ResultDTO, Enum, Exception
-Async Execution:                    Job → Action, Model, Enum
-Entry Point:                        Controller → Action, FormRequest, ResourceData, Model, ResultDTO
+Async Execution:                    Job → Action, Contract, Model, Enum
+Entry Point:                        Controller → Action, FormRequest, ResourceData, Model, ResultDTO, Enum
 Wiring:                             Provider → Contract, Service, Policy
 ```
 
