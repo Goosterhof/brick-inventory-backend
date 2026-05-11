@@ -108,12 +108,12 @@ database/
 └── factories/                  # Test Fixtures — inventory for quality inspections
 
 tests/
-├── Architecture/               # Regulation Enforcement — 21 architecture tests
+├── Architecture/               # Regulation Enforcement
 ├── Feature/                    # Integration Drills — controller-level tests
 └── Unit/                       # Component Inspections — action & service tests
 
 docs/
-└── adr/                        # The Decision Ledger — 13 architecture decisions (consolidated from 16)
+└── adr/                        # The Decision Ledger — architecture decisions
 ```
 
 ---
@@ -302,7 +302,7 @@ Wiring:                             Provider → Contract, Service, Policy
 
 ### Architecture Decision Ledger
 
-Thirteen decisions that shaped the warehouse (consolidated from sixteen — implementation details merged into their parent ADRs). Each records what was chosen, what was rejected, and what machine enforces it. Full records in `docs/adr/`.
+Decisions that shaped the warehouse, each recording what was chosen, what was rejected, and what machine enforces it. Some have been consolidated as implementation details merged into their parent ADRs. Full records in `docs/adr/`.
 
 | ADR | Decision | Enforcement |
 |---|---|---|
