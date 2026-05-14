@@ -22,6 +22,8 @@ class StorageOptionFactory extends Factory
             'description' => fake()->optional()->sentence(),
             'row' => null,
             'column' => null,
+            'grid_rows' => null,
+            'grid_columns' => null,
         ];
     }
 
