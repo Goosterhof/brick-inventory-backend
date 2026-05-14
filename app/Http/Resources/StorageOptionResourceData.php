@@ -24,6 +24,8 @@ final readonly class StorageOptionResourceData extends ResourceData
         public ?int $parent_id,
         public ?int $row,
         public ?int $column,
+        public ?int $grid_rows,
+        public ?int $grid_columns,
         public array $child_ids,
     ) {}
 
@@ -45,6 +47,8 @@ final readonly class StorageOptionResourceData extends ResourceData
             parent_id: $model->parent_id,
             row: $model->row,
             column: $model->column,
+            grid_rows: $model->grid_rows,
+            grid_columns: $model->grid_columns,
             child_ids: $childIds,
         );
     }
