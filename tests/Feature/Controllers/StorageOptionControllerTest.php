@@ -132,6 +132,181 @@ describe('StorageOptionController', function(): void {
             $response->assertStatus(422)
                 ->assertJsonValidationErrors(['parent_id']);
         });
+
+        it('should pre-seed 30 drawer children for a 6 column by 5 row grid', function(): void {
+            $user = User::factory()->create();
+            $cabinet = StorageOption::factory()->create([
+                'family_id' => $user->family_id,
+            ]);
+
+            $response = $this->actingAs($user)->postJson('/api/storage-options', [
+                'name' => '6 by 5 Section',
+                'parent_id' => $cabinet->id,
+                'grid_rows' => 5,
+                'grid_columns' => 6,
+            ]);
+
+            $response->assertStatus(201)
+                ->assertJsonPath('grid_rows', 5)
+                ->assertJsonPath('grid_columns', 6);
+
+            $sectionId = $response->json('id');
+
+            // Children count: every drawer in the 5x6 grid
+            expect(StorageOption::query()->where('parent_id', $sectionId)->count())->toBe(30);
+
+            // R1C1 — the lower bound of both loops
+            $this->assertDatabaseHas('storage_options', [
+                'parent_id' => $sectionId,
+                'family_id' => $user->family_id,
+                'name' => 'R1C1',
+                'row' => 1,
+                'column' => 1,
+                'grid_rows' => null,
+                'grid_columns' => null,
+            ]);
+
+            // R5C6 — the corner drawer, proving both loop upper bounds
+            $this->assertDatabaseHas('storage_options', [
+                'parent_id' => $sectionId,
+                'family_id' => $user->family_id,
+                'name' => 'R5C6',
+                'row' => 5,
+                'column' => 6,
+            ]);
+
+            // A row-2 cell to confirm row-major coordinate math
+            $this->assertDatabaseHas('storage_options', [
+                'parent_id' => $sectionId,
+                'name' => 'R2C1',
+                'row' => 2,
+                'column' => 1,
+            ]);
+        });
+
+        it('should pre-seed 9 drawer children for a 3 by 3 grid', function(): void {
+            $user = User::factory()->create();
+            $cabinet = StorageOption::factory()->create([
+                'family_id' => $user->family_id,
+            ]);
+
+            $response = $this->actingAs($user)->postJson('/api/storage-options', [
+                'name' => '3 by 3 Section',
+                'parent_id' => $cabinet->id,
+                'grid_rows' => 3,
+                'grid_columns' => 3,
+            ]);
+
+            $response->assertStatus(201);
+
+            $sectionId = $response->json('id');
+
+            expect(StorageOption::query()->where('parent_id', $sectionId)->count())->toBe(9);
+
+            // Corner drawer R3C3
+            $this->assertDatabaseHas('storage_options', [
+                'parent_id' => $sectionId,
+                'name' => 'R3C3',
+                'row' => 3,
+                'column' => 3,
+            ]);
+        });
+
+        it('should return 422 when grid_rows is set without grid_columns', function(): void {
+            $user = User::factory()->create();
+
+            $response = $this->actingAs($user)->postJson('/api/storage-options', [
+                'name' => 'Half-set Section',
+                'grid_rows' => 5,
+            ]);
+
+            $response->assertStatus(422)
+                ->assertJsonValidationErrors(['grid_columns']);
+        });
+
+        it('should return 422 when grid_columns is set without grid_rows', function(): void {
+            $user = User::factory()->create();
+
+            $response = $this->actingAs($user)->postJson('/api/storage-options', [
+                'name' => 'Half-set Section',
+                'grid_columns' => 6,
+            ]);
+
+            $response->assertStatus(422)
+                ->assertJsonValidationErrors(['grid_rows']);
+        });
+
+        it('should return 422 when grid_rows is zero', function(): void {
+            $user = User::factory()->create();
+
+            $response = $this->actingAs($user)->postJson('/api/storage-options', [
+                'name' => 'Zero-row Section',
+                'grid_rows' => 0,
+                'grid_columns' => 6,
+            ]);
+
+            $response->assertStatus(422)
+                ->assertJsonValidationErrors(['grid_rows']);
+        });
+
+        it('should return 422 when grid_rows exceeds 100', function(): void {
+            $user = User::factory()->create();
+
+            $response = $this->actingAs($user)->postJson('/api/storage-options', [
+                'name' => 'Over-cap Section',
+                'grid_rows' => 101,
+                'grid_columns' => 6,
+            ]);
+
+            $response->assertStatus(422)
+                ->assertJsonValidationErrors(['grid_rows']);
+        });
+
+        it('should return 422 when child row exceeds parent grid_rows', function(): void {
+            $user = User::factory()->create();
+            $cabinet = StorageOption::factory()->create([
+                'family_id' => $user->family_id,
+            ]);
+            $section = StorageOption::factory()->create([
+                'family_id' => $user->family_id,
+                'parent_id' => $cabinet->id,
+                'grid_rows' => 5,
+                'grid_columns' => 6,
+            ]);
+
+            $response = $this->actingAs($user)->postJson('/api/storage-options', [
+                'name' => 'Manual Drawer',
+                'parent_id' => $section->id,
+                'row' => 6,
+                'column' => 1,
+            ]);
+
+            $response->assertStatus(422)
+                ->assertJsonValidationErrors(['row']);
+        });
+
+        it('should return 422 when child column exceeds parent grid_columns', function(): void {
+            $user = User::factory()->create();
+            $cabinet = StorageOption::factory()->create([
+                'family_id' => $user->family_id,
+            ]);
+            $section = StorageOption::factory()->create([
+                'family_id' => $user->family_id,
+                'parent_id' => $cabinet->id,
+                'grid_rows' => 5,
+                'grid_columns' => 6,
+            ]);
+
+            $response = $this->actingAs($user)->postJson('/api/storage-options', [
+                'name' => 'Manual Drawer',
+                'parent_id' => $section->id,
+                'row' => 1,
+                'column' => 7,
+            ]);
+
+            $response->assertStatus(422)
+                ->assertJsonValidationErrors(['column']);
+        });
     });
 
     describe('show', function(): void {
@@ -210,6 +385,35 @@ describe('StorageOptionController', function(): void {
 
             $response->assertStatus(401);
         });
+
+        it('should ignore grid_rows and grid_columns on PATCH (immutable after create)', function(): void {
+            $user = User::factory()->create();
+            $section = StorageOption::factory()->create([
+                'family_id' => $user->family_id,
+                'name' => 'Section',
+                'grid_rows' => 5,
+                'grid_columns' => 6,
+            ]);
+
+            $response = $this->actingAs($user)->patchJson('/api/storage-options/' . $section->id, [
+                'name' => 'Renamed Section',
+                'grid_rows' => 10,
+                'grid_columns' => 10,
+            ]);
+
+            $response->assertStatus(200)
+                ->assertJsonPath('name', 'Renamed Section')
+                ->assertJsonPath('grid_rows', 5)
+                ->assertJsonPath('grid_columns', 6);
+
+            // Persisted dims are unchanged
+            $this->assertDatabaseHas('storage_options', [
+                'id' => $section->id,
+                'name' => 'Renamed Section',
+                'grid_rows' => 5,
+                'grid_columns' => 6,
+            ]);
+        });
     });
 
     describe('destroy', function(): void {
@@ -258,6 +462,46 @@ describe('StorageOptionController', function(): void {
             $response->assertStatus(204);
             $this->assertDatabaseMissing('storage_options', ['id' => $cabinet->id]);
             $this->assertDatabaseMissing('storage_options', ['id' => $drawer->id]);
+        });
+
+        it('should cascade delete cabinet, sections, and seeded drawers (1+2+39 rows)', function(): void {
+            $user = User::factory()->create();
+
+            // Cabinet
+            $cabinetResponse = $this->actingAs($user)->postJson('/api/storage-options', [
+                'name' => 'CEO Cabinet',
+            ]);
+            $cabinetResponse->assertStatus(201);
+
+            $cabinetId = $cabinetResponse->json('id');
+
+            // 6x5 section (seeds 30 drawers)
+            $sixByFiveResponse = $this->actingAs($user)->postJson('/api/storage-options', [
+                'name' => '6 by 5 Section',
+                'parent_id' => $cabinetId,
+                'grid_rows' => 5,
+                'grid_columns' => 6,
+            ]);
+            $sixByFiveResponse->assertStatus(201);
+
+            // 3x3 section (seeds 9 drawers)
+            $threeByThreeResponse = $this->actingAs($user)->postJson('/api/storage-options', [
+                'name' => '3 by 3 Section',
+                'parent_id' => $cabinetId,
+                'grid_rows' => 3,
+                'grid_columns' => 3,
+            ]);
+            $threeByThreeResponse->assertStatus(201);
+
+            // Verify the full topology exists before deletion: 1 cabinet + 2 sections + 39 drawers
+            expect(StorageOption::query()->where('family_id', $user->family_id)->count())->toBe(42);
+
+            // Delete the cabinet — should cascade everything
+            $deleteResponse = $this->actingAs($user)->deleteJson('/api/storage-options/' . $cabinetId);
+            $deleteResponse->assertStatus(204);
+
+            // Nothing left
+            expect(StorageOption::query()->where('family_id', $user->family_id)->count())->toBe(0);
         });
     });
 

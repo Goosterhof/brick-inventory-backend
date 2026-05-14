@@ -20,6 +20,8 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @property string|null  $description
  * @property int|null     $row
  * @property int|null     $column
+ * @property int|null     $grid_rows
+ * @property int|null     $grid_columns
  * @property Carbon|null  $created_at
  * @property Carbon|null  $updated_at
  */

@@ -12,5 +12,7 @@ final readonly class StorageOptionData
         public ?int $parentId = null,
         public ?int $row = null,
         public ?int $column = null,
+        public ?int $gridRows = null,
+        public ?int $gridColumns = null,
     ) {}
 }
