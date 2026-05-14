@@ -114,5 +114,5 @@ This branch (`claude/storage-schema-design-A0MAq`) is well under the pre-push ga
 
 ---
 
-**Status:** Open
-**Shift Log:** _to be linked when Head Sorter files it_
+**Status:** In Progress
+**Shift Log:** [.claude/records/journals/2026-05-14-storage-schema-design-a0maq.md](../journals/2026-05-14-storage-schema-design-a0maq.md)
