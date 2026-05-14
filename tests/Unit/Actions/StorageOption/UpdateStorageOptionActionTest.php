@@ -94,6 +94,37 @@ describe('UpdateStorageOptionAction', function(): void {
         expect($savedValues['parent_id'])->toBe(5);
     });
 
+    it('should ignore grid_rows and grid_columns in the DTO (immutable after create)', function(): void {
+        // arrange: pre-seed the persisted dims so we can prove they survive untouched
+        $savedValues = [
+            'grid_rows' => 5,
+            'grid_columns' => 6,
+        ];
+        $storageOption = \Mockery::mock(StorageOption::class);
+        $storageOption->allows('setAttribute')->andReturnUsing(function($key, $value) use (&$savedValues): void {
+            $savedValues[$key] = $value;
+        });
+        $storageOption->allows('getAttribute')->andReturnUsing(function($key) use (&$savedValues): mixed {
+            return $savedValues[$key] ?? null;
+        });
+        $storageOption->shouldReceive('save')->once();
+
+        $action = new UpdateStorageOptionAction($this->db);
+        $data = new StorageOptionData(
+            name: 'Resized?',
+            gridRows: 99,
+            gridColumns: 99,
+        );
+
+        // act
+        $action->execute($storageOption, $data);
+
+        // assert — the new dim values are silently dropped; the persisted dims remain
+        expect($savedValues['grid_rows'])->toBe(5)
+            ->and($savedValues['grid_columns'])->toBe(6)
+            ->and($savedValues['name'])->toBe('Resized?');
+    });
+
     it('should call save on the storage option', function(): void {
         // arrange
         $storageOption = \Mockery::mock(StorageOption::class);
