@@ -13,6 +13,7 @@ use App\Models\Set;
 use App\Models\User;
 use Illuminate\Database\UniqueConstraintViolationException;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Queue;
 
@@ -572,7 +573,13 @@ describe('FamilySetController', function(): void {
             $duplicateJob->processed_sets = 0;
             $duplicateJob->failed_sets = 0;
 
-            expect(fn() => $duplicateJob->save())
+            // Wrap the failing INSERT in a nested transaction so Laravel uses
+            // a SAVEPOINT for it. Without this, the unique-constraint failure
+            // marks the RefreshDatabase-owned outer transaction as aborted on
+            // Postgres ("current transaction is aborted, commands ignored")
+            // and every subsequent query in the test errors out, masking the
+            // assertion we're actually trying to make.
+            expect(fn() => DB::transaction(fn() => $duplicateJob->save()))
                 ->toThrow(UniqueConstraintViolationException::class);
 
             // Only one pending import job should exist
