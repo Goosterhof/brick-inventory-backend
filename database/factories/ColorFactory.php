@@ -17,7 +17,10 @@ class ColorFactory extends Factory
         return [
             'rebrickable_id' => fake()->unique()->randomNumber(4),
             'name' => fake()->colorName(),
-            'rgb' => fake()->hexColor(),
+            // `colors.rgb` is varchar(6) and the seeder writes the hex digits
+            // without the leading `#` (e.g. '0055BF'). Faker's hexColor()
+            // includes the `#`, which overflows the column.
+            'rgb' => mb_substr(fake()->hexColor(), 1),
             'is_transparent' => fake()->boolean(20),
         ];
     }
