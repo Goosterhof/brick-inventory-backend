@@ -4,8 +4,10 @@ declare(strict_types = 1);
 
 namespace Database\Seeders;
 
+use App\Enums\SetSyncStatus;
 use App\Models\SetPart;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 
 class SetPartSeeder extends Seeder
 {
@@ -39,5 +41,18 @@ class SetPartSeeder extends Seeder
             $setPart->element_id = $record['element_id'];
             $setPart->save();
         }
+
+        // The 2026_05_10 parts-sync migration backfills `parts_sync_status=completed`
+        // for any set already carrying set_parts rows, but the backfill runs before
+        // the seeders. Without this follow-up, every seeded set lands in `pending`
+        // and the `/sets/{setNum}/parts` endpoint returns 202 (awaiting sync), which
+        // breaks local dev and e2e flows that don't run a queue worker.
+        $setIds = array_unique(array_column($records, 'set_id'));
+        DB::table('sets')
+            ->whereIn('id', $setIds)
+            ->update([
+                'parts_sync_status' => SetSyncStatus::Completed->value,
+                'parts_synced_at' => now(),
+            ]);
     }
 }
