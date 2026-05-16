@@ -30,6 +30,11 @@ return RectorConfig::configure()
         __DIR__ . '/bootstrap/cache',
         __DIR__ . '/storage',
         __DIR__ . '/vendor',
+        // The Octane worker bootstrap runs BEFORE the Laravel autoloader, so
+        // Rector rules that swap `$_ENV` / `$_SERVER` accesses for facades or
+        // helpers must not be applied here — those references would resolve
+        // to undefined symbols at boot and crash the FrankenPHP worker.
+        __DIR__ . '/public/frankenphp-worker.php',
         CarbonToDateFacadeRector::class,
         AddOverrideAttributeToOverriddenMethodsRector::class,
         RenameParamToMatchTypeRector::class => [
