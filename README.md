@@ -1,125 +1,19 @@
-# LEGO Storage
+# brick-inventory-backend — ARCHIVED
 
-A REST API for managing your LEGO inventory. Track which parts you have, where they're stored, and what you need to build specific sets.
+> **This repository has been merged into the monorepo at [Goosterhof/brick-inventory-orchestrator](https://github.com/Goosterhof/brick-inventory-orchestrator) under `backend/`.**
 
-## Features
+As of 2026-05-17, all active development of the Brick Inventory backend (Laravel 12 API) lives in the orchestrator monorepo. This standalone repository is preserved for historical reference and is no longer maintained.
 
-- **Storage Management** - Organize parts by physical storage location (drawers, bins, containers)
-- **Set Tracking** - Keep track of which LEGO sets your household owns
-- **Parts Inventory** - Know exactly which parts you have and where to find them
-- **Rebrickable Integration** - Import your sets and get accurate part lists
-- **Brick Identification** - Identify unknown parts using image recognition (via Brickognize)
-- **Multi-tenant** - Family-based accounts to share inventory with household members
+## Why a monorepo
 
-## Requirements
+The orchestrator now ships both backend and frontend as a **single Railway service** — a multi-stage Dockerfile builds the Vue apps, overlays their dists onto `backend/public/`, and FrankenPHP serves both surfaces from the same origin. This removes the cross-port CORS/Sanctum complexity the standalone repos had to work around and simplifies deployment to a single image.
 
-- PHP 8.4+
-- Composer
-- SQLite (local development) or PostgreSQL (production)
+## Where to find things
 
-## Installation
+- **Active development:** [`Goosterhof/brick-inventory-orchestrator`](https://github.com/Goosterhof/brick-inventory-orchestrator), in the `backend/` subdirectory.
+- **Final standalone state:** tagged [`pre-monorepo-merge-2026-05-17`](https://github.com/Goosterhof/brick-inventory-backend/releases/tag/pre-monorepo-merge-2026-05-17) on this repo (commit `1f1d30d`).
+- **Pre-merge history:** preserved in the monorepo via `git subtree add` — `git log --follow` against any `backend/<path>` file in the orchestrator reaches commits that originated here.
 
-```bash
-# Clone the repository
-git clone https://github.com/Goosterhof/brick-inventory-backend.git
-cd brick-inventory-backend
+## Issues and PRs
 
-# Install dependencies and set up the application
-composer setup
-```
-
-The `composer setup` command will:
-- Install dependencies
-- Create `.env` from `.env.example`
-- Generate application key
-- Run database migrations
-
-## Configuration
-
-### Required Environment Variables
-
-```bash
-# Get your API key from https://rebrickable.com/api/
-REBRICKABLE_API_KEY=your_api_key_here
-```
-
-### Optional Environment Variables
-
-```bash
-# For brick identification feature (https://brickognize.com)
-BRICKOGNIZE_BASE_URL=https://api.brickognize.com
-```
-
-## Development
-
-```bash
-# Start the development server (uses Laravel Octane)
-composer dev
-
-# Run tests
-composer test
-
-# Run linting (Rector + Pint)
-composer lint
-
-# Run static analysis
-composer phpstan
-```
-
-## API Endpoints
-
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| `POST` | `/register` | Create a new user and family |
-| `GET` | `/sets/{setNum}/parts` | Get parts list for a LEGO set |
-| `GET` | `/storage-options` | List your storage locations |
-| `POST` | `/storage-options` | Create a storage location |
-| `GET` | `/storage-options/{id}/parts` | List parts in a storage location |
-| `POST` | `/storage-options/{id}/parts` | Assign a part to storage |
-| `GET` | `/family-sets` | List sets owned by your family |
-| `POST` | `/family-sets` | Add a set to your collection |
-| `POST` | `/family-sets/import-from-rebrickable` | Import sets from Rebrickable |
-| `POST` | `/identify-brick` | Identify a brick from an image |
-
-All endpoints except `/register`, `/health`, and `/sets/{setNum}/parts` require authentication via Laravel Sanctum.
-
-## Architecture
-
-- **Action Classes** - Business logic and orchestration
-- **Service Classes** - External API integrations (Rebrickable, Brickognize)
-- **ResourceData Classes** - API response DTOs
-- **Multi-tenancy** - Shared database with family-based isolation
-
-## Testing
-
-```bash
-# Run all tests
-composer test
-
-# Run architecture tests
-composer test:arch
-
-# Run unit tests with coverage (requires 100%)
-composer test:coverage
-
-# Run feature tests with coverage (requires 80%)
-composer test:feature-coverage
-```
-
-## Code Quality
-
-Before committing changes:
-
-```bash
-composer lint      # Fix code style
-composer phpstan   # Check for type errors
-composer test      # Run tests
-```
-
-## Deployment
-
-See [DEPLOYMENT.md](DEPLOYMENT.md) for production deployment instructions (Railway).
-
-## License
-
-This project is open-sourced software licensed under the [MIT license](LICENSE).
+Please file new issues and pull requests against the orchestrator. This repository is archived; issues filed here will not be reviewed.
